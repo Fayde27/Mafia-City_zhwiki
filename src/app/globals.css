@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 229, 229, 229;
+  --background-start-rgb: 15, 15, 15;
+  --background-end-rgb: 26, 26, 26;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* 硬朗风格滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #8b5a2b;
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a67c52;
+}
+
+/* 金属质感边框 */
+.metal-border {
+  border: 2px solid #404040;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* 硬朗按钮样式 */
+.btn-hard {
+  @apply px-6 py-3 font-bold uppercase tracking-wider transition-all duration-200;
+  background: linear-gradient(135deg, #8b5a2b 0%, #6b4423 100%);
+  border: 2px solid #a67c52;
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+
+.btn-hard:hover {
+  background: linear-gradient(135deg, #a67c52 0%, #8b5a2b 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* 标题样式 */
+.heading-hard {
+  @apply font-heading font-bold uppercase tracking-wider;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* 卡片样式 */
+.card-hard {
+  @apply metal-border;
+  background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+}
+
+.card-hard:hover {
+  border-color: #8b5a2b;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 4px 8px rgba(0, 0, 0, 0.6),
+    0 0 12px rgba(139, 90, 43, 0.3);
+}
