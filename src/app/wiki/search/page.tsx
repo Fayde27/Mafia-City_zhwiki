@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 
 interface Article {
   id: string
@@ -19,58 +19,62 @@ interface Article {
   createdAt: string
 }
 
-export default function WikiCategoryPage() {
-  const params = useParams()
-  const categorySlug = params?.slug as string
+export default function SearchPage() {
+  const searchParams = useSearchParams()
+  const query = searchParams.get('q') || ''
   const [articles, setArticles] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)
-  const [categoryName, setCategoryName] = useState('')
 
   useEffect(() => {
-    fetch(`/api/wiki/articles?category=${categorySlug}&limit=50`)
-      .then(res => res.json())
-      .then(data => {
-        setArticles(data.articles)
-        if (data.articles.length > 0) {
-          setCategoryName(data.articles[0].category.name)
-        }
-        setLoading(false)
-      })
-  }, [categorySlug])
+    if (query) {
+      fetch(`/api/wiki/articles?search=${encodeURIComponent(query)}&limit=50`)
+        .then(res => res.json())
+        .then(data => {
+          setArticles(data.articles)
+          setLoading(false)
+        })
+    } else {
+      setLoading(false)
+    }
+  }, [query])
 
   return (
     <div className="min-h-screen bg-wiki-dark">
       <WikiHeader />
       
-      <main className="container mx-auto px-4 py-6 md:py-8">
-        <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
+      <main className="container mx-auto px-4 py-8">
+        <div className="text-sm text-wiki-text-muted mb-6">
           <Link href="/" className="hover:text-wiki-accent">首页</Link>
           <span className="mx-2">/</span>
-          <span className="text-wiki-text">{categoryName}</span>
+          <span className="text-wiki-text">搜索: {query}</span>
         </div>
 
-        <h1 className="text-2xl md:text-4xl font-heading font-bold text-wiki-accent heading-hard mb-6 md:mb-8">
-          {categoryName}
+        <h1 className="text-3xl font-heading font-bold text-wiki-accent heading-hard mb-8">
+          搜索结果: {query}
         </h1>
 
         {loading ? (
           <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
         ) : articles.length === 0 ? (
-          <div className="card-hard rounded-lg p-8 md:p-12 text-center text-wiki-text-muted">
-            该分类下暂无文章
+          <div className="card-hard rounded-lg p-12 text-center text-wiki-text-muted">
+            没有找到相关文章
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          <div className="space-y-4">
+            <p className="text-wiki-text-muted mb-4">找到 {articles.length} 篇文章</p>
             {articles.map((article) => (
               <Link
                 key={article.id}
                 href={`/wiki/article/${article.slug}`}
-                className="card-hard rounded-lg p-4 md:p-6 block transition-all duration-300 hover:transform hover:-translate-y-1"
+                className="card-hard rounded-lg p-6 block transition-all duration-300 hover:transform hover:-translate-y-1"
               >
-                <h3 className="text-base md:text-xl font-bold text-wiki-text mb-2 md:mb-3 line-clamp-2">
+                <div className="text-wiki-accent text-xs font-bold uppercase tracking-wider mb-2">
+                  {article.category.name}
+                </div>
+                <h3 className="text-xl font-bold text-wiki-text mb-3">
                   {article.title}
                 </h3>
-                <p className="text-wiki-text-muted text-sm mb-3 md:mb-4 line-clamp-3">
+                <p className="text-wiki-text-muted text-sm mb-4 line-clamp-2">
                   {article.summary}
                 </p>
                 <div className="flex justify-between items-center text-xs text-wiki-text-muted">

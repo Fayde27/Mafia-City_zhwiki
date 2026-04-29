@@ -178,8 +178,11 @@ export default function AdminDashboardPage() {
 
         {/* 分类管理 */}
         {activeTab === 'categories' && (
-          <div className="card-hard rounded-lg p-8 text-center text-wiki-text-muted">
-            分类管理功能开发中...
+          <div className="card-hard rounded-lg p-8 text-center">
+            <p className="text-wiki-text-muted mb-4">分类管理已移至独立页面</p>
+            <Link href="/admin/categories" className="btn-hard text-white inline-block">
+              进入分类管理
+            </Link>
           </div>
         )}
       </div>

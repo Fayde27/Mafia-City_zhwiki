@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 
 interface Category {
@@ -10,11 +10,13 @@ interface Category {
   slug: string
 }
 
-export default function NewArticlePage() {
+export default function EditArticlePage() {
   const router = useRouter()
+  const params = useParams()
+  const articleId = params?.id as string
   const [categories, setCategories] = useState<Category[]>([])
-  const [loading, setLoading] = useState(false)
-  const [uploading, setUploading] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -22,55 +24,37 @@ export default function NewArticlePage() {
     summary: '',
     categoryId: '',
     tags: '',
-    coverImage: '',
     isPublished: false,
     sortOrder: 0,
   })
 
   useEffect(() => {
-    fetch('/api/admin/categories')
-      .then(res => res.json())
-      .then(data => setCategories(data))
-  }, [])
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    setUploading(true)
-    const formData = new FormData()
-    formData.append('file', file)
-
-    try {
-      const res = await fetch('/api/admin/upload', {
-        method: 'POST',
-        body: formData,
+    Promise.all([
+      fetch('/api/admin/categories').then(res => res.json()),
+      fetch(`/api/admin/articles/${articleId}`).then(res => res.json())
+    ]).then(([cats, article]) => {
+      setCategories(cats)
+      setFormData({
+        title: article.title,
+        slug: article.slug,
+        content: article.content,
+        summary: article.summary || '',
+        categoryId: article.categoryId,
+        tags: article.tags || '',
+        isPublished: article.isPublished,
+        sortOrder: article.sortOrder,
       })
-      const data = await res.json()
-      if (data.url) {
-        setFormData(prev => ({ ...prev, coverImage: data.url }))
-      }
-    } catch (err) {
-      alert('上传失败')
-    } finally {
-      setUploading(false)
-    }
-  }
-
-  const insertImageToContent = (url: string) => {
-    setFormData(prev => ({
-      ...prev,
-      content: prev.content + `\n![图片](${url})\n`,
-    }))
-  }
+      setLoading(false)
+    })
+  }, [articleId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
+    setSaving(true)
 
     try {
-      const res = await fetch('/api/admin/articles', {
-        method: 'POST',
+      const res = await fetch(`/api/admin/articles/${articleId}`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       })
@@ -78,13 +62,21 @@ export default function NewArticlePage() {
       if (res.ok) {
         router.push('/admin/dashboard')
       } else {
-        alert('创建失败')
+        alert('更新失败')
       }
     } catch (err) {
       alert('网络错误')
     } finally {
-      setLoading(false)
+      setSaving(false)
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-wiki-dark flex items-center justify-center">
+        <div className="text-wiki-text-muted text-xl">加载中...</div>
+      </div>
+    )
   }
 
   return (
@@ -96,7 +88,7 @@ export default function NewArticlePage() {
               ← 返回管理后台
             </Link>
             <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">
-              新增文章
+              编辑文章
             </h1>
           </div>
         </div>
@@ -126,7 +118,6 @@ export default function NewArticlePage() {
               value={formData.slug}
               onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
               className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-              placeholder="例如: character-guide-001"
               required
             />
           </div>
@@ -140,27 +131,6 @@ export default function NewArticlePage() {
               onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
               className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none h-24"
             />
-          </div>
-
-          <div>
-            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">
-              封面图片
-            </label>
-            <div className="flex gap-4 items-start">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text flex-1"
-                disabled={uploading}
-              />
-              {uploading && <span className="text-wiki-accent py-3">上传中...</span>}
-            </div>
-            {formData.coverImage && (
-              <div className="mt-2">
-                <img src={formData.coverImage} alt="封面" className="h-32 rounded border border-wiki-border" />
-              </div>
-            )}
           </div>
 
           <div>
@@ -186,32 +156,6 @@ export default function NewArticlePage() {
             <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">
               内容 (支持 Markdown) *
             </label>
-            <div className="flex gap-2 mb-2">
-              <label className="btn-hard text-white text-xs py-2 px-4 cursor-pointer">
-                上传图片
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file) {
-                      const formData = new FormData()
-                      formData.append('file', file)
-                      setUploading(true)
-                      fetch('/api/admin/upload', { method: 'POST', body: formData })
-                        .then(res => res.json())
-                        .then(data => {
-                          if (data.url) insertImageToContent(data.url)
-                        })
-                        .finally(() => setUploading(false))
-                    }
-                  }}
-                  className="hidden"
-                  disabled={uploading}
-                />
-              </label>
-              {uploading && <span className="text-wiki-accent py-2">上传中...</span>}
-            </div>
             <textarea
               value={formData.content}
               onChange={(e) => setFormData({ ...formData, content: e.target.value })}
@@ -229,7 +173,6 @@ export default function NewArticlePage() {
               value={formData.tags}
               onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
               className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-              placeholder="例如: 角色,图鉴,攻略"
             />
           </div>
 
@@ -246,8 +189,8 @@ export default function NewArticlePage() {
           </div>
 
           <div className="flex gap-4 pt-4">
-            <button type="submit" className="btn-hard text-white" disabled={loading}>
-              {loading ? '保存中...' : '保存'}
+            <button type="submit" className="btn-hard text-white" disabled={saving}>
+              {saving ? '保存中...' : '保存'}
             </button>
             <Link href="/admin/dashboard" className="px-6 py-3 bg-wiki-gray text-wiki-text font-bold uppercase tracking-wider">
               取消

@@ -5,6 +5,7 @@ import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
+import MarkdownRenderer from '@/components/MarkdownRenderer'
 
 interface Article {
   id: string
@@ -38,26 +39,6 @@ export default function ArticleDetailPage() {
         setLoading(false)
       })
   }, [slug])
-
-  const renderMarkdown = (content: string) => {
-    return content
-      .split('\n')
-      .map((line, i) => {
-        if (line.startsWith('## ')) {
-          return <h2 key={i} className="text-2xl font-bold text-wiki-accent mt-8 mb-4">{line.replace('## ', '')}</h2>
-        }
-        if (line.startsWith('### ')) {
-          return <h3 key={i} className="text-xl font-bold text-wiki-text mt-6 mb-3">{line.replace('### ', '')}</h3>
-        }
-        if (line.startsWith('- ')) {
-          return <li key={i} className="text-wiki-text ml-6 mb-2">{line.replace('- ', '')}</li>
-        }
-        if (line.trim() === '') {
-          return <br key={i} />
-        }
-        return <p key={i} className="text-wiki-text mb-4">{line}</p>
-      })
-  }
 
   return (
     <div className="min-h-screen bg-wiki-dark">
@@ -107,7 +88,7 @@ export default function ArticleDetailPage() {
             </header>
 
             <div className="prose prose-invert max-w-none">
-              {renderMarkdown(article.content)}
+              <MarkdownRenderer content={article.content} />
             </div>
           </article>
         )}
