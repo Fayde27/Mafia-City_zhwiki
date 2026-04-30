@@ -15,6 +15,18 @@ interface Article {
   createdAt: string
 }
 
+interface Category {
+  id: string
+  name: string
+  slug: string
+  description: string
+  icon: string
+  sortOrder: number
+  _count: {
+    articles: number
+  }
+}
+
 interface Announcement {
   id: string
   title: string
@@ -27,22 +39,28 @@ interface Announcement {
 
 export default function AdminDashboardPage() {
   const [articles, setArticles] = useState<Article[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'articles' | 'categories' | 'announcements'>('articles')
   const [showAnnounceForm, setShowAnnounceForm] = useState(false)
   const [editingAnnounce, setEditingAnnounce] = useState<Announcement | null>(null)
   const [announceForm, setAnnounceForm] = useState({ title: '', content: '', type: 'info', isActive: true, sortOrder: 0 })
+  const [showCategoryForm, setShowCategoryForm] = useState(false)
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null)
+  const [categoryForm, setCategoryForm] = useState({ name: '', slug: '', description: '', icon: '', sortOrder: 0 })
 
   useEffect(() => {
     const token = localStorage.getItem('token')
     Promise.all([
       fetch('/api/admin/articles?limit=20').then(res => res.json()),
+      fetch('/api/admin/categories').then(res => res.json()),
       fetch('/api/admin/announcements', {
         headers: { Authorization: `Bearer ${token}` },
       }).then(res => res.json()),
-    ]).then(([arts, anns]) => {
+    ]).then(([arts, cats, anns]) => {
       setArticles(arts.articles || [])
+      setCategories(Array.isArray(cats) ? cats : [])
       setAnnouncements(Array.isArray(anns) ? anns : [])
       setLoading(false)
     })
@@ -63,6 +81,62 @@ export default function AdminDashboardPage() {
     try {
       await fetch(`/api/admin/announcements/${id}`, { method: 'DELETE' })
       setAnnouncements(announcements.filter(a => a.id !== id))
+    } catch (err) {
+      alert('删除失败')
+    }
+  }
+
+  const handleSaveCategory = async () => {
+    if (!categoryForm.name.trim() || !categoryForm.slug.trim()) {
+      alert('请填写名称和别名')
+      return
+    }
+    const url = editingCategory
+      ? `/api/admin/categories/${editingCategory.id}`
+      : '/api/admin/categories'
+    const method = editingCategory ? 'PUT' : 'POST'
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(categoryForm),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (editingCategory) {
+          setCategories(categories.map(c => c.id === data.id ? data : c))
+        } else {
+          setCategories([...categories, data])
+        }
+        setShowCategoryForm(false)
+        setEditingCategory(null)
+        setCategoryForm({ name: '', slug: '', description: '', icon: '', sortOrder: 0 })
+      } else {
+        alert('保存失败')
+      }
+    } catch (err) {
+      alert('网络错误')
+    }
+  }
+
+  const handleEditCategory = (cat: Category) => {
+    setEditingCategory(cat)
+    setCategoryForm({
+      name: cat.name,
+      slug: cat.slug,
+      description: cat.description || '',
+      icon: cat.icon || '',
+      sortOrder: cat.sortOrder,
+    })
+    setShowCategoryForm(true)
+  }
+
+  const handleDeleteCategory = async (id: string) => {
+    if (!confirm('确定要删除这个分类吗？该分类下的文章将失去分类关联。')) return
+    try {
+      await fetch(`/api/admin/categories/${id}`, { method: 'DELETE' })
+      setCategories(categories.filter(c => c.id !== id))
     } catch (err) {
       alert('删除失败')
     }
@@ -139,6 +213,11 @@ export default function AdminDashboardPage() {
                 <Link href="/admin/articles/new" className="btn-hard text-white text-sm">
                   + 新增文章
                 </Link>
+              )}
+              {activeTab === 'categories' && (
+                <button onClick={() => { setShowCategoryForm(true); setEditingCategory(null); setCategoryForm({ name: '', slug: '', description: '', icon: '', sortOrder: 0 }) }} className="btn-hard text-white text-sm">
+                  + 新增分类
+                </button>
               )}
               {activeTab === 'announcements' && (
                 <button onClick={() => { setShowAnnounceForm(true); setEditingAnnounce(null); setAnnounceForm({ title: '', content: '', type: 'info', isActive: true, sortOrder: 0 }) }} className="btn-hard text-white text-sm">
@@ -232,9 +311,108 @@ export default function AdminDashboardPage() {
         )}
 
         {activeTab === 'categories' && (
-          <div className="card-hard rounded-lg p-8 text-center">
-            <p className="text-wiki-text-muted mb-4">分类管理已移至独立页面</p>
-            <Link href="/admin/categories" className="btn-hard text-white inline-block">进入分类管理</Link>
+          <div className="space-y-6">
+            {showCategoryForm && (
+              <div className="card-hard rounded-lg p-6">
+                <h3 className="text-lg font-bold text-wiki-accent mb-4">{editingCategory ? '编辑分类' : '新增分类'}</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-wiki-text-muted text-sm mb-1">名称 *</label>
+                    <input
+                      type="text"
+                      value={categoryForm.name}
+                      onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
+                      className="w-full bg-wiki-gray border border-wiki-border px-4 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none"
+                      placeholder="例如: 角色图鉴"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-wiki-text-muted text-sm mb-1">别名 (URL Slug) *</label>
+                    <input
+                      type="text"
+                      value={categoryForm.slug}
+                      onChange={(e) => setCategoryForm({ ...categoryForm, slug: e.target.value })}
+                      className="w-full bg-wiki-gray border border-wiki-border px-4 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none"
+                      placeholder="例如: characters"
+                    />
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <label className="block text-wiki-text-muted text-sm mb-1">图标 (Emoji)</label>
+                      <input
+                        type="text"
+                        value={categoryForm.icon}
+                        onChange={(e) => setCategoryForm({ ...categoryForm, icon: e.target.value })}
+                        className="w-full bg-wiki-gray border border-wiki-border px-4 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none"
+                        placeholder="例如: 📖"
+                      />
+                    </div>
+                    <div className="w-32">
+                      <label className="block text-wiki-text-muted text-sm mb-1">排序</label>
+                      <input
+                        type="number"
+                        value={categoryForm.sortOrder}
+                        onChange={(e) => setCategoryForm({ ...categoryForm, sortOrder: parseInt(e.target.value) || 0 })}
+                        className="w-full bg-wiki-gray border border-wiki-border px-4 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-wiki-text-muted text-sm mb-1">描述</label>
+                    <textarea
+                      value={categoryForm.description}
+                      onChange={(e) => setCategoryForm({ ...categoryForm, description: e.target.value })}
+                      rows={2}
+                      className="w-full bg-wiki-gray border border-wiki-border px-4 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none resize-y"
+                      placeholder="分类描述（可选）"
+                    />
+                  </div>
+                  <div className="flex gap-3 pt-2">
+                    <button type="button" onClick={handleSaveCategory} className="btn-hard text-white text-sm">保存</button>
+                    <button type="button" onClick={() => { setShowCategoryForm(false); setEditingCategory(null) }} className="px-6 py-3 bg-wiki-gray text-wiki-text-muted font-bold hover:text-wiki-text text-sm cursor-pointer">取消</button>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div className="card-hard rounded-lg overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-wiki-gray">
+                  <tr>
+                    <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">图标</th>
+                    <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">名称</th>
+                    <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">别名</th>
+                    <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">描述</th>
+                    <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">文章数</th>
+                    <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">排序</th>
+                    <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr><td colSpan={7} className="px-6 py-12 text-center text-wiki-text-muted">加载中...</td></tr>
+                  ) : categories.length === 0 ? (
+                    <tr><td colSpan={7} className="px-6 py-12 text-center text-wiki-text-muted">暂无分类</td></tr>
+                  ) : (
+                    categories.map((cat) => (
+                      <tr key={cat.id} className="border-t border-wiki-border hover:bg-wiki-gray/50">
+                        <td className="px-6 py-4 text-2xl">{cat.icon || '-'}</td>
+                        <td className="px-6 py-4 text-wiki-text font-bold">{cat.name}</td>
+                        <td className="px-6 py-4 text-wiki-text-muted font-mono text-sm">{cat.slug}</td>
+                        <td className="px-6 py-4 text-wiki-text-muted text-sm max-w-xs truncate">{cat.description || '-'}</td>
+                        <td className="px-6 py-4 text-wiki-accent font-bold">{cat._count?.articles || 0}</td>
+                        <td className="px-6 py-4 text-wiki-text-muted">{cat.sortOrder}</td>
+                        <td className="px-6 py-4">
+                          <div className="flex gap-2">
+                            <button onClick={() => handleEditCategory(cat)} className="px-3 py-1 bg-wiki-accent/20 text-wiki-accent text-sm font-bold hover:bg-wiki-accent/30">编辑</button>
+                            <button onClick={() => handleDeleteCategory(cat.id)} className="px-3 py-1 bg-wiki-danger/20 text-wiki-danger text-sm font-bold hover:bg-wiki-danger/30">删除</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 
