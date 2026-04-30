@@ -102,6 +102,54 @@ export default function AdminCategoriesPage() {
     }
   }
 
+  const handleMoveUp = async (category: Category, index: number) => {
+    if (index === 0) return
+    const newSortOrder = categories[index - 1].sortOrder
+    const prevSortOrder = category.sortOrder
+
+    try {
+      await Promise.all([
+        fetch(`/api/admin/categories/${category.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...category, sortOrder: newSortOrder }),
+        }),
+        fetch(`/api/admin/categories/${categories[index - 1].id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...categories[index - 1], sortOrder: prevSortOrder }),
+        }),
+      ])
+      fetchCategories()
+    } catch (err) {
+      alert('排序更新失败')
+    }
+  }
+
+  const handleMoveDown = async (category: Category, index: number) => {
+    if (index === categories.length - 1) return
+    const newSortOrder = categories[index + 1].sortOrder
+    const nextSortOrder = category.sortOrder
+
+    try {
+      await Promise.all([
+        fetch(`/api/admin/categories/${category.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...category, sortOrder: newSortOrder }),
+        }),
+        fetch(`/api/admin/categories/${categories[index + 1].id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...categories[index + 1], sortOrder: nextSortOrder }),
+        }),
+      ])
+      fetchCategories()
+    } catch (err) {
+      alert('排序更新失败')
+    }
+  }
+
   if (!isAdmin) return null
 
   return (
@@ -154,7 +202,23 @@ export default function AdminCategoriesPage() {
                     <td className="px-6 py-4 text-wiki-accent font-bold">{category._count.articles}</td>
                     <td className="px-6 py-4 text-wiki-text-muted">{category.sortOrder}</td>
                     <td className="px-6 py-4">
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 items-center">
+                        <button
+                          onClick={() => handleMoveUp(category, categories.indexOf(category))}
+                          disabled={categories.indexOf(category) === 0}
+                          className="px-2 py-1 bg-wiki-accent/20 text-wiki-accent text-sm font-bold hover:bg-wiki-accent/30 disabled:opacity-30 disabled:cursor-not-allowed"
+                          title="上移"
+                        >
+                          ↑
+                        </button>
+                        <button
+                          onClick={() => handleMoveDown(category, categories.indexOf(category))}
+                          disabled={categories.indexOf(category) === categories.length - 1}
+                          className="px-2 py-1 bg-wiki-accent/20 text-wiki-accent text-sm font-bold hover:bg-wiki-accent/30 disabled:opacity-30 disabled:cursor-not-allowed"
+                          title="下移"
+                        >
+                          ↓
+                        </button>
                         <button
                           onClick={() => handleEdit(category)}
                           className="px-3 py-1 bg-wiki-accent/20 text-wiki-accent text-sm font-bold hover:bg-wiki-accent/30"

@@ -180,6 +180,11 @@ export default function HomePage() {
             <h2 className="text-2xl md:text-3xl font-heading font-bold text-wiki-accent heading-hard">
               分类导航
             </h2>
+            {isAdmin && (
+              <Link href="/admin/categories" className="btn-hard text-white text-sm">
+                分类管理
+              </Link>
+            )}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {categories.map((category) => (
