@@ -28,6 +28,8 @@ export default function NewArticlePage() {
     tags: '',
     coverImage: '',
     isPublished: false,
+    isPinned: false,
+    badges: '',
     sortOrder: 0,
   })
 
@@ -237,6 +239,48 @@ export default function NewArticlePage() {
               />
               <span className="text-wiki-text font-bold">立即发布</span>
             </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={formData.isPinned}
+                onChange={(e) => setFormData({ ...formData, isPinned: e.target.checked })}
+                className="w-5 h-5"
+              />
+              <span className="text-wiki-text font-bold">置顶文章</span>
+            </label>
+          </div>
+
+          <div>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">文章标志 (逗号分隔)</label>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {['HOT', 'NEW', 'STAR', '推荐', '精华'].map((badge) => (
+                <button
+                  key={badge}
+                  type="button"
+                  onClick={() => {
+                    const current = formData.badges ? formData.badges.split(',').filter(Boolean) : []
+                    const updated = current.includes(badge)
+                      ? current.filter(b => b !== badge).join(',')
+                      : [...current, badge].join(',')
+                    setFormData({ ...formData, badges: updated })
+                  }}
+                  className={`px-3 py-1 text-xs font-bold border-2 ${
+                    formData.badges?.split(',').includes(badge)
+                      ? 'bg-wiki-accent/20 border-wiki-accent text-wiki-accent'
+                      : 'bg-wiki-gray border-wiki-border text-wiki-text-muted hover:border-wiki-accent/50'
+                  }`}
+                >
+                  {badge}
+                </button>
+              ))}
+            </div>
+            <input
+              type="text"
+              value={formData.badges}
+              onChange={(e) => setFormData({ ...formData, badges: e.target.value })}
+              className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
+              placeholder="自定义标志，逗号分隔，如: HOT,星标"
+            />
           </div>
 
           <div className="flex gap-4 pt-4">

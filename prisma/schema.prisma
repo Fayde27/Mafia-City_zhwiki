@@ -42,6 +42,8 @@ model Article {
   category    Category @relation(fields: [categoryId], references: [id])
   tags        String?
   isPublished Boolean  @default(false)
+  isPinned    Boolean  @default(false)
+  badges      String?
   sortOrder   Int      @default(0)
   views       Int      @default(0)
   createdAt   DateTime @default(now())

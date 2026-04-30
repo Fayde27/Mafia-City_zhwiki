@@ -13,6 +13,8 @@ interface Article {
   slug: string
   summary: string
   isPublished: boolean
+  isPinned: boolean
+  badges: string
   category: {
     name: string
     slug: string
@@ -33,10 +35,15 @@ export default function WikiCategoryPage() {
     fetch(`/api/wiki/articles?category=${categorySlug}&limit=50`)
       .then(res => res.json())
       .then(data => {
-        setArticles(data.articles)
-        if (data.articles.length > 0) {
-          setCategoryName(data.articles[0].category.name)
+        const articles = data?.articles || []
+        setArticles(articles)
+        if (articles.length > 0) {
+          setCategoryName(articles[0].category.name)
         }
+        setLoading(false)
+      })
+      .catch(() => {
+        setArticles([])
         setLoading(false)
       })
   }, [categorySlug])
@@ -67,7 +74,7 @@ export default function WikiCategoryPage() {
             {categoryName}
           </h1>
           {isAdmin && (
-            <Link href={`/admin/articles/new?category=${articles[0]?.categoryId || ''}`} className="btn-hard text-white text-sm">
+            <Link href={`/admin/articles/new?category=${categorySlug}`} className="btn-hard text-white text-sm">
               + 新增文章
             </Link>
           )}
@@ -84,9 +91,31 @@ export default function WikiCategoryPage() {
             {articles.map((article) => (
               <div key={article.id} className="card-hard rounded-lg p-4 md:p-6 relative group">
                 <Link href={`/wiki/article/${article.slug}`} className="block">
-                  <h3 className="text-base md:text-xl font-bold text-wiki-text mb-2 md:mb-3 line-clamp-2">
-                    {article.title}
-                  </h3>
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="text-base md:text-xl font-bold text-wiki-text line-clamp-2 flex-1">
+                      {article.title}
+                    </h3>
+                    {article.isPinned && (
+                      <span className="px-2 py-0.5 bg-wiki-danger/20 text-wiki-danger text-xs font-bold border border-wiki-danger/40 flex-shrink-0">
+                        置顶
+                      </span>
+                    )}
+                  </div>
+                  {article.badges && article.badges.split(',').filter(Boolean).length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {article.badges.split(',').filter(Boolean).map((badge) => {
+                        const badgeStyle = badge === 'HOT' ? 'bg-wiki-danger/20 text-wiki-danger border-wiki-danger/40'
+                          : badge === 'NEW' ? 'bg-wiki-accent/20 text-wiki-accent border-wiki-accent/40'
+                          : badge === 'STAR' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40'
+                          : 'bg-wiki-accent/10 text-wiki-accent border-wiki-accent/30'
+                        return (
+                          <span key={badge} className={`px-2 py-0.5 text-xs font-bold border ${badgeStyle}`}>
+                            {badge}
+                          </span>
+                        )
+                      })}
+                    </div>
+                  )}
                   <p className="text-wiki-text-muted text-sm mb-3 md:mb-4 line-clamp-3">
                     {article.summary}
                   </p>

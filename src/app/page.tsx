@@ -29,6 +29,8 @@ interface Article {
     slug: string
   }
   isPublished: boolean
+  isPinned: boolean
+  badges: string
   views: number
   createdAt: string
 }
@@ -59,9 +61,11 @@ export default function HomePage() {
       fetch('/api/wiki/articles?limit=6').then(res => res.json()),
       fetch('/api/wiki/announcements').then(res => res.json()),
     ]).then(([cats, arts, anns]) => {
-      setCategories(cats)
-      setArticles(arts.articles)
-      setAnnouncements(anns)
+      setCategories(cats || [])
+      setArticles(arts?.articles || [])
+      setAnnouncements(anns || [])
+      setLoading(false)
+    }).catch(() => {
       setLoading(false)
     })
   }, [])
@@ -229,8 +233,26 @@ export default function HomePage() {
                     </div>
                   )}
                   <div className="p-4">
-                    <div className="text-wiki-accent text-xs font-bold uppercase tracking-wider mb-2">
-                      {article.category.name}
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-wiki-accent text-xs font-bold uppercase tracking-wider">
+                        {article.category.name}
+                      </span>
+                      {article.isPinned && (
+                        <span className="px-2 py-0.5 bg-wiki-danger/20 text-wiki-danger text-xs font-bold border border-wiki-danger/40">
+                          置顶
+                        </span>
+                      )}
+                      {article.badges && article.badges.split(',').filter(Boolean).map((badge) => {
+                        const badgeStyle = badge === 'HOT' ? 'bg-wiki-danger/20 text-wiki-danger border-wiki-danger/40'
+                          : badge === 'NEW' ? 'bg-wiki-accent/20 text-wiki-accent border-wiki-accent/40'
+                          : badge === 'STAR' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40'
+                          : 'bg-wiki-accent/10 text-wiki-accent border-wiki-accent/30'
+                        return (
+                          <span key={badge} className={`px-2 py-0.5 text-xs font-bold border ${badgeStyle}`}>
+                            {badge}
+                          </span>
+                        )
+                      })}
                     </div>
                     <h3 className="text-base md:text-lg font-bold text-wiki-text mb-2 line-clamp-1">
                       {article.title}

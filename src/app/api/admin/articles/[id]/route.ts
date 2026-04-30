@@ -24,7 +24,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { title, slug, content, summary, coverImage, categoryId, tags, isPublished, sortOrder } = await request.json()
+    const { title, slug, content, summary, coverImage, categoryId, tags, isPublished, isPinned, badges, sortOrder } = await request.json()
     const article = await prisma.article.update({
       where: { id: params.id },
       data: {
@@ -36,6 +36,8 @@ export async function PUT(
         categoryId,
         tags,
         isPublished,
+        isPinned,
+        badges,
         sortOrder,
       },
       include: { category: true },

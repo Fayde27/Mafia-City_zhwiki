@@ -34,7 +34,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { title, slug, content, summary, coverImage, categoryId, tags, isPublished, sortOrder } = await request.json()
+    const { title, slug, content, summary, coverImage, categoryId, tags, isPublished, isPinned, badges, sortOrder } = await request.json()
     const article = await prisma.article.create({
       data: {
         title,
@@ -45,6 +45,8 @@ export async function POST(request: Request) {
         categoryId,
         tags,
         isPublished: isPublished || false,
+        isPinned: isPinned || false,
+        badges,
         sortOrder: sortOrder || 0,
       },
       include: { category: true },

@@ -31,7 +31,7 @@ export async function GET(request: Request) {
         where,
         skip,
         take: limit,
-        orderBy: [{ sortOrder: 'desc' }, { createdAt: 'desc' }],
+        orderBy: [{ isPinned: 'desc' }, { sortOrder: 'desc' }, { createdAt: 'desc' }],
         include: { category: true },
       }),
       prisma.article.count({ where }),
