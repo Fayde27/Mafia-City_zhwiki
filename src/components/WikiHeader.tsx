@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import { useAdminAuth } from '@/hooks/useAdminAuth'
 
 interface Category {
   id: string
@@ -13,6 +14,7 @@ interface Category {
 export default function WikiHeader() {
   const pathname = usePathname()
   const router = useRouter()
+  const { isAdmin, logout } = useAdminAuth()
   const [searchQuery, setSearchQuery] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [navCategories, setNavCategories] = useState<Category[]>([])
@@ -28,6 +30,11 @@ export default function WikiHeader() {
     if (searchQuery.trim()) {
       router.push(`/wiki/search?q=${encodeURIComponent(searchQuery.trim())}`)
     }
+  }
+
+  const handleLogout = () => {
+    logout()
+    router.push('/')
   }
 
   const navItems = [
@@ -49,6 +56,26 @@ export default function WikiHeader() {
               </div>
             </Link>
             <div className="flex items-center gap-2 md:gap-4">
+              {isAdmin ? (
+                <>
+                  <span className="hidden md:block text-wiki-accent text-xs uppercase tracking-wider">
+                    管理员已登录
+                  </span>
+                  <button
+                    onClick={handleLogout}
+                    className="hidden md:block text-wiki-danger text-xs hover:text-wiki-danger/80 uppercase tracking-wider"
+                  >
+                    退出登录
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/admin/login"
+                  className="hidden md:block text-wiki-text-muted text-xs hover:text-wiki-accent uppercase tracking-wider"
+                >
+                  管理后台
+                </Link>
+              )}
               <form onSubmit={handleSearch} className="relative hidden md:block">
                 <input
                   type="text"
@@ -57,9 +84,7 @@ export default function WikiHeader() {
                   placeholder="搜索攻略..."
                   className="bg-wiki-gray border-2 border-wiki-border px-4 py-2 text-wiki-text w-48 lg:w-64 focus:border-wiki-accent focus:outline-none"
                 />
-                <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-wiki-accent">
-                  🔍
-                </button>
+                <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-wiki-accent">🔍</button>
               </form>
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -70,18 +95,38 @@ export default function WikiHeader() {
             </div>
           </div>
           {mobileMenuOpen && (
-            <form onSubmit={handleSearch} className="relative mt-4 md:hidden">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="搜索攻略..."
-                className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none"
-              />
-              <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-wiki-accent">
-                🔍
-              </button>
-            </form>
+            <div className="mt-4 md:hidden space-y-3">
+              {isAdmin ? (
+                <>
+                  <span className="text-wiki-accent text-xs uppercase tracking-wider">
+                    管理员已登录
+                  </span>
+                  <button
+                    onClick={handleLogout}
+                    className="text-wiki-danger text-xs hover:text-wiki-danger/80 uppercase tracking-wider"
+                  >
+                    退出登录
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/admin/login"
+                  className="text-wiki-text-muted text-xs hover:text-wiki-accent uppercase tracking-wider"
+                >
+                  管理后台
+                </Link>
+              )}
+              <form onSubmit={handleSearch} className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="搜索攻略..."
+                  className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none"
+                />
+                <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-wiki-accent">🔍</button>
+              </form>
+            </div>
           )}
         </div>
       </div>

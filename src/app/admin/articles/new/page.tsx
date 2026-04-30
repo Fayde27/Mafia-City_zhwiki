@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import WikiHeader from '@/components/WikiHeader'
+import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
+import { useAdminAuth } from '@/hooks/useAdminAuth'
 
 interface Category {
   id: string
@@ -12,6 +15,7 @@ interface Category {
 
 export default function NewArticlePage() {
   const router = useRouter()
+  const { isAdmin } = useAdminAuth()
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -28,10 +32,14 @@ export default function NewArticlePage() {
   })
 
   useEffect(() => {
+    if (!isAdmin) {
+      router.push('/admin/login')
+      return
+    }
     fetch('/api/admin/categories')
       .then(res => res.json())
       .then(data => setCategories(data))
-  }, [])
+  }, [isAdmin, router])
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -76,7 +84,7 @@ export default function NewArticlePage() {
       })
 
       if (res.ok) {
-        router.push('/admin/dashboard')
+        router.push('/wiki/article/' + formData.slug)
       } else {
         alert('创建失败')
       }
@@ -87,27 +95,25 @@ export default function NewArticlePage() {
     }
   }
 
+  if (!isAdmin) return null
+
   return (
     <div className="min-h-screen bg-wiki-dark">
-      <header className="bg-wiki-darker border-b-2 border-wiki-accent">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Link href="/admin/dashboard" className="text-wiki-text-muted hover:text-wiki-accent">
-              ← 返回管理后台
-            </Link>
+      <WikiHeader />
+
+      <main className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-6">
+          <div>
             <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">
               新增文章
             </h1>
+            <p className="text-wiki-text-muted text-sm mt-1">创建新的Wiki文章，支持Markdown格式</p>
           </div>
         </div>
-      </header>
 
-      <div className="container mx-auto px-4 py-8">
         <form onSubmit={handleSubmit} className="card-hard rounded-lg p-8 space-y-6">
           <div>
-            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">
-              标题 *
-            </label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">标题 *</label>
             <input
               type="text"
               value={formData.title}
@@ -118,9 +124,7 @@ export default function NewArticlePage() {
           </div>
 
           <div>
-            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">
-              别名 (URL Slug) *
-            </label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">别名 (URL Slug) *</label>
             <input
               type="text"
               value={formData.slug}
@@ -132,9 +136,7 @@ export default function NewArticlePage() {
           </div>
 
           <div>
-            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">
-              摘要
-            </label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">摘要</label>
             <textarea
               value={formData.summary}
               onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
@@ -143,9 +145,7 @@ export default function NewArticlePage() {
           </div>
 
           <div>
-            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">
-              封面图片
-            </label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">封面图片</label>
             <div className="flex gap-4 items-start">
               <input
                 type="file"
@@ -164,9 +164,7 @@ export default function NewArticlePage() {
           </div>
 
           <div>
-            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">
-              分类 *
-            </label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">分类 *</label>
             <select
               value={formData.categoryId}
               onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
@@ -183,9 +181,7 @@ export default function NewArticlePage() {
           </div>
 
           <div>
-            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">
-              内容 (支持 Markdown) *
-            </label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">内容 (支持 Markdown) *</label>
             <div className="flex gap-2 mb-2">
               <label className="btn-hard text-white text-xs py-2 px-4 cursor-pointer">
                 上传图片
@@ -221,9 +217,7 @@ export default function NewArticlePage() {
           </div>
 
           <div>
-            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">
-              标签 (逗号分隔)
-            </label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">标签 (逗号分隔)</label>
             <input
               type="text"
               value={formData.tags}
@@ -249,12 +243,14 @@ export default function NewArticlePage() {
             <button type="submit" className="btn-hard text-white" disabled={loading}>
               {loading ? '保存中...' : '保存'}
             </button>
-            <Link href="/admin/dashboard" className="px-6 py-3 bg-wiki-gray text-wiki-text font-bold uppercase tracking-wider">
+            <Link href="/" className="px-6 py-3 bg-wiki-gray text-wiki-text font-bold uppercase tracking-wider">
               取消
             </Link>
           </div>
         </form>
-      </div>
+      </main>
+
+      <WikiFooter />
     </div>
   )
 }

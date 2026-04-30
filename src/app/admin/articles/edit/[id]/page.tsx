@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import WikiHeader from '@/components/WikiHeader'
+import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
+import { useAdminAuth } from '@/hooks/useAdminAuth'
 
 interface Category {
   id: string
@@ -13,6 +16,7 @@ interface Category {
 export default function EditArticlePage() {
   const router = useRouter()
   const params = useParams()
+  const { isAdmin } = useAdminAuth()
   const articleId = params?.id as string
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
@@ -29,6 +33,10 @@ export default function EditArticlePage() {
   })
 
   useEffect(() => {
+    if (!isAdmin) {
+      router.push('/admin/login')
+      return
+    }
     Promise.all([
       fetch('/api/admin/categories').then(res => res.json()),
       fetch(`/api/admin/articles/${articleId}`).then(res => res.json())
@@ -46,7 +54,7 @@ export default function EditArticlePage() {
       })
       setLoading(false)
     })
-  }, [articleId])
+  }, [articleId, isAdmin, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -60,7 +68,7 @@ export default function EditArticlePage() {
       })
 
       if (res.ok) {
-        router.push('/admin/dashboard')
+        router.push('/wiki/article/' + formData.slug)
       } else {
         alert('更新失败')
       }
@@ -71,35 +79,40 @@ export default function EditArticlePage() {
     }
   }
 
+  if (!isAdmin) return null
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-wiki-dark flex items-center justify-center">
-        <div className="text-wiki-text-muted text-xl">加载中...</div>
+      <div className="min-h-screen bg-wiki-dark">
+        <WikiHeader />
+        <div className="flex items-center justify-center py-24">
+          <div className="text-wiki-text-muted text-xl">加载中...</div>
+        </div>
+        <WikiFooter />
       </div>
     )
   }
 
   return (
     <div className="min-h-screen bg-wiki-dark">
-      <header className="bg-wiki-darker border-b-2 border-wiki-accent">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Link href="/admin/dashboard" className="text-wiki-text-muted hover:text-wiki-accent">
-              ← 返回管理后台
-            </Link>
+      <WikiHeader />
+
+      <main className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-6">
+          <div>
             <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">
               编辑文章
             </h1>
+            <p className="text-wiki-text-muted text-sm mt-1">修改文章内容、分类和发布状态</p>
           </div>
+          <Link href={`/wiki/article/${formData.slug}`} className="text-wiki-text-muted hover:text-wiki-accent text-sm">
+            预览文章
+          </Link>
         </div>
-      </header>
 
-      <div className="container mx-auto px-4 py-8">
         <form onSubmit={handleSubmit} className="card-hard rounded-lg p-8 space-y-6">
           <div>
-            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">
-              标题 *
-            </label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">标题 *</label>
             <input
               type="text"
               value={formData.title}
@@ -110,9 +123,7 @@ export default function EditArticlePage() {
           </div>
 
           <div>
-            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">
-              别名 (URL Slug) *
-            </label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">别名 (URL Slug) *</label>
             <input
               type="text"
               value={formData.slug}
@@ -123,9 +134,7 @@ export default function EditArticlePage() {
           </div>
 
           <div>
-            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">
-              摘要
-            </label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">摘要</label>
             <textarea
               value={formData.summary}
               onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
@@ -134,9 +143,7 @@ export default function EditArticlePage() {
           </div>
 
           <div>
-            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">
-              分类 *
-            </label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">分类 *</label>
             <select
               value={formData.categoryId}
               onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
@@ -153,9 +160,7 @@ export default function EditArticlePage() {
           </div>
 
           <div>
-            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">
-              内容 (支持 Markdown) *
-            </label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">内容 (支持 Markdown) *</label>
             <textarea
               value={formData.content}
               onChange={(e) => setFormData({ ...formData, content: e.target.value })}
@@ -165,9 +170,7 @@ export default function EditArticlePage() {
           </div>
 
           <div>
-            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">
-              标签 (逗号分隔)
-            </label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">标签 (逗号分隔)</label>
             <input
               type="text"
               value={formData.tags}
@@ -192,12 +195,14 @@ export default function EditArticlePage() {
             <button type="submit" className="btn-hard text-white" disabled={saving}>
               {saving ? '保存中...' : '保存'}
             </button>
-            <Link href="/admin/dashboard" className="px-6 py-3 bg-wiki-gray text-wiki-text font-bold uppercase tracking-wider">
+            <Link href="/" className="px-6 py-3 bg-wiki-gray text-wiki-text font-bold uppercase tracking-wider">
               取消
             </Link>
           </div>
         </form>
-      </div>
+      </main>
+
+      <WikiFooter />
     </div>
   )
 }

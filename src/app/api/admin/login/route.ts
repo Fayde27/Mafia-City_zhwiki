@@ -39,7 +39,7 @@ export async function POST(request: Request) {
       role: user.role,
     })
 
-    const response = NextResponse.json({
+    return NextResponse.json({
       success: true,
       token,
       user: {
@@ -48,15 +48,6 @@ export async function POST(request: Request) {
         role: user.role,
       },
     })
-
-    response.cookies.set('admin-token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7,
-    })
-
-    return response
   } catch (error) {
     console.error('Login error:', error)
     return NextResponse.json(

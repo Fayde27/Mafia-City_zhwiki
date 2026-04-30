@@ -26,7 +26,7 @@ export default function AdminLoginPage() {
 
       if (res.ok) {
         localStorage.setItem('token', data.token)
-        router.push('/admin/dashboard')
+        router.push('/')
       } else {
         setError(data.error || '登录失败')
       }

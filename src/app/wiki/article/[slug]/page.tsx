@@ -6,6 +6,7 @@ import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
+import { useAdminAuth } from '@/hooks/useAdminAuth'
 
 interface Article {
   id: string
@@ -26,6 +27,7 @@ interface Article {
 export default function ArticleDetailPage() {
   const params = useParams()
   const slug = params?.slug as string
+  const { isAdmin } = useAdminAuth()
   const [article, setArticle] = useState<Article | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -68,23 +70,32 @@ export default function ArticleDetailPage() {
         ) : (
           <article className="card-hard rounded-lg p-8">
             <header className="mb-8 pb-6 border-b border-wiki-border">
-              <h1 className="text-4xl font-heading font-bold text-wiki-accent heading-hard mb-4">
-                {article.title}
-              </h1>
-              <div className="flex items-center gap-6 text-sm text-wiki-text-muted">
-                <span>分类: {article.category.name}</span>
-                <span>👁 {article.views} 浏览</span>
-                <span>更新于 {new Date(article.updatedAt).toLocaleDateString('zh-TW')}</span>
-              </div>
-              {article.tags && (
-                <div className="flex gap-2 mt-4">
-                  {article.tags.split(',').map((tag, i) => (
-                    <span key={i} className="px-3 py-1 bg-wiki-accent/20 text-wiki-accent text-xs font-bold">
-                      {tag.trim()}
-                    </span>
-                  ))}
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <h1 className="text-4xl font-heading font-bold text-wiki-accent heading-hard mb-4">
+                    {article.title}
+                  </h1>
+                  <div className="flex items-center gap-6 text-sm text-wiki-text-muted">
+                    <span>分类: {article.category.name}</span>
+                    <span>👁 {article.views} 浏览</span>
+                    <span>更新于 {new Date(article.updatedAt).toLocaleDateString('zh-TW')}</span>
+                  </div>
+                  {article.tags && (
+                    <div className="flex gap-2 mt-4">
+                      {article.tags.split(',').map((tag, i) => (
+                        <span key={i} className="px-3 py-1 bg-wiki-accent/20 text-wiki-accent text-xs font-bold">
+                          {tag.trim()}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
+                {isAdmin && (
+                  <Link href={`/admin/articles/edit/${article.id}`} className="btn-hard text-white text-sm flex-shrink-0">
+                    编辑文章
+                  </Link>
+                )}
+              </div>
             </header>
 
             <div className="prose prose-invert max-w-none">

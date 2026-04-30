@@ -1,7 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import WikiHeader from '@/components/WikiHeader'
+import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
+import { useAdminAuth } from '@/hooks/useAdminAuth'
+import { useRouter } from 'next/navigation'
 
 interface Category {
   id: string
@@ -15,7 +19,9 @@ interface Category {
   }
 }
 
-export default function CategoriesPage() {
+export default function AdminCategoriesPage() {
+  const router = useRouter()
+  const { isAdmin } = useAdminAuth()
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -29,8 +35,12 @@ export default function CategoriesPage() {
   })
 
   useEffect(() => {
+    if (!isAdmin) {
+      router.push('/admin/login')
+      return
+    }
     fetchCategories()
-  }, [])
+  }, [isAdmin, router])
 
   const fetchCategories = () => {
     fetch('/api/admin/categories')
@@ -92,34 +102,32 @@ export default function CategoriesPage() {
     }
   }
 
+  if (!isAdmin) return null
+
   return (
     <div className="min-h-screen bg-wiki-dark">
-      <header className="bg-wiki-darker border-b-2 border-wiki-accent">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link href="/admin/dashboard" className="text-wiki-text-muted hover:text-wiki-accent">
-                ← 返回管理后台
-              </Link>
-              <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">
-                分类管理
-              </h1>
-            </div>
-            <button
-              onClick={() => {
-                setEditingCategory(null)
-                setFormData({ name: '', slug: '', description: '', icon: '', sortOrder: 0 })
-                setShowModal(true)
-              }}
-              className="btn-hard text-white text-sm"
-            >
-              + 新增分类
-            </button>
-          </div>
-        </div>
-      </header>
+      <WikiHeader />
 
-      <div className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">
+              分类管理
+            </h1>
+            <p className="text-wiki-text-muted text-sm mt-1">管理Wiki分类，新增、编辑或删除分类</p>
+          </div>
+          <button
+            onClick={() => {
+              setEditingCategory(null)
+              setFormData({ name: '', slug: '', description: '', icon: '', sortOrder: 0 })
+              setShowModal(true)
+            }}
+            className="btn-hard text-white text-sm"
+          >
+            + 新增分类
+          </button>
+        </div>
+
         {loading ? (
           <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
         ) : (
@@ -127,27 +135,13 @@ export default function CategoriesPage() {
             <table className="w-full">
               <thead className="bg-wiki-gray">
                 <tr>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">
-                    图标
-                  </th>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">
-                    名称
-                  </th>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">
-                    别名
-                  </th>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">
-                    描述
-                  </th>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">
-                    文章数
-                  </th>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">
-                    排序
-                  </th>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">
-                    操作
-                  </th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">图标</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">名称</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">别名</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">描述</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">文章数</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">排序</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">操作</th>
                 </tr>
               </thead>
               <tbody>
@@ -181,20 +175,17 @@ export default function CategoriesPage() {
             </table>
           </div>
         )}
-      </div>
+      </main>
 
-      {/* 新增/编辑弹窗 */}
       {showModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-          <div className="card-hard rounded-lg p-8 w-full max-w-md">
+          <div className="card-hard rounded-lg p-8 w-full max-w-md mx-4">
             <h2 className="text-2xl font-heading font-bold text-wiki-accent heading-hard mb-6">
               {editingCategory ? '编辑分类' : '新增分类'}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">
-                  名称 *
-                </label>
+                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">名称 *</label>
                 <input
                   type="text"
                   value={formData.name}
@@ -204,9 +195,7 @@ export default function CategoriesPage() {
                 />
               </div>
               <div>
-                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">
-                  别名 (URL Slug) *
-                </label>
+                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">别名 (URL Slug) *</label>
                 <input
                   type="text"
                   value={formData.slug}
@@ -216,21 +205,17 @@ export default function CategoriesPage() {
                 />
               </div>
               <div>
-                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">
-                  图标 (Emoji)
-                </label>
+                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">图标 (Emoji)</label>
                 <input
                   type="text"
                   value={formData.icon}
                   onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
                   className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                  placeholder="例如: 📖"
+                  placeholder="例如: "
                 />
               </div>
               <div>
-                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">
-                  描述
-                </label>
+                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">描述</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -238,9 +223,7 @@ export default function CategoriesPage() {
                 />
               </div>
               <div>
-                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">
-                  排序
-                </label>
+                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">排序</label>
                 <input
                   type="number"
                   value={formData.sortOrder}
@@ -249,9 +232,7 @@ export default function CategoriesPage() {
                 />
               </div>
               <div className="flex gap-4 pt-4">
-                <button type="submit" className="btn-hard text-white">
-                  保存
-                </button>
+                <button type="submit" className="btn-hard text-white">保存</button>
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
@@ -264,6 +245,8 @@ export default function CategoriesPage() {
           </div>
         </div>
       )}
+
+      <WikiFooter />
     </div>
   )
 }
