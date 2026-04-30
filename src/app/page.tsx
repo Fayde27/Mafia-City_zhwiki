@@ -31,28 +31,47 @@ interface Article {
   createdAt: string
 }
 
+interface Announcement {
+  id: string
+  title: string
+  content: string
+  type: string
+  createdAt: string
+}
+
 export default function HomePage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [articles, setArticles] = useState<Article[]>([])
+  const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     Promise.all([
       fetch('/api/wiki/categories').then(res => res.json()),
-      fetch('/api/wiki/articles?limit=6').then(res => res.json())
-    ]).then(([cats, arts]) => {
+      fetch('/api/wiki/articles?limit=6').then(res => res.json()),
+      fetch('/api/wiki/announcements').then(res => res.json()),
+    ]).then(([cats, arts, anns]) => {
       setCategories(cats)
       setArticles(arts.articles)
+      setAnnouncements(anns)
       setLoading(false)
     })
   }, [])
+
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'new': return 'NEW'
+      case 'update': return 'UPDATE'
+      case 'important': return '重要'
+      default: return '公告'
+    }
+  }
 
   return (
     <div className="min-h-screen bg-wiki-dark">
       <WikiHeader />
       
       <main className="container mx-auto px-4 py-6 md:py-8">
-        {/* 横幅区域 */}
         <section className="mb-8 md:mb-12">
           <div className="card-hard rounded-lg p-6 md:p-8 bg-gradient-to-r from-wiki-gray via-wiki-dark to-wiki-gray">
             <h1 className="text-3xl md:text-5xl font-heading font-bold text-wiki-accent heading-hard mb-3 md:mb-4">
@@ -72,7 +91,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 分类导航 */}
         <section className="mb-8 md:mb-12">
           <h2 className="text-2xl md:text-3xl font-heading font-bold text-wiki-accent heading-hard mb-4 md:mb-6">
             分类导航
@@ -99,7 +117,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 最新文章 */}
         <section className="mb-8 md:mb-12">
           <h2 className="text-2xl md:text-3xl font-heading font-bold text-wiki-accent heading-hard mb-4 md:mb-6">
             最新更新
@@ -144,26 +161,26 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 公告区域 */}
         <section className="mb-8 md:mb-12">
           <div className="card-hard rounded-lg p-5 md:p-6 bg-gradient-to-r from-wiki-danger/20 to-wiki-dark">
             <h2 className="text-xl md:text-2xl font-heading font-bold text-wiki-danger heading-hard mb-3 md:mb-4">
               📢 全站公告
             </h2>
-            <div className="space-y-2 md:space-y-3">
-              <div className="flex items-start gap-3">
-                <span className="text-wiki-accent font-bold text-sm">[NEW]</span>
-                <p className="text-wiki-text text-sm md:text-base">
-                  黑道風雲 Wiki 正式上线！欢迎玩家贡献内容
-                </p>
+            {announcements.length === 0 ? (
+              <p className="text-wiki-text-muted text-sm">暂无公告</p>
+            ) : (
+              <div className="space-y-2 md:space-y-3">
+                {announcements.map((ann) => (
+                  <div key={ann.id} className="flex items-start gap-3">
+                    <span className="text-wiki-accent font-bold text-sm">[{getTypeLabel(ann.type)}]</span>
+                    <div>
+                      <p className="text-wiki-text text-sm md:text-base font-bold">{ann.title}</p>
+                      <p className="text-wiki-text-muted text-xs md:text-sm">{ann.content}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div className="flex items-start gap-3">
-                <span className="text-wiki-accent font-bold text-sm">[UPDATE]</span>
-                <p className="text-wiki-text text-sm md:text-base">
-                  角色图鉴已更新，包含所有可玩角色详细信息
-                </p>
-              </div>
-            </div>
+            )}
           </div>
         </section>
       </main>

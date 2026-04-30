@@ -2,13 +2,26 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+
+interface Category {
+  id: string
+  name: string
+  slug: string
+}
 
 export default function WikiHeader() {
   const pathname = usePathname()
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [navCategories, setNavCategories] = useState<Category[]>([])
+
+  useEffect(() => {
+    fetch('/api/wiki/categories')
+      .then(res => res.json())
+      .then(data => setNavCategories(data))
+  }, [])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -19,16 +32,11 @@ export default function WikiHeader() {
 
   const navItems = [
     { href: '/', label: '首页' },
-    { href: '/wiki/characters', label: '角色图鉴' },
-    { href: '/wiki/weapons', label: '武器装备' },
-    { href: '/wiki/missions', label: '任务攻略' },
-    { href: '/wiki/maps', label: '地图探索' },
-    { href: '/wiki/guides', label: '新手指南' },
+    ...navCategories.map(cat => ({ href: `/wiki/${cat.slug}`, label: cat.name })),
   ]
 
   return (
     <header className="bg-wiki-darker border-b-2 border-wiki-accent">
-      {/* 顶部横幅 */}
       <div className="bg-gradient-to-r from-wiki-darker via-wiki-dark to-wiki-darker py-4 md:py-6">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between gap-4">
@@ -61,7 +69,6 @@ export default function WikiHeader() {
               </button>
             </div>
           </div>
-          {/* 移动端搜索 */}
           {mobileMenuOpen && (
             <form onSubmit={handleSearch} className="relative mt-4 md:hidden">
               <input
@@ -79,7 +86,6 @@ export default function WikiHeader() {
         </div>
       </div>
       
-      {/* 导航栏 */}
       <nav className="bg-wiki-gray border-b border-wiki-border">
         <div className="container mx-auto px-4">
           <div className="flex items-center gap-1 overflow-x-auto py-1">
