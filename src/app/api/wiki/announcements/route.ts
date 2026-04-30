@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
+import { prisma } from '@/lib/prisma'
 
 export async function GET() {
-  const db = getDb()
-  const announcements = await db.announcement.findMany({
+  const announcements = await prisma.announcement.findMany({
     where: { isActive: true },
     orderBy: { sortOrder: 'asc' },
   })

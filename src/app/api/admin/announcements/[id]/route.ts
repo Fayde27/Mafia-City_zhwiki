@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
+import { prisma } from '@/lib/prisma'
 import { verifyToken } from '@/lib/auth'
 
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
@@ -8,9 +8,8 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (!token || !verifyToken(token)) {
       return NextResponse.json({ error: '未授权' }, { status: 401 })
     }
-    const db = getDb()
     const body = await request.json()
-    const announcement = await db.announcement.update({
+    const announcement = await prisma.announcement.update({
       where: { id: params.id },
       data: {
         title: body.title,
@@ -32,8 +31,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     if (!token || !verifyToken(token)) {
       return NextResponse.json({ error: '未授权' }, { status: 401 })
     }
-    const db = getDb()
-    await db.announcement.delete({ where: { id: params.id } })
+    await prisma.announcement.delete({ where: { id: params.id } })
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error: '删除失败' }, { status: 500 })

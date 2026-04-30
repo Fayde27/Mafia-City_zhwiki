@@ -35,12 +35,15 @@ export default function AdminDashboardPage() {
   const [announceForm, setAnnounceForm] = useState({ title: '', content: '', type: 'info', isActive: true, sortOrder: 0 })
 
   useEffect(() => {
+    const token = localStorage.getItem('token')
     Promise.all([
       fetch('/api/admin/articles?limit=20').then(res => res.json()),
-      fetch('/api/admin/announcements').then(res => res.json()),
+      fetch('/api/admin/announcements', {
+        headers: { Authorization: `Bearer ${token}` },
+      }).then(res => res.json()),
     ]).then(([arts, anns]) => {
-      setArticles(arts.articles)
-      setAnnouncements(anns)
+      setArticles(arts.articles || [])
+      setAnnouncements(Array.isArray(anns) ? anns : [])
       setLoading(false)
     })
   }, [])
@@ -66,6 +69,10 @@ export default function AdminDashboardPage() {
   }
 
   const handleSaveAnnouncement = async () => {
+    if (!announceForm.title.trim()) {
+      alert('请输入公告标题')
+      return
+    }
     const token = localStorage.getItem('token')
     const url = editingAnnounce
       ? `/api/admin/announcements/${editingAnnounce.id}`
@@ -82,6 +89,10 @@ export default function AdminDashboardPage() {
         body: JSON.stringify(announceForm),
       })
       const data = await res.json()
+      if (!res.ok) {
+        alert(data.error || '保存失败')
+        return
+      }
       if (editingAnnounce) {
         setAnnouncements(announcements.map(a => a.id === data.id ? data : a))
       } else {
@@ -91,7 +102,7 @@ export default function AdminDashboardPage() {
       setEditingAnnounce(null)
       setAnnounceForm({ title: '', content: '', type: 'info', isActive: true, sortOrder: 0 })
     } catch (err) {
-      alert('保存失败')
+      alert('保存失败: ' + (err as Error).message)
     }
   }
 
@@ -228,9 +239,9 @@ export default function AdminDashboardPage() {
         )}
 
         {activeTab === 'announcements' && (
-          <div>
+          <div className="space-y-6">
             {showAnnounceForm && (
-              <div className="card-hard rounded-lg p-6 mb-6">
+              <div className="card-hard rounded-lg p-6">
                 <h3 className="text-lg font-bold text-wiki-accent mb-4">{editingAnnounce ? '编辑公告' : '新增公告'}</h3>
                 <div className="space-y-4">
                   <div>
@@ -240,6 +251,7 @@ export default function AdminDashboardPage() {
                       value={announceForm.title}
                       onChange={(e) => setAnnounceForm({ ...announceForm, title: e.target.value })}
                       className="w-full bg-wiki-gray border border-wiki-border px-4 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none"
+                      placeholder="请输入公告标题"
                     />
                   </div>
                   <div>
@@ -248,16 +260,17 @@ export default function AdminDashboardPage() {
                       value={announceForm.content}
                       onChange={(e) => setAnnounceForm({ ...announceForm, content: e.target.value })}
                       rows={3}
-                      className="w-full bg-wiki-gray border border-wiki-border px-4 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none"
+                      className="w-full bg-wiki-gray border border-wiki-border px-4 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none resize-y"
+                      placeholder="请输入公告内容"
                     />
                   </div>
-                  <div className="flex gap-4">
+                  <div className="flex flex-wrap gap-4 items-end">
                     <div>
                       <label className="block text-wiki-text-muted text-sm mb-1">类型</label>
                       <select
                         value={announceForm.type}
                         onChange={(e) => setAnnounceForm({ ...announceForm, type: e.target.value })}
-                        className="bg-wiki-gray border border-wiki-border px-4 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none"
+                        className="bg-wiki-gray border border-wiki-border px-4 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none cursor-pointer"
                       >
                         <option value="info">公告</option>
                         <option value="new">NEW</option>
@@ -265,21 +278,33 @@ export default function AdminDashboardPage() {
                         <option value="important">重要</option>
                       </select>
                     </div>
-                    <div className="flex items-end">
-                      <label className="flex items-center gap-2 text-wiki-text cursor-pointer">
+                    <div className="flex items-center">
+                      <label className="flex items-center gap-2 text-wiki-text cursor-pointer select-none">
                         <input
                           type="checkbox"
                           checked={announceForm.isActive}
                           onChange={(e) => setAnnounceForm({ ...announceForm, isActive: e.target.checked })}
-                          className="w-4 h-4 accent-wiki-accent"
+                          className="w-4 h-4 accent-wiki-accent cursor-pointer"
                         />
                         启用
                       </label>
                     </div>
                   </div>
-                  <div className="flex gap-3">
-                    <button onClick={handleSaveAnnouncement} className="btn-hard text-white text-sm">保存</button>
-                    <button onClick={() => { setShowAnnounceForm(false); setEditingAnnounce(null) }} className="px-6 py-3 bg-wiki-gray text-wiki-text-muted font-bold hover:text-wiki-text text-sm">取消</button>
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={handleSaveAnnouncement}
+                      className="btn-hard text-white text-sm"
+                    >
+                      保存
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setShowAnnounceForm(false); setEditingAnnounce(null) }}
+                      className="px-6 py-3 bg-wiki-gray text-wiki-text-muted font-bold hover:text-wiki-text text-sm cursor-pointer"
+                    >
+                      取消
+                    </button>
                   </div>
                 </div>
               </div>

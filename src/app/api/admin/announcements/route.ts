@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
+import { prisma } from '@/lib/prisma'
 import { verifyToken } from '@/lib/auth'
 
 export async function GET(request: Request) {
@@ -8,8 +8,7 @@ export async function GET(request: Request) {
     if (!token || !verifyToken(token)) {
       return NextResponse.json({ error: '未授权' }, { status: 401 })
     }
-    const db = getDb()
-    const announcements = await db.announcement.findMany({
+    const announcements = await prisma.announcement.findMany({
       orderBy: { sortOrder: 'asc' },
     })
     return NextResponse.json(announcements)
@@ -24,9 +23,8 @@ export async function POST(request: Request) {
     if (!token || !verifyToken(token)) {
       return NextResponse.json({ error: '未授权' }, { status: 401 })
     }
-    const db = getDb()
     const body = await request.json()
-    const announcement = await db.announcement.create({
+    const announcement = await prisma.announcement.create({
       data: {
         title: body.title,
         content: body.content,
