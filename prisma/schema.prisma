@@ -60,3 +60,43 @@ model Announcement {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model CharacterCategory {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  description String?
+  icon        String?
+  sortOrder   Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  characters  Character[]
+}
+
+model Character {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  title           String?
+  avatar          String?
+  banner          String?
+  rarity          Int      @default(5)
+  path            String?
+  faction         String?
+  combatType      String?
+  gender          String?
+  releaseDate     String?
+  weapon          String?
+  tags            String?
+  description     String?
+  stats           String?
+  materials       String?
+  story           String?
+  otherInfo       String?
+  categoryId      String
+  category        CharacterCategory @relation(fields: [categoryId], references: [id])
+  sortOrder       Int      @default(0)
+  isPublished     Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}

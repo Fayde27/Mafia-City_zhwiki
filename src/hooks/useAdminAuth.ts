@@ -3,12 +3,18 @@
 import { useState, useEffect } from 'react'
 
 export function useAdminAuth() {
-  const [isAdmin, setIsAdmin] = useState(() => {
-    return !!localStorage.getItem('token')
-  })
-  const [token, setToken] = useState<string | null>(() => {
-    return localStorage.getItem('token')
-  })
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [token, setToken] = useState<string | null>(null)
+  const [isLoaded, setIsLoaded] = useState(false)
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token')
+    if (storedToken) {
+      setIsAdmin(true)
+      setToken(storedToken)
+    }
+    setIsLoaded(true)
+  }, [])
 
   const logout = () => {
     localStorage.removeItem('token')
@@ -16,5 +22,5 @@ export function useAdminAuth() {
     setToken(null)
   }
 
-  return { isAdmin, token, logout }
+  return { isAdmin, token, isLoaded, logout }
 }
