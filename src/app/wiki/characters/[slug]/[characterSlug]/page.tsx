@@ -99,7 +99,9 @@ export default function CharacterDetailPage() {
         <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
           <Link href="/" className="hover:text-wiki-accent">首页</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki/characters" className="hover:text-wiki-accent">角色图鉴</Link>
+          <Link href="/wiki" className="hover:text-wiki-accent">图鉴</Link>
+          <span className="mx-2">/</span>
+          <Link href="/wiki/characters/characters" className="hover:text-wiki-accent">角色图鉴</Link>
           <span className="mx-2">/</span>
           <Link href={`/wiki/characters/${character.category.slug}`} className="hover:text-wiki-accent">
             {character.category.name}

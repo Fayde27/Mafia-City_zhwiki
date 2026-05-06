@@ -96,7 +96,9 @@ export default function CharacterListPage() {
         <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
           <Link href="/" className="hover:text-wiki-accent">首页</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki/characters" className="hover:text-wiki-accent">角色图鉴</Link>
+          <Link href="/wiki" className="hover:text-wiki-accent">图鉴</Link>
+          <span className="mx-2">/</span>
+          <Link href="/wiki/characters/characters" className="hover:text-wiki-accent">角色图鉴</Link>
           <span className="mx-2">/</span>
           <span className="text-wiki-text">{category?.name || '加载中...'}</span>
         </div>

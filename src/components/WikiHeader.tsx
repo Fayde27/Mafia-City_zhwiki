@@ -39,7 +39,8 @@ export default function WikiHeader() {
 
   const navItems = [
     { href: '/', label: '首页' },
-    { href: '/wiki/characters', label: '角色图鉴' },
+    { href: '/wiki', label: '图鉴' },
+    { href: '/wiki/characters/characters', label: '角色图鉴' },
     ...navCategories.map(cat => ({ href: `/wiki/${cat.slug}`, label: cat.name })),
   ]
 

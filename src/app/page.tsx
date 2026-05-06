@@ -168,8 +168,8 @@ export default function HomePage() {
               <Link href="/wiki/guides" className="btn-hard text-white text-sm md:text-base">
                 新手入门
               </Link>
-              <Link href="/wiki/characters" className="btn-hard text-white text-sm md:text-base">
-                角色图鉴
+              <Link href="/wiki" className="btn-hard text-white text-sm md:text-base">
+                图鉴
               </Link>
             </div>
           </div>
