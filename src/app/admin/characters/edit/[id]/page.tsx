@@ -28,18 +28,16 @@ export default function AdminCharacterEditPage() {
     avatar: '',
     banner: '',
     rarity: 5,
-    path: '',
-    faction: '',
-    combatType: '',
-    gender: '',
-    releaseDate: '',
+    role: '',
     weapon: '',
-    tags: '',
+    coreBonus: '',
+    acquisition: '',
     description: '',
-    stats: '',
-    materials: '',
-    story: '',
-    otherInfo: '',
+    attributes: '',
+    skills: '',
+    rumors: '',
+    teamComp: '',
+    troopRec: '',
     categoryId: '',
     sortOrder: 0,
     isPublished: false,
@@ -74,18 +72,16 @@ export default function AdminCharacterEditPage() {
             avatar: charData.avatar || '',
             banner: charData.banner || '',
             rarity: charData.rarity || 5,
-            path: charData.path || '',
-            faction: charData.faction || '',
-            combatType: charData.combatType || '',
-            gender: charData.gender || '',
-            releaseDate: charData.releaseDate || '',
+            role: charData.role || '',
             weapon: charData.weapon || '',
-            tags: charData.tags || '',
+            coreBonus: charData.coreBonus || '',
+            acquisition: charData.acquisition || '',
             description: charData.description || '',
-            stats: charData.stats || '',
-            materials: charData.materials || '',
-            story: charData.story || '',
-            otherInfo: charData.otherInfo || '',
+            attributes: charData.attributes || '',
+            skills: charData.skills || '',
+            rumors: charData.rumors || '',
+            teamComp: charData.teamComp || '',
+            troopRec: charData.troopRec || '',
             categoryId: charData.categoryId || '',
             sortOrder: charData.sortOrder || 0,
             isPublished: charData.isPublished || false,
@@ -261,51 +257,17 @@ export default function AdminCharacterEditPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">性别</label>
-                    <select
-                      value={formData.gender}
-                      onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                      className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none cursor-pointer"
-                    >
-                      <option value="">请选择</option>
-                      <option value="男">男</option>
-                      <option value="女">女</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">命途</label>
+                    <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">角色定位</label>
                     <input
                       type="text"
-                      value={formData.path}
-                      onChange={(e) => setFormData({ ...formData, path: e.target.value })}
+                      value={formData.role}
+                      onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                       className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
                       placeholder="如: 毁灭"
                     />
                   </div>
-                  <div>
-                    <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">战斗属性</label>
-                    <input
-                      type="text"
-                      value={formData.combatType}
-                      onChange={(e) => setFormData({ ...formData, combatType: e.target.value })}
-                      className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                      placeholder="如: 物理"
-                    />
-                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">阵营</label>
-                    <input
-                      type="text"
-                      value={formData.faction}
-                      onChange={(e) => setFormData({ ...formData, faction: e.target.value })}
-                      className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                      placeholder="如: 贝洛伯格"
-                    />
-                  </div>
                   <div>
                     <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">适配兵种</label>
                     <input
@@ -316,25 +278,25 @@ export default function AdminCharacterEditPage() {
                       placeholder="如: 剑"
                     />
                   </div>
+                  <div>
+                    <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">核心加成</label>
+                    <input
+                      type="text"
+                      value={formData.coreBonus}
+                      onChange={(e) => setFormData({ ...formData, coreBonus: e.target.value })}
+                      className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
+                      placeholder="如: 攻击力提升"
+                    />
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">实装日期</label>
+                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">获取方式</label>
                   <input
                     type="text"
-                    value={formData.releaseDate}
-                    onChange={(e) => setFormData({ ...formData, releaseDate: e.target.value })}
+                    value={formData.acquisition}
+                    onChange={(e) => setFormData({ ...formData, acquisition: e.target.value })}
                     className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                    placeholder="如: 2023年04月26日"
-                  />
-                </div>
-                <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">标签 (逗号分隔)</label>
-                  <input
-                    type="text"
-                    value={formData.tags}
-                    onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                    className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                    placeholder="如: 反击,追加攻击,物理输出"
+                    placeholder="如: 常驻跃迁"
                   />
                 </div>
               </div>
@@ -379,46 +341,57 @@ export default function AdminCharacterEditPage() {
           </div>
 
           <div className="card-hard rounded-lg p-6">
-            <h3 className="text-lg font-bold text-wiki-accent mb-4">属性数据 (Markdown)</h3>
+            <h3 className="text-lg font-bold text-wiki-accent mb-4">角色属性 (Markdown)</h3>
             <textarea
-              value={formData.stats}
-              onChange={(e) => setFormData({ ...formData, stats: e.target.value })}
+              value={formData.attributes}
+              onChange={(e) => setFormData({ ...formData, attributes: e.target.value })}
               rows={6}
               className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none resize-y font-mono text-sm"
-              placeholder="## 属性数据&#10;&#10;| 等级 | 生命值 | 攻击力 | 防御力 |&#10;|------|--------|--------|--------|"
+              placeholder="## 角色属性&#10;&#10;| 等级 | 生命值 | 攻击力 | 防御力 |&#10;|------|--------|--------|--------|"
             />
           </div>
 
           <div className="card-hard rounded-lg p-6">
-            <h3 className="text-lg font-bold text-wiki-accent mb-4">晋升材料 (Markdown)</h3>
+            <h3 className="text-lg font-bold text-wiki-accent mb-4">技能详情 (Markdown)</h3>
             <textarea
-              value={formData.materials}
-              onChange={(e) => setFormData({ ...formData, materials: e.target.value })}
+              value={formData.skills}
+              onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
               rows={6}
               className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none resize-y font-mono text-sm"
-              placeholder="## 晋升材料&#10;&#10;### 20级&#10;- 古代零件 x5&#10;- 信用点 x4000"
+              placeholder="## 技能详情&#10;&#10;### 普通攻击&#10;- xxx"
             />
           </div>
 
           <div className="card-hard rounded-lg p-6">
-            <h3 className="text-lg font-bold text-wiki-accent mb-4">角色故事 (Markdown)</h3>
+            <h3 className="text-lg font-bold text-wiki-accent mb-4">黑道传闻 (Markdown)</h3>
             <textarea
-              value={formData.story}
-              onChange={(e) => setFormData({ ...formData, story: e.target.value })}
+              value={formData.rumors}
+              onChange={(e) => setFormData({ ...formData, rumors: e.target.value })}
               rows={8}
               className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none resize-y font-mono text-sm"
-              placeholder="## 角色故事&#10;&#10;### 角色详情&#10;..."
+              placeholder="## 黑道传闻&#10;&#10;### 传闻一&#10;..."
             />
           </div>
 
           <div className="card-hard rounded-lg p-6">
-            <h3 className="text-lg font-bold text-wiki-accent mb-4">其他信息 (Markdown)</h3>
+            <h3 className="text-lg font-bold text-wiki-accent mb-4">阵容搭配 (Markdown)</h3>
             <textarea
-              value={formData.otherInfo}
-              onChange={(e) => setFormData({ ...formData, otherInfo: e.target.value })}
+              value={formData.teamComp}
+              onChange={(e) => setFormData({ ...formData, teamComp: e.target.value })}
               rows={6}
               className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none resize-y font-mono text-sm"
-              placeholder="## 其他信息&#10;&#10;### 昵称/外号&#10;- xxx"
+              placeholder="## 阵容搭配&#10;&#10;### 推荐阵容&#10;- xxx"
+            />
+          </div>
+
+          <div className="card-hard rounded-lg p-6">
+            <h3 className="text-lg font-bold text-wiki-accent mb-4">配兵推荐 (Markdown)</h3>
+            <textarea
+              value={formData.troopRec}
+              onChange={(e) => setFormData({ ...formData, troopRec: e.target.value })}
+              rows={6}
+              className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none resize-y font-mono text-sm"
+              placeholder="## 配兵推荐&#10;&#10;### 推荐配兵&#10;- xxx"
             />
           </div>
 

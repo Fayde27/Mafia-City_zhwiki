@@ -81,18 +81,16 @@ model Character {
   avatar          String?
   banner          String?
   rarity          Int      @default(5)
-  path            String?
-  faction         String?
-  combatType      String?
-  gender          String?
-  releaseDate     String?
+  role            String?
   weapon          String?
-  tags            String?
+  coreBonus       String?
+  acquisition     String?
   description     String?
-  stats           String?
-  materials       String?
-  story           String?
-  otherInfo       String?
+  attributes      String?
+  skills          String?
+  rumors          String?
+  teamComp        String?
+  troopRec        String?
   categoryId      String
   category        CharacterCategory @relation(fields: [categoryId], references: [id])
   sortOrder       Int      @default(0)

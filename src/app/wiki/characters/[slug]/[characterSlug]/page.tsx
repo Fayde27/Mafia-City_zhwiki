@@ -16,18 +16,16 @@ interface Character {
   avatar: string
   banner: string
   rarity: number
-  path: string
-  faction: string
-  combatType: string
-  gender: string
-  releaseDate: string
+  role: string
   weapon: string
-  tags: string
+  coreBonus: string
+  acquisition: string
   description: string
-  stats: string
-  materials: string
-  story: string
-  otherInfo: string
+  attributes: string
+  skills: string
+  rumors: string
+  teamComp: string
+  troopRec: string
   category: {
     name: string
     slug: string
@@ -41,7 +39,7 @@ export default function CharacterDetailPage() {
   const { isAdmin } = useAdminAuth()
   const [character, setCharacter] = useState<Character | null>(null)
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('info')
+  const [activeTab, setActiveTab] = useState('attributes')
 
   useEffect(() => {
     fetch(`/api/wiki/characters?category=${categorySlug}&slug=${characterSlug}`)
@@ -61,40 +59,12 @@ export default function CharacterDetailPage() {
     return '★'.repeat(rarity) + '☆'.repeat(5 - rarity)
   }
 
-  const getPathIcon = (path: string) => {
-    const icons: Record<string, string> = {
-      '毁灭': '⚔️',
-      '巡猎': '🏹',
-      '智识': '📖',
-      '同谐': '🎵',
-      '虚无': '🌑',
-      '存护': '🛡️',
-      '丰饶': '💚',
-      '记忆': '️',
-      '欢愉': '',
-    }
-    return icons[path] || '⭐'
-  }
-
-  const getCombatTypeIcon = (type: string) => {
-    const icons: Record<string, string> = {
-      '物理': '⚪',
-      '火': '🔥',
-      '冰': '❄️',
-      '雷': '⚡',
-      '风': '️',
-      '量子': '',
-      '虚数': '✨',
-    }
-    return icons[type] || '⭐'
-  }
-
   const tabs = [
-    { id: 'info', label: '角色信息' },
-    { id: 'stats', label: '属性数据' },
-    { id: 'materials', label: '晋升材料' },
-    { id: 'story', label: '角色故事' },
-    { id: 'other', label: '其他信息' },
+    { id: 'attributes', label: '角色属性' },
+    { id: 'skills', label: '技能详情' },
+    { id: 'rumors', label: '黑道传闻' },
+    { id: 'teamComp', label: '阵容搭配' },
+    { id: 'troopRec', label: '配兵推荐' },
   ]
 
   if (loading) {
@@ -182,34 +152,22 @@ export default function CharacterDetailPage() {
               )}
               <div className="flex-1">
                 <div className="flex flex-wrap gap-4 text-sm text-wiki-text-muted">
-                  {character.path && (
+                  {character.role && (
                     <span className="flex items-center gap-2">
-                      <span className="text-lg">{getPathIcon(character.path)}</span>
-                      <span className="text-wiki-text font-bold">{character.path}</span>
+                      <span className="text-wiki-text font-bold">{character.role}</span>
                     </span>
                   )}
-                  {character.combatType && (
+                  {character.weapon && (
                     <span className="flex items-center gap-2">
-                      <span className="text-lg">{getCombatTypeIcon(character.combatType)}</span>
-                      <span className="text-wiki-text font-bold">{character.combatType}</span>
-                    </span>
-                  )}
-                  {character.faction && (
-                    <span className="flex items-center gap-2">
-                      <span className="text-wiki-text font-bold">{character.faction}</span>
-                    </span>
-                  )}
-                  {character.gender && (
-                    <span className="flex items-center gap-2">
-                      <span className="text-wiki-text">{character.gender === '男' ? '' : '♀'} {character.gender}</span>
+                      <span className="text-wiki-text font-bold">{character.weapon}</span>
                     </span>
                   )}
                 </div>
-                {character.weapon && (
-                  <p className="text-wiki-text-muted text-sm mt-2">适配兵种：{character.weapon}</p>
+                {character.coreBonus && (
+                  <p className="text-wiki-text-muted text-sm mt-2">核心加成：{character.coreBonus}</p>
                 )}
-                {character.releaseDate && (
-                  <p className="text-wiki-text-muted text-sm">实装日期：{character.releaseDate}</p>
+                {character.acquisition && (
+                  <p className="text-wiki-text-muted text-sm">获取方式：{character.acquisition}</p>
                 )}
               </div>
             </div>
@@ -221,22 +179,13 @@ export default function CharacterDetailPage() {
               </div>
             )}
 
-            {character.tags && (
-              <div className="flex flex-wrap gap-2 mb-6">
-                {character.tags.split(',').map((tag, i) => (
-                  <span key={i} className="px-3 py-1 bg-wiki-accent/20 text-wiki-accent text-xs font-bold">
-                    {tag.trim()}
-                  </span>
-                ))}
-              </div>
-            )}
-
             <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
               {tabs.filter(tab => {
-                if (tab.id === 'stats' && !character.stats) return false
-                if (tab.id === 'materials' && !character.materials) return false
-                if (tab.id === 'story' && !character.story) return false
-                if (tab.id === 'other' && !character.otherInfo) return false
+                if (tab.id === 'attributes' && !character.attributes) return false
+                if (tab.id === 'skills' && !character.skills) return false
+                if (tab.id === 'rumors' && !character.rumors) return false
+                if (tab.id === 'teamComp' && !character.teamComp) return false
+                if (tab.id === 'troopRec' && !character.troopRec) return false
                 return true
               }).map((tab) => (
                 <button
@@ -254,35 +203,35 @@ export default function CharacterDetailPage() {
             </div>
 
             <div className="card-hard rounded-lg p-6">
-              {activeTab === 'info' && character.description && (
-                <MarkdownRenderer content={character.description} />
+              {activeTab === 'attributes' && character.attributes && (
+                <MarkdownRenderer content={character.attributes} />
               )}
-              {activeTab === 'stats' && character.stats && (
-                <MarkdownRenderer content={character.stats} />
+              {activeTab === 'skills' && character.skills && (
+                <MarkdownRenderer content={character.skills} />
               )}
-              {activeTab === 'materials' && character.materials && (
-                <MarkdownRenderer content={character.materials} />
+              {activeTab === 'rumors' && character.rumors && (
+                <MarkdownRenderer content={character.rumors} />
               )}
-              {activeTab === 'story' && character.story && (
-                <MarkdownRenderer content={character.story} />
+              {activeTab === 'teamComp' && character.teamComp && (
+                <MarkdownRenderer content={character.teamComp} />
               )}
-              {activeTab === 'other' && character.otherInfo && (
-                <MarkdownRenderer content={character.otherInfo} />
+              {activeTab === 'troopRec' && character.troopRec && (
+                <MarkdownRenderer content={character.troopRec} />
               )}
-              {activeTab === 'info' && !character.description && (
-                <p className="text-wiki-text-muted text-center py-8">暂无角色简介</p>
+              {activeTab === 'attributes' && !character.attributes && (
+                <p className="text-wiki-text-muted text-center py-8">暂无角色属性</p>
               )}
-              {activeTab === 'stats' && !character.stats && (
-                <p className="text-wiki-text-muted text-center py-8">暂无属性数据</p>
+              {activeTab === 'skills' && !character.skills && (
+                <p className="text-wiki-text-muted text-center py-8">暂无技能详情</p>
               )}
-              {activeTab === 'materials' && !character.materials && (
-                <p className="text-wiki-text-muted text-center py-8">暂无晋升材料</p>
+              {activeTab === 'rumors' && !character.rumors && (
+                <p className="text-wiki-text-muted text-center py-8">暂无黑道传闻</p>
               )}
-              {activeTab === 'story' && !character.story && (
-                <p className="text-wiki-text-muted text-center py-8">暂无角色故事</p>
+              {activeTab === 'teamComp' && !character.teamComp && (
+                <p className="text-wiki-text-muted text-center py-8">暂无阵容搭配</p>
               )}
-              {activeTab === 'other' && !character.otherInfo && (
-                <p className="text-wiki-text-muted text-center py-8">暂无其他信息</p>
+              {activeTab === 'troopRec' && !character.troopRec && (
+                <p className="text-wiki-text-muted text-center py-8">暂无配兵推荐</p>
               )}
             </div>
           </div>
@@ -297,28 +246,10 @@ export default function CharacterDetailPage() {
                     <span className="text-yellow-400 font-bold">{getRarityStars(character.rarity)}</span>
                   </div>
                 )}
-                {character.path && (
+                {character.role && (
                   <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">命途</span>
-                    <span className="text-wiki-text font-bold">{getPathIcon(character.path)} {character.path}</span>
-                  </div>
-                )}
-                {character.combatType && (
-                  <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">战斗属性</span>
-                    <span className="text-wiki-text font-bold">{getCombatTypeIcon(character.combatType)} {character.combatType}</span>
-                  </div>
-                )}
-                {character.faction && (
-                  <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">阵营</span>
-                    <span className="text-wiki-text">{character.faction}</span>
-                  </div>
-                )}
-                {character.gender && (
-                  <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">性别</span>
-                    <span className="text-wiki-text">{character.gender}</span>
+                    <span className="text-wiki-text-muted">角色定位</span>
+                    <span className="text-wiki-text font-bold">{character.role}</span>
                   </div>
                 )}
                 {character.weapon && (
@@ -327,10 +258,16 @@ export default function CharacterDetailPage() {
                     <span className="text-wiki-text">{character.weapon}</span>
                   </div>
                 )}
-                {character.releaseDate && (
+                {character.coreBonus && (
                   <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">实装日期</span>
-                    <span className="text-wiki-text">{character.releaseDate}</span>
+                    <span className="text-wiki-text-muted">核心加成</span>
+                    <span className="text-wiki-text">{character.coreBonus}</span>
+                  </div>
+                )}
+                {character.acquisition && (
+                  <div className="flex justify-between">
+                    <span className="text-wiki-text-muted">获取方式</span>
+                    <span className="text-wiki-text">{character.acquisition}</span>
                   </div>
                 )}
               </div>
