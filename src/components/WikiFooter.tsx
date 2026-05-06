@@ -16,6 +16,7 @@ export default function WikiFooter() {
               快速链接
             </h3>
             <ul className="space-y-1 md:space-y-2 text-xs md:text-sm">
+              <li><a href="/wiki/guides" className="text-wiki-text-muted hover:text-wiki-accent">玩法攻略</a></li>
               <li><a href="/wiki/characters" className="text-wiki-text-muted hover:text-wiki-accent">角色图鉴</a></li>
               <li><a href="/wiki/weapons" className="text-wiki-text-muted hover:text-wiki-accent">武器装备</a></li>
               <li><a href="/wiki/missions" className="text-wiki-text-muted hover:text-wiki-accent">任务攻略</a></li>

@@ -236,9 +236,9 @@ export default function HomePage() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                   { icon: '', title: '新手入门', desc: '从零开始', href: '/wiki/guides' },
-                  { icon: '🎯', title: '核心玩法', desc: '游戏机制', href: '/wiki' },
-                  { icon: '️', title: '进阶技巧', desc: '高手攻略', href: '/wiki/characters/characters' },
-                  { icon: '🏆', title: '赛事活动', desc: '最新活动', href: '/wiki' },
+                  { icon: '🎯', title: '核心玩法', desc: '游戏机制', href: '/wiki/guides' },
+                  { icon: '️', title: '进阶技巧', desc: '高手攻略', href: '/wiki/guides' },
+                  { icon: '🏆', title: '赛事活动', desc: '最新活动', href: '/wiki/guides' },
                 ].map((item) => (
                   <Link key={item.title} href={item.href} className="group">
                     <div className="bg-wiki-card border border-wiki-border rounded-xl p-5 hover:border-wiki-accent/50 transition-all duration-300">
