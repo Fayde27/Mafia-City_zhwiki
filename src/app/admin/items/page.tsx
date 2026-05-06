@@ -89,25 +89,25 @@ export default function AdminItemsPage() {
   if (!isAdmin) return null
 
   return (
-    <div className="min-h-screen bg-wiki-dark">
+    <div className="min-h-screen bg-white">
       <WikiHeader />
 
       <main className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">
+            <h1 className="text-2xl font-heading font-bold text-[#e8c547] heading-hard">
               道具管理
             </h1>
-            <p className="text-wiki-text-muted text-sm mt-1">管理道具图鉴内容，新增、编辑或删除道具</p>
+            <p className="text-gray-900-muted text-sm mt-1">管理道具图鉴内容，新增、编辑或删除道具</p>
           </div>
           <div className="flex gap-3">
-            <Link href="/admin/item-filters" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
+            <Link href="/admin/item-filters" className="px-4 py-2 bg-gray-100 text-gray-900 font-bold text-sm hover:text-[#e8c547]">
               筛选管理
             </Link>
-            <Link href="/admin/item-categories" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
+            <Link href="/admin/item-categories" className="px-4 py-2 bg-gray-100 text-gray-900 font-bold text-sm hover:text-[#e8c547]">
               分类管理
             </Link>
-            <Link href="/admin/items/new" className="btn-hard text-white text-sm">
+            <Link href="/admin/items/new" className="btn-hard text-gray-900 text-sm">
               + 新增道具
             </Link>
           </div>
@@ -119,7 +119,7 @@ export default function AdminItemsPage() {
             className={`px-4 py-2 text-sm font-bold whitespace-nowrap ${
               filterCategory === 'all'
                 ? 'bg-wiki-accent text-wiki-darker'
-                : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
+                : 'bg-gray-100 text-gray-900-muted hover:text-gray-900'
             }`}
           >
             全部
@@ -131,7 +131,7 @@ export default function AdminItemsPage() {
               className={`px-4 py-2 text-sm font-bold whitespace-nowrap ${
                 filterCategory === cat.slug
                   ? 'bg-wiki-accent text-wiki-darker'
-                  : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
+                  : 'bg-gray-100 text-gray-900-muted hover:text-gray-900'
               }`}
             >
               {cat.icon} {cat.name}
@@ -140,50 +140,50 @@ export default function AdminItemsPage() {
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
+          <div className="text-center py-12 text-gray-900-muted">加载中...</div>
         ) : filteredItems.length === 0 ? (
-          <div className="card-hard rounded-lg p-8 md:p-12 text-center text-wiki-text-muted">
+          <div className="card-hard rounded-lg p-8 md:p-12 text-center text-gray-900-muted">
             暂无道具数据
           </div>
         ) : (
           <div className="card-hard rounded-lg overflow-hidden">
             <table className="w-full">
-              <thead className="bg-wiki-gray">
+              <thead className="bg-gray-100">
                 <tr>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">道具</th>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">稀有度</th>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">类型</th>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">品质</th>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">分类</th>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">状态</th>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">操作</th>
+                  <th className="text-left px-6 py-4 text-[#e8c547] font-bold uppercase tracking-wider text-sm">道具</th>
+                  <th className="text-left px-6 py-4 text-[#e8c547] font-bold uppercase tracking-wider text-sm">稀有度</th>
+                  <th className="text-left px-6 py-4 text-[#e8c547] font-bold uppercase tracking-wider text-sm">类型</th>
+                  <th className="text-left px-6 py-4 text-[#e8c547] font-bold uppercase tracking-wider text-sm">品质</th>
+                  <th className="text-left px-6 py-4 text-[#e8c547] font-bold uppercase tracking-wider text-sm">分类</th>
+                  <th className="text-left px-6 py-4 text-[#e8c547] font-bold uppercase tracking-wider text-sm">状态</th>
+                  <th className="text-left px-6 py-4 text-[#e8c547] font-bold uppercase tracking-wider text-sm">操作</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredItems.map((item) => (
-                  <tr key={item.id} className="border-t border-wiki-border hover:bg-wiki-gray/50">
+                  <tr key={item.id} className="border-t border-gray-200 hover:bg-gray-100/50">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         {item.icon ? (
-                          <div className="w-10 h-10 rounded bg-wiki-gray flex items-center justify-center text-xl">
+                          <div className="w-10 h-10 rounded bg-gray-100 flex items-center justify-center text-xl">
                             {item.icon}
                           </div>
                         ) : item.image ? (
                           <img src={item.image} alt={item.name} className="w-10 h-10 rounded object-cover" />
                         ) : (
-                          <div className="w-10 h-10 rounded bg-wiki-gray flex items-center justify-center text-wiki-text-muted">
+                          <div className="w-10 h-10 rounded bg-gray-100 flex items-center justify-center text-gray-900-muted">
                             {item.name[0]}
                           </div>
                         )}
                         <div>
-                          <div className="text-wiki-text font-bold">{item.name}</div>
+                          <div className="text-gray-900 font-bold">{item.name}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-yellow-400 text-sm">{getRarityStars(item.rarity)}</td>
-                    <td className="px-6 py-4 text-wiki-text text-sm">{item.type || '-'}</td>
-                    <td className="px-6 py-4 text-wiki-text text-sm">{item.quality || '-'}</td>
-                    <td className="px-6 py-4 text-wiki-text-muted text-sm">{item.category.name}</td>
+                    <td className="px-6 py-4 text-gray-900 text-sm">{item.type || '-'}</td>
+                    <td className="px-6 py-4 text-gray-900 text-sm">{item.quality || '-'}</td>
+                    <td className="px-6 py-4 text-gray-900-muted text-sm">{item.category.name}</td>
                     <td className="px-6 py-4">
                       <button
                         onClick={() => handleTogglePublish(item)}
@@ -200,7 +200,7 @@ export default function AdminItemsPage() {
                       <div className="flex gap-2">
                         <Link
                           href={`/admin/items/edit/${item.id}`}
-                          className="px-3 py-1 bg-wiki-accent/20 text-wiki-accent text-sm font-bold hover:bg-wiki-accent/30"
+                          className="px-3 py-1 bg-wiki-accent/20 text-[#e8c547] text-sm font-bold hover:bg-wiki-accent/30"
                         >
                           编辑
                         </Link>

@@ -45,113 +45,107 @@ export default function WikiHeader() {
   ]
 
   return (
-    <header className="bg-wiki-darker border-b-2 border-wiki-accent">
-      <div className="bg-gradient-to-r from-wiki-darker via-wiki-dark to-wiki-darker py-4 md:py-6">
+    <header className="sticky top-0 z-50">
+      <div className="bg-white border-b border-gray-200 shadow-sm">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between gap-4">
-            <Link href="/" className="flex items-center gap-2 md:gap-4 flex-shrink-0">
-              <div className="text-2xl md:text-4xl font-heading font-bold text-wiki-accent heading-hard">
+          <div className="flex items-center justify-between h-14">
+            <Link href="/" className="flex items-center gap-3 flex-shrink-0">
+              <div className="text-xl font-bold text-[#e8c547]">
                 黑道風雲
               </div>
-              <div className="hidden sm:block text-wiki-text-muted text-xs md:text-sm uppercase tracking-widest">
+              <div className="hidden sm:block text-gray-500 text-xs">
                 Wiki 攻略站
               </div>
             </Link>
-            <div className="flex items-center gap-2 md:gap-4">
-              {isAdmin ? (
-                <>
-                  <span className="hidden md:block text-wiki-accent text-xs uppercase tracking-wider">
-                    管理员已登录
-                  </span>
-                  <button
-                    onClick={handleLogout}
-                    className="hidden md:block text-wiki-danger text-xs hover:text-wiki-danger/80 uppercase tracking-wider"
-                  >
-                    退出登录
-                  </button>
-                </>
-              ) : (
+
+            <nav className="hidden md:flex items-center gap-1">
+              {navItems.slice(0, 6).map((item) => (
                 <Link
-                  href="/admin/login"
-                  className="hidden md:block text-wiki-text-muted text-xs hover:text-wiki-accent uppercase tracking-wider"
+                  key={item.href}
+                  href={item.href}
+                  className={`px-3 py-1.5 text-sm transition-colors rounded ${
+                    pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href))
+                      ? 'text-[#e8c547] bg-[#e8c547]/10'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
                 >
-                  管理后台
+                  {item.label}
                 </Link>
-              )}
-              <form onSubmit={handleSearch} className="relative hidden md:block">
+              ))}
+            </nav>
+
+            <div className="flex items-center gap-3">
+              <form onSubmit={handleSearch} className="hidden md:flex items-center relative">
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="搜索攻略..."
-                  className="bg-wiki-gray border-2 border-wiki-border px-4 py-2 text-wiki-text w-48 lg:w-64 focus:border-wiki-accent focus:outline-none"
+                  className="bg-gray-100 border border-gray-200 px-3 py-1.5 text-sm text-gray-900 w-48 focus:border-[#e8c547] focus:outline-none rounded"
                 />
-                <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-wiki-accent">🔍</button>
+                <button type="submit" className="absolute right-2 text-gray-500 hover:text-[#e8c547]">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </button>
               </form>
+
+              {isAdmin ? (
+                <button
+                  onClick={handleLogout}
+                  className="text-red-500 text-xs hover:text-red-600"
+                >
+                  退出
+                </button>
+              ) : (
+                <Link
+                  href="/admin/login"
+                  className="text-gray-500 text-xs hover:text-[#e8c547]"
+                >
+                  管理
+                </Link>
+              )}
+
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden text-wiki-accent text-2xl"
+                className="md:hidden text-[#e8c547] text-xl"
               >
                 ☰
               </button>
             </div>
           </div>
-          {mobileMenuOpen && (
-            <div className="mt-4 md:hidden space-y-3">
-              {isAdmin ? (
-                <>
-                  <span className="text-wiki-accent text-xs uppercase tracking-wider">
-                    管理员已登录
-                  </span>
-                  <button
-                    onClick={handleLogout}
-                    className="text-wiki-danger text-xs hover:text-wiki-danger/80 uppercase tracking-wider"
-                  >
-                    退出登录
-                  </button>
-                </>
-              ) : (
-                <Link
-                  href="/admin/login"
-                  className="text-wiki-text-muted text-xs hover:text-wiki-accent uppercase tracking-wider"
-                >
-                  管理后台
-                </Link>
-              )}
-              <form onSubmit={handleSearch} className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="搜索攻略..."
-                  className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                />
-                <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-wiki-accent">🔍</button>
-              </form>
-            </div>
-          )}
         </div>
       </div>
-      
-      <nav className="bg-wiki-gray border-b border-wiki-border">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center gap-1 overflow-x-auto py-1">
+
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-white border-b border-gray-200">
+          <div className="container mx-auto px-4 py-3 space-y-2">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`px-3 md:px-4 py-2 md:py-3 font-bold uppercase tracking-wider transition-colors whitespace-nowrap text-sm md:text-base ${
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-3 py-2 text-sm rounded ${
                   pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href))
-                    ? 'text-wiki-accent border-b-2 border-wiki-accent'
-                    : 'text-wiki-text-muted hover:text-wiki-text'
+                    ? 'text-[#e8c547] bg-[#e8c547]/10'
+                    : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
                 {item.label}
               </Link>
             ))}
+            <form onSubmit={handleSearch} className="relative pt-2">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="搜索攻略..."
+                className="w-full bg-gray-100 border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:border-[#e8c547] focus:outline-none rounded"
+              />
+            </form>
           </div>
         </div>
-      </nav>
+      )}
     </header>
   )
 }

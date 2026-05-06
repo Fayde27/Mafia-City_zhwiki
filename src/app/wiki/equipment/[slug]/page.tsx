@@ -88,24 +88,24 @@ export default function EquipmentListPage() {
   const typeOptions = filterOptions.filter(o => o.type === 'type')
 
   return (
-    <div className="min-h-screen bg-wiki-dark">
+    <div className="min-h-screen bg-white">
       <WikiHeader />
       
       <main className="container mx-auto px-4 py-6 md:py-8">
-        <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
-          <Link href="/" className="hover:text-wiki-accent">首页</Link>
+        <div className="text-sm text-gray-900-muted mb-4 md:mb-6">
+          <Link href="/" className="hover:text-[#e8c547]">首页</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki" className="hover:text-wiki-accent">图鉴</Link>
+          <Link href="/wiki" className="hover:text-[#e8c547]">图鉴</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki/equipment" className="hover:text-wiki-accent">装备图鉴</Link>
+          <Link href="/wiki/equipment" className="hover:text-[#e8c547]">装备图鉴</Link>
           <span className="mx-2">/</span>
-          <span className="text-wiki-text">{category?.name || '加载中...'}</span>
+          <span className="text-gray-900">{category?.name || '加载中...'}</span>
         </div>
 
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
             <span className="text-3xl">{category?.icon}</span>
-            <h1 className="text-3xl md:text-4xl font-heading font-bold text-wiki-accent heading-hard">
+            <h1 className="text-3xl md:text-4xl font-heading font-bold text-[#e8c547] heading-hard">
               {category?.name}
             </h1>
           </div>
@@ -123,14 +123,14 @@ export default function EquipmentListPage() {
           <div className="card-hard rounded-lg p-4 md:p-6 mb-6 space-y-4">
             {rarityOptions.length > 0 && (
               <div>
-                <div className="text-sm font-bold text-wiki-accent uppercase tracking-wider mb-2">稀有度</div>
+                <div className="text-sm font-bold text-[#e8c547] uppercase tracking-wider mb-2">稀有度</div>
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => setFilterRarity('all')}
                     className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
                       filterRarity === 'all'
                         ? 'bg-wiki-accent text-wiki-darker'
-                        : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
+                        : 'bg-gray-100 text-gray-900-muted hover:text-gray-900'
                     }`}
                   >
                     全部
@@ -142,7 +142,7 @@ export default function EquipmentListPage() {
                       className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
                         filterRarity === opt.value
                           ? 'bg-wiki-accent text-wiki-darker'
-                          : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
+                          : 'bg-gray-100 text-gray-900-muted hover:text-gray-900'
                       }`}
                     >
                       {getRarityStars(parseInt(opt.value))}
@@ -153,14 +153,14 @@ export default function EquipmentListPage() {
             )}
             {typeOptions.length > 0 && (
               <div>
-                <div className="text-sm font-bold text-wiki-accent uppercase tracking-wider mb-2">装备类型</div>
+                <div className="text-sm font-bold text-[#e8c547] uppercase tracking-wider mb-2">装备类型</div>
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => setFilterType('all')}
                     className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
                       filterType === 'all'
                         ? 'bg-wiki-accent text-wiki-darker'
-                        : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
+                        : 'bg-gray-100 text-gray-900-muted hover:text-gray-900'
                     }`}
                   >
                     全部
@@ -172,7 +172,7 @@ export default function EquipmentListPage() {
                       className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
                         filterType === opt.value
                           ? 'bg-wiki-accent text-wiki-darker'
-                          : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
+                          : 'bg-gray-100 text-gray-900-muted hover:text-gray-900'
                       }`}
                     >
                       {opt.value}
@@ -185,9 +185,9 @@ export default function EquipmentListPage() {
         )}
 
         {loading ? (
-          <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
+          <div className="text-center py-12 text-gray-900-muted">加载中...</div>
         ) : filteredEquipment.length === 0 ? (
-          <div className="card-hard rounded-lg p-8 md:p-12 text-center text-wiki-text-muted">
+          <div className="card-hard rounded-lg p-8 md:p-12 text-center text-gray-900-muted">
             该分类下暂无装备
           </div>
         ) : (
@@ -211,7 +211,7 @@ export default function EquipmentListPage() {
                     </div>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-6xl text-wiki-text-muted">{item.name[0]}</span>
+                      <span className="text-6xl text-gray-900-muted">{item.name[0]}</span>
                     </div>
                   )}
                   <div className="absolute top-3 left-3 flex items-center gap-1">
@@ -221,21 +221,21 @@ export default function EquipmentListPage() {
                   </div>
                   {item.type && (
                     <div className="absolute top-3 right-3">
-                      <span className="text-wiki-text text-xs font-bold drop-shadow-lg">
+                      <span className="text-gray-900 text-xs font-bold drop-shadow-lg">
                         {item.type}
                       </span>
                     </div>
                   )}
                 </div>
                 <div className="p-4 md:p-5">
-                  <h3 className="text-lg md:text-xl font-bold text-wiki-text mb-1 group-hover:text-wiki-accent transition-colors">
+                  <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1 group-hover:text-[#e8c547] transition-colors">
                     {item.name}
                   </h3>
                   {item.slot && (
-                    <p className="text-wiki-text-muted text-sm mb-2">部位：{item.slot}</p>
+                    <p className="text-gray-900-muted text-sm mb-2">部位：{item.slot}</p>
                   )}
                   {item.description && (
-                    <p className="text-wiki-text-muted text-xs mt-2 line-clamp-2">
+                    <p className="text-gray-900-muted text-xs mt-2 line-clamp-2">
                       {item.description}
                     </p>
                   )}

@@ -82,27 +82,27 @@ export default function AdminEquipmentNewPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-wiki-dark">
+      <div className="min-h-screen bg-white">
         <WikiHeader />
-        <div className="text-center py-20 text-wiki-text-muted">加载中...</div>
+        <div className="text-center py-20 text-gray-900-muted">加载中...</div>
         <WikiFooter />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-wiki-dark">
+    <div className="min-h-screen bg-white">
       <WikiHeader />
 
       <main className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">
+            <h1 className="text-2xl font-heading font-bold text-[#e8c547] heading-hard">
               新增装备
             </h1>
-            <p className="text-wiki-text-muted text-sm mt-1">填写装备详细信息</p>
+            <p className="text-gray-900-muted text-sm mt-1">填写装备详细信息</p>
           </div>
-          <Link href="/admin/equipment" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
+          <Link href="/admin/equipment" className="px-4 py-2 bg-gray-100 text-gray-900 font-bold text-sm hover:text-[#e8c547]">
             返回列表
           </Link>
         </div>
@@ -110,35 +110,35 @@ export default function AdminEquipmentNewPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="card-hard rounded-lg p-6">
-              <h3 className="text-lg font-bold text-wiki-accent mb-4">基本信息</h3>
+              <h3 className="text-lg font-bold text-[#e8c547] mb-4">基本信息</h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">装备名称 *</label>
+                  <label className="block text-gray-900 text-sm font-bold uppercase tracking-wider mb-2">装备名称 *</label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
+                    className="w-full bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">URL Slug *</label>
+                  <label className="block text-gray-900 text-sm font-bold uppercase tracking-wider mb-2">URL Slug *</label>
                   <input
                     type="text"
                     value={formData.slug}
                     onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                    className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
+                    className="w-full bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none"
                     placeholder="英文小写，如: legendary-sword"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">所属分类 *</label>
+                  <label className="block text-gray-900 text-sm font-bold uppercase tracking-wider mb-2">所属分类 *</label>
                   <select
                     value={formData.categoryId}
                     onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                    className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none cursor-pointer"
+                    className="w-full bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none cursor-pointer"
                     required
                   >
                     <option value="">请选择分类</option>
@@ -151,25 +151,25 @@ export default function AdminEquipmentNewPage() {
             </div>
 
             <div className="card-hard rounded-lg p-6">
-              <h3 className="text-lg font-bold text-wiki-accent mb-4">图片链接</h3>
+              <h3 className="text-lg font-bold text-[#e8c547] mb-4">图片链接</h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">图标 URL</label>
+                  <label className="block text-gray-900 text-sm font-bold uppercase tracking-wider mb-2">图标 URL</label>
                   <input
                     type="text"
                     value={formData.icon}
                     onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                    className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
+                    className="w-full bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none"
                     placeholder="/images/equipment/xxx-icon.png"
                   />
                 </div>
                 <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">图片 URL</label>
+                  <label className="block text-gray-900 text-sm font-bold uppercase tracking-wider mb-2">图片 URL</label>
                   <input
                     type="text"
                     value={formData.image}
                     onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                    className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
+                    className="w-full bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none"
                     placeholder="/images/equipment/xxx-image.jpg"
                   />
                 </div>
@@ -179,15 +179,15 @@ export default function AdminEquipmentNewPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="card-hard rounded-lg p-6">
-              <h3 className="text-lg font-bold text-wiki-accent mb-4">装备属性</h3>
+              <h3 className="text-lg font-bold text-[#e8c547] mb-4">装备属性</h3>
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">稀有度</label>
+                    <label className="block text-gray-900 text-sm font-bold uppercase tracking-wider mb-2">稀有度</label>
                     <select
                       value={formData.rarity}
                       onChange={(e) => setFormData({ ...formData, rarity: parseInt(e.target.value) })}
-                      className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none cursor-pointer"
+                      className="w-full bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none cursor-pointer"
                     >
                       <option value={1}>★</option>
                       <option value={2}>★★</option>
@@ -197,33 +197,33 @@ export default function AdminEquipmentNewPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">装备类型</label>
+                    <label className="block text-gray-900 text-sm font-bold uppercase tracking-wider mb-2">装备类型</label>
                     <input
                       type="text"
                       value={formData.type}
                       onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                      className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
+                      className="w-full bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none"
                       placeholder="如: 武器"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">装备部位</label>
+                  <label className="block text-gray-900 text-sm font-bold uppercase tracking-wider mb-2">装备部位</label>
                   <input
                     type="text"
                     value={formData.slot}
                     onChange={(e) => setFormData({ ...formData, slot: e.target.value })}
-                    className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
+                    className="w-full bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none"
                     placeholder="如: 主手"
                   />
                 </div>
                 <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">属性加成</label>
+                  <label className="block text-gray-900 text-sm font-bold uppercase tracking-wider mb-2">属性加成</label>
                   <input
                     type="text"
                     value={formData.stats}
                     onChange={(e) => setFormData({ ...formData, stats: e.target.value })}
-                    className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
+                    className="w-full bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none"
                     placeholder="如: 攻击力+100"
                   />
                 </div>
@@ -231,10 +231,10 @@ export default function AdminEquipmentNewPage() {
             </div>
 
             <div className="card-hard rounded-lg p-6">
-              <h3 className="text-lg font-bold text-wiki-accent mb-4">发布设置</h3>
+              <h3 className="text-lg font-bold text-[#e8c547] mb-4">发布设置</h3>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <label className="flex items-center gap-2 text-wiki-text cursor-pointer select-none">
+                  <label className="flex items-center gap-2 text-gray-900 cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={formData.isPublished}
@@ -245,12 +245,12 @@ export default function AdminEquipmentNewPage() {
                   </label>
                 </div>
                 <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">排序值</label>
+                  <label className="block text-gray-900 text-sm font-bold uppercase tracking-wider mb-2">排序值</label>
                   <input
                     type="number"
                     value={formData.sortOrder}
                     onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value) })}
-                    className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
+                    className="w-full bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none"
                   />
                 </div>
               </div>
@@ -258,34 +258,34 @@ export default function AdminEquipmentNewPage() {
           </div>
 
           <div className="card-hard rounded-lg p-6">
-            <h3 className="text-lg font-bold text-wiki-accent mb-4">装备简介 (Markdown)</h3>
+            <h3 className="text-lg font-bold text-[#e8c547] mb-4">装备简介 (Markdown)</h3>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={4}
-              className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none resize-y font-mono text-sm"
+              className="w-full bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none resize-y font-mono text-sm"
               placeholder="支持Markdown格式"
             />
           </div>
 
           <div className="card-hard rounded-lg p-6">
-            <h3 className="text-lg font-bold text-wiki-accent mb-4">详细信息 (Markdown)</h3>
+            <h3 className="text-lg font-bold text-[#e8c547] mb-4">详细信息 (Markdown)</h3>
             <textarea
               value={formData.details}
               onChange={(e) => setFormData({ ...formData, details: e.target.value })}
               rows={6}
-              className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none resize-y font-mono text-sm"
+              className="w-full bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none resize-y font-mono text-sm"
               placeholder="## 详细信息&#10;&#10;### 装备效果&#10;- xxx"
             />
           </div>
 
           <div className="card-hard rounded-lg p-6">
-            <h3 className="text-lg font-bold text-wiki-accent mb-4">套装加成 (Markdown)</h3>
+            <h3 className="text-lg font-bold text-[#e8c547] mb-4">套装加成 (Markdown)</h3>
             <textarea
               value={formData.setBonus}
               onChange={(e) => setFormData({ ...formData, setBonus: e.target.value })}
               rows={6}
-              className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none resize-y font-mono text-sm"
+              className="w-full bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none resize-y font-mono text-sm"
               placeholder="## 套装加成&#10;&#10;### 2件套效果&#10;- xxx"
             />
           </div>
@@ -294,13 +294,13 @@ export default function AdminEquipmentNewPage() {
             <button
               type="submit"
               disabled={saving}
-              className="btn-hard text-white disabled:opacity-50"
+              className="btn-hard text-gray-900 disabled:opacity-50"
             >
               {saving ? '保存中...' : '保存'}
             </button>
             <Link
               href="/admin/equipment"
-              className="px-6 py-3 bg-wiki-gray text-wiki-text font-bold uppercase tracking-wider"
+              className="px-6 py-3 bg-gray-100 text-gray-900 font-bold uppercase tracking-wider"
             >
               取消
             </Link>

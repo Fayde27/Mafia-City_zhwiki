@@ -64,9 +64,9 @@ export default function ItemDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-wiki-dark">
+      <div className="min-h-screen bg-white">
         <WikiHeader />
-        <div className="text-center py-20 text-wiki-text-muted">加载中...</div>
+        <div className="text-center py-20 text-gray-900-muted">加载中...</div>
         <WikiFooter />
       </div>
     )
@@ -74,10 +74,10 @@ export default function ItemDetailPage() {
 
   if (!item) {
     return (
-      <div className="min-h-screen bg-wiki-dark">
+      <div className="min-h-screen bg-white">
         <WikiHeader />
         <main className="container mx-auto px-4 py-12">
-          <div className="card-hard rounded-lg p-12 text-center text-wiki-text-muted">
+          <div className="card-hard rounded-lg p-12 text-center text-gray-900-muted">
             道具不存在
           </div>
         </main>
@@ -87,22 +87,22 @@ export default function ItemDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-wiki-dark">
+    <div className="min-h-screen bg-white">
       <WikiHeader />
       
       <main className="container mx-auto px-4 py-6 md:py-8">
-        <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
-          <Link href="/" className="hover:text-wiki-accent">首页</Link>
+        <div className="text-sm text-gray-900-muted mb-4 md:mb-6">
+          <Link href="/" className="hover:text-[#e8c547]">首页</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki" className="hover:text-wiki-accent">图鉴</Link>
+          <Link href="/wiki" className="hover:text-[#e8c547]">图鉴</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki/items" className="hover:text-wiki-accent">道具图鉴</Link>
+          <Link href="/wiki/items" className="hover:text-[#e8c547]">道具图鉴</Link>
           <span className="mx-2">/</span>
-          <Link href={`/wiki/items/${item.category.slug}`} className="hover:text-wiki-accent">
+          <Link href={`/wiki/items/${item.category.slug}`} className="hover:text-[#e8c547]">
             {item.category.name}
           </Link>
           <span className="mx-2">/</span>
-          <span className="text-wiki-text">{item.name}</span>
+          <span className="text-gray-900">{item.name}</span>
         </div>
 
         {item.image && (
@@ -119,11 +119,11 @@ export default function ItemDetailPage() {
                   {getRarityStars(item.rarity)}
                 </span>
               </div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-white heading-hard mb-2">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-gray-900 heading-hard mb-2">
                 {item.name}
               </h1>
               {item.effect && (
-                <p className="text-wiki-text-muted text-lg md:text-xl">{item.effect}</p>
+                <p className="text-gray-900-muted text-lg md:text-xl">{item.effect}</p>
               )}
             </div>
             {isAdmin && (
@@ -143,14 +143,14 @@ export default function ItemDetailPage() {
           <div className="lg:col-span-2">
             <div className="flex items-center gap-4 mb-6">
               {item.icon && (
-                <div className="w-24 h-24 md:w-32 md:h-32 rounded-lg overflow-hidden border-2 border-wiki-accent flex-shrink-0 bg-wiki-gray flex items-center justify-center">
+                <div className="w-24 h-24 md:w-32 md:h-32 rounded-lg overflow-hidden border-2 border-wiki-accent flex-shrink-0 bg-gray-100 flex items-center justify-center">
                   <span className="text-5xl">{item.icon}</span>
                 </div>
               )}
               <div>
-                <h2 className="text-2xl md:text-3xl font-bold text-wiki-text">{item.name}</h2>
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900">{item.name}</h2>
                 {item.type && (
-                  <p className="text-wiki-text-muted mt-1">类型：{item.type}</p>
+                  <p className="text-gray-900-muted mt-1">类型：{item.type}</p>
                 )}
               </div>
             </div>
@@ -163,7 +163,7 @@ export default function ItemDetailPage() {
                   className={`px-4 py-2 text-sm font-bold uppercase tracking-wider whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'bg-wiki-accent text-wiki-darker'
-                      : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
+                      : 'bg-gray-100 text-gray-900-muted hover:text-gray-900'
                   }`}
                 >
                   {tab.label}
@@ -198,36 +198,36 @@ export default function ItemDetailPage() {
 
           <div className="lg:col-span-1">
             <div className="card-hard rounded-lg p-6 sticky top-4">
-              <h3 className="text-lg font-bold text-wiki-accent mb-4">道具信息</h3>
+              <h3 className="text-lg font-bold text-[#e8c547] mb-4">道具信息</h3>
               <div className="space-y-3 text-sm">
                 {item.rarity && (
                   <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">稀有度</span>
+                    <span className="text-gray-900-muted">稀有度</span>
                     <span className="text-yellow-400 font-bold">{getRarityStars(item.rarity)}</span>
                   </div>
                 )}
                 {item.type && (
                   <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">类型</span>
-                    <span className="text-wiki-text font-bold">{item.type}</span>
+                    <span className="text-gray-900-muted">类型</span>
+                    <span className="text-gray-900 font-bold">{item.type}</span>
                   </div>
                 )}
                 {item.quality && (
                   <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">品质</span>
-                    <span className="text-wiki-text">{item.quality}</span>
+                    <span className="text-gray-900-muted">品质</span>
+                    <span className="text-gray-900">{item.quality}</span>
                   </div>
                 )}
                 {item.stackable !== undefined && (
                   <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">可堆叠</span>
-                    <span className="text-wiki-text">{item.stackable ? '是' : '否'}</span>
+                    <span className="text-gray-900-muted">可堆叠</span>
+                    <span className="text-gray-900">{item.stackable ? '是' : '否'}</span>
                   </div>
                 )}
                 {item.source && (
                   <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">来源</span>
-                    <span className="text-wiki-text">{item.source}</span>
+                    <span className="text-gray-900-muted">来源</span>
+                    <span className="text-gray-900">{item.source}</span>
                   </div>
                 )}
               </div>

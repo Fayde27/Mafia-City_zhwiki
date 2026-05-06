@@ -69,9 +69,9 @@ export default function CharacterDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-wiki-dark">
+      <div className="min-h-screen bg-white">
         <WikiHeader />
-        <div className="text-center py-20 text-wiki-text-muted">加载中...</div>
+        <div className="text-center py-20 text-gray-900-muted">加载中...</div>
         <WikiFooter />
       </div>
     )
@@ -79,10 +79,10 @@ export default function CharacterDetailPage() {
 
   if (!character) {
     return (
-      <div className="min-h-screen bg-wiki-dark">
+      <div className="min-h-screen bg-white">
         <WikiHeader />
         <main className="container mx-auto px-4 py-12">
-          <div className="card-hard rounded-lg p-12 text-center text-wiki-text-muted">
+          <div className="card-hard rounded-lg p-12 text-center text-gray-900-muted">
             角色不存在
           </div>
         </main>
@@ -92,22 +92,22 @@ export default function CharacterDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-wiki-dark">
+    <div className="min-h-screen bg-white">
       <WikiHeader />
       
       <main className="container mx-auto px-4 py-6 md:py-8">
-        <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
-          <Link href="/" className="hover:text-wiki-accent">首页</Link>
+        <div className="text-sm text-gray-900-muted mb-4 md:mb-6">
+          <Link href="/" className="hover:text-[#e8c547]">首页</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki" className="hover:text-wiki-accent">图鉴</Link>
+          <Link href="/wiki" className="hover:text-[#e8c547]">图鉴</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki/characters/characters" className="hover:text-wiki-accent">角色图鉴</Link>
+          <Link href="/wiki/characters/characters" className="hover:text-[#e8c547]">角色图鉴</Link>
           <span className="mx-2">/</span>
-          <Link href={`/wiki/characters/${character.category.slug}`} className="hover:text-wiki-accent">
+          <Link href={`/wiki/characters/${character.category.slug}`} className="hover:text-[#e8c547]">
             {character.category.name}
           </Link>
           <span className="mx-2">/</span>
-          <span className="text-wiki-text">{character.name}</span>
+          <span className="text-gray-900">{character.name}</span>
         </div>
 
         {character.banner && (
@@ -124,11 +124,11 @@ export default function CharacterDetailPage() {
                   {getRarityStars(character.rarity)}
                 </span>
               </div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-white heading-hard mb-2">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-gray-900 heading-hard mb-2">
                 {character.name}
               </h1>
               {character.title && (
-                <p className="text-wiki-text-muted text-lg md:text-xl">{character.title}</p>
+                <p className="text-gray-900-muted text-lg md:text-xl">{character.title}</p>
               )}
             </div>
             {isAdmin && (
@@ -153,31 +153,31 @@ export default function CharacterDetailPage() {
                 </div>
               )}
               <div className="flex-1">
-                <div className="flex flex-wrap gap-4 text-sm text-wiki-text-muted">
+                <div className="flex flex-wrap gap-4 text-sm text-gray-900-muted">
                   {character.role && (
                     <span className="flex items-center gap-2">
-                      <span className="text-wiki-text font-bold">{character.role}</span>
+                      <span className="text-gray-900 font-bold">{character.role}</span>
                     </span>
                   )}
                   {character.weapon && (
                     <span className="flex items-center gap-2">
-                      <span className="text-wiki-text font-bold">{character.weapon}</span>
+                      <span className="text-gray-900 font-bold">{character.weapon}</span>
                     </span>
                   )}
                 </div>
                 {character.coreBonus && (
-                  <p className="text-wiki-text-muted text-sm mt-2">核心加成：{character.coreBonus}</p>
+                  <p className="text-gray-900-muted text-sm mt-2">核心加成：{character.coreBonus}</p>
                 )}
                 {character.acquisition && (
-                  <p className="text-wiki-text-muted text-sm">获取方式：{character.acquisition}</p>
+                  <p className="text-gray-900-muted text-sm">获取方式：{character.acquisition}</p>
                 )}
               </div>
             </div>
 
             {character.description && (
               <div className="card-hard rounded-lg p-6 mb-6">
-                <h3 className="text-lg font-bold text-wiki-accent mb-3">角色简介</h3>
-                <p className="text-wiki-text leading-relaxed">{character.description}</p>
+                <h3 className="text-lg font-bold text-[#e8c547] mb-3">角色简介</h3>
+                <p className="text-gray-900 leading-relaxed">{character.description}</p>
               </div>
             )}
 
@@ -196,7 +196,7 @@ export default function CharacterDetailPage() {
                   className={`px-4 py-2 text-sm font-bold uppercase tracking-wider whitespace-nowrap transition-colors ${
                     activeTab === tab.id
                       ? 'bg-wiki-accent text-wiki-darker'
-                      : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
+                      : 'bg-gray-100 text-gray-900-muted hover:text-gray-900'
                   }`}
                 >
                   {tab.label}
@@ -221,55 +221,55 @@ export default function CharacterDetailPage() {
                 <MarkdownRenderer content={character.troopRec} />
               )}
               {activeTab === 'attributes' && !character.attributes && (
-                <p className="text-wiki-text-muted text-center py-8">暂无角色属性</p>
+                <p className="text-gray-900-muted text-center py-8">暂无角色属性</p>
               )}
               {activeTab === 'skills' && !character.skills && (
-                <p className="text-wiki-text-muted text-center py-8">暂无技能详情</p>
+                <p className="text-gray-900-muted text-center py-8">暂无技能详情</p>
               )}
               {activeTab === 'rumors' && !character.rumors && (
-                <p className="text-wiki-text-muted text-center py-8">暂无黑道传闻</p>
+                <p className="text-gray-900-muted text-center py-8">暂无黑道传闻</p>
               )}
               {activeTab === 'teamComp' && !character.teamComp && (
-                <p className="text-wiki-text-muted text-center py-8">暂无阵容搭配</p>
+                <p className="text-gray-900-muted text-center py-8">暂无阵容搭配</p>
               )}
               {activeTab === 'troopRec' && !character.troopRec && (
-                <p className="text-wiki-text-muted text-center py-8">暂无配兵推荐</p>
+                <p className="text-gray-900-muted text-center py-8">暂无配兵推荐</p>
               )}
             </div>
           </div>
 
           <div className="lg:col-span-1">
             <div className="card-hard rounded-lg p-6 sticky top-4">
-              <h3 className="text-lg font-bold text-wiki-accent mb-4">角色信息</h3>
+              <h3 className="text-lg font-bold text-[#e8c547] mb-4">角色信息</h3>
               <div className="space-y-3 text-sm">
                 {character.rarity && (
                   <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">稀有度</span>
+                    <span className="text-gray-900-muted">稀有度</span>
                     <span className="text-yellow-400 font-bold">{getRarityStars(character.rarity)}</span>
                   </div>
                 )}
                 {character.role && (
                   <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">角色定位</span>
-                    <span className="text-wiki-text font-bold">{character.role}</span>
+                    <span className="text-gray-900-muted">角色定位</span>
+                    <span className="text-gray-900 font-bold">{character.role}</span>
                   </div>
                 )}
                 {character.weapon && (
                   <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">适配兵种</span>
-                    <span className="text-wiki-text">{character.weapon}</span>
+                    <span className="text-gray-900-muted">适配兵种</span>
+                    <span className="text-gray-900">{character.weapon}</span>
                   </div>
                 )}
                 {character.coreBonus && (
                   <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">核心加成</span>
-                    <span className="text-wiki-text">{character.coreBonus}</span>
+                    <span className="text-gray-900-muted">核心加成</span>
+                    <span className="text-gray-900">{character.coreBonus}</span>
                   </div>
                 )}
                 {character.acquisition && (
                   <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">获取方式</span>
-                    <span className="text-wiki-text">{character.acquisition}</span>
+                    <span className="text-gray-900-muted">获取方式</span>
+                    <span className="text-gray-900">{character.acquisition}</span>
                   </div>
                 )}
               </div>
@@ -279,7 +279,7 @@ export default function CharacterDetailPage() {
 
         {isAdmin && (
           <div className="mt-8 flex justify-end">
-            <Link href={`/admin/characters/edit/${character.id}`} className="btn-hard text-white text-sm">
+            <Link href={`/admin/characters/edit/${character.id}`} className="btn-hard text-gray-900 text-sm">
               编辑角色
             </Link>
           </div>

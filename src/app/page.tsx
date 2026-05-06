@@ -51,9 +51,7 @@ export default function HomePage() {
   const [articles, setArticles] = useState<Article[]>([])
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [loading, setLoading] = useState(true)
-  const [showAnnounceForm, setShowAnnounceForm] = useState(false)
-  const [editingAnnounce, setEditingAnnounce] = useState<Announcement | null>(null)
-  const [announceForm, setAnnounceForm] = useState({ title: '', content: '', type: 'info', isActive: true, sortOrder: 0 })
+  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
     Promise.all([
@@ -70,6 +68,13 @@ export default function HomePage() {
     })
   }, [])
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      window.location.href = `/wiki/search?q=${encodeURIComponent(searchQuery.trim())}`
+    }
+  }
+
   const handleDeleteArticle = async (id: string) => {
     if (!confirm('确定要删除这篇文章吗？')) return
     try {
@@ -78,59 +83,6 @@ export default function HomePage() {
     } catch (err) {
       alert('删除失败')
     }
-  }
-
-  const handleDeleteAnnouncement = async (id: string) => {
-    if (!confirm('确定要删除这条公告吗？')) return
-    try {
-      await fetch(`/api/admin/announcements/${id}`, { method: 'DELETE' })
-      setAnnouncements(announcements.filter(a => a.id !== id))
-    } catch (err) {
-      alert('删除失败')
-    }
-  }
-
-  const handleSaveAnnouncement = async () => {
-    if (!announceForm.title.trim()) {
-      alert('请输入公告标题')
-      return
-    }
-    const url = editingAnnounce
-      ? `/api/admin/announcements/${editingAnnounce.id}`
-      : '/api/admin/announcements'
-    const method = editingAnnounce ? 'PUT' : 'POST'
-
-    try {
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(announceForm),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        alert(data.error || '保存失败')
-        return
-      }
-      if (editingAnnounce) {
-        setAnnouncements(announcements.map(a => a.id === data.id ? data : a))
-      } else {
-        setAnnouncements([...announcements, data])
-      }
-      setShowAnnounceForm(false)
-      setEditingAnnounce(null)
-      setAnnounceForm({ title: '', content: '', type: 'info', isActive: true, sortOrder: 0 })
-    } catch (err) {
-      alert('保存失败: ' + (err as Error).message)
-    }
-  }
-
-  const handleEditAnnouncement = (ann: Announcement) => {
-    setEditingAnnounce(ann)
-    setAnnounceForm({ title: ann.title, content: ann.content, type: ann.type, isActive: ann.isActive, sortOrder: ann.sortOrder })
-    setShowAnnounceForm(true)
   }
 
   const getTypeLabel = (type: string) => {
@@ -142,253 +94,268 @@ export default function HomePage() {
     }
   }
 
+  const quickLinks = [
+    { label: '新手入门', href: '/wiki/guides', icon: '📖' },
+    { label: '角色图鉴', href: '/wiki/characters/characters', icon: '👤' },
+    { label: '建筑图鉴', href: '/wiki/buildings', icon: '🏠' },
+    { label: '装备图鉴', href: '/wiki/equipment', icon: '⚔️' },
+    { label: '道具图鉴', href: '/wiki/items', icon: '' },
+    { label: '兵种图鉴', href: '/wiki/troops', icon: '️' },
+  ]
+
   return (
-    <div className="min-h-screen bg-wiki-dark">
+    <div className="min-h-screen bg-white">
       <WikiHeader />
-      
-      <main className="container mx-auto px-4 py-6 md:py-8">
-        <section className="mb-8 md:mb-12">
-          <div className="card-hard rounded-lg p-6 md:p-8 bg-gradient-to-r from-wiki-gray via-wiki-dark to-wiki-gray">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h1 className="text-3xl md:text-5xl font-heading font-bold text-wiki-accent heading-hard mb-3 md:mb-4">
-                  黑道風雲 Wiki
-                </h1>
-                <p className="text-wiki-text text-base md:text-lg mb-4 md:mb-6">
-                  最全面的游戏攻略站，提供详细的角色信息、武器装备、任务攻略等内容
-                </p>
-              </div>
-              {isAdmin && (
-                <Link href="/admin/dashboard" className="btn-hard text-white text-sm flex-shrink-0">
-                  管理后台
-                </Link>
-              )}
-            </div>
-            <div className="flex flex-wrap gap-3 md:gap-4">
-              <Link href="/wiki/guides" className="btn-hard text-white text-sm md:text-base">
-                新手入门
-              </Link>
-              <Link href="/wiki" className="btn-hard text-white text-sm md:text-base">
-                图鉴
-              </Link>
-            </div>
-          </div>
-        </section>
 
-        <section className="mb-8 md:mb-12">
-          <div className="flex items-center justify-between mb-4 md:mb-6">
-            <h2 className="text-2xl md:text-3xl font-heading font-bold text-wiki-accent heading-hard">
-              分类导航
-            </h2>
-            {isAdmin && (
-              <Link href="/admin/categories" className="btn-hard text-white text-sm">
-                分类管理
-              </Link>
-            )}
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {categories.map((category) => (
-              <div key={category.id} className="card-hard rounded-lg p-5 md:p-6 relative group">
-                <Link href={`/wiki/${category.slug}`} className="block">
-                  <div className="text-3xl md:text-4xl mb-3 md:mb-4">{category.icon}</div>
-                  <h3 className="text-lg md:text-xl font-bold text-wiki-text mb-2 uppercase tracking-wider">
-                    {category.name}
-                  </h3>
-                  <p className="text-wiki-text-muted text-sm mb-3 md:mb-4 line-clamp-2">
-                    {category.description}
-                  </p>
-                  <div className="text-wiki-accent text-sm font-bold">
-                    {category._count.articles} 篇文章
-                  </div>
-                </Link>
-                {isAdmin && (
-                  <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Link href={`/admin/articles/new?category=${category.id}`} className="px-2 py-1 bg-wiki-accent/20 text-wiki-accent text-xs font-bold hover:bg-wiki-accent/30">
-                      新增
-                    </Link>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="mb-8 md:mb-12">
-          <div className="flex items-center justify-between mb-4 md:mb-6">
-            <h2 className="text-2xl md:text-3xl font-heading font-bold text-wiki-accent heading-hard">
-              最新更新
-            </h2>
-            {isAdmin && (
-              <Link href="/admin/articles/new" className="btn-hard text-white text-sm">
-                + 新增文章
-              </Link>
-            )}
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {articles.map((article) => (
-              <div key={article.id} className="card-hard rounded-lg overflow-hidden relative group">
-                <Link href={`/wiki/article/${article.slug}`} className="block">
-                  {article.coverImage ? (
-                    <div className="h-40 md:h-48 bg-wiki-gray overflow-hidden">
-                      <img src={article.coverImage} alt={article.title} className="w-full h-full object-cover" />
-                    </div>
-                  ) : (
-                    <div className="h-40 md:h-48 bg-wiki-gray flex items-center justify-center">
-                      <span className="text-wiki-text-muted text-5xl md:text-6xl"></span>
-                    </div>
-                  )}
-                  <div className="p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-wiki-accent text-xs font-bold uppercase tracking-wider">
-                        {article.category.name}
-                      </span>
-                      {article.isPinned && (
-                        <span className="px-2 py-0.5 bg-wiki-danger/20 text-wiki-danger text-xs font-bold border border-wiki-danger/40">
-                          置顶
-                        </span>
-                      )}
-                      {article.badges && article.badges.split(',').filter(Boolean).map((badge) => {
-                        const badgeStyle = badge === 'HOT' ? 'bg-wiki-danger/20 text-wiki-danger border-wiki-danger/40'
-                          : badge === 'NEW' ? 'bg-wiki-accent/20 text-wiki-accent border-wiki-accent/40'
-                          : badge === 'STAR' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40'
-                          : 'bg-wiki-accent/10 text-wiki-accent border-wiki-accent/30'
-                        return (
-                          <span key={badge} className={`px-2 py-0.5 text-xs font-bold border ${badgeStyle}`}>
-                            {badge}
-                          </span>
-                        )
-                      })}
-                    </div>
-                    <h3 className="text-base md:text-lg font-bold text-wiki-text mb-2 line-clamp-1">
-                      {article.title}
-                    </h3>
-                    <p className="text-wiki-text-muted text-sm mb-3 md:mb-4 line-clamp-2">
-                      {article.summary}
-                    </p>
-                    <div className="flex justify-between items-center text-xs text-wiki-text-muted">
-                      <span>{new Date(article.createdAt).toLocaleDateString('zh-TW')}</span>
-                      <span> {article.views}</span>
-                    </div>
-                  </div>
-                </Link>
-                {isAdmin && (
-                  <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Link href={`/admin/articles/edit/${article.id}`} className="px-2 py-1 bg-wiki-accent/20 text-wiki-accent text-xs font-bold hover:bg-wiki-accent/30">
-                      编辑
-                    </Link>
-                    <button onClick={() => handleDeleteArticle(article.id)} className="px-2 py-1 bg-wiki-danger/20 text-wiki-danger text-xs font-bold hover:bg-wiki-danger/30">
-                      删除
-                    </button>
-                  </div>
-                )}
-                {!article.isPublished && (
-                  <div className="absolute top-3 left-3 px-2 py-1 bg-wiki-danger/80 text-white text-xs font-bold">
-                    草稿
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="mb-8 md:mb-12">
-          <div className="flex items-center justify-between mb-3 md:mb-4">
-            <h2 className="text-xl md:text-2xl font-heading font-bold text-wiki-danger heading-hard">
-              全站公告
-            </h2>
-            {isAdmin && (
-              <button onClick={() => { setShowAnnounceForm(true); setEditingAnnounce(null); setAnnounceForm({ title: '', content: '', type: 'info', isActive: true, sortOrder: 0 }) }} className="btn-hard text-white text-sm">
-                + 新增公告
-              </button>
-            )}
-          </div>
-
-          {isAdmin && showAnnounceForm && (
-            <div className="card-hard rounded-lg p-6 mb-6">
-              <h3 className="text-lg font-bold text-wiki-accent mb-4">{editingAnnounce ? '编辑公告' : '新增公告'}</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-wiki-text-muted text-sm mb-1">标题</label>
-                  <input
-                    type="text"
-                    value={announceForm.title}
-                    onChange={(e) => setAnnounceForm({ ...announceForm, title: e.target.value })}
-                    className="w-full bg-wiki-gray border border-wiki-border px-4 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                    placeholder="请输入公告标题"
-                  />
+      <main className="container mx-auto px-4 py-6">
+        <div className="flex flex-col lg:flex-row gap-6">
+          <div className="flex-1">
+            <section className="mb-8">
+              <div className="relative rounded-xl overflow-hidden bg-gradient-to-br from-gray-50 to-white border border-gray-200 p-8">
+                <div className="absolute inset-0 opacity-5">
+                  <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNlOGM1NDciIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRoLTJ2LTRoMnYtMmgtNHY2aDR2LTJoLTJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] bg-repeat" />
                 </div>
-                <div>
-                  <label className="block text-wiki-text-muted text-sm mb-1">内容</label>
-                  <textarea
-                    value={announceForm.content}
-                    onChange={(e) => setAnnounceForm({ ...announceForm, content: e.target.value })}
-                    rows={3}
-                    className="w-full bg-wiki-gray border border-wiki-border px-4 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none resize-y"
-                    placeholder="请输入公告内容"
-                  />
-                </div>
-                <div className="flex flex-wrap gap-4 items-end">
-                  <div>
-                    <label className="block text-wiki-text-muted text-sm mb-1">类型</label>
-                    <select
-                      value={announceForm.type}
-                      onChange={(e) => setAnnounceForm({ ...announceForm, type: e.target.value })}
-                      className="bg-wiki-gray border border-wiki-border px-4 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none cursor-pointer"
-                    >
-                      <option value="info">公告</option>
-                      <option value="new">NEW</option>
-                      <option value="update">UPDATE</option>
-                      <option value="important">重要</option>
-                    </select>
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-[#e8c547] text-sm font-bold uppercase tracking-wider">玩法攻略</span>
+                    <span className="text-gray-500 text-xs">从入门到精通，带你征战天下</span>
                   </div>
-                  <div className="flex items-center">
-                    <label className="flex items-center gap-2 text-wiki-text cursor-pointer select-none">
+                  <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+                    黑道風雲 <span className="text-[#e8c547]">Wiki</span>
+                  </h1>
+                  <form onSubmit={handleSearch} className="max-w-xl mb-6">
+                    <div className="relative">
                       <input
-                        type="checkbox"
-                        checked={announceForm.isActive}
-                        onChange={(e) => setAnnounceForm({ ...announceForm, isActive: e.target.checked })}
-                        className="w-4 h-4 accent-wiki-accent cursor-pointer"
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="搜索攻略、角色、装备..."
+                        className="w-full bg-white border border-gray-300 px-5 py-3 text-gray-900 placeholder-gray-400 focus:border-[#e8c547] focus:outline-none rounded-lg"
                       />
-                      启用
-                    </label>
+                      <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#e8c547]">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      </button>
+                    </div>
+                  </form>
+                  <div className="flex flex-wrap gap-2">
+                    {['新手入门', '角色攻略', '装备图鉴', '建筑攻略', '阵容搭配', '赛事活动'].map((tag) => (
+                      <span key={tag} className="px-3 py-1.5 bg-gray-100 text-gray-600 text-xs rounded-full border border-gray-200 hover:border-[#e8c547] hover:text-[#e8c547] cursor-pointer transition-colors">
+                        {tag}
+                      </span>
+                    ))}
                   </div>
-                </div>
-                <div className="flex gap-3 pt-2">
-                  <button type="button" onClick={handleSaveAnnouncement} className="btn-hard text-white text-sm">保存</button>
-                  <button type="button" onClick={() => { setShowAnnounceForm(false); setEditingAnnounce(null) }} className="px-6 py-3 bg-wiki-gray text-wiki-text-muted font-bold hover:text-wiki-text text-sm cursor-pointer">取消</button>
                 </div>
               </div>
-            </div>
-          )}
+            </section>
 
-          <div className="card-hard rounded-lg p-5 md:p-6 bg-gradient-to-r from-wiki-danger/20 to-wiki-dark">
-            {announcements.length === 0 ? (
-              <p className="text-wiki-text-muted text-sm">暂无公告</p>
-            ) : (
-              <div className="space-y-2 md:space-y-3">
-                {announcements.map((ann) => (
-                  <div key={ann.id} className="flex items-start gap-3 group relative">
-                    <span className="text-wiki-accent font-bold text-sm">[{getTypeLabel(ann.type)}]</span>
-                    <div className="flex-1">
-                      <p className="text-wiki-text text-sm md:text-base font-bold">{ann.title}</p>
-                      <p className="text-wiki-text-muted text-xs md:text-sm">{ann.content}</p>
+            <section className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900">
+                  <span className="text-[#e8c547] mr-2">◆</span>
+                  玩法指南
+                </h2>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  { icon: '', title: '新手入门', desc: '从零开始', href: '/wiki/guides' },
+                  { icon: '🎯', title: '核心玩法', desc: '游戏机制', href: '/wiki' },
+                  { icon: '️', title: '进阶技巧', desc: '高手攻略', href: '/wiki/characters/characters' },
+                  { icon: '🏆', title: '赛事活动', desc: '最新活动', href: '/wiki' },
+                ].map((item) => (
+                  <Link key={item.title} href={item.href} className="group">
+                    <div className="bg-white border border-gray-200 rounded-xl p-5 hover:border-[#e8c547]/50 transition-all duration-300">
+                      <div className="text-3xl mb-3">{item.icon}</div>
+                      <h3 className="text-gray-900 font-bold text-sm mb-1">{item.title}</h3>
+                      <p className="text-gray-500 text-xs mb-3">{item.desc}</p>
+                      <span className="text-[#e8c547] text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                        查看详情 →
+                      </span>
                     </div>
-                    {isAdmin && (
-                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-                        <button onClick={() => handleEditAnnouncement(ann)} className="px-2 py-1 bg-wiki-accent/20 text-wiki-accent text-xs font-bold hover:bg-wiki-accent/30">
-                          编辑
-                        </button>
-                        <button onClick={() => handleDeleteAnnouncement(ann.id)} className="px-2 py-1 bg-wiki-danger/20 text-wiki-danger text-xs font-bold hover:bg-wiki-danger/30">
-                          删除
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                  </Link>
                 ))}
               </div>
-            )}
+            </section>
+
+            <section className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900">
+                  <span className="text-[#e8c547] mr-2">◆</span>
+                  热门攻略
+                </h2>
+                {isAdmin && (
+                  <Link href="/admin/articles/new" className="text-[#e8c547] text-xs hover:underline">
+                    + 新增文章
+                  </Link>
+                )}
+              </div>
+              <div className="space-y-3">
+                {articles.map((article, index) => (
+                  <Link key={article.id} href={`/wiki/article/${article.slug}`} className="block group">
+                    <div className="flex gap-4 bg-white border border-gray-200 rounded-xl p-4 hover:border-[#e8c547]/30 transition-all duration-300 relative">
+                      {article.coverImage ? (
+                        <div className="w-24 h-24 md:w-32 md:h-24 flex-shrink-0 rounded-lg overflow-hidden">
+                          <img src={article.coverImage} alt={article.title} className="w-full h-full object-cover" />
+                        </div>
+                      ) : (
+                        <div className="w-24 h-24 md:w-32 md:h-24 flex-shrink-0 rounded-lg bg-gray-100 flex items-center justify-center">
+                          <span className="text-2xl">{article.category.name?.charAt(0) || '📄'}</span>
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-[#e8c547] text-xs font-bold">{article.category.name}</span>
+                          {article.isPinned && (
+                            <span className="px-2 py-0.5 bg-red-50 text-red-500 text-xs rounded">置顶</span>
+                          )}
+                          {article.badges && article.badges.split(',').filter(Boolean).map((badge) => {
+                            const badgeStyle = badge === 'HOT' ? 'bg-red-50 text-red-500'
+                              : badge === 'NEW' ? 'bg-[#e8c547]/10 text-[#e8c547]'
+                              : 'bg-blue-50 text-blue-500'
+                            return (
+                              <span key={badge} className={`px-2 py-0.5 text-xs rounded ${badgeStyle}`}>
+                                {badge}
+                              </span>
+                            )
+                          })}
+                        </div>
+                        <h3 className="text-gray-900 font-bold text-sm md:text-base mb-1 line-clamp-1 group-hover:text-[#e8c547] transition-colors">
+                          {article.title}
+                        </h3>
+                        <p className="text-gray-500 text-xs md:text-sm line-clamp-2 mb-2">
+                          {article.summary}
+                        </p>
+                        <div className="flex items-center gap-4 text-xs text-gray-600">
+                          <span>{new Date(article.createdAt).toLocaleDateString('zh-TW')}</span>
+                          <span className="flex items-center gap-1">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            {article.views}
+                          </span>
+                        </div>
+                      </div>
+                      {isAdmin && (
+                        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Link href={`/admin/articles/edit/${article.id}`} className="px-2 py-1 bg-[#e8c547]/10 text-[#e8c547] text-xs rounded hover:bg-[#e8c547]/30">
+                            编辑
+                          </Link>
+                          <button onClick={(e) => { e.preventDefault(); handleDeleteArticle(article.id) }} className="px-2 py-1 bg-red-50 text-red-500 text-xs rounded hover:bg-red-500/30">
+                            删除
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+
+            <section className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900">
+                  <span className="text-red-500 mr-2">◆</span>
+                  全站公告
+                </h2>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-xl p-5">
+                {announcements.length === 0 ? (
+                  <p className="text-gray-500 text-sm">暂无公告</p>
+                ) : (
+                  <div className="space-y-3">
+                    {announcements.map((ann) => (
+                      <div key={ann.id} className="flex items-start gap-3 pb-3 border-b border-gray-200 last:border-0 last:pb-0">
+                        <span className="text-[#e8c547] text-xs font-bold flex-shrink-0 mt-0.5">[{getTypeLabel(ann.type)}]</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-gray-900 text-sm font-bold">{ann.title}</p>
+                          <p className="text-gray-500 text-xs mt-1">{ann.content}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
           </div>
-        </section>
+
+          <div className="lg:w-72 flex-shrink-0">
+            <div className="sticky top-20 space-y-6">
+              <div className="bg-white border border-gray-200 rounded-xl p-5">
+                <h3 className="text-gray-900 font-bold text-sm mb-4 flex items-center gap-2">
+                  <span className="text-[#e8c547]">◆</span>
+                  新手快速入口
+                </h3>
+                <div className="space-y-2">
+                  {quickLinks.map((link) => (
+                    <Link key={link.href} href={link.href} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-100 transition-colors group">
+                      <span className="text-lg">{link.icon}</span>
+                      <span className="text-gray-700 text-sm group-hover:text-[#e8c547] transition-colors">{link.label}</span>
+                      <svg className="w-4 h-4 text-gray-600 ml-auto group-hover:text-[#e8c547] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-white border border-gray-200 rounded-xl p-5">
+                <h3 className="text-gray-900 font-bold text-sm mb-4 flex items-center gap-2">
+                  <span className="text-[#e8c547]">◆</span>
+                  快捷功能
+                </h3>
+                <div className="space-y-2">
+                  {[
+                    { label: '新手入门', icon: '📖' },
+                    { label: '新手必看', icon: '⭐' },
+                    { label: '新手攻略', icon: '📋' },
+                    { label: '新手问答', icon: '❓' },
+                    { label: '常见问题', icon: '💡' },
+                  ].map((item) => (
+                    <div key={item.label} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer group">
+                      <span className="text-lg">{item.icon}</span>
+                      <span className="text-gray-700 text-sm group-hover:text-[#e8c547] transition-colors">{item.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-white border border-gray-200 rounded-xl p-5">
+                <h3 className="text-gray-900 font-bold text-sm mb-4 flex items-center gap-2">
+                  <span className="text-[#e8c547]">◆</span>
+                  热门分类
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {['新手攻略', '角色攻略', '装备图鉴', '建筑攻略', '阵容搭配', '赛事活动', '更新日志', '常见问题'].map((tag) => (
+                    <span key={tag} className="px-3 py-1.5 bg-gray-100/60 text-gray-500 text-xs rounded-full border border-gray-200 hover:border-[#e8c547] hover:text-[#e8c547] cursor-pointer transition-colors">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {isAdmin && (
+                <div className="bg-white border border-gray-200 rounded-xl p-5">
+                  <h3 className="text-gray-900 font-bold text-sm mb-4 flex items-center gap-2">
+                    <span className="text-[#e8c547]">◆</span>
+                    管理入口
+                  </h3>
+                  <div className="space-y-2">
+                    <Link href="/admin/dashboard" className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-100 transition-colors group">
+                      <span className="text-lg">️</span>
+                      <span className="text-gray-700 text-sm group-hover:text-[#e8c547] transition-colors">管理后台</span>
+                    </Link>
+                    <Link href="/admin/categories" className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-100 transition-colors group">
+                      <span className="text-lg">📁</span>
+                      <span className="text-gray-700 text-sm group-hover:text-[#e8c547] transition-colors">分类管理</span>
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </main>
 
       <WikiFooter />
