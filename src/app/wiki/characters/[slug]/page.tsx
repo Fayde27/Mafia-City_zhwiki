@@ -15,9 +15,10 @@ interface Character {
   avatar: string
   banner: string
   rarity: number
-  path: string
-  faction: string
-  combatType: string
+  role: string
+  weapon: string
+  coreBonus: string
+  acquisition: string
   description: string
   category: {
     name: string
@@ -32,6 +33,13 @@ interface CharacterCategory {
   icon: string
 }
 
+interface CharacterFilterOption {
+  id: string
+  type: string
+  value: string
+  sortOrder: number
+}
+
 export default function CharacterListPage() {
   const params = useParams()
   const categorySlug = params?.slug as string
@@ -39,22 +47,25 @@ export default function CharacterListPage() {
   const [characters, setCharacters] = useState<Character[]>([])
   const [category, setCategory] = useState<CharacterCategory | null>(null)
   const [loading, setLoading] = useState(true)
-  const [filterPath, setFilterPath] = useState<string>('all')
-  const [paths, setPaths] = useState<string[]>([])
+  const [filterRarity, setFilterRarity] = useState<string>('all')
+  const [filterRole, setFilterRole] = useState<string>('all')
+  const [filterWeapon, setFilterWeapon] = useState<string>('all')
+  const [filterOptions, setFilterOptions] = useState<CharacterFilterOption[]>([])
 
   useEffect(() => {
     Promise.all([
       fetch(`/api/wiki/characters?category=${categorySlug}`).then(res => res.json()),
       fetch('/api/wiki/characters/categories').then(res => res.json()),
-    ]).then(([charData, catData]) => {
+      fetch('/api/admin/character-filters').then(res => res.json()),
+    ]).then(([charData, catData, filterData]) => {
       const chars = charData?.characters || []
       setCharacters(chars)
       
       const cat = catData?.find((c: CharacterCategory) => c.slug === categorySlug)
       setCategory(cat || null)
       
-      const uniquePaths = [...new Set(chars.map((c: Character) => c.path).filter(Boolean))]
-      setPaths(uniquePaths as string[])
+      const filters = Array.isArray(filterData) ? filterData : []
+      setFilterOptions(filters)
       
       setLoading(false)
     }).catch(() => {
@@ -62,41 +73,20 @@ export default function CharacterListPage() {
     })
   }, [categorySlug])
 
-  const filteredCharacters = filterPath === 'all' 
-    ? characters 
-    : characters.filter(c => c.path === filterPath)
+  const filteredCharacters = characters.filter(c => {
+    if (filterRarity !== 'all' && c.rarity !== parseInt(filterRarity)) return false
+    if (filterRole !== 'all' && c.role !== filterRole) return false
+    if (filterWeapon !== 'all' && c.weapon !== filterWeapon) return false
+    return true
+  })
 
   const getRarityStars = (rarity: number) => {
     return '★'.repeat(rarity) + '☆'.repeat(5 - rarity)
   }
 
-  const getPathIcon = (path: string) => {
-    const icons: Record<string, string> = {
-      '毁灭': '⚔️',
-      '巡猎': '🏹',
-      '智识': '📖',
-      '同谐': '🎵',
-      '虚无': '🌑',
-      '存护': '🛡️',
-      '丰饶': '💚',
-      '记忆': '❄️',
-      '欢愉': '🎭',
-    }
-    return icons[path] || '⭐'
-  }
-
-  const getCombatTypeColor = (type: string) => {
-    const colors: Record<string, string> = {
-      '物理': 'text-gray-300',
-      '火': 'text-red-400',
-      '冰': 'text-cyan-300',
-      '雷': 'text-purple-400',
-      '风': 'text-green-400',
-      '量子': 'text-indigo-400',
-      '虚数': 'text-yellow-400',
-    }
-    return colors[type] || 'text-wiki-text'
-  }
+  const rarityOptions = filterOptions.filter(o => o.type === 'rarity')
+  const roleOptions = filterOptions.filter(o => o.type === 'role')
+  const weaponOptions = filterOptions.filter(o => o.type === 'weapon')
 
   return (
     <div className="min-h-screen bg-wiki-dark">
@@ -128,32 +118,98 @@ export default function CharacterListPage() {
           )}
         </div>
 
-        {paths.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-6">
-            <button
-              onClick={() => setFilterPath('all')}
-              className={`px-4 py-2 text-sm font-bold uppercase tracking-wider transition-colors ${
-                filterPath === 'all'
-                  ? 'bg-wiki-accent text-wiki-darker'
-                  : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
-              }`}
-            >
-              全部
-            </button>
-            {paths.map((path) => (
-              <button
-                key={path}
-                onClick={() => setFilterPath(path)}
-                className={`px-4 py-2 text-sm font-bold uppercase tracking-wider transition-colors flex items-center gap-2 ${
-                  filterPath === path
-                    ? 'bg-wiki-accent text-wiki-darker'
-                    : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
-                }`}
-              >
-                <span>{getPathIcon(path)}</span>
-                {path}
-              </button>
-            ))}
+        {(rarityOptions.length > 0 || roleOptions.length > 0 || weaponOptions.length > 0) && (
+          <div className="card-hard rounded-lg p-4 md:p-6 mb-6 space-y-4">
+            {rarityOptions.length > 0 && (
+              <div>
+                <div className="text-sm font-bold text-wiki-accent uppercase tracking-wider mb-2">稀有度</div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setFilterRarity('all')}
+                    className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
+                      filterRarity === 'all'
+                        ? 'bg-wiki-accent text-wiki-darker'
+                        : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
+                    }`}
+                  >
+                    全部
+                  </button>
+                  {rarityOptions.map((opt) => (
+                    <button
+                      key={opt.id}
+                      onClick={() => setFilterRarity(opt.value)}
+                      className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
+                        filterRarity === opt.value
+                          ? 'bg-wiki-accent text-wiki-darker'
+                          : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
+                      }`}
+                    >
+                      {getRarityStars(parseInt(opt.value))}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {roleOptions.length > 0 && (
+              <div>
+                <div className="text-sm font-bold text-wiki-accent uppercase tracking-wider mb-2">角色定位</div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setFilterRole('all')}
+                    className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
+                      filterRole === 'all'
+                        ? 'bg-wiki-accent text-wiki-darker'
+                        : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
+                    }`}
+                  >
+                    全部
+                  </button>
+                  {roleOptions.map((opt) => (
+                    <button
+                      key={opt.id}
+                      onClick={() => setFilterRole(opt.value)}
+                      className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
+                        filterRole === opt.value
+                          ? 'bg-wiki-accent text-wiki-darker'
+                          : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
+                      }`}
+                    >
+                      {opt.value}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {weaponOptions.length > 0 && (
+              <div>
+                <div className="text-sm font-bold text-wiki-accent uppercase tracking-wider mb-2">适配兵种</div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setFilterWeapon('all')}
+                    className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
+                      filterWeapon === 'all'
+                        ? 'bg-wiki-accent text-wiki-darker'
+                        : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
+                    }`}
+                  >
+                    全部
+                  </button>
+                  {weaponOptions.map((opt) => (
+                    <button
+                      key={opt.id}
+                      onClick={() => setFilterWeapon(opt.value)}
+                      className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
+                        filterWeapon === opt.value
+                          ? 'bg-wiki-accent text-wiki-darker'
+                          : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
+                      }`}
+                    >
+                      {opt.value}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -195,14 +251,8 @@ export default function CharacterListPage() {
                     </span>
                   </div>
                   <div className="absolute top-3 right-3">
-                    <span className={`text-lg ${getCombatTypeColor(character.combatType)} drop-shadow-lg`}>
-                      {character.combatType === '物理' ? '⚪' :
-                       character.combatType === '火' ? '🔥' :
-                       character.combatType === '冰' ? '❄️' :
-                       character.combatType === '雷' ? '⚡' :
-                       character.combatType === '风' ? '🌪️' :
-                       character.combatType === '量子' ? '' :
-                       character.combatType === '虚数' ? '✨' : '⭐'}
+                    <span className="text-wiki-text text-xs font-bold drop-shadow-lg">
+                      {character.role}
                     </span>
                   </div>
                 </div>
@@ -214,15 +264,18 @@ export default function CharacterListPage() {
                     <p className="text-wiki-text-muted text-sm mb-2">{character.title}</p>
                   )}
                   <div className="flex items-center gap-2 text-xs text-wiki-text-muted">
-                    {character.path && (
-                      <span className="flex items-center gap-1">
-                        {getPathIcon(character.path)} {character.path}
-                      </span>
+                    {character.role && (
+                      <span>{character.role}</span>
                     )}
-                    {character.faction && (
-                      <span>· {character.faction}</span>
+                    {character.weapon && (
+                      <span>· {character.weapon}</span>
                     )}
                   </div>
+                  {character.coreBonus && (
+                    <p className="text-wiki-text-muted text-xs mt-1">
+                      核心加成：{character.coreBonus}
+                    </p>
+                  )}
                   {character.description && (
                     <p className="text-wiki-text-muted text-xs mt-2 line-clamp-2">
                       {character.description}

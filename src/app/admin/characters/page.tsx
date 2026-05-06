@@ -103,6 +103,9 @@ export default function AdminCharactersPage() {
             <p className="text-wiki-text-muted text-sm mt-1">管理角色图鉴内容，新增、编辑或删除角色</p>
           </div>
           <div className="flex gap-3">
+            <Link href="/admin/character-filters" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
+              筛选管理
+            </Link>
             <Link href="/admin/character-categories" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
               分类管理
             </Link>

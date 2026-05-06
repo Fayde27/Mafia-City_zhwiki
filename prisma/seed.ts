@@ -120,6 +120,28 @@ async function main() {
     },
   })
 
+  // 创建筛选选项
+  await prisma.characterFilterOption.deleteMany({})
+  await prisma.characterFilterOption.createMany({
+    data: [
+      { type: 'rarity', value: '5', sortOrder: 1 },
+      { type: 'rarity', value: '4', sortOrder: 2 },
+      { type: 'rarity', value: '3', sortOrder: 3 },
+      { type: 'role', value: '毁灭', sortOrder: 1 },
+      { type: 'role', value: '巡猎', sortOrder: 2 },
+      { type: 'role', value: '智识', sortOrder: 3 },
+      { type: 'role', value: '同谐', sortOrder: 4 },
+      { type: 'role', value: '虚无', sortOrder: 5 },
+      { type: 'role', value: '存护', sortOrder: 6 },
+      { type: 'role', value: '丰饶', sortOrder: 7 },
+      { type: 'weapon', value: '剑', sortOrder: 1 },
+      { type: 'weapon', value: '弓', sortOrder: 2 },
+      { type: 'weapon', value: '法杖', sortOrder: 3 },
+      { type: 'weapon', value: '近战', sortOrder: 4 },
+      { type: 'weapon', value: '枪械', sortOrder: 5 },
+    ],
+  })
+
   // 创建示例角色
   await prisma.character.upsert({
     where: { slug: 'clara' },
