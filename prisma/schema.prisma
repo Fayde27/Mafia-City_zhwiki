@@ -107,3 +107,186 @@ model Character {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
+
+model BuildingCategory {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  description String?
+  icon        String?
+  sortOrder   Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  buildings   Building[]
+}
+
+model BuildingFilterOption {
+  id        String   @id @default(cuid())
+  type      String
+  value     String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Building {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  icon            String?
+  image           String?
+  rarity          Int      @default(3)
+  type            String?
+  function        String?
+  level           Int      @default(1)
+  maxLevel        Int      @default(10)
+  cost            String?
+  production      String?
+  description     String?
+  details         String?
+  upgradeInfo     String?
+  categoryId      String
+  category        BuildingCategory @relation(fields: [categoryId], references: [id])
+  sortOrder       Int      @default(0)
+  isPublished     Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model EquipmentCategory {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  description String?
+  icon        String?
+  sortOrder   Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  equipment   Equipment[]
+}
+
+model EquipmentFilterOption {
+  id        String   @id @default(cuid())
+  type      String
+  value     String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Equipment {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  icon            String?
+  image           String?
+  rarity          Int      @default(3)
+  type            String?
+  slot            String?
+  attack          Int      @default(0)
+  defense         Int      @default(0)
+  hp              Int      @default(0)
+  speed           Int      @default(0)
+  skill           String?
+  description     String?
+  stats           String?
+  enhancement     String?
+  acquisition     String?
+  categoryId      String
+  category        EquipmentCategory @relation(fields: [categoryId], references: [id])
+  sortOrder       Int      @default(0)
+  isPublished     Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model ItemCategory {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  description String?
+  icon        String?
+  sortOrder   Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  items       Item[]
+}
+
+model ItemFilterOption {
+  id        String   @id @default(cuid())
+  type      String
+  value     String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Item {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  icon            String?
+  image           String?
+  rarity          Int      @default(3)
+  type            String?
+  quality         String?
+  stackable       Boolean  @default(true)
+  effect          String?
+  description     String?
+  usage           String?
+  recipe          String?
+  source          String?
+  categoryId      String
+  category        ItemCategory @relation(fields: [categoryId], references: [id])
+  sortOrder       Int      @default(0)
+  isPublished     Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model TroopCategory {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  description String?
+  icon        String?
+  sortOrder   Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  troops      Troop[]
+}
+
+model TroopFilterOption {
+  id        String   @id @default(cuid())
+  type      String
+  value     String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Troop {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  icon            String?
+  image           String?
+  rarity          Int      @default(3)
+  type            String?
+  attack          Int      @default(0)
+  defense         Int      @default(0)
+  hp              Int      @default(0)
+  speed           Int      @default(0)
+  counter         String?
+  weakness        String?
+  description     String?
+  stats           String?
+  skills          String?
+  training        String?
+  categoryId      String
+  category        TroopCategory @relation(fields: [categoryId], references: [id])
+  sortOrder       Int      @default(0)
+  isPublished     Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}

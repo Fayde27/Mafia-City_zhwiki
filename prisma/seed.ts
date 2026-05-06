@@ -222,6 +222,56 @@ async function main() {
   })
 
   console.log('角色数据初始化完成！')
+
+  // 创建建筑分类
+  const buildingCat1 = await prisma.buildingCategory.upsert({
+    where: { slug: 'production' },
+    update: {},
+    create: { name: '生产建筑', slug: 'production', description: '资源生产类建筑', icon: '🏭', sortOrder: 1 },
+  })
+  const buildingCat2 = await prisma.buildingCategory.upsert({
+    where: { slug: 'military' },
+    update: {},
+    create: { name: '军事建筑', slug: 'military', description: '军事训练类建筑', icon: '⚔️', sortOrder: 2 },
+  })
+
+  // 创建装备分类
+  const equipCat1 = await prisma.equipmentCategory.upsert({
+    where: { slug: 'weapons' },
+    update: {},
+    create: { name: '武器', slug: 'weapons', description: '攻击类装备', icon: '🗡️', sortOrder: 1 },
+  })
+  const equipCat2 = await prisma.equipmentCategory.upsert({
+    where: { slug: 'armor' },
+    update: {},
+    create: { name: '防具', slug: 'armor', description: '防御类装备', icon: '🛡️', sortOrder: 2 },
+  })
+
+  // 创建道具分类
+  const itemCat1 = await prisma.itemCategory.upsert({
+    where: { slug: 'consumables' },
+    update: {},
+    create: { name: '消耗品', slug: 'consumables', description: '一次性使用道具', icon: '🧪', sortOrder: 1 },
+  })
+  const itemCat2 = await prisma.itemCategory.upsert({
+    where: { slug: 'materials' },
+    update: {},
+    create: { name: '材料', slug: 'materials', description: '合成升级材料', icon: '📦', sortOrder: 2 },
+  })
+
+  // 创建兵种分类
+  const troopCat1 = await prisma.troopCategory.upsert({
+    where: { slug: 'infantry' },
+    update: {},
+    create: { name: '步兵', slug: 'infantry', description: '近战步兵兵种', icon: '👤', sortOrder: 1 },
+  })
+  const troopCat2 = await prisma.troopCategory.upsert({
+    where: { slug: 'cavalry' },
+    update: {},
+    create: { name: '骑兵', slug: 'cavalry', description: '快速机动兵种', icon: '🐴', sortOrder: 2 },
+  })
+
+  console.log('图鉴分类初始化完成！')
 }
 
 main()
