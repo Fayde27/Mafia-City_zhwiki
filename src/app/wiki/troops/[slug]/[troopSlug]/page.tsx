@@ -67,9 +67,9 @@ export default function TroopDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-wiki-bg">
         <WikiHeader />
-        <div className="text-center py-20 text-gray-900-muted">加载中...</div>
+        <div className="text-center py-20 text-wiki-text-muted">加载中...</div>
         <WikiFooter />
       </div>
     )
@@ -77,10 +77,10 @@ export default function TroopDetailPage() {
 
   if (!troop) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-wiki-bg">
         <WikiHeader />
         <main className="container mx-auto px-4 py-12">
-          <div className="card-hard rounded-lg p-12 text-center text-gray-900-muted">
+          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-12 text-center text-wiki-text-muted">
             兵种不存在
           </div>
         </main>
@@ -90,22 +90,22 @@ export default function TroopDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-wiki-bg">
       <WikiHeader />
       
       <main className="container mx-auto px-4 py-6 md:py-8">
-        <div className="text-sm text-gray-900-muted mb-4 md:mb-6">
-          <Link href="/" className="hover:text-[#e8c547]">首页</Link>
+        <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
+          <Link href="/" className="hover:text-wiki-accent">首页</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki" className="hover:text-[#e8c547]">图鉴</Link>
+          <Link href="/wiki" className="hover:text-wiki-accent">图鉴</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki/troops" className="hover:text-[#e8c547]">兵种图鉴</Link>
+          <Link href="/wiki/troops" className="hover:text-wiki-accent">兵种图鉴</Link>
           <span className="mx-2">/</span>
-          <Link href={`/wiki/troops/${troop.category.slug}`} className="hover:text-[#e8c547]">
+          <Link href={`/wiki/troops/${troop.category.slug}`} className="hover:text-wiki-accent">
             {troop.category.name}
           </Link>
           <span className="mx-2">/</span>
-          <span className="text-gray-900">{troop.name}</span>
+          <span className="text-wiki-text">{troop.name}</span>
         </div>
 
         {troop.image && (
@@ -122,11 +122,11 @@ export default function TroopDetailPage() {
                   {getRarityStars(troop.rarity)}
                 </span>
               </div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-gray-900 heading-hard mb-2">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-wiki-text heading-hard mb-2">
                 {troop.name}
               </h1>
               {troop.type && (
-                <p className="text-gray-900-muted text-lg md:text-xl">类型：{troop.type}</p>
+                <p className="text-wiki-text-muted text-lg md:text-xl">类型：{troop.type}</p>
               )}
             </div>
             {isAdmin && (
@@ -146,14 +146,14 @@ export default function TroopDetailPage() {
           <div className="lg:col-span-2">
             <div className="flex items-center gap-4 mb-6">
               {troop.icon && (
-                <div className="w-24 h-24 md:w-32 md:h-32 rounded-lg overflow-hidden border-2 border-wiki-accent flex-shrink-0 bg-gray-100 flex items-center justify-center">
+                <div className="w-24 h-24 md:w-32 md:h-32 rounded-lg overflow-hidden border-2 border-wiki-accent flex-shrink-0 bg-wiki-gray flex items-center justify-center">
                   <span className="text-5xl">{troop.icon}</span>
                 </div>
               )}
               <div>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900">{troop.name}</h2>
+                <h2 className="text-2xl md:text-3xl font-bold text-wiki-text">{troop.name}</h2>
                 {troop.type && (
-                  <p className="text-gray-900-muted mt-1">类型：{troop.type}</p>
+                  <p className="text-wiki-text-muted mt-1">类型：{troop.type}</p>
                 )}
               </div>
             </div>
@@ -166,7 +166,7 @@ export default function TroopDetailPage() {
                   className={`px-4 py-2 text-sm font-bold uppercase tracking-wider whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'bg-wiki-accent text-wiki-darker'
-                      : 'bg-gray-100 text-gray-900-muted hover:text-gray-900'
+                      : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
                   }`}
                 >
                   {tab.label}
@@ -174,7 +174,7 @@ export default function TroopDetailPage() {
               ))}
             </div>
 
-            <div className="card-hard rounded-lg p-6 md:p-8">
+            <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6 md:p-8">
               {activeTab === 'description' && (
                 <div>
                   {troop.description && (
@@ -200,55 +200,55 @@ export default function TroopDetailPage() {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="card-hard rounded-lg p-6 sticky top-4">
-              <h3 className="text-lg font-bold text-[#e8c547] mb-4">兵种信息</h3>
+            <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6 sticky top-4">
+              <h3 className="text-lg font-bold text-wiki-accent mb-4">兵种信息</h3>
               <div className="space-y-3 text-sm">
                 {troop.rarity && (
                   <div className="flex justify-between">
-                    <span className="text-gray-900-muted">稀有度</span>
+                    <span className="text-wiki-text-muted">稀有度</span>
                     <span className="text-yellow-400 font-bold">{getRarityStars(troop.rarity)}</span>
                   </div>
                 )}
                 {troop.type && (
                   <div className="flex justify-between">
-                    <span className="text-gray-900-muted">类型</span>
-                    <span className="text-gray-900 font-bold">{troop.type}</span>
+                    <span className="text-wiki-text-muted">类型</span>
+                    <span className="text-wiki-text font-bold">{troop.type}</span>
                   </div>
                 )}
                 {troop.attack > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-gray-900-muted">攻击力</span>
-                    <span className="text-gray-900 font-bold">{troop.attack}</span>
+                    <span className="text-wiki-text-muted">攻击力</span>
+                    <span className="text-wiki-text font-bold">{troop.attack}</span>
                   </div>
                 )}
                 {troop.defense > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-gray-900-muted">防御力</span>
-                    <span className="text-gray-900 font-bold">{troop.defense}</span>
+                    <span className="text-wiki-text-muted">防御力</span>
+                    <span className="text-wiki-text font-bold">{troop.defense}</span>
                   </div>
                 )}
                 {troop.hp > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-gray-900-muted">生命值</span>
-                    <span className="text-gray-900 font-bold">{troop.hp}</span>
+                    <span className="text-wiki-text-muted">生命值</span>
+                    <span className="text-wiki-text font-bold">{troop.hp}</span>
                   </div>
                 )}
                 {troop.speed > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-gray-900-muted">速度</span>
-                    <span className="text-gray-900 font-bold">{troop.speed}</span>
+                    <span className="text-wiki-text-muted">速度</span>
+                    <span className="text-wiki-text font-bold">{troop.speed}</span>
                   </div>
                 )}
                 {troop.counter && (
                   <div className="flex justify-between">
-                    <span className="text-gray-900-muted">克制</span>
-                    <span className="text-gray-900">{troop.counter}</span>
+                    <span className="text-wiki-text-muted">克制</span>
+                    <span className="text-wiki-text">{troop.counter}</span>
                   </div>
                 )}
                 {troop.weakness && (
                   <div className="flex justify-between">
-                    <span className="text-gray-900-muted">被克制</span>
-                    <span className="text-gray-900">{troop.weakness}</span>
+                    <span className="text-wiki-text-muted">被克制</span>
+                    <span className="text-wiki-text">{troop.weakness}</span>
                   </div>
                 )}
               </div>

@@ -46,14 +46,14 @@ export default function WikiHeader() {
 
   return (
     <header className="sticky top-0 z-50">
-      <div className="bg-white border-b border-gray-200 shadow-sm">
+      <div className="bg-wiki-dark border-b border-wiki-border/20">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-14">
             <Link href="/" className="flex items-center gap-3 flex-shrink-0">
-              <div className="text-xl font-bold text-[#e8c547]">
+              <div className="text-xl font-bold text-wiki-accent">
                 黑道風雲
               </div>
-              <div className="hidden sm:block text-gray-500 text-xs">
+              <div className="hidden sm:block text-wiki-text-muted text-xs">
                 Wiki 攻略站
               </div>
             </Link>
@@ -65,8 +65,8 @@ export default function WikiHeader() {
                   href={item.href}
                   className={`px-3 py-1.5 text-sm transition-colors rounded ${
                     pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href))
-                      ? 'text-[#e8c547] bg-[#e8c547]/10'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'text-wiki-accent bg-wiki-accent/10'
+                      : 'text-wiki-text-muted hover:text-white'
                   }`}
                 >
                   {item.label}
@@ -81,9 +81,9 @@ export default function WikiHeader() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="搜索攻略..."
-                  className="bg-gray-100 border border-gray-200 px-3 py-1.5 text-sm text-gray-900 w-48 focus:border-[#e8c547] focus:outline-none rounded"
+                  className="bg-wiki-darker border border-wiki-border/30 px-3 py-1.5 text-sm text-white w-48 focus:border-wiki-accent focus:outline-none rounded"
                 />
-                <button type="submit" className="absolute right-2 text-gray-500 hover:text-[#e8c547]">
+                <button type="submit" className="absolute right-2 text-wiki-text-muted hover:text-wiki-accent">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
@@ -93,14 +93,14 @@ export default function WikiHeader() {
               {isAdmin ? (
                 <button
                   onClick={handleLogout}
-                  className="text-red-500 text-xs hover:text-red-600"
+                  className="text-wiki-danger text-xs hover:text-wiki-danger"
                 >
                   退出
                 </button>
               ) : (
                 <Link
                   href="/admin/login"
-                  className="text-gray-500 text-xs hover:text-[#e8c547]"
+                  className="text-wiki-text-muted text-xs hover:text-wiki-accent"
                 >
                   管理
                 </Link>
@@ -108,7 +108,7 @@ export default function WikiHeader() {
 
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden text-[#e8c547] text-xl"
+                className="md:hidden text-wiki-accent text-xl"
               >
                 ☰
               </button>
@@ -118,7 +118,7 @@ export default function WikiHeader() {
       </div>
 
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-b border-gray-200">
+        <div className="md:hidden bg-wiki-dark border-b border-wiki-border/20">
           <div className="container mx-auto px-4 py-3 space-y-2">
             {navItems.map((item) => (
               <Link
@@ -127,8 +127,8 @@ export default function WikiHeader() {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`block px-3 py-2 text-sm rounded ${
                   pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href))
-                    ? 'text-[#e8c547] bg-[#e8c547]/10'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'text-wiki-accent bg-wiki-accent/10'
+                    : 'text-wiki-text-muted hover:text-white'
                 }`}
               >
                 {item.label}
@@ -140,7 +140,7 @@ export default function WikiHeader() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="搜索攻略..."
-                className="w-full bg-gray-100 border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:border-[#e8c547] focus:outline-none rounded"
+                className="w-full bg-wiki-darker border border-wiki-border/30 px-3 py-2 text-sm text-white focus:border-wiki-accent focus:outline-none rounded"
               />
             </form>
           </div>

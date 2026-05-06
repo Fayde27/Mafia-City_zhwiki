@@ -86,45 +86,45 @@ export default function WikiIndexPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-wiki-bg">
       <WikiHeader />
       
       <main className="container mx-auto px-4 py-6 md:py-8">
-        <div className="text-sm text-gray-900-muted mb-4 md:mb-6">
-          <Link href="/" className="hover:text-[#e8c547]">首页</Link>
+        <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
+          <Link href="/" className="hover:text-wiki-accent">首页</Link>
           <span className="mx-2">/</span>
-          <span className="text-gray-900">图鉴</span>
+          <span className="text-wiki-text">图鉴</span>
         </div>
 
         <div className="mb-6 md:mb-8">
-          <h1 className="text-3xl md:text-4xl font-heading font-bold text-[#e8c547] heading-hard">
+          <h1 className="text-3xl md:text-4xl font-heading font-bold text-wiki-accent heading-hard">
             图鉴
           </h1>
-          <p className="text-gray-900-muted text-sm mt-2">选择图鉴类型，浏览游戏内容</p>
+          <p className="text-wiki-text-muted text-sm mt-2">选择图鉴类型，浏览游戏内容</p>
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-gray-900-muted">加载中...</div>
+          <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
             {wikiCategories.map((category) => (
               <Link
                 key={category.id}
                 href={category.route}
-                className="card-hard rounded-lg p-6 md:p-8 hover:border-wiki-accent transition-all group block"
+                className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6 md:p-8 hover:border-wiki-accent transition-all group block"
               >
                 <div className="text-4xl md:text-5xl mb-4">{category.icon}</div>
-                <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2 uppercase tracking-wider group-hover:text-[#e8c547] transition-colors">
+                <h3 className="text-xl md:text-2xl font-bold text-wiki-text mb-2 uppercase tracking-wider group-hover:text-wiki-accent transition-colors">
                   {category.name}
                 </h3>
-                <p className="text-gray-900-muted text-sm mb-4 line-clamp-2">
+                <p className="text-wiki-text-muted text-sm mb-4 line-clamp-2">
                   {category.description}
                 </p>
                 <div className="flex items-center justify-between">
-                  <span className="text-[#e8c547] text-sm font-bold">
+                  <span className="text-wiki-accent text-sm font-bold">
                     {category.count > 0 ? `${category.count} ${category.countLabel}` : '即将上线'}
                   </span>
-                  <span className="text-[#e8c547] text-lg group-hover:translate-x-1 transition-transform">→</span>
+                  <span className="text-wiki-accent text-lg group-hover:translate-x-1 transition-transform">→</span>
                 </div>
               </Link>
             ))}

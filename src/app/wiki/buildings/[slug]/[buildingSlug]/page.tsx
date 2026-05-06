@@ -64,9 +64,9 @@ export default function BuildingDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-wiki-bg">
         <WikiHeader />
-        <div className="text-center py-20 text-gray-900-muted">加载中...</div>
+        <div className="text-center py-20 text-wiki-text-muted">加载中...</div>
         <WikiFooter />
       </div>
     )
@@ -74,10 +74,10 @@ export default function BuildingDetailPage() {
 
   if (!building) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-wiki-bg">
         <WikiHeader />
         <main className="container mx-auto px-4 py-12">
-          <div className="card-hard rounded-lg p-12 text-center text-gray-900-muted">
+          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-12 text-center text-wiki-text-muted">
             建筑不存在
           </div>
         </main>
@@ -87,22 +87,22 @@ export default function BuildingDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-wiki-bg">
       <WikiHeader />
       
       <main className="container mx-auto px-4 py-6 md:py-8">
-        <div className="text-sm text-gray-900-muted mb-4 md:mb-6">
-          <Link href="/" className="hover:text-[#e8c547]">首页</Link>
+        <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
+          <Link href="/" className="hover:text-wiki-accent">首页</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki" className="hover:text-[#e8c547]">图鉴</Link>
+          <Link href="/wiki" className="hover:text-wiki-accent">图鉴</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki/buildings" className="hover:text-[#e8c547]">建筑图鉴</Link>
+          <Link href="/wiki/buildings" className="hover:text-wiki-accent">建筑图鉴</Link>
           <span className="mx-2">/</span>
-          <Link href={`/wiki/buildings/${building.category.slug}`} className="hover:text-[#e8c547]">
+          <Link href={`/wiki/buildings/${building.category.slug}`} className="hover:text-wiki-accent">
             {building.category.name}
           </Link>
           <span className="mx-2">/</span>
-          <span className="text-gray-900">{building.name}</span>
+          <span className="text-wiki-text">{building.name}</span>
         </div>
 
         {building.image && (
@@ -119,11 +119,11 @@ export default function BuildingDetailPage() {
                   {getRarityStars(building.rarity)}
                 </span>
               </div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-gray-900 heading-hard mb-2">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-wiki-text heading-hard mb-2">
                 {building.name}
               </h1>
               {building.function && (
-                <p className="text-gray-900-muted text-lg md:text-xl">{building.function}</p>
+                <p className="text-wiki-text-muted text-lg md:text-xl">{building.function}</p>
               )}
             </div>
             {isAdmin && (
@@ -143,14 +143,14 @@ export default function BuildingDetailPage() {
           <div className="lg:col-span-2">
             <div className="flex items-center gap-4 mb-6">
               {building.icon && (
-                <div className="w-24 h-24 md:w-32 md:h-32 rounded-lg overflow-hidden border-2 border-wiki-accent flex-shrink-0 bg-gray-100 flex items-center justify-center">
+                <div className="w-24 h-24 md:w-32 md:h-32 rounded-lg overflow-hidden border-2 border-wiki-accent flex-shrink-0 bg-wiki-gray flex items-center justify-center">
                   <span className="text-5xl">{building.icon}</span>
                 </div>
               )}
               <div>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900">{building.name}</h2>
+                <h2 className="text-2xl md:text-3xl font-bold text-wiki-text">{building.name}</h2>
                 {building.type && (
-                  <p className="text-gray-900-muted mt-1">类型：{building.type}</p>
+                  <p className="text-wiki-text-muted mt-1">类型：{building.type}</p>
                 )}
               </div>
             </div>
@@ -163,7 +163,7 @@ export default function BuildingDetailPage() {
                   className={`px-4 py-2 text-sm font-bold uppercase tracking-wider whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'bg-wiki-accent text-wiki-darker'
-                      : 'bg-gray-100 text-gray-900-muted hover:text-gray-900'
+                      : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
                   }`}
                 >
                   {tab.label}
@@ -171,7 +171,7 @@ export default function BuildingDetailPage() {
               ))}
             </div>
 
-            <div className="card-hard rounded-lg p-6 md:p-8">
+            <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6 md:p-8">
               {activeTab === 'details' && (
                 <div>
                   {building.description && (
@@ -190,37 +190,37 @@ export default function BuildingDetailPage() {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="card-hard rounded-lg p-6 sticky top-4">
-              <h3 className="text-lg font-bold text-[#e8c547] mb-4">建筑信息</h3>
+            <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6 sticky top-4">
+              <h3 className="text-lg font-bold text-wiki-accent mb-4">建筑信息</h3>
               <div className="space-y-3 text-sm">
                 {building.rarity && (
                   <div className="flex justify-between">
-                    <span className="text-gray-900-muted">稀有度</span>
+                    <span className="text-wiki-text-muted">稀有度</span>
                     <span className="text-yellow-400 font-bold">{getRarityStars(building.rarity)}</span>
                   </div>
                 )}
                 {building.type && (
                   <div className="flex justify-between">
-                    <span className="text-gray-900-muted">类型</span>
-                    <span className="text-gray-900 font-bold">{building.type}</span>
+                    <span className="text-wiki-text-muted">类型</span>
+                    <span className="text-wiki-text font-bold">{building.type}</span>
                   </div>
                 )}
                 {building.level && (
                   <div className="flex justify-between">
-                    <span className="text-gray-900-muted">等级</span>
-                    <span className="text-gray-900">{building.level}/{building.maxLevel}</span>
+                    <span className="text-wiki-text-muted">等级</span>
+                    <span className="text-wiki-text">{building.level}/{building.maxLevel}</span>
                   </div>
                 )}
                 {building.cost && (
                   <div className="flex justify-between">
-                    <span className="text-gray-900-muted">建造成本</span>
-                    <span className="text-gray-900">{building.cost}</span>
+                    <span className="text-wiki-text-muted">建造成本</span>
+                    <span className="text-wiki-text">{building.cost}</span>
                   </div>
                 )}
                 {building.production && (
                   <div className="flex justify-between">
-                    <span className="text-gray-900-muted">产出</span>
-                    <span className="text-gray-900">{building.production}</span>
+                    <span className="text-wiki-text-muted">产出</span>
+                    <span className="text-wiki-text">{building.production}</span>
                   </div>
                 )}
               </div>

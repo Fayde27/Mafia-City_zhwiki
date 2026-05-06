@@ -66,9 +66,9 @@ export default function EquipmentDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-wiki-bg">
         <WikiHeader />
-        <div className="text-center py-20 text-gray-900-muted">加载中...</div>
+        <div className="text-center py-20 text-wiki-text-muted">加载中...</div>
         <WikiFooter />
       </div>
     )
@@ -76,10 +76,10 @@ export default function EquipmentDetailPage() {
 
   if (!equipment) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-wiki-bg">
         <WikiHeader />
         <main className="container mx-auto px-4 py-12">
-          <div className="card-hard rounded-lg p-12 text-center text-gray-900-muted">
+          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-12 text-center text-wiki-text-muted">
             装备不存在
           </div>
         </main>
@@ -89,22 +89,22 @@ export default function EquipmentDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-wiki-bg">
       <WikiHeader />
       
       <main className="container mx-auto px-4 py-6 md:py-8">
-        <div className="text-sm text-gray-900-muted mb-4 md:mb-6">
-          <Link href="/" className="hover:text-[#e8c547]">首页</Link>
+        <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
+          <Link href="/" className="hover:text-wiki-accent">首页</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki" className="hover:text-[#e8c547]">图鉴</Link>
+          <Link href="/wiki" className="hover:text-wiki-accent">图鉴</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki/equipment" className="hover:text-[#e8c547]">装备图鉴</Link>
+          <Link href="/wiki/equipment" className="hover:text-wiki-accent">装备图鉴</Link>
           <span className="mx-2">/</span>
-          <Link href={`/wiki/equipment/${equipment.category.slug}`} className="hover:text-[#e8c547]">
+          <Link href={`/wiki/equipment/${equipment.category.slug}`} className="hover:text-wiki-accent">
             {equipment.category.name}
           </Link>
           <span className="mx-2">/</span>
-          <span className="text-gray-900">{equipment.name}</span>
+          <span className="text-wiki-text">{equipment.name}</span>
         </div>
 
         {equipment.image && (
@@ -121,11 +121,11 @@ export default function EquipmentDetailPage() {
                   {getRarityStars(equipment.rarity)}
                 </span>
               </div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-gray-900 heading-hard mb-2">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-wiki-text heading-hard mb-2">
                 {equipment.name}
               </h1>
               {equipment.skill && (
-                <p className="text-gray-900-muted text-lg md:text-xl">{equipment.skill}</p>
+                <p className="text-wiki-text-muted text-lg md:text-xl">{equipment.skill}</p>
               )}
             </div>
             {isAdmin && (
@@ -145,14 +145,14 @@ export default function EquipmentDetailPage() {
           <div className="lg:col-span-2">
             <div className="flex items-center gap-4 mb-6">
               {equipment.icon && (
-                <div className="w-24 h-24 md:w-32 md:h-32 rounded-lg overflow-hidden border-2 border-wiki-accent flex-shrink-0 bg-gray-100 flex items-center justify-center">
+                <div className="w-24 h-24 md:w-32 md:h-32 rounded-lg overflow-hidden border-2 border-wiki-accent flex-shrink-0 bg-wiki-gray flex items-center justify-center">
                   <span className="text-5xl">{equipment.icon}</span>
                 </div>
               )}
               <div>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900">{equipment.name}</h2>
+                <h2 className="text-2xl md:text-3xl font-bold text-wiki-text">{equipment.name}</h2>
                 {equipment.type && (
-                  <p className="text-gray-900-muted mt-1">类型：{equipment.type}</p>
+                  <p className="text-wiki-text-muted mt-1">类型：{equipment.type}</p>
                 )}
               </div>
             </div>
@@ -165,7 +165,7 @@ export default function EquipmentDetailPage() {
                   className={`px-4 py-2 text-sm font-bold uppercase tracking-wider whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'bg-wiki-accent text-wiki-darker'
-                      : 'bg-gray-100 text-gray-900-muted hover:text-gray-900'
+                      : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
                   }`}
                 >
                   {tab.label}
@@ -173,7 +173,7 @@ export default function EquipmentDetailPage() {
               ))}
             </div>
 
-            <div className="card-hard rounded-lg p-6 md:p-8">
+            <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6 md:p-8">
               {activeTab === 'stats' && (
                 <div>
                   {equipment.description && (
@@ -192,55 +192,55 @@ export default function EquipmentDetailPage() {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="card-hard rounded-lg p-6 sticky top-4">
-              <h3 className="text-lg font-bold text-[#e8c547] mb-4">装备信息</h3>
+            <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6 sticky top-4">
+              <h3 className="text-lg font-bold text-wiki-accent mb-4">装备信息</h3>
               <div className="space-y-3 text-sm">
                 {equipment.rarity && (
                   <div className="flex justify-between">
-                    <span className="text-gray-900-muted">稀有度</span>
+                    <span className="text-wiki-text-muted">稀有度</span>
                     <span className="text-yellow-400 font-bold">{getRarityStars(equipment.rarity)}</span>
                   </div>
                 )}
                 {equipment.type && (
                   <div className="flex justify-between">
-                    <span className="text-gray-900-muted">类型</span>
-                    <span className="text-gray-900 font-bold">{equipment.type}</span>
+                    <span className="text-wiki-text-muted">类型</span>
+                    <span className="text-wiki-text font-bold">{equipment.type}</span>
                   </div>
                 )}
                 {equipment.slot && (
                   <div className="flex justify-between">
-                    <span className="text-gray-900-muted">部位</span>
-                    <span className="text-gray-900">{equipment.slot}</span>
+                    <span className="text-wiki-text-muted">部位</span>
+                    <span className="text-wiki-text">{equipment.slot}</span>
                   </div>
                 )}
                 {equipment.attack > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-gray-900-muted">攻击力</span>
-                    <span className="text-gray-900 font-bold">{equipment.attack}</span>
+                    <span className="text-wiki-text-muted">攻击力</span>
+                    <span className="text-wiki-text font-bold">{equipment.attack}</span>
                   </div>
                 )}
                 {equipment.defense > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-gray-900-muted">防御力</span>
-                    <span className="text-gray-900 font-bold">{equipment.defense}</span>
+                    <span className="text-wiki-text-muted">防御力</span>
+                    <span className="text-wiki-text font-bold">{equipment.defense}</span>
                   </div>
                 )}
                 {equipment.hp > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-gray-900-muted">生命值</span>
-                    <span className="text-gray-900 font-bold">{equipment.hp}</span>
+                    <span className="text-wiki-text-muted">生命值</span>
+                    <span className="text-wiki-text font-bold">{equipment.hp}</span>
                   </div>
                 )}
                 {equipment.speed > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-gray-900-muted">速度</span>
-                    <span className="text-gray-900 font-bold">{equipment.speed}</span>
+                    <span className="text-wiki-text-muted">速度</span>
+                    <span className="text-wiki-text font-bold">{equipment.speed}</span>
                   </div>
                 )}
                 {equipment.acquisition && (
                   <div className="flex justify-between">
-                    <span className="text-gray-900-muted">获取方式</span>
-                    <span className="text-gray-900">{equipment.acquisition}</span>
+                    <span className="text-wiki-text-muted">获取方式</span>
+                    <span className="text-wiki-text">{equipment.acquisition}</span>
                   </div>
                 )}
               </div>

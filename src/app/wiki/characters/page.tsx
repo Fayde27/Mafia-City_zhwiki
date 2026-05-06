@@ -35,22 +35,22 @@ export default function CharactersPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-wiki-bg">
       <WikiHeader />
       
       <main className="container mx-auto px-4 py-6 md:py-8">
-        <div className="text-sm text-gray-900-muted mb-4 md:mb-6">
-          <Link href="/" className="hover:text-[#e8c547]">首页</Link>
+        <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
+          <Link href="/" className="hover:text-wiki-accent">首页</Link>
           <span className="mx-2">/</span>
-          <span className="text-gray-900">角色图鉴</span>
+          <span className="text-wiki-text">角色图鉴</span>
         </div>
 
         <div className="flex items-center justify-between mb-6 md:mb-8">
           <div>
-            <h1 className="text-3xl md:text-4xl font-heading font-bold text-[#e8c547] heading-hard">
+            <h1 className="text-3xl md:text-4xl font-heading font-bold text-wiki-accent heading-hard">
               角色图鉴
             </h1>
-            <p className="text-gray-900-muted text-sm mt-2">选择角色分类，查看详细信息</p>
+            <p className="text-wiki-text-muted text-sm mt-2">选择角色分类，查看详细信息</p>
           </div>
           {isAdmin && (
             <Link
@@ -63,9 +63,9 @@ export default function CharactersPage() {
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-gray-900-muted">加载中...</div>
+          <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
         ) : categories.length === 0 ? (
-          <div className="card-hard rounded-lg p-8 md:p-12 text-center text-gray-900-muted">
+          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-8 md:p-12 text-center text-wiki-text-muted">
             暂无角色分类
           </div>
         ) : (
@@ -74,20 +74,20 @@ export default function CharactersPage() {
               <Link
                 key={category.id}
                 href={`/wiki/characters/${category.slug}`}
-                className="card-hard rounded-lg p-6 md:p-8 hover:border-wiki-accent transition-all group block"
+                className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6 md:p-8 hover:border-wiki-accent transition-all group block"
               >
                 <div className="text-4xl md:text-5xl mb-4">{category.icon}</div>
-                <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2 uppercase tracking-wider group-hover:text-[#e8c547] transition-colors">
+                <h3 className="text-xl md:text-2xl font-bold text-wiki-text mb-2 uppercase tracking-wider group-hover:text-wiki-accent transition-colors">
                   {category.name}
                 </h3>
-                <p className="text-gray-900-muted text-sm mb-4 line-clamp-2">
+                <p className="text-wiki-text-muted text-sm mb-4 line-clamp-2">
                   {category.description}
                 </p>
                 <div className="flex items-center justify-between">
-                  <span className="text-[#e8c547] text-sm font-bold">
+                  <span className="text-wiki-accent text-sm font-bold">
                     {category._count.characters} 名角色
                   </span>
-                  <span className="text-[#e8c547] text-lg group-hover:translate-x-1 transition-transform">→</span>
+                  <span className="text-wiki-accent text-lg group-hover:translate-x-1 transition-transform">→</span>
                 </div>
               </Link>
             ))}

@@ -153,16 +153,16 @@ export default function AdminCategoriesPage() {
   if (!isAdmin) return null
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-wiki-bg">
       <WikiHeader />
 
       <main className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-heading font-bold text-[#e8c547] heading-hard">
+            <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">
               分类管理
             </h1>
-            <p className="text-gray-900-muted text-sm mt-1">管理Wiki分类，新增、编辑或删除分类</p>
+            <p className="text-wiki-text-muted text-sm mt-1">管理Wiki分类，新增、编辑或删除分类</p>
           </div>
           <button
             onClick={() => {
@@ -170,43 +170,43 @@ export default function AdminCategoriesPage() {
               setFormData({ name: '', slug: '', description: '', icon: '', sortOrder: 0 })
               setShowModal(true)
             }}
-            className="btn-hard text-gray-900 text-sm"
+            className="btn-hard text-wiki-text text-sm"
           >
             + 新增分类
           </button>
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-gray-900-muted">加载中...</div>
+          <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
         ) : (
-          <div className="card-hard rounded-lg overflow-hidden">
+          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg overflow-hidden">
             <table className="w-full">
-              <thead className="bg-gray-100">
+              <thead className="bg-wiki-gray">
                 <tr>
-                  <th className="text-left px-6 py-4 text-[#e8c547] font-bold uppercase tracking-wider text-sm">图标</th>
-                  <th className="text-left px-6 py-4 text-[#e8c547] font-bold uppercase tracking-wider text-sm">名称</th>
-                  <th className="text-left px-6 py-4 text-[#e8c547] font-bold uppercase tracking-wider text-sm">别名</th>
-                  <th className="text-left px-6 py-4 text-[#e8c547] font-bold uppercase tracking-wider text-sm">描述</th>
-                  <th className="text-left px-6 py-4 text-[#e8c547] font-bold uppercase tracking-wider text-sm">文章数</th>
-                  <th className="text-left px-6 py-4 text-[#e8c547] font-bold uppercase tracking-wider text-sm">排序</th>
-                  <th className="text-left px-6 py-4 text-[#e8c547] font-bold uppercase tracking-wider text-sm">操作</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">图标</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">名称</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">别名</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">描述</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">文章数</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">排序</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">操作</th>
                 </tr>
               </thead>
               <tbody>
                 {categories.map((category) => (
-                  <tr key={category.id} className="border-t border-gray-200 hover:bg-gray-100/50">
+                  <tr key={category.id} className="border-t border-wiki-border hover:bg-wiki-gray/50">
                     <td className="px-6 py-4 text-2xl">{category.icon}</td>
-                    <td className="px-6 py-4 text-gray-900 font-bold">{category.name}</td>
-                    <td className="px-6 py-4 text-gray-900-muted font-mono text-sm">{category.slug}</td>
-                    <td className="px-6 py-4 text-gray-900-muted text-sm max-w-xs truncate">{category.description}</td>
-                    <td className="px-6 py-4 text-[#e8c547] font-bold">{category._count.articles}</td>
-                    <td className="px-6 py-4 text-gray-900-muted">{category.sortOrder}</td>
+                    <td className="px-6 py-4 text-wiki-text font-bold">{category.name}</td>
+                    <td className="px-6 py-4 text-wiki-text-muted font-mono text-sm">{category.slug}</td>
+                    <td className="px-6 py-4 text-wiki-text-muted text-sm max-w-xs truncate">{category.description}</td>
+                    <td className="px-6 py-4 text-wiki-accent font-bold">{category._count.articles}</td>
+                    <td className="px-6 py-4 text-wiki-text-muted">{category.sortOrder}</td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2 items-center">
                         <button
                           onClick={() => handleMoveUp(category, categories.indexOf(category))}
                           disabled={categories.indexOf(category) === 0}
-                          className="px-2 py-1 bg-wiki-accent/20 text-[#e8c547] text-sm font-bold hover:bg-wiki-accent/30 disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="px-2 py-1 bg-wiki-accent/20 text-wiki-accent text-sm font-bold hover:bg-wiki-accent/30 disabled:opacity-30 disabled:cursor-not-allowed"
                           title="上移"
                         >
                           ↑
@@ -214,14 +214,14 @@ export default function AdminCategoriesPage() {
                         <button
                           onClick={() => handleMoveDown(category, categories.indexOf(category))}
                           disabled={categories.indexOf(category) === categories.length - 1}
-                          className="px-2 py-1 bg-wiki-accent/20 text-[#e8c547] text-sm font-bold hover:bg-wiki-accent/30 disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="px-2 py-1 bg-wiki-accent/20 text-wiki-accent text-sm font-bold hover:bg-wiki-accent/30 disabled:opacity-30 disabled:cursor-not-allowed"
                           title="下移"
                         >
                           ↓
                         </button>
                         <button
                           onClick={() => handleEdit(category)}
-                          className="px-3 py-1 bg-wiki-accent/20 text-[#e8c547] text-sm font-bold hover:bg-wiki-accent/30"
+                          className="px-3 py-1 bg-wiki-accent/20 text-wiki-accent text-sm font-bold hover:bg-wiki-accent/30"
                         >
                           编辑
                         </button>
@@ -243,64 +243,64 @@ export default function AdminCategoriesPage() {
 
       {showModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-          <div className="card-hard rounded-lg p-8 w-full max-w-md mx-4">
-            <h2 className="text-2xl font-heading font-bold text-[#e8c547] heading-hard mb-6">
+          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-8 w-full max-w-md mx-4">
+            <h2 className="text-2xl font-heading font-bold text-wiki-accent heading-hard mb-6">
               {editingCategory ? '编辑分类' : '新增分类'}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-gray-900 text-sm font-bold uppercase tracking-wider mb-2">名称 *</label>
+                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">名称 *</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none"
+                  className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
                   required
                 />
               </div>
               <div>
-                <label className="block text-gray-900 text-sm font-bold uppercase tracking-wider mb-2">别名 (URL Slug) *</label>
+                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">别名 (URL Slug) *</label>
                 <input
                   type="text"
                   value={formData.slug}
                   onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                  className="w-full bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none"
+                  className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
                   required
                 />
               </div>
               <div>
-                <label className="block text-gray-900 text-sm font-bold uppercase tracking-wider mb-2">图标 (Emoji)</label>
+                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">图标 (Emoji)</label>
                 <input
                   type="text"
                   value={formData.icon}
                   onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                  className="w-full bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none"
+                  className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
                   placeholder="例如: "
                 />
               </div>
               <div>
-                <label className="block text-gray-900 text-sm font-bold uppercase tracking-wider mb-2">描述</label>
+                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">描述</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none h-20"
+                  className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none h-20"
                 />
               </div>
               <div>
-                <label className="block text-gray-900 text-sm font-bold uppercase tracking-wider mb-2">排序</label>
+                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">排序</label>
                 <input
                   type="number"
                   value={formData.sortOrder}
                   onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value) })}
-                  className="w-full bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none"
+                  className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
                 />
               </div>
               <div className="flex gap-4 pt-4">
-                <button type="submit" className="btn-hard text-gray-900">保存</button>
+                <button type="submit" className="btn-hard text-wiki-text">保存</button>
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-6 py-3 bg-gray-100 text-gray-900 font-bold uppercase tracking-wider"
+                  className="px-6 py-3 bg-wiki-gray text-wiki-text font-bold uppercase tracking-wider"
                 >
                   取消
                 </button>

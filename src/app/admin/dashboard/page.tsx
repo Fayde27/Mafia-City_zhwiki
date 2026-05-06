@@ -17,8 +17,8 @@ export default function AdminDashboardPage() {
   }, [isAdmin, router])
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
-      <p className="text-gray-900-muted">跳转中...</p>
+    <div className="min-h-screen bg-wiki-bg flex items-center justify-center">
+      <p className="text-wiki-text-muted">跳转中...</p>
     </div>
   )
 }

@@ -89,24 +89,24 @@ export default function CharacterListPage() {
   const weaponOptions = filterOptions.filter(o => o.type === 'weapon')
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-wiki-bg">
       <WikiHeader />
       
       <main className="container mx-auto px-4 py-6 md:py-8">
-        <div className="text-sm text-gray-900-muted mb-4 md:mb-6">
-          <Link href="/" className="hover:text-[#e8c547]">首页</Link>
+        <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
+          <Link href="/" className="hover:text-wiki-accent">首页</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki" className="hover:text-[#e8c547]">图鉴</Link>
+          <Link href="/wiki" className="hover:text-wiki-accent">图鉴</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki/characters/characters" className="hover:text-[#e8c547]">角色图鉴</Link>
+          <Link href="/wiki/characters/characters" className="hover:text-wiki-accent">角色图鉴</Link>
           <span className="mx-2">/</span>
-          <span className="text-gray-900">{category?.name || '加载中...'}</span>
+          <span className="text-wiki-text">{category?.name || '加载中...'}</span>
         </div>
 
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
             <span className="text-3xl">{category?.icon}</span>
-            <h1 className="text-3xl md:text-4xl font-heading font-bold text-[#e8c547] heading-hard">
+            <h1 className="text-3xl md:text-4xl font-heading font-bold text-wiki-accent heading-hard">
               {category?.name}
             </h1>
           </div>
@@ -121,17 +121,17 @@ export default function CharacterListPage() {
         </div>
 
         {(rarityOptions.length > 0 || roleOptions.length > 0 || weaponOptions.length > 0) && (
-          <div className="card-hard rounded-lg p-4 md:p-6 mb-6 space-y-4">
+          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-4 md:p-6 mb-6 space-y-4">
             {rarityOptions.length > 0 && (
               <div>
-                <div className="text-sm font-bold text-[#e8c547] uppercase tracking-wider mb-2">稀有度</div>
+                <div className="text-sm font-bold text-wiki-accent uppercase tracking-wider mb-2">稀有度</div>
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => setFilterRarity('all')}
                     className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
                       filterRarity === 'all'
                         ? 'bg-wiki-accent text-wiki-darker'
-                        : 'bg-gray-100 text-gray-900-muted hover:text-gray-900'
+                        : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
                     }`}
                   >
                     全部
@@ -143,7 +143,7 @@ export default function CharacterListPage() {
                       className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
                         filterRarity === opt.value
                           ? 'bg-wiki-accent text-wiki-darker'
-                          : 'bg-gray-100 text-gray-900-muted hover:text-gray-900'
+                          : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
                       }`}
                     >
                       {getRarityStars(parseInt(opt.value))}
@@ -154,14 +154,14 @@ export default function CharacterListPage() {
             )}
             {roleOptions.length > 0 && (
               <div>
-                <div className="text-sm font-bold text-[#e8c547] uppercase tracking-wider mb-2">角色定位</div>
+                <div className="text-sm font-bold text-wiki-accent uppercase tracking-wider mb-2">角色定位</div>
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => setFilterRole('all')}
                     className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
                       filterRole === 'all'
                         ? 'bg-wiki-accent text-wiki-darker'
-                        : 'bg-gray-100 text-gray-900-muted hover:text-gray-900'
+                        : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
                     }`}
                   >
                     全部
@@ -173,7 +173,7 @@ export default function CharacterListPage() {
                       className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
                         filterRole === opt.value
                           ? 'bg-wiki-accent text-wiki-darker'
-                          : 'bg-gray-100 text-gray-900-muted hover:text-gray-900'
+                          : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
                       }`}
                     >
                       {opt.value}
@@ -184,14 +184,14 @@ export default function CharacterListPage() {
             )}
             {weaponOptions.length > 0 && (
               <div>
-                <div className="text-sm font-bold text-[#e8c547] uppercase tracking-wider mb-2">适配兵种</div>
+                <div className="text-sm font-bold text-wiki-accent uppercase tracking-wider mb-2">适配兵种</div>
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => setFilterWeapon('all')}
                     className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
                       filterWeapon === 'all'
                         ? 'bg-wiki-accent text-wiki-darker'
-                        : 'bg-gray-100 text-gray-900-muted hover:text-gray-900'
+                        : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
                     }`}
                   >
                     全部
@@ -203,7 +203,7 @@ export default function CharacterListPage() {
                       className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
                         filterWeapon === opt.value
                           ? 'bg-wiki-accent text-wiki-darker'
-                          : 'bg-gray-100 text-gray-900-muted hover:text-gray-900'
+                          : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
                       }`}
                     >
                       {opt.value}
@@ -216,9 +216,9 @@ export default function CharacterListPage() {
         )}
 
         {loading ? (
-          <div className="text-center py-12 text-gray-900-muted">加载中...</div>
+          <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
         ) : filteredCharacters.length === 0 ? (
-          <div className="card-hard rounded-lg p-8 md:p-12 text-center text-gray-900-muted">
+          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-8 md:p-12 text-center text-wiki-text-muted">
             该分类下暂无角色
           </div>
         ) : (
@@ -227,7 +227,7 @@ export default function CharacterListPage() {
               <Link
                 key={character.id}
                 href={`/wiki/characters/${categorySlug}/${character.slug}`}
-                className="card-hard rounded-lg overflow-hidden group block hover:border-wiki-accent transition-all"
+                className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg overflow-hidden group block hover:border-wiki-accent transition-all"
               >
                 <div className="relative h-48 md:h-56 overflow-hidden bg-gradient-to-br from-wiki-gray to-wiki-darker">
                   {character.banner ? (
@@ -244,7 +244,7 @@ export default function CharacterListPage() {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-6xl text-gray-900-muted">{character.name[0]}</span>
+                      <span className="text-6xl text-wiki-text-muted">{character.name[0]}</span>
                     </div>
                   )}
                   <div className="absolute top-3 left-3 flex items-center gap-1">
@@ -253,19 +253,19 @@ export default function CharacterListPage() {
                     </span>
                   </div>
                   <div className="absolute top-3 right-3">
-                    <span className="text-gray-900 text-xs font-bold drop-shadow-lg">
+                    <span className="text-wiki-text text-xs font-bold drop-shadow-lg">
                       {character.role}
                     </span>
                   </div>
                 </div>
                 <div className="p-4 md:p-5">
-                  <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1 group-hover:text-[#e8c547] transition-colors">
+                  <h3 className="text-lg md:text-xl font-bold text-wiki-text mb-1 group-hover:text-wiki-accent transition-colors">
                     {character.name}
                   </h3>
                   {character.title && (
-                    <p className="text-gray-900-muted text-sm mb-2">{character.title}</p>
+                    <p className="text-wiki-text-muted text-sm mb-2">{character.title}</p>
                   )}
-                  <div className="flex items-center gap-2 text-xs text-gray-900-muted">
+                  <div className="flex items-center gap-2 text-xs text-wiki-text-muted">
                     {character.role && (
                       <span>{character.role}</span>
                     )}
@@ -274,12 +274,12 @@ export default function CharacterListPage() {
                     )}
                   </div>
                   {character.coreBonus && (
-                    <p className="text-gray-900-muted text-xs mt-1">
+                    <p className="text-wiki-text-muted text-xs mt-1">
                       核心加成：{character.coreBonus}
                     </p>
                   )}
                   {character.description && (
-                    <p className="text-gray-900-muted text-xs mt-2 line-clamp-2">
+                    <p className="text-wiki-text-muted text-xs mt-2 line-clamp-2">
                       {character.description}
                     </p>
                   )}

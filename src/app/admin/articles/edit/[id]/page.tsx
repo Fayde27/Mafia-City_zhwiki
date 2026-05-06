@@ -87,10 +87,10 @@ export default function EditArticlePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-wiki-bg">
         <WikiHeader />
         <div className="flex items-center justify-center py-24">
-          <div className="text-gray-900-muted text-xl">加载中...</div>
+          <div className="text-wiki-text-muted text-xl">加载中...</div>
         </div>
         <WikiFooter />
       </div>
@@ -98,60 +98,60 @@ export default function EditArticlePage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-wiki-bg">
       <WikiHeader />
 
       <main className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-heading font-bold text-[#e8c547] heading-hard">
+            <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">
               编辑文章
             </h1>
-            <p className="text-gray-900-muted text-sm mt-1">修改文章内容、分类和发布状态</p>
+            <p className="text-wiki-text-muted text-sm mt-1">修改文章内容、分类和发布状态</p>
           </div>
-          <Link href={`/wiki/article/${formData.slug}`} className="text-gray-900-muted hover:text-[#e8c547] text-sm">
+          <Link href={`/wiki/article/${formData.slug}`} className="text-wiki-text-muted hover:text-wiki-accent text-sm">
             预览文章
           </Link>
         </div>
 
-        <form onSubmit={handleSubmit} className="card-hard rounded-lg p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-8 space-y-6">
           <div>
-            <label className="block text-gray-900 text-sm font-bold uppercase tracking-wider mb-2">标题 *</label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">标题 *</label>
             <input
               type="text"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="w-full bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none"
+              className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
               required
             />
           </div>
 
           <div>
-            <label className="block text-gray-900 text-sm font-bold uppercase tracking-wider mb-2">别名 (URL Slug) *</label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">别名 (URL Slug) *</label>
             <input
               type="text"
               value={formData.slug}
               onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-              className="w-full bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none"
+              className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
               required
             />
           </div>
 
           <div>
-            <label className="block text-gray-900 text-sm font-bold uppercase tracking-wider mb-2">摘要</label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">摘要</label>
             <textarea
               value={formData.summary}
               onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
-              className="w-full bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none h-24"
+              className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none h-24"
             />
           </div>
 
           <div>
-            <label className="block text-gray-900 text-sm font-bold uppercase tracking-wider mb-2">分类 *</label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">分类 *</label>
             <select
               value={formData.categoryId}
               onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-              className="w-full bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none"
+              className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
               required
             >
               <option value="">请选择分类</option>
@@ -164,22 +164,22 @@ export default function EditArticlePage() {
           </div>
 
           <div>
-            <label className="block text-gray-900 text-sm font-bold uppercase tracking-wider mb-2">内容 (支持 Markdown) *</label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">内容 (支持 Markdown) *</label>
             <textarea
               value={formData.content}
               onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              className="w-full bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none h-64 font-mono"
+              className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none h-64 font-mono"
               required
             />
           </div>
 
           <div>
-            <label className="block text-gray-900 text-sm font-bold uppercase tracking-wider mb-2">标签 (逗号分隔)</label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">标签 (逗号分隔)</label>
             <input
               type="text"
               value={formData.tags}
               onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-              className="w-full bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none"
+              className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
             />
           </div>
 
@@ -191,7 +191,7 @@ export default function EditArticlePage() {
                 onChange={(e) => setFormData({ ...formData, isPublished: e.target.checked })}
                 className="w-5 h-5"
               />
-              <span className="text-gray-900 font-bold">立即发布</span>
+              <span className="text-wiki-text font-bold">立即发布</span>
             </label>
             <label className="flex items-center gap-2">
               <input
@@ -200,12 +200,12 @@ export default function EditArticlePage() {
                 onChange={(e) => setFormData({ ...formData, isPinned: e.target.checked })}
                 className="w-5 h-5"
               />
-              <span className="text-gray-900 font-bold">置顶文章</span>
+              <span className="text-wiki-text font-bold">置顶文章</span>
             </label>
           </div>
 
           <div>
-            <label className="block text-gray-900 text-sm font-bold uppercase tracking-wider mb-2">文章标志 (逗号分隔)</label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">文章标志 (逗号分隔)</label>
             <div className="flex flex-wrap gap-2 mb-2">
               {['HOT', 'NEW', 'STAR', '推荐', '精华'].map((badge) => (
                 <button
@@ -220,8 +220,8 @@ export default function EditArticlePage() {
                   }}
                   className={`px-3 py-1 text-xs font-bold border-2 ${
                     formData.badges?.split(',').includes(badge)
-                      ? 'bg-wiki-accent/20 border-wiki-accent text-[#e8c547]'
-                      : 'bg-gray-100 border-gray-200 text-gray-900-muted hover:border-wiki-accent/50'
+                      ? 'bg-wiki-accent/20 border-wiki-accent text-wiki-accent'
+                      : 'bg-wiki-gray border-wiki-border text-wiki-text-muted hover:border-wiki-accent/50'
                   }`}
                 >
                   {badge}
@@ -232,16 +232,16 @@ export default function EditArticlePage() {
               type="text"
               value={formData.badges}
               onChange={(e) => setFormData({ ...formData, badges: e.target.value })}
-              className="w-full bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none"
+              className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
               placeholder="自定义标志，逗号分隔，如: HOT,星标"
             />
           </div>
 
           <div className="flex gap-4 pt-4">
-            <button type="submit" className="btn-hard text-gray-900" disabled={saving}>
+            <button type="submit" className="btn-hard text-wiki-text" disabled={saving}>
               {saving ? '保存中...' : '保存'}
             </button>
-            <Link href="/" className="px-6 py-3 bg-gray-100 text-gray-900 font-bold uppercase tracking-wider">
+            <Link href="/" className="px-6 py-3 bg-wiki-gray text-wiki-text font-bold uppercase tracking-wider">
               取消
             </Link>
           </div>

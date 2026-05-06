@@ -93,26 +93,26 @@ export default function AdminCharacterFiltersPage() {
   const weaponOptions = options.filter(o => o.type === 'weapon')
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-wiki-bg">
       <WikiHeader />
       <main className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-heading font-bold text-[#e8c547] heading-hard">筛选选项管理</h1>
-            <p className="text-gray-900-muted text-sm mt-1">管理角色列表筛选菜单的选项</p>
+            <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">筛选选项管理</h1>
+            <p className="text-wiki-text-muted text-sm mt-1">管理角色列表筛选菜单的选项</p>
           </div>
-          <Link href="/admin/characters" className="px-4 py-2 bg-gray-100 text-gray-900 font-bold text-sm hover:text-[#e8c547]">
+          <Link href="/admin/characters" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
             返回角色管理
           </Link>
         </div>
 
-        <div className="card-hard rounded-lg p-6 mb-6">
-          <h3 className="text-lg font-bold text-[#e8c547] mb-4">添加选项</h3>
+        <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6 mb-6">
+          <h3 className="text-lg font-bold text-wiki-accent mb-4">添加选项</h3>
           <div className="flex gap-4">
             <select
               value={newType}
               onChange={(e) => setNewType(e.target.value)}
-              className="bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none cursor-pointer"
+              className="bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none cursor-pointer"
             >
               <option value="rarity">稀有度</option>
               <option value="role">角色定位</option>
@@ -122,14 +122,14 @@ export default function AdminCharacterFiltersPage() {
               type="text"
               value={newValue}
               onChange={(e) => setNewValue(e.target.value)}
-              className="flex-1 bg-gray-100 border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-wiki-accent focus:outline-none"
+              className="flex-1 bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
               placeholder="输入选项值"
               onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
             />
             <button
               onClick={handleAdd}
               disabled={saving || !newValue.trim()}
-              className="btn-hard text-gray-900 disabled:opacity-50 px-6"
+              className="btn-hard text-wiki-text disabled:opacity-50 px-6"
             >
               添加
             </button>
@@ -137,70 +137,70 @@ export default function AdminCharacterFiltersPage() {
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-gray-900-muted">加载中...</div>
+          <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
         ) : (
           <div className="space-y-6">
-            <div className="card-hard rounded-lg p-6">
-              <h3 className="text-lg font-bold text-[#e8c547] mb-4">稀有度</h3>
+            <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
+              <h3 className="text-lg font-bold text-wiki-accent mb-4">稀有度</h3>
               {rarityOptions.length === 0 ? (
-                <p className="text-gray-900-muted text-sm">暂无选项</p>
+                <p className="text-wiki-text-muted text-sm">暂无选项</p>
               ) : (
                 <div className="space-y-2">
                   {rarityOptions.map((opt) => (
-                    <div key={opt.id} className="flex items-center gap-4 bg-gray-100 rounded-lg p-3">
+                    <div key={opt.id} className="flex items-center gap-4 bg-wiki-gray rounded-lg p-3">
                       <input
                         type="number"
                         value={opt.sortOrder}
                         onChange={(e) => handleSortChange(opt.id, parseInt(e.target.value))}
-                        className="w-16 bg-whiteer border border-gray-200 px-2 py-1 text-gray-900 text-center"
+                        className="w-16 bg-wiki-carder border border-wiki-border px-2 py-1 text-wiki-text text-center"
                       />
-                      <span className="text-gray-900 flex-1">{'★'.repeat(parseInt(opt.value)) + '☆'.repeat(5 - parseInt(opt.value))}</span>
-                      <span className="text-gray-900-muted text-sm">{opt.value}星</span>
-                      <button onClick={() => handleDelete(opt.id)} className="text-red-500 hover:text-red-300 text-sm">删除</button>
+                      <span className="text-wiki-text flex-1">{'★'.repeat(parseInt(opt.value)) + '☆'.repeat(5 - parseInt(opt.value))}</span>
+                      <span className="text-wiki-text-muted text-sm">{opt.value}星</span>
+                      <button onClick={() => handleDelete(opt.id)} className="text-wiki-danger hover:text-wiki-danger text-sm">删除</button>
                     </div>
                   ))}
                 </div>
               )}
             </div>
 
-            <div className="card-hard rounded-lg p-6">
-              <h3 className="text-lg font-bold text-[#e8c547] mb-4">角色定位</h3>
+            <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
+              <h3 className="text-lg font-bold text-wiki-accent mb-4">角色定位</h3>
               {roleOptions.length === 0 ? (
-                <p className="text-gray-900-muted text-sm">暂无选项</p>
+                <p className="text-wiki-text-muted text-sm">暂无选项</p>
               ) : (
                 <div className="space-y-2">
                   {roleOptions.map((opt) => (
-                    <div key={opt.id} className="flex items-center gap-4 bg-gray-100 rounded-lg p-3">
+                    <div key={opt.id} className="flex items-center gap-4 bg-wiki-gray rounded-lg p-3">
                       <input
                         type="number"
                         value={opt.sortOrder}
                         onChange={(e) => handleSortChange(opt.id, parseInt(e.target.value))}
-                        className="w-16 bg-whiteer border border-gray-200 px-2 py-1 text-gray-900 text-center"
+                        className="w-16 bg-wiki-carder border border-wiki-border px-2 py-1 text-wiki-text text-center"
                       />
-                      <span className="text-gray-900 flex-1">{opt.value}</span>
-                      <button onClick={() => handleDelete(opt.id)} className="text-red-500 hover:text-red-300 text-sm">删除</button>
+                      <span className="text-wiki-text flex-1">{opt.value}</span>
+                      <button onClick={() => handleDelete(opt.id)} className="text-wiki-danger hover:text-wiki-danger text-sm">删除</button>
                     </div>
                   ))}
                 </div>
               )}
             </div>
 
-            <div className="card-hard rounded-lg p-6">
-              <h3 className="text-lg font-bold text-[#e8c547] mb-4">适配兵种</h3>
+            <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
+              <h3 className="text-lg font-bold text-wiki-accent mb-4">适配兵种</h3>
               {weaponOptions.length === 0 ? (
-                <p className="text-gray-900-muted text-sm">暂无选项</p>
+                <p className="text-wiki-text-muted text-sm">暂无选项</p>
               ) : (
                 <div className="space-y-2">
                   {weaponOptions.map((opt) => (
-                    <div key={opt.id} className="flex items-center gap-4 bg-gray-100 rounded-lg p-3">
+                    <div key={opt.id} className="flex items-center gap-4 bg-wiki-gray rounded-lg p-3">
                       <input
                         type="number"
                         value={opt.sortOrder}
                         onChange={(e) => handleSortChange(opt.id, parseInt(e.target.value))}
-                        className="w-16 bg-whiteer border border-gray-200 px-2 py-1 text-gray-900 text-center"
+                        className="w-16 bg-wiki-carder border border-wiki-border px-2 py-1 text-wiki-text text-center"
                       />
-                      <span className="text-gray-900 flex-1">{opt.value}</span>
-                      <button onClick={() => handleDelete(opt.id)} className="text-red-500 hover:text-red-300 text-sm">删除</button>
+                      <span className="text-wiki-text flex-1">{opt.value}</span>
+                      <button onClick={() => handleDelete(opt.id)} className="text-wiki-danger hover:text-wiki-danger text-sm">删除</button>
                     </div>
                   ))}
                 </div>

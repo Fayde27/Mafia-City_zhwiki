@@ -15,7 +15,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
     const flushList = () => {
       if (listItems.length > 0) {
         elements.push(
-          <ul key={`list-${elements.length}`} className="list-disc list-inside space-y-2 mb-4 text-gray-900">
+          <ul key={`list-${elements.length}`} className="list-disc list-inside space-y-2 mb-4 text-wiki-text">
             {listItems.map((item, i) => (
               <li key={i}>{item}</li>
             ))}
@@ -29,8 +29,8 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
     const flushCodeBlock = () => {
       if (codeLines.length > 0) {
         elements.push(
-          <pre key={`code-${elements.length}`} className="bg-whiteer border border-gray-200 p-4 rounded mb-4 overflow-x-auto">
-            <code className="text-gray-900 font-mono text-sm">
+          <pre key={`code-${elements.length}`} className="bg-wiki-carder border border-wiki-border p-4 rounded mb-4 overflow-x-auto">
+            <code className="text-wiki-text font-mono text-sm">
               {codeLines.join('\n')}
             </code>
           </pre>
@@ -72,7 +72,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
 
         switch (firstMatch.type) {
           case 'bold':
-            parts.push(<strong key={keyIndex++} className="text-[#e8c547] font-bold">{firstMatch.match![1]}</strong>)
+            parts.push(<strong key={keyIndex++} className="text-wiki-accent font-bold">{firstMatch.match![1]}</strong>)
             remaining = remaining.slice(firstMatch.index + firstMatch.match![0].length)
             break
           case 'italic':
@@ -80,11 +80,11 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
             remaining = remaining.slice(firstMatch.index + firstMatch.match![0].length)
             break
           case 'code':
-            parts.push(<code key={keyIndex++} className="bg-whiteer px-2 py-0.5 rounded text-[#e8c547] font-mono text-sm">{firstMatch.match![1]}</code>)
+            parts.push(<code key={keyIndex++} className="bg-wiki-carder px-2 py-0.5 rounded text-wiki-accent font-mono text-sm">{firstMatch.match![1]}</code>)
             remaining = remaining.slice(firstMatch.index + firstMatch.match![0].length)
             break
           case 'link':
-            parts.push(<a key={keyIndex++} href={firstMatch.match![2]} className="text-[#e8c547] underline hover:text-[#e8c547]-light">{firstMatch.match![1]}</a>)
+            parts.push(<a key={keyIndex++} href={firstMatch.match![2]} className="text-wiki-accent underline hover:text-wiki-accent-light">{firstMatch.match![1]}</a>)
             remaining = remaining.slice(firstMatch.index + firstMatch.match![0].length)
             break
         }
@@ -113,33 +113,33 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
       if (line.startsWith('# ')) {
         flushList()
         elements.push(
-          <h1 key={index} className="text-4xl font-heading font-bold text-[#e8c547] mt-8 mb-6 heading-hard">{processInline(line.slice(2))}</h1>
+          <h1 key={index} className="text-4xl font-heading font-bold text-wiki-accent mt-8 mb-6 heading-hard">{processInline(line.slice(2))}</h1>
         )
       } else if (line.startsWith('## ')) {
         flushList()
         elements.push(
-          <h2 key={index} className="text-3xl font-heading font-bold text-[#e8c547] mt-8 mb-4 heading-hard">{processInline(line.slice(3))}</h2>
+          <h2 key={index} className="text-3xl font-heading font-bold text-wiki-accent mt-8 mb-4 heading-hard">{processInline(line.slice(3))}</h2>
         )
       } else if (line.startsWith('### ')) {
         flushList()
         elements.push(
-          <h3 key={index} className="text-2xl font-bold text-gray-900 mt-6 mb-3">{processInline(line.slice(4))}</h3>
+          <h3 key={index} className="text-2xl font-bold text-wiki-text mt-6 mb-3">{processInline(line.slice(4))}</h3>
         )
       } else if (line.startsWith('#### ')) {
         flushList()
         elements.push(
-          <h4 key={index} className="text-xl font-bold text-gray-900 mt-4 mb-2">{processInline(line.slice(5))}</h4>
+          <h4 key={index} className="text-xl font-bold text-wiki-text mt-4 mb-2">{processInline(line.slice(5))}</h4>
         )
       } else if (line.startsWith('> ')) {
         flushList()
         elements.push(
-          <blockquote key={index} className="border-l-4 border-wiki-accent pl-4 py-2 my-4 bg-gray-100/30 italic text-gray-900-muted">
+          <blockquote key={index} className="border-l-4 border-wiki-accent pl-4 py-2 my-4 bg-wiki-gray/30 italic text-wiki-text-muted">
             {processInline(line.slice(2))}
           </blockquote>
         )
       } else if (line.startsWith('---') || line.startsWith('***')) {
         flushList()
-        elements.push(<hr key={index} className="border-gray-200 my-6" />)
+        elements.push(<hr key={index} className="border-wiki-border my-6" />)
       } else if (line.startsWith('- ') || line.startsWith('* ')) {
         inList = true
         listItems.push(processInline(line.slice(2)))
@@ -148,7 +148,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
         const content = line.replace(/^\d+\. /, '')
         elements.push(
           <div key={index} className="flex items-start gap-2 mb-2">
-            <span className="text-[#e8c547] font-bold min-w-[24px]">{line.match(/^\d+/)?.[0]}.</span>
+            <span className="text-wiki-accent font-bold min-w-[24px]">{line.match(/^\d+/)?.[0]}.</span>
             <span>{processInline(content)}</span>
           </div>
         )
@@ -157,7 +157,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
         const match = line.match(/!\[(.+?)\]\((.+?)\)/)
         if (match) {
           elements.push(
-            <img key={index} src={match[2]} alt={match[1]} className="max-w-full rounded my-4 border border-gray-200" />
+            <img key={index} src={match[2]} alt={match[1]} className="max-w-full rounded my-4 border border-wiki-border" />
           )
         }
       } else if (line.startsWith('[')) {
@@ -166,7 +166,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
         if (match) {
           elements.push(
             <p key={index} className="mb-4">
-              <a href={match[2]} className="text-[#e8c547] underline hover:text-[#e8c547]-light">{processInline(match[1])}</a>
+              <a href={match[2]} className="text-wiki-accent underline hover:text-wiki-accent-light">{processInline(match[1])}</a>
             </p>
           )
         }
@@ -178,7 +178,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
           flushList()
         }
         elements.push(
-          <p key={index} className="text-gray-900 mb-3 leading-relaxed">{processInline(line)}</p>
+          <p key={index} className="text-wiki-text mb-3 leading-relaxed">{processInline(line)}</p>
         )
       }
     })
