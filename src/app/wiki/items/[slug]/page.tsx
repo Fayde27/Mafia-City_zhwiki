@@ -132,17 +132,17 @@ export default function ItemListPage() {
                   >
                     全部
                   </button>
-                  {rarityOptions.map((rarity) => (
+                  {rarityOptions.map((opt) => (
                     <button
-                      key={rarity}
-                      onClick={() => setFilterRarity(rarity.toString())}
+                      key={opt.id}
+                      onClick={() => setFilterRarity(opt.value)}
                       className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
-                        filterRarity === rarity.toString()
+                        filterRarity === opt.value
                           ? 'bg-wiki-accent text-wiki-darker'
                           : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
                       }`}
                     >
-                      {getRarityStars(rarity)}
+                      {getRarityStars(parseInt(opt.value))}
                     </button>
                   ))}
                 </div>
@@ -162,17 +162,17 @@ export default function ItemListPage() {
                   >
                     全部
                   </button>
-                  {typeOptions.map((type) => (
+                  {typeOptions.map((opt) => (
                     <button
-                      key={type}
-                      onClick={() => setFilterType(type)}
+                      key={opt.id}
+                      onClick={() => setFilterType(opt.value)}
                       className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
-                        filterType === type
+                        filterType === opt.value
                           ? 'bg-wiki-accent text-wiki-darker'
                           : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
                       }`}
                     >
-                      {type}
+                      {opt.value}
                     </button>
                   ))}
                 </div>

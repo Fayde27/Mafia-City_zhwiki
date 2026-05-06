@@ -272,6 +272,73 @@ async function main() {
   })
 
   console.log('图鉴分类初始化完成！')
+
+  // 创建建筑筛选选项
+  await prisma.buildingFilterOption.deleteMany({})
+  await prisma.buildingFilterOption.createMany({
+    data: [
+      { type: 'rarity', value: '5', sortOrder: 1 },
+      { type: 'rarity', value: '4', sortOrder: 2 },
+      { type: 'rarity', value: '3', sortOrder: 3 },
+      { type: 'rarity', value: '2', sortOrder: 4 },
+      { type: 'rarity', value: '1', sortOrder: 5 },
+      { type: 'type', value: '资源建筑', sortOrder: 1 },
+      { type: 'type', value: '军事建筑', sortOrder: 2 },
+      { type: 'type', value: '装饰建筑', sortOrder: 3 },
+      { type: 'type', value: '防御建筑', sortOrder: 4 },
+    ],
+  })
+
+  // 创建装备筛选选项
+  await prisma.equipmentFilterOption.deleteMany({})
+  await prisma.equipmentFilterOption.createMany({
+    data: [
+      { type: 'rarity', value: '5', sortOrder: 1 },
+      { type: 'rarity', value: '4', sortOrder: 2 },
+      { type: 'rarity', value: '3', sortOrder: 3 },
+      { type: 'rarity', value: '2', sortOrder: 4 },
+      { type: 'rarity', value: '1', sortOrder: 5 },
+      { type: 'type', value: '武器', sortOrder: 1 },
+      { type: 'type', value: '防具', sortOrder: 2 },
+      { type: 'type', value: '饰品', sortOrder: 3 },
+      { type: 'type', value: '特殊装备', sortOrder: 4 },
+    ],
+  })
+
+  // 创建道具筛选选项
+  await prisma.itemFilterOption.deleteMany({})
+  await prisma.itemFilterOption.createMany({
+    data: [
+      { type: 'rarity', value: '5', sortOrder: 1 },
+      { type: 'rarity', value: '4', sortOrder: 2 },
+      { type: 'rarity', value: '3', sortOrder: 3 },
+      { type: 'rarity', value: '2', sortOrder: 4 },
+      { type: 'rarity', value: '1', sortOrder: 5 },
+      { type: 'type', value: '消耗品', sortOrder: 1 },
+      { type: 'type', value: '材料', sortOrder: 2 },
+      { type: 'type', value: '任务道具', sortOrder: 3 },
+      { type: 'type', value: '特殊道具', sortOrder: 4 },
+    ],
+  })
+
+  // 创建兵种筛选选项
+  await prisma.troopFilterOption.deleteMany({})
+  await prisma.troopFilterOption.createMany({
+    data: [
+      { type: 'rarity', value: '5', sortOrder: 1 },
+      { type: 'rarity', value: '4', sortOrder: 2 },
+      { type: 'rarity', value: '3', sortOrder: 3 },
+      { type: 'rarity', value: '2', sortOrder: 4 },
+      { type: 'rarity', value: '1', sortOrder: 5 },
+      { type: 'type', value: '步兵', sortOrder: 1 },
+      { type: 'type', value: '骑兵', sortOrder: 2 },
+      { type: 'type', value: '弓兵', sortOrder: 3 },
+      { type: 'type', value: '法师', sortOrder: 4 },
+      { type: 'type', value: '攻城', sortOrder: 5 },
+    ],
+  })
+
+  console.log('筛选选项初始化完成！')
 }
 
 main()

@@ -35,6 +35,13 @@ interface TroopCategory {
   icon: string
 }
 
+interface TroopFilterOption {
+  id: string
+  type: string
+  value: string
+  sortOrder: number
+}
+
 export default function TroopListPage() {
   const params = useParams()
   const categorySlug = params?.slug as string
@@ -44,17 +51,22 @@ export default function TroopListPage() {
   const [loading, setLoading] = useState(true)
   const [filterRarity, setFilterRarity] = useState<string>('all')
   const [filterType, setFilterType] = useState<string>('all')
+  const [filterOptions, setFilterOptions] = useState<TroopFilterOption[]>([])
 
   useEffect(() => {
     Promise.all([
       fetch(`/api/wiki/troops?category=${categorySlug}`).then(res => res.json()),
       fetch('/api/wiki/troops/categories').then(res => res.json()),
-    ]).then(([troopData, catData]) => {
+      fetch('/api/admin/troop-filters').then(res => res.json()),
+    ]).then(([troopData, catData, filterData]) => {
       const trps = troopData?.troops || []
       setTroops(trps)
       
       const cat = catData?.find((c: TroopCategory) => c.slug === categorySlug)
       setCategory(cat || null)
+      
+      const filters = Array.isArray(filterData) ? filterData : []
+      setFilterOptions(filters)
       
       setLoading(false)
     }).catch(() => {
@@ -72,8 +84,8 @@ export default function TroopListPage() {
     return '★'.repeat(rarity) + '☆'.repeat(5 - rarity)
   }
 
-  const rarityOptions = [...new Set(troops.map(t => t.rarity).filter(Boolean))].sort((a, b) => b - a)
-  const typeOptions = [...new Set(troops.map(t => t.type).filter(Boolean))]
+  const rarityOptions = filterOptions.filter(o => o.type === 'rarity')
+  const typeOptions = filterOptions.filter(o => o.type === 'type')
 
   return (
     <div className="min-h-screen bg-wiki-dark">
@@ -123,17 +135,17 @@ export default function TroopListPage() {
                   >
                     全部
                   </button>
-                  {rarityOptions.map((rarity) => (
+                  {rarityOptions.map((opt) => (
                     <button
-                      key={rarity}
-                      onClick={() => setFilterRarity(rarity.toString())}
+                      key={opt.id}
+                      onClick={() => setFilterRarity(opt.value)}
                       className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
-                        filterRarity === rarity.toString()
+                        filterRarity === opt.value
                           ? 'bg-wiki-accent text-wiki-darker'
                           : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
                       }`}
                     >
-                      {getRarityStars(rarity)}
+                      {getRarityStars(parseInt(opt.value))}
                     </button>
                   ))}
                 </div>
@@ -153,17 +165,17 @@ export default function TroopListPage() {
                   >
                     全部
                   </button>
-                  {typeOptions.map((type) => (
+                  {typeOptions.map((opt) => (
                     <button
-                      key={type}
-                      onClick={() => setFilterType(type)}
+                      key={opt.id}
+                      onClick={() => setFilterType(opt.value)}
                       className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
-                        filterType === type
+                        filterType === opt.value
                           ? 'bg-wiki-accent text-wiki-darker'
                           : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
                       }`}
                     >
-                      {type}
+                      {opt.value}
                     </button>
                   ))}
                 </div>
