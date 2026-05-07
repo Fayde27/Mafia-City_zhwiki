@@ -5,25 +5,9 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
 
-interface ArticleCategory {
-  id: string
-  name: string
-  slug: string
-  icon: string
-  description: string
-}
-
-interface TroopCategory {
-  id: string
-  name: string
-  slug: string
-  icon: string
-}
-
 interface WikiSection {
   label: string
   href: string
-  children?: { label: string; href: string; icon?: string; children?: { label: string; href: string; icon?: string }[] }[]
 }
 
 export default function WikiHeader() {
@@ -32,26 +16,12 @@ export default function WikiHeader() {
   const { isAdmin, logout } = useAdminAuth()
   const [searchQuery, setSearchQuery] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [articleCategories, setArticleCategories] = useState<ArticleCategory[]>([])
-  const [troopCategories, setTroopCategories] = useState<TroopCategory[]>([])
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
-  const [activeSubDropdown, setActiveSubDropdown] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    Promise.all([
-      fetch('/api/wiki/categories').then(res => res.json()),
-      fetch('/api/wiki/troops/categories').then(res => res.json()),
-    ]).then(([articleData, troopData]) => {
-      setArticleCategories(Array.isArray(articleData) ? articleData : [])
-      setTroopCategories(Array.isArray(troopData) ? troopData : [])
-    })
-  }, [])
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setActiveDropdown(null)
+        setMobileMenuOpen(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -77,123 +47,15 @@ export default function WikiHeader() {
     return pathname === href || pathname?.startsWith(href + '/')
   }
 
-  const isChildActive = (parentHref: string): boolean => {
-    if (parentHref === '/wiki') {
-      return pathname?.startsWith('/wiki/') && !pathname?.startsWith('/wiki/guides') && !pathname?.startsWith('/wiki/article')
-    }
-    if (parentHref === '/wiki/guides') {
-      return pathname?.startsWith('/wiki/guides/')
-    }
-    return false
-  }
-
   const navSections: WikiSection[] = [
     { label: '首页', href: '/' },
-    {
-      label: '图鉴',
-      href: '/wiki',
-      children: [
-        { label: '角色图鉴', href: '/wiki/characters/characters', icon: '' },
-        { label: '建筑图鉴', href: '/wiki/buildings', icon: '' },
-        { label: '装备图鉴', href: '/wiki/equipment', icon: '️' },
-        { label: '道具图鉴', href: '/wiki/items', icon: '' },
-        {
-          label: '兵种图鉴',
-          href: '/wiki/troops',
-          icon: '🛡️',
-          children: troopCategories.map(cat => ({ label: cat.name, href: `/wiki/troops/${cat.slug}`, icon: cat.icon })),
-        },
-      ],
-    },
-    {
-      label: '玩法攻略',
-      href: '/wiki/guides',
-      children: articleCategories.map(cat => ({ label: cat.name, href: `/wiki/guides/${cat.slug}`, icon: cat.icon })),
-    },
+    { label: '图鉴', href: '/wiki' },
+    { label: '玩法攻略', href: '/wiki/guides' },
     { label: '游戏资讯', href: '/wiki/articles' },
   ]
 
   const renderNavItem = (section: WikiSection) => {
-    const active = isActive(section.href) || isChildActive(section.href)
-    const hasChildren = section.children && section.children.length > 0
-
-    if (hasChildren) {
-      return (
-        <div
-          key={section.href}
-          className="relative"
-          onMouseEnter={() => setActiveDropdown(section.href)}
-          onMouseLeave={() => setActiveDropdown(null)}
-        >
-          <Link
-            href={section.href}
-            className={`px-3 py-1.5 text-sm transition-colors rounded flex items-center gap-1 ${
-              active
-                ? 'text-wiki-accent bg-wiki-accent/10'
-                : 'text-wiki-text-muted hover:text-white'
-            }`}
-          >
-            {section.label}
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </Link>
-          {activeDropdown === section.href && (
-            <>
-              <div className="absolute top-full left-0 w-full h-2" />
-              <div className="absolute top-full left-0 pt-2 bg-wiki-dark border border-wiki-border/30 rounded-lg shadow-xl min-w-[180px] py-2 z-50">
-                {section.children!.map((child) => (
-                  <div
-                    key={child.href}
-                    className="relative"
-                    onMouseEnter={() => child.children && setActiveSubDropdown(child.href)}
-                    onMouseLeave={() => child.children && setActiveSubDropdown(null)}
-                  >
-                    <Link
-                      href={child.href}
-                      className={`flex items-center gap-2 px-4 py-2 text-sm transition-colors ${
-                        pathname === child.href || pathname?.startsWith(child.href + '/')
-                          ? 'text-wiki-accent bg-wiki-accent/10'
-                          : 'text-wiki-text-muted hover:text-white hover:bg-wiki-accent/5'
-                      }`}
-                    >
-                      {child.icon && <span className="text-base">{child.icon}</span>}
-                      <span>{child.label}</span>
-                      {child.children && child.children.length > 0 && (
-                        <svg className="w-3 h-3 ml-auto opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      )}
-                    </Link>
-                    {child.children && child.children.length > 0 && activeSubDropdown === child.href && (
-                      <>
-                        <div className="absolute top-0 left-full w-2 h-full" />
-                        <div className="absolute top-0 left-full pt-2 bg-wiki-dark border border-wiki-border/30 rounded-lg shadow-xl min-w-[160px] py-2 z-50">
-                          {child.children.map((subChild) => (
-                            <Link
-                              key={subChild.href}
-                              href={subChild.href}
-                              className={`flex items-center gap-2 px-4 py-2 text-sm transition-colors ${
-                                pathname === subChild.href || pathname?.startsWith(subChild.href + '/')
-                                  ? 'text-wiki-accent bg-wiki-accent/10'
-                                  : 'text-wiki-text-muted hover:text-white hover:bg-wiki-accent/5'
-                              }`}
-                            >
-                              {subChild.icon && <span className="text-base">{subChild.icon}</span>}
-                              <span>{subChild.label}</span>
-                            </Link>
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      )
-    }
+    const active = isActive(section.href)
 
     return (
       <Link
@@ -214,7 +76,7 @@ export default function WikiHeader() {
     <header className="sticky top-0 z-50" style={{ overflow: 'visible' }} ref={dropdownRef}>
       <div className="bg-wiki-dark border-b border-wiki-border/20" style={{ overflow: 'visible' }}>
         <div className="container mx-auto px-4" style={{ overflow: 'visible' }}>
-          <div className="flex items-center justify-between h-14" style={{ overflow: 'visible' }}>
+          <div className="flex items-center justify-between py-3" style={{ overflow: 'visible' }}>
             <Link href="/" className="flex items-center gap-3 flex-shrink-0">
               <div className="text-xl font-bold text-wiki-accent">
                 黑道風雲

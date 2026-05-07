@@ -1,0 +1,161 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import WikiHeader from '@/components/WikiHeader'
+import WikiFooter from '@/components/WikiFooter'
+import Link from 'next/link'
+import { useAdminAuth } from '@/hooks/useAdminAuth'
+import { useRouter } from 'next/navigation'
+
+export default function AdminAnnouncementNewPage() {
+  const router = useRouter()
+  const { isAdmin, isLoaded } = useAdminAuth()
+  const [saving, setSaving] = useState(false)
+  const [formData, setFormData] = useState({
+    title: '',
+    content: '',
+    type: 'info',
+    isActive: true,
+    sortOrder: 0,
+  })
+
+  useEffect(() => {
+    if (!isLoaded) return
+    if (!isAdmin) {
+      router.push('/admin/login')
+      return
+    }
+  }, [isAdmin, isLoaded, router])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSaving(true)
+
+    try {
+      const res = await fetch('/api/admin/announcements', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+
+      if (res.ok) {
+        alert('创建成功')
+        router.push('/admin/announcements')
+      } else {
+        const data = await res.json()
+        alert(data.error || '保存失败')
+      }
+    } catch (err) {
+      alert('网络错误')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (!isAdmin) return null
+
+  return (
+    <div className="min-h-screen bg-wiki-bg">
+      <WikiHeader />
+
+      <main className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">
+              新增公告
+            </h1>
+            <p className="text-wiki-text-muted text-sm mt-1">填写公告详细信息</p>
+          </div>
+          <Link href="/admin/announcements" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
+            返回列表
+          </Link>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6">
+            <h3 className="text-lg font-bold text-wiki-accent mb-4">基本信息</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">公告标题 *</label>
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">公告内容 *</label>
+                <textarea
+                  value={formData.content}
+                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  rows={6}
+                  className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none resize-y"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">公告类型</label>
+                  <select
+                    value={formData.type}
+                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                    className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none cursor-pointer"
+                  >
+                    <option value="info">公告</option>
+                    <option value="new">NEW</option>
+                    <option value="update">UPDATE</option>
+                    <option value="important">重要</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">排序值</label>
+                  <input
+                    type="number"
+                    value={formData.sortOrder}
+                    onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value) })}
+                    className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <label className="flex items-center gap-2 text-wiki-text cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={formData.isActive}
+                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                    className="w-5 h-5 accent-wiki-accent cursor-pointer"
+                  />
+                  <span className="font-bold">立即发布</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-4 pt-4">
+            <button
+              type="submit"
+              disabled={saving}
+              className="btn-hard text-wiki-text disabled:opacity-50"
+            >
+              {saving ? '保存中...' : '保存'}
+            </button>
+            <Link
+              href="/admin/announcements"
+              className="px-6 py-3 bg-wiki-gray text-wiki-text font-bold uppercase tracking-wider"
+            >
+              取消
+            </Link>
+          </div>
+        </form>
+      </main>
+
+      <WikiFooter />
+    </div>
+  )
+}

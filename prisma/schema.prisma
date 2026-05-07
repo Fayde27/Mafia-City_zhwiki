@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -20,14 +17,14 @@ model User {
 }
 
 model Category {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   name        String
-  slug        String   @unique
+  slug        String    @unique
   description String?
   icon        String?
-  sortOrder   Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   articles    Article[]
 }
 
@@ -39,7 +36,6 @@ model Article {
   summary     String?
   coverImage  String?
   categoryId  String
-  category    Category @relation(fields: [categoryId], references: [id])
   tags        String?
   isPublished Boolean  @default(false)
   isPinned    Boolean  @default(false)
@@ -48,6 +44,7 @@ model Article {
   views       Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  category    Category @relation(fields: [categoryId], references: [id])
 }
 
 model Announcement {
@@ -83,40 +80,40 @@ model CharacterFilterOption {
 }
 
 model Character {
-  id              String   @id @default(cuid())
-  name            String
-  slug            String   @unique
-  title           String?
-  avatar          String?
-  banner          String?
-  rarity          Int      @default(5)
-  role            String?
-  weapon          String?
-  coreBonus       String?
-  acquisition     String?
-  description     String?
-  attributes      String?
-  skills          String?
-  rumors          String?
-  teamComp        String?
-  troopRec        String?
-  categoryId      String
-  category        CharacterCategory @relation(fields: [categoryId], references: [id])
-  sortOrder       Int      @default(0)
-  isPublished     Boolean  @default(false)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id          String            @id @default(cuid())
+  name        String
+  slug        String            @unique
+  title       String?
+  avatar      String?
+  banner      String?
+  rarity      Int               @default(5)
+  role        String?
+  weapon      String?
+  coreBonus   String?
+  acquisition String?
+  description String?
+  attributes  String?
+  skills      String?
+  rumors      String?
+  teamComp    String?
+  troopRec    String?
+  categoryId  String
+  sortOrder   Int               @default(0)
+  isPublished Boolean           @default(false)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  category    CharacterCategory @relation(fields: [categoryId], references: [id])
 }
 
 model BuildingCategory {
-  id          String      @id @default(cuid())
+  id          String     @id @default(cuid())
   name        String
-  slug        String      @unique
+  slug        String     @unique
   description String?
   icon        String?
-  sortOrder   Int         @default(0)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  sortOrder   Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
   buildings   Building[]
 }
 
@@ -130,27 +127,27 @@ model BuildingFilterOption {
 }
 
 model Building {
-  id              String   @id @default(cuid())
-  name            String
-  slug            String   @unique
-  icon            String?
-  image           String?
-  rarity          Int      @default(3)
-  type            String?
-  function        String?
-  level           Int      @default(1)
-  maxLevel        Int      @default(10)
-  cost            String?
-  production      String?
-  description     String?
-  details         String?
-  upgradeInfo     String?
-  categoryId      String
-  category        BuildingCategory @relation(fields: [categoryId], references: [id])
-  sortOrder       Int      @default(0)
-  isPublished     Boolean  @default(false)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id          String           @id @default(cuid())
+  name        String
+  slug        String           @unique
+  icon        String?
+  image       String?
+  rarity      Int              @default(3)
+  type        String?
+  function    String?
+  level       Int              @default(1)
+  maxLevel    Int              @default(10)
+  cost        String?
+  production  String?
+  description String?
+  details     String?
+  upgradeInfo String?
+  categoryId  String
+  sortOrder   Int              @default(0)
+  isPublished Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  category    BuildingCategory @relation(fields: [categoryId], references: [id])
 }
 
 model EquipmentCategory {
@@ -175,40 +172,40 @@ model EquipmentFilterOption {
 }
 
 model Equipment {
-  id              String   @id @default(cuid())
-  name            String
-  slug            String   @unique
-  icon            String?
-  image           String?
-  rarity          Int      @default(3)
-  type            String?
-  slot            String?
-  attack          Int      @default(0)
-  defense         Int      @default(0)
-  hp              Int      @default(0)
-  speed           Int      @default(0)
-  skill           String?
-  description     String?
-  stats           String?
-  enhancement     String?
-  acquisition     String?
-  categoryId      String
-  category        EquipmentCategory @relation(fields: [categoryId], references: [id])
-  sortOrder       Int      @default(0)
-  isPublished     Boolean  @default(false)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id          String            @id @default(cuid())
+  name        String
+  slug        String            @unique
+  icon        String?
+  image       String?
+  rarity      Int               @default(3)
+  type        String?
+  slot        String?
+  attack      Int               @default(0)
+  defense     Int               @default(0)
+  hp          Int               @default(0)
+  speed       Int               @default(0)
+  skill       String?
+  description String?
+  stats       String?
+  enhancement String?
+  acquisition String?
+  categoryId  String
+  sortOrder   Int               @default(0)
+  isPublished Boolean           @default(false)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  category    EquipmentCategory @relation(fields: [categoryId], references: [id])
 }
 
 model ItemCategory {
-  id          String      @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
-  slug        String      @unique
+  slug        String   @unique
   description String?
   icon        String?
-  sortOrder   Int         @default(0)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   items       Item[]
 }
 
@@ -222,37 +219,37 @@ model ItemFilterOption {
 }
 
 model Item {
-  id              String   @id @default(cuid())
-  name            String
-  slug            String   @unique
-  icon            String?
-  image           String?
-  rarity          Int      @default(3)
-  type            String?
-  quality         String?
-  stackable       Boolean  @default(true)
-  effect          String?
-  description     String?
-  usage           String?
-  recipe          String?
-  source          String?
-  categoryId      String
-  category        ItemCategory @relation(fields: [categoryId], references: [id])
-  sortOrder       Int      @default(0)
-  isPublished     Boolean  @default(false)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id          String       @id @default(cuid())
+  name        String
+  slug        String       @unique
+  icon        String?
+  image       String?
+  rarity      Int          @default(3)
+  type        String?
+  quality     String?
+  stackable   Boolean      @default(true)
+  effect      String?
+  description String?
+  usage       String?
+  recipe      String?
+  source      String?
+  categoryId  String
+  sortOrder   Int          @default(0)
+  isPublished Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  category    ItemCategory @relation(fields: [categoryId], references: [id])
 }
 
 model TroopCategory {
-  id          String      @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
-  slug        String      @unique
+  slug        String   @unique
   description String?
   icon        String?
-  sortOrder   Int         @default(0)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   troops      Troop[]
 }
 
@@ -266,27 +263,27 @@ model TroopFilterOption {
 }
 
 model Troop {
-  id              String   @id @default(cuid())
-  name            String
-  slug            String   @unique
-  icon            String?
-  image           String?
-  rarity          Int      @default(3)
-  type            String?
-  attack          Int      @default(0)
-  defense         Int      @default(0)
-  hp              Int      @default(0)
-  speed           Int      @default(0)
-  counter         String?
-  weakness        String?
-  description     String?
-  stats           String?
-  skills          String?
-  training        String?
-  categoryId      String
-  category        TroopCategory @relation(fields: [categoryId], references: [id])
-  sortOrder       Int      @default(0)
-  isPublished     Boolean  @default(false)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id          String        @id @default(cuid())
+  name        String
+  slug        String        @unique
+  icon        String?
+  image       String?
+  rarity      Int           @default(3)
+  type        String?
+  attack      Int           @default(0)
+  defense     Int           @default(0)
+  hp          Int           @default(0)
+  speed       Int           @default(0)
+  counter     String?
+  weakness    String?
+  description String?
+  stats       String?
+  skills      String?
+  training    String?
+  categoryId  String
+  sortOrder   Int           @default(0)
+  isPublished Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  category    TroopCategory @relation(fields: [categoryId], references: [id])
 }

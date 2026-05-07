@@ -179,6 +179,10 @@ export default function HomePage() {
                       <span className="text-lg">📁</span>
                       <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors">分类管理</span>
                     </Link>
+                    <Link href="/admin/announcements" className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors group">
+                      <span className="text-lg">📢</span>
+                      <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors">公告管理</span>
+                    </Link>
                   </div>
                 </div>
               )}
