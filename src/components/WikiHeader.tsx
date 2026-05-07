@@ -74,13 +74,21 @@ export default function WikiHeader() {
     return false
   }
 
+  const wikiCategories = [
+    { label: '角色图鉴', href: '/wiki/characters/characters', icon: '' },
+    { label: '建筑图鉴', href: '/wiki/buildings', icon: '🏠' },
+    { label: '装备图鉴', href: '/wiki/equipment', icon: '⚔️' },
+    { label: '道具图鉴', href: '/wiki/items', icon: '' },
+    { label: '兵种图鉴', href: '/wiki/troops', icon: '️' },
+  ]
+
   const navSections: WikiSection[] = [
     { label: '首页', href: '/' },
     {
       label: '图鉴',
       href: '/wiki',
       children: [
-        { label: '角色图鉴', href: '/wiki/characters/characters', icon: '' },
+        ...wikiCategories,
         ...categories.map(cat => ({ label: cat.name, href: `/wiki/${cat.slug}`, icon: cat.icon })),
       ],
     },
