@@ -95,12 +95,12 @@ export default function HomePage() {
   }
 
   const quickLinks = [
-    { label: '新手入门', href: '/wiki/guides', icon: '📖' },
+    { label: '图鉴', href: '/wiki', icon: '📚' },
+    { label: '玩法攻略', href: '/wiki/guides', icon: '📖' },
+    { label: '游戏资讯', href: '/wiki/articles', icon: '📰' },
     { label: '角色图鉴', href: '/wiki/characters/characters', icon: '👤' },
     { label: '建筑图鉴', href: '/wiki/buildings', icon: '🏠' },
     { label: '装备图鉴', href: '/wiki/equipment', icon: '⚔️' },
-    { label: '道具图鉴', href: '/wiki/items', icon: '' },
-    { label: '兵种图鉴', href: '/wiki/troops', icon: '️' },
   ]
 
   return (
@@ -230,15 +230,15 @@ export default function HomePage() {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-wiki-text">
                   <span className="text-wiki-accent mr-2">◆</span>
-                  玩法指南
+                  内容导航
                 </h2>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { icon: '', title: '新手入门', desc: '从零开始', href: '/wiki/guides' },
-                  { icon: '🎯', title: '核心玩法', desc: '游戏机制', href: '/wiki/guides' },
-                  { icon: '️', title: '进阶技巧', desc: '高手攻略', href: '/wiki/guides' },
-                  { icon: '🏆', title: '赛事活动', desc: '最新活动', href: '/wiki/guides' },
+                  { icon: '📚', title: '图鉴', desc: '角色、建筑、装备等', href: '/wiki' },
+                  { icon: '📖', title: '玩法攻略', desc: '新手入门到进阶', href: '/wiki/guides' },
+                  { icon: '📰', title: '游戏资讯', desc: '最新动态与公告', href: '/wiki/articles' },
+                  { icon: '🔍', title: '搜索', desc: '全站内容检索', href: '/wiki/search' },
                 ].map((item) => (
                   <Link key={item.title} href={item.href} className="group">
                     <div className="bg-wiki-card border border-wiki-border rounded-xl p-5 hover:border-wiki-accent/50 transition-all duration-300">
