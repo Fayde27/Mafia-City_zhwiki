@@ -118,25 +118,28 @@ export default function WikiHeader() {
             </svg>
           </Link>
           {activeDropdown === section.href && (
-            <div className="absolute top-full left-0 mt-1 bg-wiki-dark border border-wiki-border/30 rounded-lg shadow-xl min-w-[180px] py-2 z-50">
-              {section.children!.map((child) => (
-                <Link
-                  key={child.href}
-                  href={child.href}
-                  className={`flex items-center gap-2 px-4 py-2 text-sm transition-colors ${
-                    pathname === child.href || pathname?.startsWith(child.href + '/')
-                      ? 'text-wiki-accent bg-wiki-accent/10'
-                      : 'text-wiki-text-muted hover:text-white hover:bg-wiki-accent/5'
-                  }`}
-                >
-                  {child.icon && <span className="text-base">{child.icon}</span>}
-                  <span>{child.label}</span>
-                  <svg className="w-3 h-3 ml-auto opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </Link>
-              ))}
-            </div>
+            <>
+              <div className="absolute top-full left-0 w-full h-2" />
+              <div className="absolute top-full left-0 pt-2 bg-wiki-dark border border-wiki-border/30 rounded-lg shadow-xl min-w-[180px] py-2 z-50">
+                {section.children!.map((child) => (
+                  <Link
+                    key={child.href}
+                    href={child.href}
+                    className={`flex items-center gap-2 px-4 py-2 text-sm transition-colors ${
+                      pathname === child.href || pathname?.startsWith(child.href + '/')
+                        ? 'text-wiki-accent bg-wiki-accent/10'
+                        : 'text-wiki-text-muted hover:text-white hover:bg-wiki-accent/5'
+                    }`}
+                  >
+                    {child.icon && <span className="text-base">{child.icon}</span>}
+                    <span>{child.label}</span>
+                    <svg className="w-3 h-3 ml-auto opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                ))}
+              </div>
+            </>
           )}
         </div>
       )
