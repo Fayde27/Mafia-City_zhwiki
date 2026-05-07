@@ -211,10 +211,10 @@ export default function WikiHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-50" ref={dropdownRef}>
-      <div className="bg-wiki-dark border-b border-wiki-border/20">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-14">
+    <header className="sticky top-0 z-50" style={{ overflow: 'visible' }} ref={dropdownRef}>
+      <div className="bg-wiki-dark border-b border-wiki-border/20" style={{ overflow: 'visible' }}>
+        <div className="container mx-auto px-4" style={{ overflow: 'visible' }}>
+          <div className="flex items-center justify-between h-14" style={{ overflow: 'visible' }}>
             <Link href="/" className="flex items-center gap-3 flex-shrink-0">
               <div className="text-xl font-bold text-wiki-accent">
                 黑道風雲
@@ -224,7 +224,7 @@ export default function WikiHeader() {
               </div>
             </Link>
 
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden md:flex items-center gap-1 overflow-visible">
               {navSections.map(renderNavItem)}
             </nav>
 
