@@ -16,7 +16,7 @@ interface Category {
 export default function EditArticlePage() {
   const router = useRouter()
   const params = useParams()
-  const { isAdmin } = useAdminAuth()
+  const { isAdmin, isLoaded } = useAdminAuth()
   const articleId = params?.id as string
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
@@ -35,6 +35,7 @@ export default function EditArticlePage() {
   })
 
   useEffect(() => {
+    if (!isLoaded) return
     if (!isAdmin) {
       router.push('/admin/login')
       return
@@ -58,7 +59,7 @@ export default function EditArticlePage() {
       })
       setLoading(false)
     })
-  }, [articleId, isAdmin, router])
+  }, [articleId, isAdmin, isLoaded, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

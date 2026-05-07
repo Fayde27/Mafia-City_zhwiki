@@ -15,7 +15,7 @@ interface Category {
 
 export default function NewArticlePage() {
   const router = useRouter()
-  const { isAdmin } = useAdminAuth()
+  const { isAdmin, isLoaded } = useAdminAuth()
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -34,6 +34,7 @@ export default function NewArticlePage() {
   })
 
   useEffect(() => {
+    if (!isLoaded) return
     if (!isAdmin) {
       router.push('/admin/login')
       return
@@ -41,7 +42,7 @@ export default function NewArticlePage() {
     fetch('/api/admin/categories')
       .then(res => res.json())
       .then(data => setCategories(data))
-  }, [isAdmin, router])
+  }, [isAdmin, isLoaded, router])
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
