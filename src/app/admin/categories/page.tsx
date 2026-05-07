@@ -21,7 +21,7 @@ interface Category {
 
 export default function AdminCategoriesPage() {
   const router = useRouter()
-  const { isAdmin } = useAdminAuth()
+  const { isAdmin, isLoaded } = useAdminAuth()
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -35,12 +35,13 @@ export default function AdminCategoriesPage() {
   })
 
   useEffect(() => {
+    if (!isLoaded) return
     if (!isAdmin) {
       router.push('/admin/login')
       return
     }
     fetchCategories()
-  }, [isAdmin, router])
+  }, [isAdmin, isLoaded, router])
 
   const fetchCategories = () => {
     fetch('/api/admin/categories')
