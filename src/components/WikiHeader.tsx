@@ -137,38 +137,18 @@ export default function WikiHeader() {
         <div className="md:hidden bg-wiki-dark border-b border-wiki-border/20">
           <div className="container mx-auto px-4 py-3 space-y-1">
             {navSections.map((section) => (
-              <div key={section.href}>
-                <Link
-                  href={section.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`block px-3 py-2 text-sm rounded ${
-                    isActive(section.href) || isChildActive(section.href)
-                      ? 'text-wiki-accent bg-wiki-accent/10'
-                      : 'text-wiki-text-muted hover:text-white'
-                  }`}
-                >
-                  {section.label}
-                </Link>
-                {section.children && (
-                  <div className="pl-4 space-y-1">
-                    {section.children.map((child) => (
-                      <Link
-                        key={child.href}
-                        href={child.href}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={`block px-3 py-1.5 text-sm rounded ${
-                          pathname === child.href || pathname?.startsWith(child.href + '/')
-                            ? 'text-wiki-accent bg-wiki-accent/10'
-                            : 'text-wiki-text-muted hover:text-white'
-                        }`}
-                      >
-                        {child.icon && <span className="mr-1">{child.icon}</span>}
-                        {child.label}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <Link
+                key={section.href}
+                href={section.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-3 py-2 text-sm rounded ${
+                  isActive(section.href)
+                    ? 'text-wiki-accent bg-wiki-accent/10'
+                    : 'text-wiki-text-muted hover:text-white'
+                }`}
+              >
+                {section.label}
+              </Link>
             ))}
             <form onSubmit={handleSearch} className="relative pt-2">
               <input

@@ -11,9 +11,11 @@ export default function AdminAnnouncementNewPage() {
   const router = useRouter()
   const { isAdmin, isLoaded } = useAdminAuth()
   const [saving, setSaving] = useState(false)
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     title: '',
     content: '',
+    banner: '',
     type: 'info',
     isActive: true,
     sortOrder: 0,
@@ -26,6 +28,24 @@ export default function AdminAnnouncementNewPage() {
       return
     }
   }, [isAdmin, isLoaded, router])
+
+  const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const result = reader.result as string
+        setBannerPreview(result)
+        setFormData({ ...formData, banner: result })
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleBannerUrlChange = (url: string) => {
+    setBannerPreview(url || null)
+    setFormData({ ...formData, banner: url })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -95,6 +115,45 @@ export default function AdminAnnouncementNewPage() {
                   className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none resize-y"
                   required
                 />
+              </div>
+
+              <div>
+                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">Banner 图片</label>
+                <div className="space-y-3">
+                  <div className="flex gap-4">
+                    <label className="flex-1">
+                      <span className="block text-wiki-text-muted text-xs mb-1">上传图片</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleBannerUpload}
+                        className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-2 text-wiki-text text-sm focus:border-wiki-accent focus:outline-none cursor-pointer"
+                      />
+                    </label>
+                    <div className="flex-1">
+                      <span className="block text-wiki-text-muted text-xs mb-1">或输入图片 URL</span>
+                      <input
+                        type="text"
+                        value={formData.banner}
+                        onChange={(e) => handleBannerUrlChange(e.target.value)}
+                        placeholder="https://example.com/banner.jpg"
+                        className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-2 text-wiki-text text-sm focus:border-wiki-accent focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                  {bannerPreview && (
+                    <div className="relative rounded-lg overflow-hidden border border-wiki-border">
+                      <img src={bannerPreview} alt="Banner 预览" className="w-full h-48 object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => { setBannerPreview(null); setFormData({ ...formData, banner: '' }) }}
+                        className="absolute top-2 right-2 px-3 py-1 bg-wiki-danger text-white text-xs rounded hover:bg-wiki-danger/80"
+                      >
+                        移除
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">

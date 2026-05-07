@@ -23,6 +23,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       data: {
         title: body.title,
         content: body.content,
+        banner: body.banner || null,
         type: body.type,
         isActive: body.isActive,
         sortOrder: body.sortOrder,

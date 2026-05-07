@@ -21,11 +21,13 @@ export default function EditArticlePage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
     content: '',
     summary: '',
+    coverImage: '',
     categoryId: '',
     tags: '',
     isPublished: false,
@@ -50,6 +52,7 @@ export default function EditArticlePage() {
         slug: article.slug,
         content: article.content,
         summary: article.summary || '',
+        coverImage: article.coverImage || '',
         categoryId: article.categoryId,
         tags: article.tags || '',
         isPublished: article.isPublished,
@@ -60,6 +63,30 @@ export default function EditArticlePage() {
       setLoading(false)
     })
   }, [articleId, isAdmin, isLoaded, router])
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploading(true)
+    const uploadFormData = new FormData()
+    uploadFormData.append('file', file)
+
+    try {
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: uploadFormData,
+      })
+      const data = await res.json()
+      if (data.url) {
+        setFormData(prev => ({ ...prev, coverImage: data.url }))
+      }
+    } catch (err) {
+      alert('上传失败')
+    } finally {
+      setUploading(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -145,6 +172,46 @@ export default function EditArticlePage() {
               onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
               className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none h-24"
             />
+          </div>
+
+          <div>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">封面图片</label>
+            <div className="space-y-3">
+              <div className="flex gap-4">
+                <label className="flex-1">
+                  <span className="block text-wiki-text-muted text-xs mb-1">上传图片</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={uploading}
+                    className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-2 text-wiki-text text-sm focus:border-wiki-accent focus:outline-none cursor-pointer"
+                  />
+                </label>
+                <div className="flex-1">
+                  <span className="block text-wiki-text-muted text-xs mb-1">或输入图片 URL</span>
+                  <input
+                    type="text"
+                    value={formData.coverImage}
+                    onChange={(e) => setFormData({ ...formData, coverImage: e.target.value })}
+                    placeholder="https://example.com/cover.jpg"
+                    className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-2 text-wiki-text text-sm focus:border-wiki-accent focus:outline-none"
+                  />
+                </div>
+              </div>
+              {formData.coverImage && (
+                <div className="relative rounded-lg overflow-hidden border border-wiki-border">
+                  <img src={formData.coverImage} alt="封面预览" className="w-full h-48 object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, coverImage: '' })}
+                    className="absolute top-2 right-2 px-3 py-1 bg-wiki-danger text-white text-xs rounded hover:bg-wiki-danger/80"
+                  >
+                    移除
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           <div>

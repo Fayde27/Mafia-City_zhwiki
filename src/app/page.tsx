@@ -346,13 +346,19 @@ export default function HomePage() {
                 ) : (
                   <div className="space-y-3">
                     {announcements.map((ann) => (
-                      <div key={ann.id} className="flex items-start gap-3 pb-3 border-b border-wiki-border last:border-0 last:pb-0">
-                        <span className="text-wiki-accent text-xs font-bold flex-shrink-0 mt-0.5">[{getTypeLabel(ann.type)}]</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-wiki-text text-sm font-bold">{ann.title}</p>
-                          <p className="text-wiki-text-muted text-xs mt-1">{ann.content}</p>
+                      <Link 
+                        key={ann.id} 
+                        href={`/wiki/announcements/${ann.id}`}
+                        className="block group"
+                      >
+                        <div className="flex items-start gap-3 pb-3 border-b border-wiki-border last:border-0 last:pb-0 hover:bg-wiki-gray/50 -mx-2 px-2 py-1 rounded-lg transition-colors">
+                          <span className="text-wiki-accent text-xs font-bold flex-shrink-0 mt-0.5">[{getTypeLabel(ann.type)}]</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-wiki-text text-sm font-bold group-hover:text-wiki-accent transition-colors">{ann.title}</p>
+                            <p className="text-wiki-text-muted text-xs mt-1">{ann.content}</p>
+                          </div>
                         </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 )}

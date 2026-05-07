@@ -51,6 +51,7 @@ model Announcement {
   id        String   @id @default(cuid())
   title     String
   content   String
+  banner    String?
   type      String   @default("info")
   isActive  Boolean  @default(true)
   sortOrder Int      @default(0)
