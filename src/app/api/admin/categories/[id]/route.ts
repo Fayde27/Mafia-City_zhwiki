@@ -44,6 +44,21 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const category = await prisma.category.findUnique({
+      where: { id: params.id },
+      include: { _count: { select: { articles: true } } },
+    })
+
+    if (!category) {
+      return NextResponse.json({ error: '分类不存在' }, { status: 404 })
+    }
+
+    if (category._count.articles > 0) {
+      await prisma.article.deleteMany({
+        where: { categoryId: params.id },
+      })
+    }
+
     await prisma.category.delete({
       where: { id: params.id },
     })

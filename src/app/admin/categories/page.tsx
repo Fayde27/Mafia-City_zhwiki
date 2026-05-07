@@ -93,11 +93,16 @@ export default function AdminCategoriesPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('确定要删除这个分类吗？该分类下的文章将失去分类关联。')) return
+    if (!confirm('确定要删除这个分类吗？该分类下的所有文章也将被删除。')) return
 
     try {
-      await fetch(`/api/admin/categories/${id}`, { method: 'DELETE' })
-      fetchCategories()
+      const res = await fetch(`/api/admin/categories/${id}`, { method: 'DELETE' })
+      const data = await res.json()
+      if (data.error) {
+        alert(data.error)
+      } else {
+        fetchCategories()
+      }
     } catch (err) {
       alert('删除失败')
     }
