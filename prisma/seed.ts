@@ -339,6 +339,28 @@ async function main() {
   })
 
   console.log('筛选选项初始化完成！')
+
+  // 创建默认侧边栏导航数据
+  await prisma.sidebarNav.deleteMany({})
+  await prisma.sidebarNav.createMany({
+    data: [
+      // 新手快速入口
+      { section: 'quick-entry', label: '图鉴', icon: '📚', href: '/wiki', sortOrder: 10, isActive: true },
+      { section: 'quick-entry', label: '玩法攻略', icon: '', href: '/wiki/guides', sortOrder: 9, isActive: true },
+      { section: 'quick-entry', label: '游戏资讯', icon: '📰', href: '/wiki/articles', sortOrder: 8, isActive: true },
+      { section: 'quick-entry', label: '角色图鉴', icon: '', href: '/wiki/characters/characters', sortOrder: 7, isActive: true },
+      { section: 'quick-entry', label: '建筑图鉴', icon: '', href: '/wiki/buildings', sortOrder: 6, isActive: true },
+      { section: 'quick-entry', label: '装备图鉴', icon: '️', href: '/wiki/equipment', sortOrder: 5, isActive: true },
+      // 快捷功能
+      { section: 'shortcut', label: '新手入门', icon: '', href: '/wiki/guides', sortOrder: 10, isActive: true },
+      { section: 'shortcut', label: '新手必看', icon: '', href: '/wiki/guides', sortOrder: 9, isActive: true },
+      { section: 'shortcut', label: '新手攻略', icon: '', href: '/wiki/guides', sortOrder: 8, isActive: true },
+      { section: 'shortcut', label: '新手问答', icon: '', href: '/wiki/guides', sortOrder: 7, isActive: true },
+      { section: 'shortcut', label: '常见问题', icon: '', href: '/wiki/guides', sortOrder: 6, isActive: true },
+    ],
+  })
+
+  console.log('侧边栏导航初始化完成！')
 }
 
 main()

@@ -288,3 +288,15 @@ model Troop {
   updatedAt   DateTime      @updatedAt
   category    TroopCategory @relation(fields: [categoryId], references: [id])
 }
+
+model SidebarNav {
+  id          String   @id @default(cuid())
+  section     String   // 所属分组：quick-entry 或 shortcut
+  label       String   // 显示名称
+  icon        String?  // 图标
+  href        String   // 跳转链接
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

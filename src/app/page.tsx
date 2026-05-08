@@ -45,11 +45,22 @@ interface Announcement {
   createdAt: string
 }
 
+interface SidebarNavItem {
+  id: string
+  section: string
+  label: string
+  icon: string | null
+  href: string
+  sortOrder: number
+  isActive: boolean
+}
+
 export default function HomePage() {
   const { isAdmin, token } = useAdminAuth()
   const [categories, setCategories] = useState<Category[]>([])
   const [articles, setArticles] = useState<Article[]>([])
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
+  const [sidebarNavItems, setSidebarNavItems] = useState<SidebarNavItem[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -58,10 +69,12 @@ export default function HomePage() {
       fetch('/api/wiki/categories').then(res => res.json()),
       fetch('/api/wiki/articles?limit=6').then(res => res.json()),
       fetch('/api/wiki/announcements').then(res => res.json()),
-    ]).then(([cats, arts, anns]) => {
+      fetch('/api/wiki/sidebar-nav').then(res => res.json()),
+    ]).then(([cats, arts, anns, navItems]) => {
       setCategories(cats || [])
       setArticles(arts?.articles || [])
       setAnnouncements(anns || [])
+      setSidebarNavItems(Array.isArray(navItems) ? navItems : [])
       setLoading(false)
     }).catch(() => {
       setLoading(false)
@@ -96,12 +109,15 @@ export default function HomePage() {
 
   const quickLinks = [
     { label: '图鉴', href: '/wiki', icon: '📚' },
-    { label: '玩法攻略', href: '/wiki/guides', icon: '📖' },
+    { label: '玩法攻略', href: '/wiki/guides', icon: '' },
     { label: '游戏资讯', href: '/wiki/articles', icon: '📰' },
-    { label: '角色图鉴', href: '/wiki/characters/characters', icon: '👤' },
-    { label: '建筑图鉴', href: '/wiki/buildings', icon: '🏠' },
-    { label: '装备图鉴', href: '/wiki/equipment', icon: '⚔️' },
+    { label: '角色图鉴', href: '/wiki/characters/characters', icon: '' },
+    { label: '建筑图鉴', href: '/wiki/buildings', icon: '' },
+    { label: '装备图鉴', href: '/wiki/equipment', icon: '️' },
   ]
+
+  const quickEntryItems = sidebarNavItems.filter(item => item.section === 'quick-entry')
+  const shortcutItems = sidebarNavItems.filter(item => item.section === 'shortcut')
 
   return (
     <div className="min-h-screen bg-wiki-bg">
@@ -117,15 +133,27 @@ export default function HomePage() {
                   新手快速入口
                 </h3>
                 <div className="space-y-2">
-                  {quickLinks.map((link) => (
-                    <Link key={link.href} href={link.href} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors group">
-                      <span className="text-lg">{link.icon}</span>
-                      <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors">{link.label}</span>
-                      <svg className="w-4 h-4 text-wiki-text-secondary ml-auto group-hover:text-wiki-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </Link>
-                  ))}
+                  {quickEntryItems.length > 0 ? (
+                    quickEntryItems.map((item) => (
+                      <Link key={item.id} href={item.href} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors group">
+                        {item.icon && <span className="text-lg">{item.icon}</span>}
+                        <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors">{item.label}</span>
+                        <svg className="w-4 h-4 text-wiki-text-secondary ml-auto group-hover:text-wiki-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </Link>
+                    ))
+                  ) : (
+                    quickLinks.map((link) => (
+                      <Link key={link.href} href={link.href} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors group">
+                        <span className="text-lg">{link.icon}</span>
+                        <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors">{link.label}</span>
+                        <svg className="w-4 h-4 text-wiki-text-secondary ml-auto group-hover:text-wiki-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </Link>
+                    ))
+                  )}
                 </div>
               </div>
 
@@ -135,18 +163,21 @@ export default function HomePage() {
                   快捷功能
                 </h3>
                 <div className="space-y-2">
-                  {[
-                    { label: '新手入门', icon: '' },
-                    { label: '新手必看', icon: '⭐' },
-                    { label: '新手攻略', icon: '📋' },
-                    { label: '新手问答', icon: '❓' },
-                    { label: '常见问题', icon: '💡' },
-                  ].map((item) => (
-                    <div key={item.label} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors cursor-pointer group">
-                      <span className="text-lg">{item.icon}</span>
-                      <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors">{item.label}</span>
+                  {shortcutItems.length > 0 ? (
+                    shortcutItems.map((item) => (
+                      <Link key={item.id} href={item.href} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors group">
+                        {item.icon && <span className="text-lg">{item.icon}</span>}
+                        <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors">{item.label}</span>
+                        <svg className="w-4 h-4 text-wiki-text-secondary ml-auto group-hover:text-wiki-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </Link>
+                    ))
+                  ) : (
+                    <div className="text-wiki-text-muted text-sm text-center py-4">
+                      暂无快捷功能，请在管理后台添加
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
 
@@ -177,11 +208,19 @@ export default function HomePage() {
                     </Link>
                     <Link href="/admin/categories" className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors group">
                       <span className="text-lg">📁</span>
-                      <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors">分类管理</span>
+                      <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors">攻略分类管理</span>
+                    </Link>
+                    <Link href="/admin/wiki-categories" className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors group">
+                      <span className="text-lg">📚</span>
+                      <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors">图鉴分类管理</span>
                     </Link>
                     <Link href="/admin/announcements" className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors group">
                       <span className="text-lg">📢</span>
                       <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors">公告管理</span>
+                    </Link>
+                    <Link href="/admin/sidebar-nav" className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors group">
+                      <span className="text-lg">🧭</span>
+                      <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors">侧边栏导航</span>
                     </Link>
                   </div>
                 </div>
@@ -221,9 +260,14 @@ export default function HomePage() {
                   </form>
                   <div className="flex flex-wrap gap-2">
                     {['新手入门', '角色攻略', '装备图鉴', '建筑攻略', '阵容搭配', '赛事活动'].map((tag) => (
-                      <span key={tag} className="px-3 py-1.5 bg-wiki-gray text-wiki-text-secondary text-xs rounded-full border border-wiki-border hover:border-wiki-accent hover:text-wiki-accent cursor-pointer transition-colors">
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => setSearchQuery(tag)}
+                        className="px-3 py-1.5 bg-wiki-gray text-wiki-text-secondary text-xs rounded-full border border-wiki-border hover:border-wiki-accent hover:text-wiki-accent cursor-pointer transition-colors"
+                      >
                         {tag}
-                      </span>
+                      </button>
                     ))}
                   </div>
                 </div>

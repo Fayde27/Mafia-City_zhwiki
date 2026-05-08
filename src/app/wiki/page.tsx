@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
+import { useAdminAuth } from '@/hooks/useAdminAuth'
 
 interface WikiCategory {
   id: string
@@ -71,6 +72,7 @@ const wikiCategories: WikiCategory[] = [
 
 export default function WikiIndexPage() {
   const [loading, setLoading] = useState(true)
+  const { isAdmin, isLoaded } = useAdminAuth()
 
   useEffect(() => {
     fetch('/api/wiki/characters/categories')
@@ -85,6 +87,15 @@ export default function WikiIndexPage() {
       })
   }, [])
 
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-wiki-bg">
+        <WikiHeader />
+        <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-wiki-bg">
       <WikiHeader />
@@ -96,11 +107,21 @@ export default function WikiIndexPage() {
           <span className="text-wiki-text">图鉴</span>
         </div>
 
-        <div className="mb-6 md:mb-8">
-          <h1 className="text-3xl md:text-4xl font-heading font-bold text-wiki-accent heading-hard">
-            图鉴
-          </h1>
-          <p className="text-wiki-text-muted text-sm mt-2">选择图鉴类型，浏览游戏内容</p>
+        <div className="flex items-center justify-between mb-6 md:mb-8">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-heading font-bold text-wiki-accent heading-hard">
+              图鉴
+            </h1>
+            <p className="text-wiki-text-muted text-sm mt-2">选择图鉴类型，浏览游戏内容</p>
+          </div>
+          {isAdmin && (
+            <Link
+              href="/admin/wiki-categories"
+              className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90"
+            >
+              管理分类
+            </Link>
+          )}
         </div>
 
         {loading ? (
