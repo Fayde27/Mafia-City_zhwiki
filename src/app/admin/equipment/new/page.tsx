@@ -1,5 +1,8 @@
 'use client'
 
+export const runtime = 'edge'
+
+
 import { useState, useEffect } from 'react'
 import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'

@@ -1,3 +1,5 @@
+export const runtime = 'edge'
+
 import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'

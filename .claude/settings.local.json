@@ -4,7 +4,8 @@
       "Bash(npm run:*)",
       "Bash(npm install:*)",
       "Bash(npx vercel:*)",
-      "Bash(node -e \"console.log\\(require\\(''crypto''\\).randomBytes\\(32\\).toString\\(''base64''\\)\\)\")"
+      "Bash(node -e \"console.log\\(require\\(''crypto''\\).randomBytes\\(32\\).toString\\(''base64''\\)\\)\")",
+      "Bash(node -e \":*)"
     ]
   }
 }
