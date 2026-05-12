@@ -1,5 +1,7 @@
+export const runtime = 'edge'
+
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(request: Request) {
   try {
@@ -8,28 +10,32 @@ export async function GET(request: Request) {
     const slug = searchParams.get('slug')
     const search = searchParams.get('search')
 
-    const where: any = { isPublished: true }
+    let query = supabaseAdmin
+      .from('Character')
+      .select('*, CharacterCategory(*)')
+      .eq('isPublished', true)
+
     if (category) {
-      where.category = { slug: category }
+      query = query.eq('CharacterCategory.slug', category)
     }
     if (slug) {
-      where.slug = slug
+      query = query.eq('slug', slug)
     }
     if (search) {
-      where.OR = [
-        { name: { contains: search } },
-        { title: { contains: search } },
-        { description: { contains: search } },
-      ]
+      query = query.or(`name.ilike.%${search}%,title.ilike.%${search}%,description.ilike.%${search}%`)
     }
 
-    const characters = await prisma.character.findMany({
-      where,
-      orderBy: [{ sortOrder: 'desc' }, { createdAt: 'desc' }],
-      include: { category: true },
-    })
+    const { data: characters, error } = await query
+      .order('sortOrder', { ascending: false })
 
-    return NextResponse.json({ characters })
+    if (error) throw error
+
+    const mapped = (characters || []).map(({ CharacterCategory, ...rest }: any) => ({
+      ...rest,
+      category: CharacterCategory,
+    }))
+
+    return NextResponse.json({ characters: mapped })
   } catch (error) {
     return NextResponse.json({ error: '获取角色失败' }, { status: 500 })
   }

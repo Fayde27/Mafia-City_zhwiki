@@ -1,16 +1,20 @@
+export const runtime = 'edge'
+
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const article = await prisma.article.findUnique({
-      where: { id: params.id },
-      include: { category: true },
-    })
-    if (!article) {
+    const { data: article, error } = await supabaseAdmin
+      .from('Article')
+      .select('*, Category(*)')
+      .eq('id', params.id)
+      .single()
+
+    if (error || !article) {
       return NextResponse.json({ error: '文章不存在' }, { status: 404 })
     }
     return NextResponse.json(article)
@@ -25,9 +29,9 @@ export async function PUT(
 ) {
   try {
     const { title, slug, content, summary, coverImage, categoryId, tags, isPublished, isPinned, badges, sortOrder } = await request.json()
-    const article = await prisma.article.update({
-      where: { id: params.id },
-      data: {
+    const { data: article, error } = await supabaseAdmin
+      .from('Article')
+      .update({
         title,
         slug,
         content,
@@ -39,9 +43,12 @@ export async function PUT(
         isPinned,
         badges,
         sortOrder,
-      },
-      include: { category: true },
-    })
+      })
+      .eq('id', params.id)
+      .select('*, Category(*)')
+      .single()
+
+    if (error) throw error
     return NextResponse.json(article)
   } catch (error) {
     return NextResponse.json({ error: '更新文章失败' }, { status: 500 })
@@ -53,9 +60,12 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await prisma.article.delete({
-      where: { id: params.id },
-    })
+    const { error } = await supabaseAdmin
+      .from('Article')
+      .delete()
+      .eq('id', params.id)
+
+    if (error) throw error
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error: '删除文章失败' }, { status: 500 })

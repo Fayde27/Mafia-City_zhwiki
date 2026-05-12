@@ -1,6 +1,8 @@
+export const runtime = 'edge'
+
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import jwt from 'jsonwebtoken'
+import { verifyToken } from '@/lib/auth'
 
 export async function GET() {
   try {
@@ -11,10 +13,9 @@ export async function GET() {
       return NextResponse.json({ isAdmin: false })
     }
 
-    const secret = process.env.JWT_SECRET || 'your-secret-key'
-    const decoded = jwt.verify(token, secret) as any
+    const decoded = await verifyToken(token)
 
-    return NextResponse.json({ isAdmin: decoded.role === 'admin' })
+    return NextResponse.json({ isAdmin: decoded?.role === 'admin' })
   } catch (error) {
     return NextResponse.json({ isAdmin: false })
   }

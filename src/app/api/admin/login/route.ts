@@ -1,5 +1,7 @@
+export const runtime = 'edge'
+
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase'
 import { verifyPassword, generateToken } from '@/lib/auth'
 
 export async function POST(request: Request) {
@@ -13,11 +15,13 @@ export async function POST(request: Request) {
       )
     }
 
-    const user = await prisma.user.findUnique({
-      where: { username },
-    })
+    const { data: user, error } = await supabaseAdmin
+      .from('User')
+      .select('*')
+      .eq('username', username)
+      .single()
 
-    if (!user) {
+    if (error || !user) {
       return NextResponse.json(
         { error: '用户名或密码错误' },
         { status: 401 }
@@ -33,13 +37,13 @@ export async function POST(request: Request) {
       )
     }
 
-    const token = generateToken({
+    const token = await generateToken({
       userId: user.id,
       username: user.username,
       role: user.role,
     })
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       token,
       user: {
@@ -48,6 +52,16 @@ export async function POST(request: Request) {
         role: user.role,
       },
     })
+
+    response.cookies.set('admin-token', token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7,
+      path: '/',
+    })
+
+    return response
   } catch (error) {
     console.error('Login error:', error)
     return NextResponse.json(

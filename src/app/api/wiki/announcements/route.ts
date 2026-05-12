@@ -1,10 +1,19 @@
+export const runtime = 'edge'
+
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET() {
-  const announcements = await prisma.announcement.findMany({
-    where: { isActive: true },
-    orderBy: { createdAt: 'desc' },
-  })
-  return NextResponse.json(announcements)
+  try {
+    const { data: announcements, error } = await supabaseAdmin
+      .from('Announcement')
+      .select('*')
+      .eq('isActive', true)
+      .order('createdAt', { ascending: false })
+
+    if (error) throw error
+    return NextResponse.json(announcements)
+  } catch (error) {
+    return NextResponse.json({ error: '获取公告失败' }, { status: 500 })
+  }
 }

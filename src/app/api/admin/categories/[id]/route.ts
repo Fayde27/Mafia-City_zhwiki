@@ -1,20 +1,20 @@
+export const runtime = 'edge'
+
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const category = await prisma.category.findUnique({
-      where: { id: params.id },
-      include: {
-        _count: {
-          select: { articles: true },
-        },
-      },
-    })
-    if (!category) {
+    const { data: category, error } = await supabaseAdmin
+      .from('Category')
+      .select('*')
+      .eq('id', params.id)
+      .single()
+
+    if (error || !category) {
       return NextResponse.json({ error: '分类不存在' }, { status: 404 })
     }
     return NextResponse.json(category)
@@ -29,10 +29,14 @@ export async function PUT(
 ) {
   try {
     const { name, slug, description, icon, sortOrder } = await request.json()
-    const category = await prisma.category.update({
-      where: { id: params.id },
-      data: { name, slug, description, icon, sortOrder },
-    })
+    const { data: category, error } = await supabaseAdmin
+      .from('Category')
+      .update({ name, slug, description, icon, sortOrder })
+      .eq('id', params.id)
+      .select()
+      .single()
+
+    if (error) throw error
     return NextResponse.json(category)
   } catch (error) {
     return NextResponse.json({ error: '更新分类失败' }, { status: 500 })
@@ -44,24 +48,22 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const category = await prisma.category.findUnique({
-      where: { id: params.id },
-      include: { _count: { select: { articles: true } } },
-    })
+    const { data: category, error: findError } = await supabaseAdmin
+      .from('Category')
+      .select('id')
+      .eq('id', params.id)
+      .single()
 
-    if (!category) {
+    if (findError || !category) {
       return NextResponse.json({ error: '分类不存在' }, { status: 404 })
     }
 
-    if (category._count.articles > 0) {
-      await prisma.article.deleteMany({
-        where: { categoryId: params.id },
-      })
-    }
+    const { error } = await supabaseAdmin
+      .from('Category')
+      .delete()
+      .eq('id', params.id)
 
-    await prisma.category.delete({
-      where: { id: params.id },
-    })
+    if (error) throw error
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error: '删除分类失败' }, { status: 500 })

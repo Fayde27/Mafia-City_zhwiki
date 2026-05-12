@@ -1,21 +1,25 @@
+export const runtime = 'edge'
+
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const section = searchParams.get('section')
 
-    const where: any = {}
+    let query = supabaseAdmin
+      .from('SidebarNav')
+      .select('*')
+      .order('sortOrder', { ascending: false })
+
     if (section) {
-      where.section = section
+      query = query.eq('section', section)
     }
 
-    const items = await prisma.sidebarNav.findMany({
-      where,
-      orderBy: [{ section: 'asc' }, { sortOrder: 'asc' }, { createdAt: 'asc' }],
-    })
+    const { data: items, error } = await query
 
+    if (error) throw error
     return NextResponse.json(items)
   } catch (error) {
     return NextResponse.json({ error: '获取导航数据失败' }, { status: 500 })
@@ -25,16 +29,20 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const data = await request.json()
-    const item = await prisma.sidebarNav.create({
-      data: {
+    const { data: item, error } = await supabaseAdmin
+      .from('SidebarNav')
+      .insert({
         section: data.section,
         label: data.label,
         icon: data.icon || null,
         href: data.href,
         sortOrder: data.sortOrder || 0,
         isActive: data.isActive !== false,
-      },
-    })
+      })
+      .select()
+      .single()
+
+    if (error) throw error
     return NextResponse.json(item)
   } catch (error) {
     return NextResponse.json({ error: '创建导航项失败' }, { status: 500 })

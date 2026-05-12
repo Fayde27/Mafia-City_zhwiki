@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
@@ -31,7 +31,7 @@ const wikiTypes = [
   { key: 'troops', label: '兵种图鉴', model: 'troopCategory' },
 ]
 
-export default function AdminWikiCategoriesPage() {
+function AdminWikiCategoriesContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { isAdmin, isLoaded } = useAdminAuth()
@@ -371,5 +371,13 @@ export default function AdminWikiCategoriesPage() {
 
       <WikiFooter />
     </div>
+  )
+}
+
+export default function AdminWikiCategoriesPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-wiki-bg flex items-center justify-center text-wiki-text-muted">加载中...</div>}>
+      <AdminWikiCategoriesContent />
+    </Suspense>
   )
 }

@@ -1,5 +1,7 @@
+export const runtime = 'edge'
+
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(request: Request) {
   try {
@@ -9,41 +11,44 @@ export async function GET(request: Request) {
     const category = searchParams.get('category')
     const slug = searchParams.get('slug')
     const search = searchParams.get('search')
-    const skip = (page - 1) * limit
+    const from = (page - 1) * limit
+    const to = from + limit - 1
 
-    const where: any = { isPublished: true }
+    let query = supabaseAdmin
+      .from('Article')
+      .select('*, Category(*)', { count: 'exact' })
+      .eq('isPublished', true)
+
     if (category) {
-      where.category = { slug: category }
+      query = query.eq('Category.slug', category)
     }
     if (slug) {
-      where.slug = slug
+      query = query.eq('slug', slug)
     }
     if (search) {
-      where.OR = [
-        { title: { contains: search } },
-        { content: { contains: search } },
-        { tags: { contains: search } },
-      ]
+      query = query.or(`title.ilike.%${search}%,content.ilike.%${search}%,tags.ilike.%${search}%`)
     }
 
-    const [articles, total] = await Promise.all([
-      prisma.article.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: [{ isPinned: 'desc' }, { sortOrder: 'desc' }, { createdAt: 'desc' }],
-        include: { category: true },
-      }),
-      prisma.article.count({ where }),
-    ])
+    const { data: articles, error, count: total } = await query
+      .order('isPinned', { ascending: false })
+      .order('createdAt', { ascending: false })
+      .range(from, to)
+
+    if (error) throw error
+
+    // Supabase 返回关联数据用大写表名，映射为前端期望的小写 category
+    const mapped = (articles || []).map(({ Category, ...rest }: any) => ({
+      ...rest,
+      category: Category,
+    }))
 
     return NextResponse.json({
-      articles,
+      articles: mapped,
       pagination: {
         page,
         limit,
-        total,
-        totalPages: Math.ceil(total / limit),
+        total: total || 0,
+        totalPages: Math.ceil((total || 0) / limit),
       },
     })
   } catch (error) {

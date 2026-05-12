@@ -1,11 +1,16 @@
+export const runtime = 'edge'
+
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET() {
   try {
-    const options = await prisma.buildingFilterOption.findMany({
-      orderBy: [{ type: 'asc' }, { sortOrder: 'asc' }],
-    })
+    const { data: options, error } = await supabaseAdmin
+      .from('BuildingFilterOption')
+      .select('*')
+      .order('sortOrder', { ascending: true })
+
+    if (error) throw error
     return NextResponse.json(options)
   } catch {
     return NextResponse.json({ error: '获取筛选选项失败' }, { status: 500 })
@@ -18,9 +23,13 @@ export async function POST(request: Request) {
     if (!type || !value) {
       return NextResponse.json({ error: '类型和值不能为空' }, { status: 400 })
     }
-    const option = await prisma.buildingFilterOption.create({
-      data: { type, value },
-    })
+    const { data: option, error } = await supabaseAdmin
+      .from('BuildingFilterOption')
+      .insert({ type, value })
+      .select()
+      .single()
+
+    if (error) throw error
     return NextResponse.json(option, { status: 201 })
   } catch {
     return NextResponse.json({ error: '创建筛选选项失败' }, { status: 500 })

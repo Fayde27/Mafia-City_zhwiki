@@ -1,14 +1,18 @@
+export const runtime = 'edge'
+
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const item = await prisma.sidebarNav.findUnique({
-      where: { id: params.id },
-    })
+    const { data: item, error } = await supabaseAdmin.from('SidebarNav').select('*')
+      .eq('id', params.id )
+      .single()
+
+    if (error) throw error
     if (!item) {
       return NextResponse.json({ error: '导航项不存在' }, { status: 404 })
     }
@@ -24,17 +28,19 @@ export async function PUT(
 ) {
   try {
     const data = await request.json()
-    const item = await prisma.sidebarNav.update({
-      where: { id: params.id },
-      data: {
+    const { data: item, error } = await supabaseAdmin.from('SidebarNav').update({
         section: data.section,
         label: data.label,
         icon: data.icon || null,
         href: data.href,
         sortOrder: data.sortOrder || 0,
         isActive: data.isActive !== false,
-      },
-    })
+      })
+      .eq('id', params.id )
+      .select()
+      .single()
+
+    if (error) throw error
     return NextResponse.json(item)
   } catch (error) {
     return NextResponse.json({ error: '更新导航项失败' }, { status: 500 })
@@ -46,9 +52,8 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await prisma.sidebarNav.delete({
-      where: { id: params.id },
-    })
+    const { error } = await supabaseAdmin.from('SidebarNav').delete()
+      .eq('id', params.id )
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error: '删除导航项失败' }, { status: 500 })

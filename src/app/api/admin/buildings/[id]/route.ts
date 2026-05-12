@@ -1,15 +1,16 @@
+export const runtime = 'edge'
+
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const building = await prisma.building.findUnique({
-      where: { id: params.id },
-      include: { category: true },
-    })
+    const { data: building, error } = await supabaseAdmin.from('Building').select('*')
+      .eq('id', params.id)
+      .single()
     if (!building) {
       return NextResponse.json({ error: '建筑不存在' }, { status: 404 })
     }
@@ -25,9 +26,7 @@ export async function PUT(
 ) {
   try {
     const data = await request.json()
-    const building = await prisma.building.update({
-      where: { id: params.id },
-      data: {
+    const { data: building, error } = await supabaseAdmin.from('Building').update({
         name: data.name,
         slug: data.slug,
         icon: data.icon,
@@ -45,9 +44,12 @@ export async function PUT(
         categoryId: data.categoryId,
         sortOrder: data.sortOrder,
         isPublished: data.isPublished,
-      },
-      include: { category: true },
-    })
+      })
+      .eq('id', params.id )
+      .select()
+      .single()
+
+    if (error) throw error
     return NextResponse.json(building)
   } catch (error) {
     return NextResponse.json({ error: '更新建筑失败' }, { status: 500 })
@@ -59,9 +61,8 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await prisma.building.delete({
-      where: { id: params.id },
-    })
+    const { error } = await supabaseAdmin.from('Building').delete()
+      .eq('id', params.id )
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error: '删除建筑失败' }, { status: 500 })

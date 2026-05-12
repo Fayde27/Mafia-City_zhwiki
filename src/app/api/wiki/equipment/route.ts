@@ -1,5 +1,7 @@
+export const runtime = 'edge'
+
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(request: Request) {
   try {
@@ -7,21 +9,29 @@ export async function GET(request: Request) {
     const category = searchParams.get('category')
     const slug = searchParams.get('slug')
 
-    const where: any = { isPublished: true }
+    let query = supabaseAdmin
+      .from('Equipment')
+      .select('*, EquipmentCategory(*)')
+      .eq('isPublished', true)
+
     if (category) {
-      where.category = { slug: category }
+      query = query.eq('EquipmentCategory.slug', category)
     }
     if (slug) {
-      where.slug = slug
+      query = query.eq('slug', slug)
     }
 
-    const equipment = await prisma.equipment.findMany({
-      where,
-      include: { category: true },
-      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
-    })
+    const { data: equipment, error } = await query
+      .order('sortOrder', { ascending: false })
 
-    return NextResponse.json({ equipment })
+    if (error) throw error
+
+    const mapped = (equipment || []).map(({ EquipmentCategory, ...rest }: any) => ({
+      ...rest,
+      category: EquipmentCategory,
+    }))
+
+    return NextResponse.json({ equipment: mapped })
   } catch {
     return NextResponse.json({ error: '获取装备失败' }, { status: 500 })
   }

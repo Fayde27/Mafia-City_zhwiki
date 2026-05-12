@@ -1,15 +1,16 @@
+export const runtime = 'edge'
+
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const troop = await prisma.troop.findUnique({
-      where: { id: params.id },
-      include: { category: true },
-    })
+    const { data: troop, error } = await supabaseAdmin.from('Troop').select('*')
+      .eq('id', params.id)
+      .single()
     if (!troop) {
       return NextResponse.json({ error: '兵种不存在' }, { status: 404 })
     }
@@ -25,9 +26,7 @@ export async function PUT(
 ) {
   try {
     const data = await request.json()
-    const troop = await prisma.troop.update({
-      where: { id: params.id },
-      data: {
+    const { data: troop, error } = await supabaseAdmin.from('Troop').update({
         name: data.name,
         slug: data.slug,
         icon: data.icon,
@@ -47,9 +46,12 @@ export async function PUT(
         categoryId: data.categoryId,
         sortOrder: data.sortOrder,
         isPublished: data.isPublished,
-      },
-      include: { category: true },
-    })
+      })
+      .eq('id', params.id )
+      .select()
+      .single()
+
+    if (error) throw error
     return NextResponse.json(troop)
   } catch (error) {
     return NextResponse.json({ error: '更新兵种失败' }, { status: 500 })
@@ -61,9 +63,8 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await prisma.troop.delete({
-      where: { id: params.id },
-    })
+    const { error } = await supabaseAdmin.from('Troop').delete()
+      .eq('id', params.id )
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error: '删除兵种失败' }, { status: 500 })

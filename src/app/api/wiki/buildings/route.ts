@@ -1,5 +1,7 @@
+export const runtime = 'edge'
+
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(request: Request) {
   try {
@@ -7,21 +9,29 @@ export async function GET(request: Request) {
     const category = searchParams.get('category')
     const slug = searchParams.get('slug')
 
-    const where: any = { isPublished: true }
+    let query = supabaseAdmin
+      .from('Building')
+      .select('*, BuildingCategory(*)')
+      .eq('isPublished', true)
+
     if (category) {
-      where.category = { slug: category }
+      query = query.eq('BuildingCategory.slug', category)
     }
     if (slug) {
-      where.slug = slug
+      query = query.eq('slug', slug)
     }
 
-    const buildings = await prisma.building.findMany({
-      where,
-      include: { category: true },
-      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
-    })
+    const { data: buildings, error } = await query
+      .order('sortOrder', { ascending: false })
 
-    return NextResponse.json({ buildings })
+    if (error) throw error
+
+    const mapped = (buildings || []).map(({ BuildingCategory, ...rest }: any) => ({
+      ...rest,
+      category: BuildingCategory,
+    }))
+
+    return NextResponse.json({ buildings: mapped })
   } catch {
     return NextResponse.json({ error: '获取建筑失败' }, { status: 500 })
   }

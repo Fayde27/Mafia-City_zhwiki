@@ -1,5 +1,7 @@
+export const runtime = 'edge'
+
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function PUT(
   request: Request,
@@ -7,10 +9,14 @@ export async function PUT(
 ) {
   try {
     const data = await request.json()
-    const option = await prisma.buildingFilterOption.update({
-      where: { id: params.id },
-      data: { sortOrder: data.sortOrder },
-    })
+    const { data: option, error } = await supabaseAdmin.from('BuildingFilterOption').update({
+        sortOrder: data.sortOrder 
+      })
+      .eq('id', params.id )
+      .select()
+      .single()
+
+    if (error) throw error
     return NextResponse.json(option)
   } catch {
     return NextResponse.json({ error: '更新筛选选项失败' }, { status: 500 })
@@ -22,9 +28,8 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await prisma.buildingFilterOption.delete({
-      where: { id: params.id },
-    })
+    const { error } = await supabaseAdmin.from('BuildingFilterOption').delete()
+      .eq('id', params.id )
     return NextResponse.json({ success: true })
   } catch {
     return NextResponse.json({ error: '删除筛选选项失败' }, { status: 500 })

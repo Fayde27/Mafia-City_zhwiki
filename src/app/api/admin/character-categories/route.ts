@@ -1,16 +1,16 @@
+export const runtime = 'edge'
+
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET() {
   try {
-    const categories = await prisma.characterCategory.findMany({
-      orderBy: { sortOrder: 'asc' },
-      include: {
-        _count: {
-          select: { characters: true },
-        },
-      },
-    })
+    const { data: categories, error } = await supabaseAdmin
+      .from('CharacterCategory')
+      .select('*')
+      .order('sortOrder', { ascending: true })
+
+    if (error) throw error
     return NextResponse.json(categories)
   } catch (error) {
     return NextResponse.json({ error: '获取角色分类失败' }, { status: 500 })
@@ -20,9 +20,13 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const { name, slug, description, icon, sortOrder } = await request.json()
-    const category = await prisma.characterCategory.create({
-      data: { name, slug, description, icon, sortOrder: sortOrder || 0 },
-    })
+    const { data: category, error } = await supabaseAdmin
+      .from('CharacterCategory')
+      .insert({ name, slug, description, icon, sortOrder: sortOrder || 0 })
+      .select()
+      .single()
+
+    if (error) throw error
     return NextResponse.json(category, { status: 201 })
   } catch (error) {
     return NextResponse.json({ error: '创建角色分类失败' }, { status: 500 })

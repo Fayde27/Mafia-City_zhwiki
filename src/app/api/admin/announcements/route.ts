@@ -1,11 +1,16 @@
+export const runtime = 'edge'
+
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(request: Request) {
   try {
-    const announcements = await prisma.announcement.findMany({
-      orderBy: { createdAt: 'desc' },
-    })
+    const { data: announcements, error } = await supabaseAdmin
+      .from('Announcement')
+      .select('*')
+      .order('createdAt', { ascending: false })
+
+    if (error) throw error
     return NextResponse.json(announcements)
   } catch (error) {
     return NextResponse.json({ error: '获取失败' }, { status: 500 })
@@ -15,16 +20,20 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const announcement = await prisma.announcement.create({
-      data: {
+    const { data: announcement, error } = await supabaseAdmin
+      .from('Announcement')
+      .insert({
         title: body.title,
         content: body.content,
         banner: body.banner || null,
         type: body.type || 'info',
         isActive: body.isActive !== false,
         sortOrder: body.sortOrder || 0,
-      },
-    })
+      })
+      .select()
+      .single()
+
+    if (error) throw error
     return NextResponse.json(announcement)
   } catch (error) {
     return NextResponse.json({ error: '创建失败' }, { status: 500 })

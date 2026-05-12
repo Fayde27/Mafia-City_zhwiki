@@ -1,5 +1,7 @@
+export const runtime = 'edge'
+
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(request: Request) {
   try {
@@ -7,31 +9,31 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
     const category = searchParams.get('category')
-    const skip = (page - 1) * limit
+    const from = (page - 1) * limit
+    const to = from + limit - 1
 
-    const where: any = {}
+    let query = supabaseAdmin
+      .from('Item')
+      .select('*, ItemCategory(*)', { count: 'exact' })
+
     if (category) {
-      where.category = { slug: category }
+      query = query.eq('ItemCategory.slug', category)
     }
 
-    const [items, total] = await Promise.all([
-      prisma.item.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: [{ sortOrder: 'desc' }, { createdAt: 'desc' }],
-        include: { category: true },
-      }),
-      prisma.item.count({ where }),
-    ])
+    const { data: items, error, count: total } = await query
+      .order('sortOrder', { ascending: false })
+      .order('createdAt', { ascending: false })
+      .range(from, to)
+
+    if (error) throw error
 
     return NextResponse.json({
       items,
       pagination: {
         page,
         limit,
-        total,
-        totalPages: Math.ceil(total / limit),
+        total: total || 0,
+        totalPages: Math.ceil((total || 0) / limit),
       },
     })
   } catch (error) {
@@ -42,8 +44,9 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const data = await request.json()
-    const item = await prisma.item.create({
-      data: {
+    const { data: item, error } = await supabaseAdmin
+      .from('Item')
+      .insert({
         name: data.name,
         slug: data.slug,
         icon: data.icon,
@@ -60,9 +63,11 @@ export async function POST(request: Request) {
         categoryId: data.categoryId,
         sortOrder: data.sortOrder || 0,
         isPublished: data.isPublished || false,
-      },
-      include: { category: true },
-    })
+      })
+      .select('*, ItemCategory(*)')
+      .single()
+
+    if (error) throw error
     return NextResponse.json(item, { status: 201 })
   } catch (error) {
     return NextResponse.json({ error: '创建道具失败' }, { status: 500 })

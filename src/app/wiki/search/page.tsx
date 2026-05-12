@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
@@ -19,7 +19,7 @@ interface Article {
   createdAt: string
 }
 
-export default function SearchPage() {
+function SearchContent() {
   const searchParams = useSearchParams()
   const query = searchParams.get('q') || ''
   const [articles, setArticles] = useState<Article[]>([])
@@ -89,5 +89,13 @@ export default function SearchPage() {
 
       <WikiFooter />
     </div>
+  )
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-wiki-bg flex items-center justify-center text-wiki-text-muted">加载中...</div>}>
+      <SearchContent />
+    </Suspense>
   )
 }

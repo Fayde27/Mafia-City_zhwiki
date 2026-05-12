@@ -1,21 +1,26 @@
+export const runtime = 'edge'
+
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const section = searchParams.get('section')
 
-    const where: any = { isActive: true }
+    let query = supabaseAdmin
+      .from('SidebarNav')
+      .select('*')
+      .eq('isActive', true)
+      .order('sortOrder', { ascending: false })
+
     if (section) {
-      where.section = section
+      query = query.eq('section', section)
     }
 
-    const items = await prisma.sidebarNav.findMany({
-      where,
-      orderBy: [{ section: 'asc' }, { sortOrder: 'asc' }, { createdAt: 'asc' }],
-    })
+    const { data: items, error } = await query
 
+    if (error) throw error
     return NextResponse.json(items)
   } catch (error) {
     return NextResponse.json({ error: '获取导航数据失败' }, { status: 500 })

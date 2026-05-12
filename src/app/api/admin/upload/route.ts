@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
-import { writeFile, mkdir } from 'fs/promises'
-import { existsSync } from 'fs'
-import path from 'path'
+import { supabaseAdmin } from '@/lib/supabase'
+
+export const runtime = 'edge'
 
 export async function POST(request: Request) {
   try {
@@ -13,21 +13,27 @@ export async function POST(request: Request) {
     }
 
     const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads')
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true })
-    }
+    const buffer = new Uint8Array(bytes)
 
     const timestamp = Date.now()
     const fileName = `${timestamp}-${file.name.replace(/\s/g, '_')}`
-    const filePath = path.join(uploadDir, fileName)
+    const filePath = `uploads/${fileName}`
 
-    await writeFile(filePath, buffer)
+    const { error } = await supabaseAdmin.storage
+      .from('assets')
+      .upload(filePath, buffer, {
+        contentType: file.type,
+        upsert: false,
+      })
+
+    if (error) throw error
+
+    const { data: { publicUrl } } = supabaseAdmin.storage
+      .from('assets')
+      .getPublicUrl(filePath)
 
     return NextResponse.json({
-      url: `/uploads/${fileName}`,
+      url: publicUrl,
       name: file.name,
     })
   } catch (error) {

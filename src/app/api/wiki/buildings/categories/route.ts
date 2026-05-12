@@ -1,13 +1,29 @@
+export const runtime = 'edge'
+
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET() {
   try {
-    const categories = await prisma.buildingCategory.findMany({
-      include: { _count: { select: { buildings: true } } },
-      orderBy: { sortOrder: 'asc' },
-    })
-    return NextResponse.json(categories)
+    const { data: categories, error } = await supabaseAdmin
+      .from('BuildingCategory')
+      .select('*')
+      .order('sortOrder', { ascending: true })
+
+    if (error) throw error
+
+    const withCounts = await Promise.all(
+      (categories || []).map(async (cat) => {
+        const { count } = await supabaseAdmin
+          .from('Building')
+          .select('*', { count: 'exact', head: true })
+          .eq('categoryId', cat.id)
+          .eq('isPublished', true)
+        return { ...cat, _count: { buildings: count || 0 } }
+      })
+    )
+
+    return NextResponse.json(withCounts)
   } catch {
     return NextResponse.json({ error: '获取建筑分类失败' }, { status: 500 })
   }

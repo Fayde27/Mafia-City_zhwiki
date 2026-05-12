@@ -6,24 +6,21 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
-  },
-  "prisma": {
-    "seed": "npx ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+    "lint": "next lint",
+    "seed": "npx tsx --env-file=.env prisma/seed.ts",
+    "pages:build": "npx @cloudflare/next-on-pages",
+    "preview": "npx @cloudflare/next-on-pages preview"
   },
   "dependencies": {
-    "@prisma/client": "^5.17.0",
+    "@supabase/supabase-js": "^2.105.4",
     "autoprefixer": "^10.5.0",
-    "bcryptjs": "^2.4.3",
-    "jsonwebtoken": "^9.0.2",
-    "next": "14.2.5",
-    "prisma": "^5.17.0",
+    "jose": "^6.2.3",
+    "next": "^14.2.29",
     "react": "^18",
     "react-dom": "^18"
   },
   "devDependencies": {
-    "@types/bcryptjs": "^2.4.6",
-    "@types/jsonwebtoken": "^9.0.6",
+    "@cloudflare/next-on-pages": "^1.13.16",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
@@ -31,7 +28,9 @@
     "eslint-config-next": "14.2.5",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "ts-node": "^10.9.2",
-    "typescript": "^5"
+    "tsx": "^4.19.0",
+    "typescript": "^5",
+    "vercel": "^53.4.0",
+    "wrangler": "^4.90.0"
   }
 }

@@ -1,15 +1,16 @@
+export const runtime = 'edge'
+
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const item = await prisma.item.findUnique({
-      where: { id: params.id },
-      include: { category: true },
-    })
+    const { data: item, error } = await supabaseAdmin.from('Item').select('*')
+      .eq('id', params.id)
+      .single()
     if (!item) {
       return NextResponse.json({ error: '道具不存在' }, { status: 404 })
     }
@@ -25,9 +26,7 @@ export async function PUT(
 ) {
   try {
     const data = await request.json()
-    const item = await prisma.item.update({
-      where: { id: params.id },
-      data: {
+    const { data: item, error } = await supabaseAdmin.from('Item').update({
         name: data.name,
         slug: data.slug,
         icon: data.icon,
@@ -44,9 +43,12 @@ export async function PUT(
         categoryId: data.categoryId,
         sortOrder: data.sortOrder,
         isPublished: data.isPublished,
-      },
-      include: { category: true },
-    })
+      })
+      .eq('id', params.id )
+      .select()
+      .single()
+
+    if (error) throw error
     return NextResponse.json(item)
   } catch (error) {
     return NextResponse.json({ error: '更新道具失败' }, { status: 500 })
@@ -58,9 +60,8 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await prisma.item.delete({
-      where: { id: params.id },
-    })
+    const { error } = await supabaseAdmin.from('Item').delete()
+      .eq('id', params.id )
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error: '删除道具失败' }, { status: 500 })

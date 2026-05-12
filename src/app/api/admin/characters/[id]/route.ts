@@ -1,16 +1,20 @@
+export const runtime = 'edge'
+
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const character = await prisma.character.findUnique({
-      where: { id: params.id },
-      include: { category: true },
-    })
-    if (!character) {
+    const { data: character, error } = await supabaseAdmin
+      .from('Character')
+      .select('*, CharacterCategory(*)')
+      .eq('id', params.id)
+      .single()
+
+    if (error || !character) {
       return NextResponse.json({ error: '角色不存在' }, { status: 404 })
     }
     return NextResponse.json(character)
@@ -25,9 +29,9 @@ export async function PUT(
 ) {
   try {
     const data = await request.json()
-    const character = await prisma.character.update({
-      where: { id: params.id },
-      data: {
+    const { data: character, error } = await supabaseAdmin
+      .from('Character')
+      .update({
         name: data.name,
         slug: data.slug,
         title: data.title,
@@ -47,9 +51,12 @@ export async function PUT(
         categoryId: data.categoryId,
         sortOrder: data.sortOrder,
         isPublished: data.isPublished,
-      },
-      include: { category: true },
-    })
+      })
+      .eq('id', params.id)
+      .select('*, CharacterCategory(*)')
+      .single()
+
+    if (error) throw error
     return NextResponse.json(character)
   } catch (error) {
     return NextResponse.json({ error: '更新角色失败' }, { status: 500 })
@@ -61,9 +68,12 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await prisma.character.delete({
-      where: { id: params.id },
-    })
+    const { error } = await supabaseAdmin
+      .from('Character')
+      .delete()
+      .eq('id', params.id)
+
+    if (error) throw error
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error: '删除角色失败' }, { status: 500 })

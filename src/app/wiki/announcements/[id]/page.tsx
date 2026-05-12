@@ -1,7 +1,7 @@
 import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
-import { prisma } from '@/lib/prisma'
+import { supabase } from '@/lib/supabase'
 import { notFound } from 'next/navigation'
 import AdminEditButton from './AdminEditButton'
 
@@ -13,7 +13,7 @@ interface Announcement {
   type: string
   isActive: boolean
   sortOrder: number
-  createdAt: Date
+  createdAt: string
 }
 
 const getTypeLabel = (type: string) => {
@@ -36,11 +36,15 @@ const getTypeColor = (type: string) => {
 
 export default async function AnnouncementPage({ params }: { params: { id: string } }) {
   let announcement: Announcement | null = null
-  
+
   try {
-    announcement = await prisma.announcement.findUnique({
-      where: { id: params.id },
-    })
+    const { data } = await supabase
+      .from('Announcement')
+      .select('*')
+      .eq('id', params.id)
+      .single()
+
+    announcement = data
   } catch (error) {
     console.error('Failed to fetch announcement:', error)
   }
@@ -49,10 +53,13 @@ export default async function AnnouncementPage({ params }: { params: { id: strin
     notFound()
   }
 
-  const announcements = await prisma.announcement.findMany({
-    where: { isActive: true },
-    orderBy: { createdAt: 'desc' },
-  })
+  const { data } = await supabase
+    .from('Announcement')
+    .select('*')
+    .eq('isActive', true)
+    .order('createdAt', { ascending: false })
+
+  const announcements: any[] = data || []
 
   return (
     <div className="min-h-screen bg-wiki-bg">
@@ -71,13 +78,13 @@ export default async function AnnouncementPage({ params }: { params: { id: strin
                   {announcements.length === 0 ? (
                     <p className="text-wiki-text-muted text-sm">暂无公告</p>
                   ) : (
-                    announcements.map((ann) => (
-                      <Link 
-                        key={ann.id} 
+                    announcements.map((ann: any) => (
+                      <Link
+                        key={ann.id}
                         href={`/wiki/announcements/${ann.id}`}
                         className={`block p-2.5 rounded-lg transition-colors group ${
-                          ann.id === announcement.id 
-                            ? 'bg-wiki-accent/10 border border-wiki-accent/30' 
+                          ann.id === announcement!.id
+                            ? 'bg-wiki-accent/10 border border-wiki-accent/30'
                             : 'hover:bg-wiki-gray'
                         }`}
                       >
@@ -86,8 +93,8 @@ export default async function AnnouncementPage({ params }: { params: { id: strin
                             [{getTypeLabel(ann.type)}]
                           </span>
                           <span className={`text-sm line-clamp-1 ${
-                            ann.id === announcement.id 
-                              ? 'text-wiki-accent font-medium' 
+                            ann.id === announcement!.id
+                              ? 'text-wiki-accent font-medium'
                               : 'text-wiki-text-secondary group-hover:text-wiki-accent'
                           }`}>
                             {ann.title}
@@ -105,14 +112,14 @@ export default async function AnnouncementPage({ params }: { params: { id: strin
             <div className="bg-wiki-card border border-wiki-border rounded-xl p-6">
               {announcement.banner && (
                 <div className="mb-6 rounded-lg overflow-hidden" style={{ aspectRatio: '1920/1080' }}>
-                  <img 
-                    src={announcement.banner} 
-                    alt="公告 Banner" 
+                  <img
+                    src={announcement.banner}
+                    alt="公告 Banner"
                     className="w-full h-full object-cover rounded-lg"
                   />
                 </div>
               )}
-              
+
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <span className={`text-sm font-bold ${getTypeColor(announcement.type)}`}>
