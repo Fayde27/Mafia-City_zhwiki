@@ -42,7 +42,7 @@ export default function RichTextEditor({
   // 外部 value 变化时同步（如 useEffect 加载数据后）
   useEffect(() => {
     if (editor && value !== editor.getHTML()) {
-      editor.commands.setContent(value || '', false)
+      editor.commands.setContent(value || '')
     }
   }, [value, editor])
 
