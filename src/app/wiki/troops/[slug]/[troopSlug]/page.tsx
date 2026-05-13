@@ -114,7 +114,7 @@ export default function TroopDetailPage() {
         </div>
 
         {troop.image && (
-          <div className="relative h-64 md:h-80 lg:h-96 rounded-lg overflow-hidden mb-6 md:mb-8">
+          <div className="relative w-full aspect-[3/1] rounded-lg overflow-hidden mb-6 md:mb-8">
             <img
               src={troop.image}
               alt={troop.name}

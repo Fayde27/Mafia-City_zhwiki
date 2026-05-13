@@ -11,7 +11,18 @@ export async function GET() {
       .order('sortOrder', { ascending: true })
 
     if (error) throw error
-    return NextResponse.json(categories)
+
+    const withCounts = await Promise.all(
+      (categories || []).map(async (cat) => {
+        const { count } = await supabaseAdmin
+          .from('Article')
+          .select('*', { count: 'exact', head: true })
+          .eq('categoryId', cat.id)
+        return { ...cat, _count: { articles: count || 0 } }
+      })
+    )
+
+    return NextResponse.json(withCounts)
   } catch (error) {
     return NextResponse.json({ error: '获取分类失败' }, { status: 500 })
   }

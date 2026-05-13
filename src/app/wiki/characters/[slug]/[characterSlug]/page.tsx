@@ -116,7 +116,7 @@ export default function CharacterDetailPage() {
         </div>
 
         {character.banner && (
-          <div className="relative h-64 md:h-80 lg:h-96 rounded-lg overflow-hidden mb-6 md:mb-8">
+          <div className="relative w-full aspect-[3/1] rounded-lg overflow-hidden mb-6 md:mb-8">
             <img
               src={character.banner}
               alt={character.name}

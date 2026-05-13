@@ -21,6 +21,7 @@ export default function ImageUploadInput({
 }: ImageUploadInputProps) {
   const [uploading, setUploading] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
+  const [isActive, setIsActive] = useState(false)
   const [displayPosition, setDisplayPosition] = useState(position)
   const containerRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -28,10 +29,29 @@ export default function ImageUploadInput({
   const dragDataRef = useRef<{ startX: number; startY: number; posX: number; posY: number } | null>(null)
   const displayPositionRef = useRef(position)
   const onPositionChangeRef = useRef(onPositionChange)
+  const isActiveRef = useRef(false)
 
   useEffect(() => {
     onPositionChangeRef.current = onPositionChange
   }, [onPositionChange])
+
+  // 全局 Ctrl+V 粘贴监听：鼠标悬停在组件上时激活
+  useEffect(() => {
+    const handleGlobalPaste = (e: ClipboardEvent) => {
+      if (!isActiveRef.current) return
+      const items = e.clipboardData ? Array.from(e.clipboardData.items) : []
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          e.preventDefault()
+          const file = item.getAsFile()
+          if (file) uploadFile(file)
+          return
+        }
+      }
+    }
+    document.addEventListener('paste', handleGlobalPaste)
+    return () => document.removeEventListener('paste', handleGlobalPaste)
+  }, [])
 
   useEffect(() => {
     setDisplayPosition(position)
@@ -126,10 +146,12 @@ export default function ImageUploadInput({
       {value ? (
         <div
           ref={containerRef}
-          className={`relative ${previewHeight} rounded-lg overflow-hidden bg-wiki-gray mb-2 select-none focus:outline-none focus:ring-2 focus:ring-wiki-accent`}
+          className={`relative ${previewHeight} rounded-lg overflow-hidden bg-wiki-gray mb-2 select-none focus:outline-none focus:ring-2 focus:ring-wiki-accent ${isActive ? 'ring-2 ring-wiki-accent' : ''}`}
           style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
           onMouseDown={handleMouseDown}
           onPaste={handlePaste}
+          onMouseEnter={() => { isActiveRef.current = true; setIsActive(true) }}
+          onMouseLeave={() => { isActiveRef.current = false; setIsActive(false) }}
           tabIndex={0}
         >
           <img
@@ -140,17 +162,19 @@ export default function ImageUploadInput({
             draggable={false}
           />
           <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded pointer-events-none">
-            拖动调整显示区域 · Ctrl+V 替换图片
+            {isActive ? '🖼️ Ctrl+V 粘贴 · 拖动调整位置' : '拖动调整显示区域'}
           </div>
         </div>
       ) : (
         <div
-          className={`${previewHeight} rounded-lg border-2 border-dashed border-wiki-border bg-wiki-gray mb-2 flex flex-col items-center justify-center text-wiki-text-muted text-sm gap-1 focus:outline-none focus:ring-2 focus:ring-wiki-accent`}
+          className={`${previewHeight} rounded-lg border-2 border-dashed bg-wiki-gray mb-2 flex flex-col items-center justify-center text-wiki-text-muted text-sm gap-1 focus:outline-none transition-colors ${isActive ? 'border-wiki-accent ring-2 ring-wiki-accent' : 'border-wiki-border'}`}
           onPaste={handlePaste}
+          onMouseEnter={() => { isActiveRef.current = true; setIsActive(true) }}
+          onMouseLeave={() => { isActiveRef.current = false; setIsActive(false) }}
           tabIndex={0}
         >
           <span>{uploading ? '上传中...' : '暂无图片'}</span>
-          <span className="text-xs opacity-60">点击此处后可 Ctrl+V 粘贴图片</span>
+          <span className="text-xs opacity-60">{isActive ? '🖼️ 现在可以 Ctrl+V 粘贴图片' : '悬停后可 Ctrl+V 粘贴'}</span>
         </div>
       )}
 

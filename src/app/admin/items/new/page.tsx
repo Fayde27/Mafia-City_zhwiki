@@ -164,7 +164,7 @@ export default function AdminItemNewPage() {
                   position={formData.iconPosition}
                   onChange={(url) => setFormData({ ...formData, icon: url })}
                   onPositionChange={(pos) => setFormData({ ...formData, iconPosition: pos })}
-                  previewHeight="h-32"
+                  previewHeight="h-32 aspect-square"
                 />
                 <ImageUploadInput
                   label="图片"
@@ -172,7 +172,7 @@ export default function AdminItemNewPage() {
                   position={formData.imagePosition}
                   onChange={(url) => setFormData({ ...formData, image: url })}
                   onPositionChange={(pos) => setFormData({ ...formData, imagePosition: pos })}
-                  previewHeight="h-36"
+                  previewHeight="w-full aspect-[3/1]"
                 />
               </div>
             </div>

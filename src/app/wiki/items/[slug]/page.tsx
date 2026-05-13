@@ -200,7 +200,7 @@ export default function ItemListPage() {
                 href={`/wiki/items/${categorySlug}/${item.slug}`}
                 className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg overflow-hidden group block hover:border-wiki-accent transition-all"
               >
-                <div className="relative h-48 md:h-56 overflow-hidden bg-gradient-to-br from-wiki-gray to-wiki-darker">
+                <div className="relative w-full aspect-[3/1] overflow-hidden bg-gradient-to-br from-wiki-gray to-wiki-darker">
                   {item.image ? (
                     <img
                       src={item.image}
