@@ -407,7 +407,7 @@ export default function HomePage() {
                           <span className="text-wiki-accent text-xs font-bold flex-shrink-0 mt-0.5">[{getTypeLabel(ann.type)}]</span>
                           <div className="flex-1 min-w-0">
                             <p className="text-wiki-text text-sm font-bold group-hover:text-wiki-accent transition-colors">{ann.title}</p>
-                            <p className="text-wiki-text-muted text-xs mt-1">{ann.content}</p>
+                            <p className="text-wiki-text-muted text-xs mt-1">{ann.content?.replace(/<[^>]*>/g, '').slice(0, 80)}</p>
                           </div>
                         </div>
                       </Link>

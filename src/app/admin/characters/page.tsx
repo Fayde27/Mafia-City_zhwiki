@@ -23,10 +23,10 @@ interface Character {
   combatType: string
   isPublished: boolean
   sortOrder: number
-  category: {
+  CharacterCategory: {
     name: string
     slug: string
-  }
+  } | null
 }
 
 export default function AdminCharactersPage() {
@@ -85,7 +85,7 @@ export default function AdminCharactersPage() {
 
   const filteredCharacters = filterCategory === 'all'
     ? characters
-    : characters.filter(c => c.category.slug === filterCategory)
+    : characters.filter(c => c.CharacterCategory?.slug === filterCategory)
 
   const getRarityStars = (rarity: number) => {
     return '★'.repeat(rarity) + '☆'.repeat(5 - rarity)
@@ -187,7 +187,7 @@ export default function AdminCharactersPage() {
                     <td className="px-6 py-4 text-yellow-400 text-sm">{getRarityStars(character.rarity)}</td>
                     <td className="px-6 py-4 text-wiki-text text-sm">{character.path || '-'}</td>
                     <td className="px-6 py-4 text-wiki-text text-sm">{character.combatType || '-'}</td>
-                    <td className="px-6 py-4 text-wiki-text-muted text-sm">{character.category.name}</td>
+                    <td className="px-6 py-4 text-wiki-text-muted text-sm">{character.CharacterCategory?.name || '-'}</td>
                     <td className="px-6 py-4">
                       <button
                         onClick={() => handleTogglePublish(character)}

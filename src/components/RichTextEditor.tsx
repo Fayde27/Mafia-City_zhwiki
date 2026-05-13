@@ -72,14 +72,14 @@ export default function RichTextEditor({
   if (!editor) return null
 
   const btn = (active: boolean) =>
-    `px-2 py-1 text-xs rounded transition-colors ${active ? 'bg-wiki-accent text-wiki-darker font-bold' : 'text-wiki-text hover:bg-wiki-gray/60'}`
+    `px-2 py-1 text-xs rounded transition-colors ${active ? 'bg-wiki-accent text-wiki-darker font-bold' : 'text-gray-700 hover:bg-black/10'}`
 
   const currentColor = editor.getAttributes('textStyle').color || '#e8e0d0'
 
   return (
-    <div className="border-2 border-wiki-border bg-wiki-gray rounded-lg overflow-hidden focus-within:border-wiki-accent">
+    <div className="border-2 border-wiki-border rounded-lg overflow-hidden focus-within:border-wiki-accent" style={{ background: '#f5f5f0' }}>
       {/* 工具栏 */}
-      <div className="flex flex-wrap gap-1 px-3 py-2 border-b border-wiki-border bg-wiki-gray-light">
+      <div className="flex flex-wrap gap-1 px-3 py-2 border-b border-wiki-border" style={{ background: '#e8e0d0' }}>
         {/* 格式 */}
         <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={btn(editor.isActive('bold'))} title="粗体"><strong>B</strong></button>
         <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={btn(editor.isActive('italic'))} title="斜体"><em>I</em></button>
@@ -91,7 +91,7 @@ export default function RichTextEditor({
           <button
             type="button"
             onClick={() => setShowColorPicker(v => !v)}
-            className={`flex items-center gap-1 px-2 py-1 text-xs rounded hover:bg-wiki-gray/60 text-wiki-text`}
+            className={`flex items-center gap-1 px-2 py-1 text-xs rounded hover:bg-black/10 text-gray-700`}
             title="字体颜色"
           >
             <span style={{ color: currentColor }}>A</span>
@@ -102,7 +102,7 @@ export default function RichTextEditor({
             <span className="text-wiki-text-muted">▾</span>
           </button>
           {showColorPicker && (
-            <div className="absolute top-full left-0 mt-1 z-50 bg-wiki-gray-light border border-wiki-border rounded-lg p-2 shadow-lg min-w-[160px]">
+            <div className="absolute top-full left-0 mt-1 z-50 bg-white border border-gray-300 rounded-lg p-2 shadow-lg min-w-[160px]">
               <div className="grid grid-cols-6 gap-1 mb-2">
                 {PRESET_COLORS.map(color => (
                   <button
@@ -130,7 +130,7 @@ export default function RichTextEditor({
                 <button
                   type="button"
                   onClick={() => { editor.chain().focus().unsetColor().run(); setShowColorPicker(false) }}
-                  className="ml-auto text-xs text-wiki-text-muted hover:text-wiki-text"
+                  className="ml-auto text-xs text-gray-500 hover:text-gray-800"
                 >
                   重置
                 </button>
