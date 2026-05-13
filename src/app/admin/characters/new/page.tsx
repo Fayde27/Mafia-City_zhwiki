@@ -141,7 +141,6 @@ export default function AdminCharacterNewPage() {
                     value={formData.slug}
                     onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                     className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                    placeholder="英文小写，如: clara"
                     required
                   />
                 </div>
@@ -152,7 +151,6 @@ export default function AdminCharacterNewPage() {
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                    placeholder="如: 被机器人养大的女孩"
                   />
                 </div>
                 <div>
@@ -219,7 +217,6 @@ export default function AdminCharacterNewPage() {
                       value={formData.role}
                       onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                       className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                      placeholder="如: 毁灭"
                     />
                   </div>
                 </div>
@@ -231,7 +228,6 @@ export default function AdminCharacterNewPage() {
                       value={formData.weapon}
                       onChange={(e) => setFormData({ ...formData, weapon: e.target.value })}
                       className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                      placeholder="如: 剑"
                     />
                   </div>
                   <div>
@@ -241,7 +237,6 @@ export default function AdminCharacterNewPage() {
                       value={formData.coreBonus}
                       onChange={(e) => setFormData({ ...formData, coreBonus: e.target.value })}
                       className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                      placeholder="如: 攻击力提升"
                     />
                   </div>
                 </div>
@@ -252,7 +247,6 @@ export default function AdminCharacterNewPage() {
                     value={formData.acquisition}
                     onChange={(e) => setFormData({ ...formData, acquisition: e.target.value })}
                     className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                    placeholder="如: 常驻跃迁"
                   />
                 </div>
               </div>
@@ -287,12 +281,10 @@ export default function AdminCharacterNewPage() {
 
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
             <h3 className="text-lg font-bold text-wiki-accent mb-4">角色简介</h3>
-            <textarea
+            <RichTextEditor
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows={4}
-              className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none resize-y"
-              placeholder="支持Markdown格式"
+              onChange={(html) => setFormData({ ...formData, description: html })}
+              minHeight="min-h-[120px]"
             />
           </div>
 
