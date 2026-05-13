@@ -14,9 +14,12 @@ export async function GET(request: Request) {
     const from = (page - 1) * limit
     const to = from + limit - 1
 
+    // 有分类过滤时用 !inner（INNER JOIN），避免返回 category 为 null 的文章
+    const selectStr = category ? '*, Category!inner(*)' : '*, Category(*)'
+
     let query = supabaseAdmin
       .from('Article')
-      .select('*, Category(*)', { count: 'exact' })
+      .select(selectStr, { count: 'exact' })
       .eq('isPublished', true)
 
     if (category) {

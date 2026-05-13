@@ -123,13 +123,13 @@ export default function GuideCategoryPage() {
                     ) : (
                       <div className="w-24 h-24 md:w-32 md:h-24 flex-shrink-0 rounded-lg bg-wiki-gray flex items-center justify-center">
                         <span className="text-2xl text-wiki-text-muted">
-                          {article.category.name?.charAt(0) || ''}
+                          {article.category?.name?.charAt(0) || '📄'}
                         </span>
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="text-wiki-accent text-xs font-bold">{article.category.name}</span>
+                        <span className="text-wiki-accent text-xs font-bold">{article.category?.name}</span>
                         {article.isPinned && (
                           <span className="px-2 py-0.5 bg-wiki-danger/10 text-wiki-danger text-xs rounded">
                             置顶
