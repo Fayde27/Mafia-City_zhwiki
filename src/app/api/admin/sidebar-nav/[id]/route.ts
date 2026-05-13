@@ -32,7 +32,8 @@ export async function PUT(
         section: data.section,
         label: data.label,
         icon: data.icon || null,
-        href: data.href,
+        href: data.href || '',
+        parentId: data.parentId || null,
         sortOrder: data.sortOrder || 0,
         isActive: data.isActive !== false,
       })

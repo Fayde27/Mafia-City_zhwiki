@@ -8,19 +8,33 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const section = searchParams.get('section')
 
-    let query = supabaseAdmin
+    // 获取所有顶级项（包括未激活的）
+    let topQuery = supabaseAdmin
       .from('SidebarNav')
       .select('*')
+      .is('parentId', null)
       .order('sortOrder', { ascending: false })
 
     if (section) {
-      query = query.eq('section', section)
+      topQuery = topQuery.eq('section', section)
     }
 
-    const { data: items, error } = await query
+    const { data: topItems, error: topError } = await topQuery
+    if (topError) throw topError
 
-    if (error) throw error
-    return NextResponse.json(items)
+    // 为每个顶级项获取子项（包括未激活的）
+    const withChildren = await Promise.all(
+      (topItems || []).map(async (item) => {
+        const { data: children } = await supabaseAdmin
+          .from('SidebarNav')
+          .select('*')
+          .eq('parentId', item.id)
+          .order('sortOrder', { ascending: false })
+        return { ...item, children: children || [] }
+      })
+    )
+
+    return NextResponse.json(withChildren)
   } catch (error) {
     return NextResponse.json({ error: '获取导航数据失败' }, { status: 500 })
   }
@@ -35,7 +49,8 @@ export async function POST(request: Request) {
         section: data.section,
         label: data.label,
         icon: data.icon || null,
-        href: data.href,
+        href: data.href || '',
+        parentId: data.parentId || null,
         sortOrder: data.sortOrder || 0,
         isActive: data.isActive !== false,
       })

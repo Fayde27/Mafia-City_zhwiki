@@ -2,7 +2,6 @@
 
 export const runtime = 'edge'
 
-
 import { useState, useEffect } from 'react'
 import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
@@ -16,9 +15,10 @@ interface SidebarNavItem {
   label: string
   icon: string | null
   href: string
+  parentId: string | null
   sortOrder: number
   isActive: boolean
-  createdAt: string
+  children?: SidebarNavItem[]
 }
 
 export default function AdminSidebarNavPage() {
@@ -46,19 +46,16 @@ export default function AdminSidebarNavPage() {
       })
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('确定要删除这个导航项吗？')) return
-
+  const handleDelete = async (id: string, hasChildren: boolean) => {
+    const msg = hasChildren
+      ? '此项有子菜单，删除后子菜单将失去父级关联。确定要删除吗？'
+      : '确定要删除这个导航项吗？'
+    if (!confirm(msg)) return
     try {
       const res = await fetch(`/api/admin/sidebar-nav/${id}`, { method: 'DELETE' })
-      if (res.ok) {
-        fetchItems()
-      } else {
-        alert('删除失败')
-      }
-    } catch (err) {
-      alert('网络错误')
-    }
+      if (res.ok) fetchItems()
+      else alert('删除失败')
+    } catch { alert('网络错误') }
   }
 
   const handleToggleActive = async (item: SidebarNavItem) => {
@@ -66,17 +63,10 @@ export default function AdminSidebarNavPage() {
       const res = await fetch(`/api/admin/sidebar-nav/${item.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...item,
-          isActive: !item.isActive,
-        }),
+        body: JSON.stringify({ ...item, isActive: !item.isActive }),
       })
-      if (res.ok) {
-        fetchItems()
-      }
-    } catch (err) {
-      alert('操作失败')
-    }
+      if (res.ok) fetchItems()
+    } catch { alert('操作失败') }
   }
 
   const getSectionLabel = (section: string) => {
@@ -92,12 +82,67 @@ export default function AdminSidebarNavPage() {
     : items.filter(item => item.section === filterSection)
 
   const groupedItems = filteredItems.reduce((acc, item) => {
-    if (!acc[item.section]) {
-      acc[item.section] = []
-    }
+    if (!acc[item.section]) acc[item.section] = []
     acc[item.section].push(item)
     return acc
   }, {} as Record<string, SidebarNavItem[]>)
+
+  const renderItem = (item: SidebarNavItem, isChild = false) => (
+    <div key={item.id}>
+      <div className={`px-6 py-4 flex items-center justify-between ${isChild ? 'bg-wiki-gray/30 pl-12 border-l-4 border-wiki-accent/30' : ''}`}>
+        <div className="flex items-center gap-4 flex-1 min-w-0">
+          {isChild && <span className="text-wiki-text-muted text-xs">└</span>}
+          {item.icon && <span className="text-xl flex-shrink-0">{item.icon}</span>}
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-wiki-text">{item.label}</span>
+              {(item.children?.length ?? 0) > 0 && (
+                <span className="px-2 py-0.5 bg-wiki-accent/20 text-wiki-accent text-xs rounded">
+                  {item.children!.length} 个子菜单
+                </span>
+              )}
+              {!item.isActive && (
+                <span className="px-2 py-0.5 bg-wiki-gray text-wiki-text-muted text-xs rounded">已隐藏</span>
+              )}
+            </div>
+            <span className="text-wiki-text-muted text-sm truncate block">
+              {item.href || <em className="opacity-50">无链接（展开父级）</em>}
+            </span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <button
+            onClick={() => handleToggleActive(item)}
+            className={`px-3 py-1.5 text-xs font-bold rounded border transition-colors ${
+              item.isActive
+                ? 'bg-green-500/20 text-green-400 border-green-500/40 hover:bg-green-500/30'
+                : 'bg-wiki-gray text-wiki-text-muted border-wiki-border hover:border-wiki-accent/50'
+            }`}
+          >
+            {item.isActive ? '显示中' : '已隐藏'}
+          </button>
+          <Link
+            href={`/admin/sidebar-nav/${item.id}`}
+            className="px-3 py-1.5 bg-wiki-accent/20 text-wiki-accent text-xs font-bold rounded border border-wiki-accent/40 hover:bg-wiki-accent/30"
+          >
+            编辑
+          </Link>
+          <button
+            onClick={() => handleDelete(item.id, (item.children?.length ?? 0) > 0)}
+            className="px-3 py-1.5 bg-wiki-danger/20 text-wiki-danger text-xs font-bold rounded border border-wiki-danger/40 hover:bg-wiki-danger/30"
+          >
+            删除
+          </button>
+        </div>
+      </div>
+      {/* 子项 */}
+      {item.children && item.children.length > 0 && (
+        <div className="divide-y divide-wiki-border/50">
+          {item.children.map(child => renderItem(child, true))}
+        </div>
+      )}
+    </div>
+  )
 
   if (!isAdmin) return null
 
@@ -108,10 +153,8 @@ export default function AdminSidebarNavPage() {
       <main className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">
-              侧边栏导航管理
-            </h1>
-            <p className="text-wiki-text-muted text-sm mt-1">管理首页侧边栏的导航项，可自主选择在边栏展示的内容</p>
+            <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">侧边栏导航管理</h1>
+            <p className="text-wiki-text-muted text-sm mt-1">支持多级菜单，父级可展开显示子菜单</p>
           </div>
           <Link href="/admin/sidebar-nav/new" className="btn-hard text-wiki-text text-sm">
             + 新增导航项
@@ -148,56 +191,12 @@ export default function AdminSidebarNavPage() {
           <div className="space-y-6">
             {Object.entries(groupedItems).map(([section, sectionItems]) => (
               <div key={section} className="bg-wiki-gray-light border border-wiki-border rounded-lg overflow-hidden">
-                <div className="px-6 py-4 border-b border-wiki-border bg-wiki-gray">
-                  <h2 className="text-lg font-bold text-wiki-text">
-                    {getSectionLabel(section)}
-                  </h2>
+                <div className="px-6 py-4 border-b border-wiki-border bg-wiki-gray flex items-center justify-between">
+                  <h2 className="text-lg font-bold text-wiki-text">{getSectionLabel(section)}</h2>
+                  <span className="text-wiki-text-muted text-xs">{sectionItems.length} 个顶级项</span>
                 </div>
                 <div className="divide-y divide-wiki-border">
-                  {sectionItems.map((item) => (
-                    <div key={item.id} className="px-6 py-4 flex items-center justify-between">
-                      <div className="flex items-center gap-4 flex-1 min-w-0">
-                        {item.icon && (
-                          <span className="text-xl flex-shrink-0">{item.icon}</span>
-                        )}
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-wiki-text">{item.label}</span>
-                            {!item.isActive && (
-                              <span className="px-2 py-0.5 bg-wiki-gray text-wiki-text-muted text-xs rounded">
-                                已隐藏
-                              </span>
-                            )}
-                          </div>
-                          <span className="text-wiki-text-muted text-sm truncate block">{item.href}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <button
-                          onClick={() => handleToggleActive(item)}
-                          className={`px-3 py-1.5 text-xs font-bold rounded border transition-colors ${
-                            item.isActive
-                              ? 'bg-green-500/20 text-green-400 border-green-500/40 hover:bg-green-500/30'
-                              : 'bg-wiki-gray text-wiki-text-muted border-wiki-border hover:border-wiki-accent/50'
-                          }`}
-                        >
-                          {item.isActive ? '显示' : '隐藏'}
-                        </button>
-                        <Link
-                          href={`/admin/sidebar-nav/${item.id}`}
-                          className="px-3 py-1.5 bg-wiki-accent/20 text-wiki-accent text-xs font-bold rounded border border-wiki-accent/40 hover:bg-wiki-accent/30"
-                        >
-                          编辑
-                        </Link>
-                        <button
-                          onClick={() => handleDelete(item.id)}
-                          className="px-3 py-1.5 bg-wiki-danger/20 text-wiki-danger text-xs font-bold rounded border border-wiki-danger/40 hover:bg-wiki-danger/30"
-                        >
-                          删除
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                  {sectionItems.map(item => renderItem(item))}
                 </div>
               </div>
             ))}
