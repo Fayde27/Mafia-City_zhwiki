@@ -51,7 +51,6 @@ export default function WikiHeader() {
     { label: '首页', href: '/' },
     { label: '图鉴', href: '/wiki' },
     { label: '玩法攻略', href: '/wiki/guides' },
-    { label: '游戏资讯', href: '/wiki/articles' },
   ]
 
   const renderNavItem = (section: WikiSection) => {

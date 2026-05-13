@@ -127,7 +127,6 @@ export default function HomePage() {
   const quickLinks = [
     { label: '图鉴', href: '/wiki', icon: '📚' },
     { label: '玩法攻略', href: '/wiki/guides', icon: '' },
-    { label: '游戏资讯', href: '/wiki/articles', icon: '📰' },
   ]
 
   const toggleExpand = (id: string) => {
