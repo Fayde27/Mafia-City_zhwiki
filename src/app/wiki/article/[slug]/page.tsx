@@ -76,7 +76,7 @@ export default function ArticleDetailPage() {
         ) : (
           <article className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg overflow-hidden">
             {article.coverImage && (
-              <div className="w-full aspect-video overflow-hidden">
+              <div className="w-full aspect-[3/1] overflow-hidden">
                 <img
                   src={article.coverImage}
                   alt={article.title}

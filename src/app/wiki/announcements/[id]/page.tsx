@@ -113,7 +113,7 @@ export default async function AnnouncementPage({ params }: { params: { id: strin
           <div className="flex-1 order-1 lg:order-2">
             <div className="bg-wiki-card border border-wiki-border rounded-xl p-6">
               {announcement.banner && (
-                <div className="mb-6 rounded-lg overflow-hidden" style={{ aspectRatio: '1920/1080' }}>
+                <div className="mb-6 rounded-lg overflow-hidden w-full aspect-[3/1]">
                   <img
                     src={announcement.banner}
                     alt="公告 Banner"
