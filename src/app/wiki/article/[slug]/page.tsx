@@ -18,6 +18,7 @@ interface Article {
   content: string
   summary: string
   coverImage: string | null
+  coverImagePosition?: string
   isPinned: boolean
   badges: string
   category: {
@@ -81,6 +82,7 @@ export default function ArticleDetailPage() {
                   src={article.coverImage}
                   alt={article.title}
                   className="w-full h-full object-cover"
+                  style={{ objectPosition: article.coverImagePosition || '50% 50%' }}
                 />
               </div>
             )}

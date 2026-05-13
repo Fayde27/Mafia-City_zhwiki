@@ -28,7 +28,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { title, slug, content, summary, coverImage, categoryId, tags, isPublished, isPinned, badges, sortOrder } = await request.json()
+    const { title, slug, content, summary, coverImage, coverImagePosition, categoryId, tags, isPublished, isPinned, badges, sortOrder } = await request.json()
     const { data: article, error } = await supabaseAdmin
       .from('Article')
       .update({
@@ -37,6 +37,7 @@ export async function PUT(
         content,
         summary,
         coverImage,
+        coverImagePosition,
         categoryId,
         tags,
         isPublished,

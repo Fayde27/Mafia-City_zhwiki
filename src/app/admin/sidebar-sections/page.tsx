@@ -22,6 +22,7 @@ export default function AdminSidebarSectionsPage() {
   const { isAdmin, isLoaded } = useAdminAuth()
   const [sections, setSections] = useState<SidebarSection[]>([])
   const [loading, setLoading] = useState(true)
+  const [apiError, setApiError] = useState<string>('')
   const [showModal, setShowModal] = useState(false)
   const [editingSection, setEditingSection] = useState<SidebarSection | null>(null)
   const [formData, setFormData] = useState({ name: '', slug: '', sortOrder: 0, isActive: true })
