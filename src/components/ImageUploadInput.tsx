@@ -65,7 +65,7 @@ export default function ImageUploadInput({
   }
 
   const handlePaste = (e: React.ClipboardEvent) => {
-    for (const item of e.clipboardData.items) {
+    for (const item of Array.from(e.clipboardData.items)) {
       if (item.type.startsWith('image/')) {
         e.preventDefault()
         const file = item.getAsFile()
