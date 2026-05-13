@@ -9,6 +9,8 @@ import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
+import ImageUploadInput from '@/components/ImageUploadInput'
+import RichTextEditor from '@/components/RichTextEditor'
 
 interface Category {
   id: string
@@ -30,6 +32,7 @@ export default function NewArticlePage() {
     categoryId: '',
     tags: '',
     coverImage: '',
+    coverImagePosition: '50% 50%',
     isPublished: false,
     isPinned: false,
     badges: '',
@@ -151,22 +154,14 @@ export default function NewArticlePage() {
           </div>
 
           <div>
-            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">封面图片</label>
-            <div className="flex gap-4 items-start">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text flex-1"
-                disabled={uploading}
-              />
-              {uploading && <span className="text-wiki-accent py-3">上传中...</span>}
-            </div>
-            {formData.coverImage && (
-              <div className="mt-2">
-                <img src={formData.coverImage} alt="封面" className="h-32 rounded border border-wiki-border" />
-              </div>
-            )}
+            <ImageUploadInput
+              label="封面图片"
+              value={formData.coverImage}
+              position={formData.coverImagePosition}
+              onChange={(url) => setFormData({ ...formData, coverImage: url })}
+              onPositionChange={(pos) => setFormData({ ...formData, coverImagePosition: pos })}
+              previewHeight="w-full aspect-[3/1]"
+            />
           </div>
 
           <div>
@@ -187,38 +182,12 @@ export default function NewArticlePage() {
           </div>
 
           <div>
-            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">内容 (支持 Markdown) *</label>
-            <div className="flex gap-2 mb-2">
-              <label className="btn-hard text-wiki-text text-xs py-2 px-4 cursor-pointer">
-                上传图片
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file) {
-                      const formData = new FormData()
-                      formData.append('file', file)
-                      setUploading(true)
-                      fetch('/api/admin/upload', { method: 'POST', body: formData })
-                        .then(res => res.json())
-                        .then(data => {
-                          if (data.url) insertImageToContent(data.url)
-                        })
-                        .finally(() => setUploading(false))
-                    }
-                  }}
-                  className="hidden"
-                  disabled={uploading}
-                />
-              </label>
-              {uploading && <span className="text-wiki-accent py-2">上传中...</span>}
-            </div>
-            <textarea
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">内容 *</label>
+            <RichTextEditor
               value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none h-64 font-mono"
-              required
+              onChange={(html) => setFormData({ ...formData, content: html })}
+              placeholder="请输入文章内容..."
+              minHeight="min-h-[400px]"
             />
           </div>
 

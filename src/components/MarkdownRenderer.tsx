@@ -189,5 +189,15 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
     return elements
   }
 
+  // 如果内容是 HTML（富文本编辑器输出），直接渲染 HTML
+  if (content && content.trim().startsWith('<')) {
+    return (
+      <div
+        className="rich-content text-wiki-text"
+        dangerouslySetInnerHTML={{ __html: content }}
+      />
+    )
+  }
+
   return <div className="markdown-content">{renderMarkdown(content)}</div>
 }

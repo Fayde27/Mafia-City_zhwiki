@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
 import { useRouter } from 'next/navigation'
 import ImageUploadInput from '@/components/ImageUploadInput'
+import RichTextEditor from '@/components/RichTextEditor'
 
 interface BuildingCategory {
   id: string
@@ -294,34 +295,28 @@ export default function AdminBuildingNewPage() {
 
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
             <h3 className="text-lg font-bold text-wiki-accent mb-4">建筑简介 (Markdown)</h3>
-            <textarea
+            <RichTextEditor
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows={4}
-              className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none resize-y font-mono text-sm"
-              placeholder="支持Markdown格式"
+              onChange={(html) => setFormData({ ...formData, description: html })}
+              minHeight="min-h-[160px]"
             />
           </div>
 
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
             <h3 className="text-lg font-bold text-wiki-accent mb-4">详细信息 (Markdown)</h3>
-            <textarea
+            <RichTextEditor
               value={formData.details}
-              onChange={(e) => setFormData({ ...formData, details: e.target.value })}
-              rows={6}
-              className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none resize-y font-mono text-sm"
-              placeholder="## 详细信息&#10;&#10;### 建筑效果&#10;- xxx"
+              onChange={(html) => setFormData({ ...formData, details: html })}
+              minHeight="min-h-[160px]"
             />
           </div>
 
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
             <h3 className="text-lg font-bold text-wiki-accent mb-4">升级信息 (Markdown)</h3>
-            <textarea
+            <RichTextEditor
               value={formData.upgradeInfo}
-              onChange={(e) => setFormData({ ...formData, upgradeInfo: e.target.value })}
-              rows={6}
-              className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none resize-y font-mono text-sm"
-              placeholder="## 升级信息&#10;&#10;### 升级消耗&#10;- xxx"
+              onChange={(html) => setFormData({ ...formData, upgradeInfo: html })}
+              minHeight="min-h-[160px]"
             />
           </div>
 

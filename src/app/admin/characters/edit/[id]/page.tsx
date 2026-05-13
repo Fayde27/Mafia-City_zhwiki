@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
 import { useRouter, useParams } from 'next/navigation'
 import ImageUploadInput from '@/components/ImageUploadInput'
+import RichTextEditor from '@/components/RichTextEditor'
 
 interface CharacterCategory {
   id: string
@@ -341,56 +342,46 @@ export default function AdminCharacterEditPage() {
 
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
             <h3 className="text-lg font-bold text-wiki-accent mb-4">角色属性 (Markdown)</h3>
-            <textarea
+            <RichTextEditor
               value={formData.attributes}
-              onChange={(e) => setFormData({ ...formData, attributes: e.target.value })}
-              rows={6}
-              className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none resize-y font-mono text-sm"
-              placeholder="## 角色属性&#10;&#10;| 等级 | 生命值 | 攻击力 | 防御力 |&#10;|------|--------|--------|--------|"
+              onChange={(html) => setFormData({ ...formData, attributes: html })}
+              minHeight="min-h-[160px]"
             />
           </div>
 
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
             <h3 className="text-lg font-bold text-wiki-accent mb-4">技能详情 (Markdown)</h3>
-            <textarea
+            <RichTextEditor
               value={formData.skills}
-              onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
-              rows={6}
-              className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none resize-y font-mono text-sm"
-              placeholder="## 技能详情&#10;&#10;### 普通攻击&#10;- xxx"
+              onChange={(html) => setFormData({ ...formData, skills: html })}
+              minHeight="min-h-[160px]"
             />
           </div>
 
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
             <h3 className="text-lg font-bold text-wiki-accent mb-4">黑道传闻 (Markdown)</h3>
-            <textarea
+            <RichTextEditor
               value={formData.rumors}
-              onChange={(e) => setFormData({ ...formData, rumors: e.target.value })}
-              rows={8}
-              className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none resize-y font-mono text-sm"
-              placeholder="## 黑道传闻&#10;&#10;### 传闻一&#10;..."
+              onChange={(html) => setFormData({ ...formData, rumors: html })}
+              minHeight="min-h-[160px]"
             />
           </div>
 
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
             <h3 className="text-lg font-bold text-wiki-accent mb-4">阵容搭配 (Markdown)</h3>
-            <textarea
+            <RichTextEditor
               value={formData.teamComp}
-              onChange={(e) => setFormData({ ...formData, teamComp: e.target.value })}
-              rows={6}
-              className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none resize-y font-mono text-sm"
-              placeholder="## 阵容搭配&#10;&#10;### 推荐阵容&#10;- xxx"
+              onChange={(html) => setFormData({ ...formData, teamComp: html })}
+              minHeight="min-h-[160px]"
             />
           </div>
 
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
             <h3 className="text-lg font-bold text-wiki-accent mb-4">配兵推荐 (Markdown)</h3>
-            <textarea
+            <RichTextEditor
               value={formData.troopRec}
-              onChange={(e) => setFormData({ ...formData, troopRec: e.target.value })}
-              rows={6}
-              className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none resize-y font-mono text-sm"
-              placeholder="## 配兵推荐&#10;&#10;### 推荐配兵&#10;- xxx"
+              onChange={(html) => setFormData({ ...formData, troopRec: html })}
+              minHeight="min-h-[160px]"
             />
           </div>
 
