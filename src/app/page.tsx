@@ -60,12 +60,21 @@ interface SidebarNavItem {
   children?: SidebarNavItem[]
 }
 
+interface SidebarSection {
+  id: string
+  name: string
+  slug: string
+  sortOrder: number
+  isActive: boolean
+}
+
 export default function HomePage() {
   const { isAdmin, token } = useAdminAuth()
   const [categories, setCategories] = useState<Category[]>([])
   const [articles, setArticles] = useState<Article[]>([])
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [sidebarNavItems, setSidebarNavItems] = useState<SidebarNavItem[]>([])
+  const [sidebarSections, setSidebarSections] = useState<SidebarSection[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [expandedItems, setExpandedItems] = useState<string[]>([])
@@ -76,11 +85,13 @@ export default function HomePage() {
       fetch('/api/wiki/articles?limit=6').then(res => res.json()),
       fetch('/api/wiki/announcements').then(res => res.json()),
       fetch('/api/wiki/sidebar-nav').then(res => res.json()),
-    ]).then(([cats, arts, anns, navItems]) => {
+      fetch('/api/wiki/sidebar-sections').then(res => res.json()),
+    ]).then(([cats, arts, anns, navItems, sections]) => {
       setCategories(cats || [])
       setArticles(arts?.articles || [])
       setAnnouncements(anns || [])
       setSidebarNavItems(Array.isArray(navItems) ? navItems : [])
+      setSidebarSections(Array.isArray(sections) ? sections : [])
       setLoading(false)
     }).catch(() => {
       setLoading(false)
@@ -118,9 +129,6 @@ export default function HomePage() {
     { label: '玩法攻略', href: '/wiki/guides', icon: '' },
     { label: '游戏资讯', href: '/wiki/articles', icon: '📰' },
   ]
-
-  const quickEntryItems = sidebarNavItems.filter(item => item.section === 'quick-entry')
-  const shortcutItems = sidebarNavItems.filter(item => item.section === 'shortcut')
 
   const toggleExpand = (id: string) => {
     setExpandedItems(prev =>
@@ -189,53 +197,42 @@ export default function HomePage() {
         <div className="flex flex-col lg:flex-row gap-6">
           <div className="lg:w-72 flex-shrink-0 order-2 lg:order-1">
             <div className="sticky top-20 space-y-6">
-              <div className="bg-wiki-card border border-wiki-border rounded-xl p-5">
-                <h3 className="text-wiki-text font-bold text-sm mb-4 flex items-center gap-2">
-                  <span className="text-wiki-accent">◆</span>
-                  新手快速入口
-                </h3>
-                <div className="space-y-1">
-                  {quickEntryItems.length > 0
-                    ? quickEntryItems.map(renderNavItem)
-                    : quickLinks.map((link) => (
-                        <Link key={link.href} href={link.href} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors group">
-                          <span className="text-lg">{link.icon}</span>
-                          <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors flex-1">{link.label}</span>
-                          <svg className="w-4 h-4 text-wiki-text-secondary group-hover:text-wiki-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </Link>
-                      ))
-                  }
+              {sidebarSections.length > 0 ? sidebarSections.map(section => {
+                const sectionItems = sidebarNavItems.filter(item => item.section === section.slug)
+                return (
+                  <div key={section.id} className="bg-wiki-card border border-wiki-border rounded-xl p-5">
+                    <h3 className="text-wiki-text font-bold text-sm mb-4 flex items-center gap-2">
+                      <span className="text-wiki-accent">◆</span>
+                      {section.name}
+                    </h3>
+                    <div className="space-y-1">
+                      {sectionItems.length > 0
+                        ? sectionItems.map(renderNavItem)
+                        : <div className="text-wiki-text-muted text-sm text-center py-4">暂无内容，请在管理后台添加</div>
+                      }
+                    </div>
+                  </div>
+                )
+              }) : (
+                // Fallback when no sections configured yet
+                <div className="bg-wiki-card border border-wiki-border rounded-xl p-5">
+                  <h3 className="text-wiki-text font-bold text-sm mb-4 flex items-center gap-2">
+                    <span className="text-wiki-accent">◆</span>
+                    快速入口
+                  </h3>
+                  <div className="space-y-1">
+                    {quickLinks.map((link) => (
+                      <Link key={link.href} href={link.href} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors group">
+                        <span className="text-lg">{link.icon}</span>
+                        <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors flex-1">{link.label}</span>
+                        <svg className="w-4 h-4 text-wiki-text-secondary group-hover:text-wiki-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
-              </div>
-
-              <div className="bg-wiki-card border border-wiki-border rounded-xl p-5">
-                <h3 className="text-wiki-text font-bold text-sm mb-4 flex items-center gap-2">
-                  <span className="text-wiki-accent">◆</span>
-                  快捷功能
-                </h3>
-                <div className="space-y-1">
-                  {shortcutItems.length > 0
-                    ? shortcutItems.map(renderNavItem)
-                    : <div className="text-wiki-text-muted text-sm text-center py-4">暂无快捷功能，请在管理后台添加</div>
-                  }
-                </div>
-              </div>
-
-              <div className="bg-wiki-card border border-wiki-border rounded-xl p-5">
-                <h3 className="text-wiki-text font-bold text-sm mb-4 flex items-center gap-2">
-                  <span className="text-wiki-accent">◆</span>
-                  热门分类
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {['新手攻略', '角色攻略', '装备图鉴', '建筑攻略', '阵容搭配', '赛事活动', '更新日志', '常见问题'].map((tag) => (
-                    <span key={tag} className="px-3 py-1.5 bg-wiki-gray/60 text-wiki-text-muted text-xs rounded-full border border-wiki-border hover:border-wiki-accent hover:text-wiki-accent cursor-pointer transition-colors">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
+              )}
 
               {isAdmin && (
                 <div className="bg-wiki-card border border-wiki-border rounded-xl p-5">
@@ -259,6 +256,10 @@ export default function HomePage() {
                     <Link href="/admin/announcements" className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors group">
                       <span className="text-lg">📢</span>
                       <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors">公告管理</span>
+                    </Link>
+                    <Link href="/admin/sidebar-sections" className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors group">
+                      <span className="text-lg">📂</span>
+                      <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors">侧边栏分类</span>
                     </Link>
                     <Link href="/admin/sidebar-nav" className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors group">
                       <span className="text-lg">🧭</span>

@@ -25,6 +25,7 @@ export default function AdminSidebarNavPage() {
   const router = useRouter()
   const { isAdmin, isLoaded } = useAdminAuth()
   const [items, setItems] = useState<SidebarNavItem[]>([])
+  const [sections, setSections] = useState<{ id: string; name: string; slug: string }[]>([])
   const [loading, setLoading] = useState(true)
   const [filterSection, setFilterSection] = useState<string>('all')
 
@@ -38,12 +39,14 @@ export default function AdminSidebarNavPage() {
   }, [isAdmin, isLoaded, router])
 
   const fetchItems = () => {
-    fetch('/api/admin/sidebar-nav')
-      .then(res => res.json())
-      .then(data => {
-        setItems(Array.isArray(data) ? data : [])
-        setLoading(false)
-      })
+    Promise.all([
+      fetch('/api/admin/sidebar-nav').then(res => res.json()),
+      fetch('/api/admin/sidebar-sections').then(res => res.json()),
+    ]).then(([navData, sectData]) => {
+      setItems(Array.isArray(navData) ? navData : [])
+      setSections(Array.isArray(sectData) ? sectData : [])
+      setLoading(false)
+    }).catch(() => setLoading(false))
   }
 
   const handleDelete = async (id: string, hasChildren: boolean) => {
@@ -69,12 +72,8 @@ export default function AdminSidebarNavPage() {
     } catch { alert('操作失败') }
   }
 
-  const getSectionLabel = (section: string) => {
-    switch (section) {
-      case 'quick-entry': return '新手快速入口'
-      case 'shortcut': return '快捷功能'
-      default: return section
-    }
+  const getSectionLabel = (slug: string) => {
+    return sections.find(s => s.slug === slug)?.name || slug
   }
 
   const filteredItems = filterSection === 'all'
@@ -161,11 +160,10 @@ export default function AdminSidebarNavPage() {
           </Link>
         </div>
 
-        <div className="flex gap-2 mb-6">
+        <div className="flex gap-2 mb-6 flex-wrap">
           {[
             { value: 'all', label: '全部' },
-            { value: 'quick-entry', label: '新手快速入口' },
-            { value: 'shortcut', label: '快捷功能' },
+            ...sections.map(s => ({ value: s.slug, label: s.name })),
           ].map(tab => (
             <button
               key={tab.value}

@@ -30,6 +30,7 @@ export default function EditSidebarNavPage() {
   const [loading, setLoading] = useState(!isNew)
   const [saving, setSaving] = useState(false)
   const [allTopItems, setAllTopItems] = useState<SidebarNavItem[]>([])
+  const [sections, setSections] = useState<{ id: string; name: string; slug: string }[]>([])
   const [formData, setFormData] = useState({
     section: 'quick-entry',
     label: '',
@@ -49,10 +50,11 @@ export default function EditSidebarNavPage() {
     // 加载所有顶级项（用于父级选择器）
     fetch('/api/admin/sidebar-nav')
       .then(res => res.json())
-      .then(data => {
-        // data 已是嵌套结构，顶级项用于父级选择
-        setAllTopItems(Array.isArray(data) ? data : [])
-      })
+      .then(data => setAllTopItems(Array.isArray(data) ? data : []))
+    // 加载动态分类
+    fetch('/api/admin/sidebar-sections')
+      .then(res => res.json())
+      .then(data => setSections(Array.isArray(data) ? data : []))
 
     if (!isNew && itemId) {
       fetch(`/api/admin/sidebar-nav/${itemId}`)
@@ -155,15 +157,17 @@ export default function EditSidebarNavPage() {
           {/* 所属分组（选了父级时沿用父级分组，可不改） */}
           {!formData.parentId && (
             <div>
-              <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">所属分组 *</label>
+              <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">所属分类 *</label>
               <select
                 value={formData.section}
                 onChange={(e) => setFormData({ ...formData, section: e.target.value })}
                 className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
                 required
               >
-                <option value="quick-entry">新手快速入口</option>
-                <option value="shortcut">快捷功能</option>
+                <option value="">请选择分类</option>
+                {sections.map(s => (
+                  <option key={s.id} value={s.slug}>{s.name} ({s.slug})</option>
+                ))}
               </select>
             </div>
           )}
