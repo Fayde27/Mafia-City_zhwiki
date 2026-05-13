@@ -17,6 +17,8 @@ interface Character {
   title: string
   avatar: string
   banner: string
+  avatarPosition?: string
+  bannerPosition?: string
   rarity: number
   role: string
   weapon: string

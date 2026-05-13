@@ -17,6 +17,8 @@ interface Building {
   slug: string
   icon: string
   image: string
+  imagePosition?: string
+  iconPosition?: string
   rarity: number
   type: string
   function: string

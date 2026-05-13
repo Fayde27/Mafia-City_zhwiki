@@ -16,6 +16,8 @@ interface Troop {
   slug: string
   icon: string
   image: string
+  imagePosition?: string
+  iconPosition?: string
   rarity: number
   type: string
   attack: number
