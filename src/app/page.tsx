@@ -386,6 +386,11 @@ export default function HomePage() {
                   <span className="text-wiki-danger mr-2">◆</span>
                   全站公告
                 </h2>
+                {isAdmin && (
+                  <a href="/admin/announcements" className="text-sm text-wiki-accent hover:underline">
+                    管理公告 →
+                  </a>
+                )}
               </div>
               <div className="bg-wiki-card border border-wiki-border rounded-xl p-5">
                 {announcements.length === 0 ? (

@@ -207,6 +207,7 @@ export default function TroopListPage() {
                       src={troop.image}
                       alt={troop.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      style={{ objectPosition: troop.imagePosition || '50% 50%' }}
                     />
                   ) : troop.icon ? (
                     <div className="w-full h-full flex items-center justify-center">

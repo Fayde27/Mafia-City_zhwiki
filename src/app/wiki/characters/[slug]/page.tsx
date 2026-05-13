@@ -233,17 +233,19 @@ export default function CharacterListPage() {
                 className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg overflow-hidden group block hover:border-wiki-accent transition-all"
               >
                 <div className="relative h-48 md:h-56 overflow-hidden bg-gradient-to-br from-wiki-gray to-wiki-darker">
-                  {character.banner ? (
-                    <img
-                      src={character.banner}
-                      alt={character.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  ) : character.avatar ? (
+                  {character.avatar ? (
                     <img
                       src={character.avatar}
                       alt={character.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      style={{ objectPosition: character.avatarPosition || '50% 50%' }}
+                    />
+                  ) : character.banner ? (
+                    <img
+                      src={character.banner}
+                      alt={character.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      style={{ objectPosition: character.bannerPosition || '50% 50%' }}
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">

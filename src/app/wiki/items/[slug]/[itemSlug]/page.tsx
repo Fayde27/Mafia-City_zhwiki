@@ -114,6 +114,7 @@ export default function ItemDetailPage() {
               src={item.image}
               alt={item.name}
               className="w-full h-full object-cover"
+              style={{ objectPosition: item.imagePosition || '50% 50%' }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-wiki-dark via-transparent to-transparent" />
             <div className="absolute bottom-4 left-4 md:bottom-8 md:left-8">

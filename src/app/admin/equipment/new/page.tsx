@@ -9,6 +9,7 @@ import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
 import { useRouter } from 'next/navigation'
+import ImageUploadInput from '@/components/ImageUploadInput'
 
 interface EquipmentCategory {
   id: string
@@ -26,7 +27,9 @@ export default function AdminEquipmentNewPage() {
     name: '',
     slug: '',
     icon: '',
+    iconPosition: '50% 50%',
     image: '',
+    imagePosition: '50% 50%',
     rarity: 3,
     type: '',
     slot: '',
@@ -154,28 +157,24 @@ export default function AdminEquipmentNewPage() {
             </div>
 
             <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
-              <h3 className="text-lg font-bold text-wiki-accent mb-4">图片链接</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">图标 URL</label>
-                  <input
-                    type="text"
-                    value={formData.icon}
-                    onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                    className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                    placeholder="/images/equipment/xxx-icon.png"
-                  />
-                </div>
-                <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">图片 URL</label>
-                  <input
-                    type="text"
-                    value={formData.image}
-                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                    className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                    placeholder="/images/equipment/xxx-image.jpg"
-                  />
-                </div>
+              <h3 className="text-lg font-bold text-wiki-accent mb-4">图片上传</h3>
+              <div className="space-y-6">
+                <ImageUploadInput
+                  label="图标"
+                  value={formData.icon}
+                  position={formData.iconPosition}
+                  onChange={(url) => setFormData({ ...formData, icon: url })}
+                  onPositionChange={(pos) => setFormData({ ...formData, iconPosition: pos })}
+                  previewHeight="h-32"
+                />
+                <ImageUploadInput
+                  label="图片"
+                  value={formData.image}
+                  position={formData.imagePosition}
+                  onChange={(url) => setFormData({ ...formData, image: url })}
+                  onPositionChange={(pos) => setFormData({ ...formData, imagePosition: pos })}
+                  previewHeight="h-36"
+                />
               </div>
             </div>
           </div>

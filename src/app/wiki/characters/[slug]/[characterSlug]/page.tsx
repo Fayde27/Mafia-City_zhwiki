@@ -119,6 +119,7 @@ export default function CharacterDetailPage() {
               src={character.banner}
               alt={character.name}
               className="w-full h-full object-cover"
+              style={{ objectPosition: character.bannerPosition || '50% 50%' }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-wiki-dark via-transparent to-transparent" />
             <div className="absolute bottom-4 left-4 md:bottom-8 md:left-8">
@@ -152,7 +153,7 @@ export default function CharacterDetailPage() {
             <div className="flex items-center gap-4 mb-6">
               {character.avatar && (
                 <div className="w-24 h-24 md:w-32 md:h-32 rounded-lg overflow-hidden border-2 border-wiki-accent flex-shrink-0">
-                  <img src={character.avatar} alt={character.name} className="w-full h-full object-cover" />
+                  <img src={character.avatar} alt={character.name} className="w-full h-full object-cover" style={{ objectPosition: character.avatarPosition || '50% 50%' }} />
                 </div>
               )}
               <div className="flex-1">

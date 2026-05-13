@@ -207,6 +207,7 @@ export default function EquipmentListPage() {
                       src={item.image}
                       alt={item.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      style={{ objectPosition: item.imagePosition || '50% 50%' }}
                     />
                   ) : item.icon ? (
                     <div className="w-full h-full flex items-center justify-center">

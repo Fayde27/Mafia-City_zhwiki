@@ -206,6 +206,7 @@ export default function BuildingListPage() {
                       src={building.image}
                       alt={building.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      style={{ objectPosition: building.imagePosition || '50% 50%' }}
                     />
                   ) : building.icon ? (
                     <div className="w-full h-full flex items-center justify-center">

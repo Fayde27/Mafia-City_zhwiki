@@ -9,6 +9,7 @@ import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
 import { useRouter } from 'next/navigation'
+import ImageUploadInput from '@/components/ImageUploadInput'
 
 interface CharacterCategory {
   id: string
@@ -27,7 +28,9 @@ export default function AdminCharacterNewPage() {
     slug: '',
     title: '',
     avatar: '',
+    avatarPosition: '50% 50%',
     banner: '',
+    bannerPosition: '50% 50%',
     rarity: 5,
     role: '',
     weapon: '',
@@ -169,33 +172,24 @@ export default function AdminCharacterNewPage() {
             </div>
 
             <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
-              <h3 className="text-lg font-bold text-wiki-accent mb-4">图片链接</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">头像 URL</label>
-                  <input
-                    type="text"
-                    value={formData.avatar}
-                    onChange={(e) => setFormData({ ...formData, avatar: e.target.value })}
-                    className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                    placeholder="/images/characters/xxx-avatar.jpg"
-                  />
-                </div>
-                <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">Banner URL</label>
-                  <input
-                    type="text"
-                    value={formData.banner}
-                    onChange={(e) => setFormData({ ...formData, banner: e.target.value })}
-                    className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                    placeholder="/images/characters/xxx-banner.jpg"
-                  />
-                </div>
-                {formData.banner && (
-                  <div className="rounded-lg overflow-hidden h-32 bg-wiki-gray">
-                    <img src={formData.banner} alt="Banner预览" className="w-full h-full object-cover" />
-                  </div>
-                )}
+              <h3 className="text-lg font-bold text-wiki-accent mb-4">图片上传</h3>
+              <div className="space-y-6">
+                <ImageUploadInput
+                  label="头像"
+                  value={formData.avatar}
+                  position={formData.avatarPosition}
+                  onChange={(url) => setFormData({ ...formData, avatar: url })}
+                  onPositionChange={(pos) => setFormData({ ...formData, avatarPosition: pos })}
+                  previewHeight="h-36"
+                />
+                <ImageUploadInput
+                  label="Banner"
+                  value={formData.banner}
+                  position={formData.bannerPosition}
+                  onChange={(url) => setFormData({ ...formData, banner: url })}
+                  onPositionChange={(pos) => setFormData({ ...formData, bannerPosition: pos })}
+                  previewHeight="h-36"
+                />
               </div>
             </div>
           </div>
