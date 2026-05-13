@@ -181,7 +181,7 @@ export default function AdminCharacterNewPage() {
                   position={formData.avatarPosition}
                   onChange={(url) => setFormData({ ...formData, avatar: url })}
                   onPositionChange={(pos) => setFormData({ ...formData, avatarPosition: pos })}
-                  previewHeight="w-full aspect-[3/1]"
+                  previewHeight="h-48 max-w-xs mx-auto"
                 />
                 <ImageUploadInput
                   label="Banner"

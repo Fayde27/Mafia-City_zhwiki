@@ -139,9 +139,16 @@ export default async function AnnouncementPage({ params }: { params: { id: strin
               </h1>
 
               <div className="prose prose-wiki max-w-none">
-                <div className="text-wiki-text-secondary text-sm leading-relaxed whitespace-pre-wrap">
-                  {announcement.content}
-                </div>
+                {announcement.content?.trim().startsWith('<') ? (
+                  <div
+                    className="rich-content text-wiki-text leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: announcement.content }}
+                  />
+                ) : (
+                  <div className="text-wiki-text leading-relaxed whitespace-pre-wrap">
+                    {announcement.content}
+                  </div>
+                )}
               </div>
             </div>
           </div>
