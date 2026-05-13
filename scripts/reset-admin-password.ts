@@ -38,7 +38,7 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 async function main() {
-  const password = 'admin123'
+  const password = 'mafia12321+++'
   console.log('正在生成密码 hash...')
   const hashedPassword = await hashPassword(password)
   console.log('Hash 前缀:', hashedPassword.substring(0, 30) + '...')
@@ -47,7 +47,7 @@ async function main() {
   const { error: deleteError } = await supabaseAdmin
     .from('User')
     .delete()
-    .eq('username', 'admin')
+    .eq('username', 'mafiacityzhwiki123')
 
   if (deleteError) {
     console.error('删除旧用户失败:', deleteError)
@@ -58,7 +58,7 @@ async function main() {
   // 插入新记录
   const { data, error: insertError } = await supabaseAdmin
     .from('User')
-    .insert({ username: 'admin', password: hashedPassword, role: 'admin' })
+    .insert({ username: 'mafiacityzhwiki123', password: hashedPassword, role: 'admin' })
     .select()
 
   if (insertError) {
@@ -67,8 +67,8 @@ async function main() {
   }
 
   console.log('✅ 管理员账号已重置')
-  console.log('   用户名: admin')
-  console.log('   密码: admin123')
+  console.log('   用户名: mafiacityzhwiki123')
+  console.log('   密码: mafia12321+++')
   console.log('   用户ID:', data?.[0]?.id)
 }
 
