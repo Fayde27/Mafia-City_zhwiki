@@ -287,7 +287,7 @@ export default function CharacterListPage() {
                   )}
                   {character.description && (
                     <p className="text-wiki-text-muted text-xs mt-2 line-clamp-2">
-                      {character.description}
+                      {character.description.replace(/<[^>]*>/g, '').trim()}
                     </p>
                   )}
                 </div>

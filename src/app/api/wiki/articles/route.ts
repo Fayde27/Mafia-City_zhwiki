@@ -11,6 +11,7 @@ export async function GET(request: Request) {
     const category = searchParams.get('category')
     const slug = searchParams.get('slug')
     const search = searchParams.get('search')
+    const featured = searchParams.get('featured')
     const from = (page - 1) * limit
     const to = from + limit - 1
 
@@ -30,6 +31,9 @@ export async function GET(request: Request) {
     }
     if (search) {
       query = query.or(`title.ilike.%${search}%,content.ilike.%${search}%,tags.ilike.%${search}%`)
+    }
+    if (featured === 'true') {
+      query = query.eq('isFeatured', true)
     }
 
     const { data: articles, error, count: total } = await query

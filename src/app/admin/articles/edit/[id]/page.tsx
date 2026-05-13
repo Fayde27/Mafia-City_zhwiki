@@ -37,6 +37,7 @@ export default function EditArticlePage() {
     tags: '',
     isPublished: false,
     isPinned: false,
+    isFeatured: false,
     badges: '',
     sortOrder: 0,
   })
@@ -63,6 +64,7 @@ export default function EditArticlePage() {
         tags: article.tags || '',
         isPublished: article.isPublished,
         isPinned: article.isPinned || false,
+        isFeatured: article.isFeatured || false,
         badges: article.badges || '',
         sortOrder: article.sortOrder,
       })
@@ -222,6 +224,15 @@ export default function EditArticlePage() {
                 className="w-5 h-5"
               />
               <span className="text-wiki-text font-bold">置顶文章</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={formData.isFeatured}
+                onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
+                className="w-5 h-5"
+              />
+              <span className="text-wiki-text font-bold">在首页热门攻略显示</span>
             </label>
           </div>
 

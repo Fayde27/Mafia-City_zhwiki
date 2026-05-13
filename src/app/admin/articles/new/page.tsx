@@ -35,6 +35,7 @@ export default function NewArticlePage() {
     coverImagePosition: '50% 50%',
     isPublished: false,
     isPinned: false,
+    isFeatured: false,
     badges: '',
     sortOrder: 0,
   })
@@ -220,6 +221,15 @@ export default function NewArticlePage() {
                 className="w-5 h-5"
               />
               <span className="text-wiki-text font-bold">置顶文章</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={formData.isFeatured}
+                onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
+                className="w-5 h-5"
+              />
+              <span className="text-wiki-text font-bold">在首页热门攻略显示</span>
             </label>
           </div>
 

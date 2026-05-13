@@ -82,7 +82,7 @@ export default function HomePage() {
   useEffect(() => {
     Promise.all([
       fetch('/api/wiki/categories').then(res => res.json()),
-      fetch('/api/wiki/articles?limit=6').then(res => res.json()),
+      fetch('/api/wiki/articles?featured=true&limit=12').then(res => res.json()),
       fetch('/api/wiki/announcements').then(res => res.json()),
       fetch('/api/wiki/sidebar-nav').then(res => res.json()),
       fetch('/api/wiki/sidebar-sections').then(res => res.json()),
