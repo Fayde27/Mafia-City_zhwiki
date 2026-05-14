@@ -86,7 +86,7 @@ export default function ItemListPage() {
   const groupedFilters = filterTypes.reduce((acc, type) => {
     acc[type] = filterOptions.filter(o => o.type === type).sort((a, b) => a.sortOrder - b.sortOrder)
     return acc
-  }, {} as Record<string, typeof filterOptions[0][]>)
+  }, {} as Record<string, ItemFilterOption[]>)
 
   return (
     <div className="min-h-screen bg-wiki-bg">
