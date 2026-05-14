@@ -130,13 +130,13 @@ export default function BuildingListPage() {
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => setActiveFilters(prev => ({ ...prev, [type]: 'all' }))}
-                    className={}
+                    className={(!activeFilters[type] || activeFilters[type] === 'all') ? 'px-3 py-1.5 text-xs font-bold bg-wiki-accent text-wiki-darker' : 'px-3 py-1.5 text-xs font-bold bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}
                   >全部</button>
                   {groupedFilters[type].map(opt => (
                     <button
                       key={opt.id}
                       onClick={() => setActiveFilters(prev => ({ ...prev, [type]: opt.value }))}
-                      className={}
+                      className={activeFilters[type] === opt.value ? 'px-3 py-1.5 text-xs font-bold bg-wiki-accent text-wiki-darker' : 'px-3 py-1.5 text-xs font-bold bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}
                     >
                       {type === 'rarity' && !isNaN(parseInt(opt.value)) ? getRarityStars(parseInt(opt.value)) : opt.value}
                     </button>
