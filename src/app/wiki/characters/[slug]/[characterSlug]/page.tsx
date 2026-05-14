@@ -183,7 +183,11 @@ export default function CharacterDetailPage() {
             {character.description && (
               <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6 mb-6">
                 <h3 className="text-lg font-bold text-wiki-accent mb-3">角色简介</h3>
-                <p className="text-wiki-text leading-relaxed">{character.description}</p>
+                {character.description.trim().startsWith('<') ? (
+                  <div className="rich-content text-wiki-text leading-relaxed" dangerouslySetInnerHTML={{ __html: character.description }} />
+                ) : (
+                  <p className="text-wiki-text leading-relaxed">{character.description}</p>
+                )}
               </div>
             )}
 
