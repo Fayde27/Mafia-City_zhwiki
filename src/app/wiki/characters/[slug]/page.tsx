@@ -83,7 +83,7 @@ export default function CharacterListPage() {
       if (type === 'role') return c.role === value
       if (type === 'weapon') return c.weapon === value
       // 自定义类型：尝试匹配角色所有字段
-      return Object.values(c as Record<string, unknown>).some(v => String(v) === value)
+      return Object.values(c as any).some((v: unknown) => String(v) === value)
     })
   })
 
