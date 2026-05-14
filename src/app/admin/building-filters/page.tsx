@@ -14,12 +14,21 @@ interface FilterOption {
   type: string
   value: string
   sortOrder: number
+  categoryId: string
+}
+
+interface Category {
+  id: string
+  name: string
+  slug: string
 }
 
 export default function AdminBuildingFiltersPage() {
   const router = useRouter()
   const { isAdmin, isLoaded } = useAdminAuth()
   const [options, setOptions] = useState<FilterOption[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [selectedCategoryId, setSelectedCategoryId] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [newType, setNewType] = useState('')
@@ -28,26 +37,32 @@ export default function AdminBuildingFiltersPage() {
   useEffect(() => {
     if (!isLoaded) return
     if (!isAdmin) { router.push('/admin/login'); return }
-    fetchOptions()
+    Promise.all([
+      fetch('/api/wiki/buildings/categories').then(r => r.json()),
+      fetch('/api/admin/building-filters').then(r => r.json()),
+    ]).then(([cats, opts]) => {
+      const catList: Category[] = Array.isArray(cats) ? cats : []
+      setCategories(catList)
+      if (catList.length > 0) setSelectedCategoryId(catList[0].id)
+      setOptions(Array.isArray(opts) ? opts : [])
+      setLoading(false)
+    }).catch(() => setLoading(false))
   }, [isAdmin, isLoaded, router])
 
   const fetchOptions = async () => {
-    try {
-      const res = await fetch('/api/admin/building-filters')
-      const data = await res.json()
-      setOptions(Array.isArray(data) ? data : [])
-      setLoading(false)
-    } catch { setLoading(false) }
+    const res = await fetch('/api/admin/building-filters')
+    const data = await res.json()
+    setOptions(Array.isArray(data) ? data : [])
   }
 
   const handleAdd = async () => {
-    if (!newValue.trim() || !newType.trim()) return
+    if (!newValue.trim() || !newType.trim() || !selectedCategoryId) return
     setSaving(true)
     try {
       const res = await fetch('/api/admin/building-filters', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: newType.trim(), value: newValue.trim() }),
+        body: JSON.stringify({ type: newType.trim(), value: newValue.trim(), categoryId: selectedCategoryId }),
       })
       if (res.ok) { setNewValue(''); fetchOptions() }
     } catch { alert('添加失败') }
@@ -75,11 +90,14 @@ export default function AdminBuildingFiltersPage() {
 
   if (!isAdmin) return null
 
-  const existingTypes = Array.from(new Set(options.map(o => o.type))).sort()
+  const currentOptions = options.filter(o => o.categoryId === selectedCategoryId)
+  const existingTypes = Array.from(new Set(currentOptions.map(o => o.type))).sort()
   const groupedOptions = existingTypes.reduce((acc, type) => {
-    acc[type] = options.filter(o => o.type === type).sort((a, b) => a.sortOrder - b.sortOrder)
+    acc[type] = currentOptions.filter(o => o.type === type).sort((a, b) => a.sortOrder - b.sortOrder)
     return acc
   }, {} as Record<string, FilterOption[]>)
+
+  const allTypes = Array.from(new Set(options.map(o => o.type))).sort()
 
   return (
     <div className="min-h-screen bg-wiki-bg">
@@ -88,15 +106,36 @@ export default function AdminBuildingFiltersPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">建筑筛选选项管理</h1>
-            <p className="text-wiki-text-muted text-sm mt-1">自由配置筛选大类和选项值，大类名称即为前台显示的标题</p>
+            <p className="text-wiki-text-muted text-sm mt-1">为每个分类单独配置筛选选项</p>
           </div>
           <Link href="/admin/buildings" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
             返回建筑管理
           </Link>
         </div>
 
+        <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-4 mb-6 flex items-center gap-4">
+          <span className="text-wiki-text font-bold text-sm flex-shrink-0">当前分类：</span>
+          <div className="flex flex-wrap gap-2">
+            {categories.map(cat => (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategoryId(cat.id)}
+                className={`px-4 py-1.5 text-sm font-bold transition-colors ${
+                  selectedCategoryId === cat.id
+                    ? 'bg-wiki-accent text-wiki-darker'
+                    : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
+                }`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6 mb-6">
-          <h3 className="text-lg font-bold text-wiki-accent mb-4">添加筛选选项</h3>
+          <h3 className="text-lg font-bold text-wiki-accent mb-4">
+            添加筛选选项（到「{categories.find(c => c.id === selectedCategoryId)?.name ?? '...'}」）
+          </h3>
           <div className="flex gap-4 items-end">
             <div className="flex-shrink-0">
               <label className="block text-wiki-text-muted text-xs mb-1">筛选大类</label>
@@ -109,7 +148,7 @@ export default function AdminBuildingFiltersPage() {
                 placeholder="如：稀有度"
               />
               <datalist id="type-suggestions">
-                {existingTypes.map(t => <option key={t} value={t} />)}
+                {allTypes.map(t => <option key={t} value={t} />)}
               </datalist>
             </div>
             <div className="flex-1">
@@ -125,7 +164,7 @@ export default function AdminBuildingFiltersPage() {
             </div>
             <button
               onClick={handleAdd}
-              disabled={saving || !newValue.trim() || !newType.trim()}
+              disabled={saving || !newValue.trim() || !newType.trim() || !selectedCategoryId}
               className="btn-hard text-wiki-text disabled:opacity-50 px-6 py-2"
             >
               添加
@@ -138,7 +177,7 @@ export default function AdminBuildingFiltersPage() {
           <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
         ) : existingTypes.length === 0 ? (
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-8 text-center text-wiki-text-muted">
-            暂无筛选选项，在上方添加第一个选项
+            该分类暂无筛选选项，在上方添加第一个选项
           </div>
         ) : (
           <div className="space-y-6">

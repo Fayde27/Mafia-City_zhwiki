@@ -60,7 +60,7 @@ export default function BuildingListPage() {
     Promise.all([
       fetch(`/api/wiki/buildings?category=${categorySlug}`).then(res => res.json()),
       fetch('/api/wiki/buildings/categories').then(res => res.json()),
-      fetch('/api/admin/building-filters').then(res => res.json()),
+      fetch(`/api/wiki/buildings/filter-options?categorySlug=${categorySlug}`).then(res => res.json()),
     ]).then(([buildingData, catData, filterData]) => {
       const bldgs = buildingData?.buildings || []
       setBuildings(bldgs)

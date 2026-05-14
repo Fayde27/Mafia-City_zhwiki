@@ -59,7 +59,7 @@ export default function CharacterListPage() {
     Promise.all([
       fetch(`/api/wiki/characters?category=${categorySlug}`).then(res => res.json()),
       fetch('/api/wiki/characters/categories').then(res => res.json()),
-      fetch('/api/admin/character-filters').then(res => res.json()),
+      fetch(`/api/wiki/characters/filter-options?categorySlug=${categorySlug}`).then(res => res.json()),
     ]).then(([charData, catData, filterData]) => {
       const chars = charData?.characters || []
       setCharacters(chars)

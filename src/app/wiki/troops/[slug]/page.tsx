@@ -61,7 +61,7 @@ export default function TroopListPage() {
     Promise.all([
       fetch(`/api/wiki/troops?category=${categorySlug}`).then(res => res.json()),
       fetch('/api/wiki/troops/categories').then(res => res.json()),
-      fetch('/api/admin/troop-filters').then(res => res.json()),
+      fetch(`/api/wiki/troops/filter-options?categorySlug=${categorySlug}`).then(res => res.json()),
     ]).then(([troopData, catData, filterData]) => {
       const trps = troopData?.troops || []
       setTroops(trps)

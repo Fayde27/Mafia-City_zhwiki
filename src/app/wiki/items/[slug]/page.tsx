@@ -58,7 +58,7 @@ export default function ItemListPage() {
     Promise.all([
       fetch(`/api/wiki/items?category=${categorySlug}`).then(res => res.json()),
       fetch('/api/wiki/items/categories').then(res => res.json()),
-      fetch('/api/admin/item-filters').then(res => res.json()),
+      fetch(`/api/wiki/items/filter-options?categorySlug=${categorySlug}`).then(res => res.json()),
     ]).then(([itemData, catData, filterData]) => {
       const its = itemData?.items || []
       setItems(its)

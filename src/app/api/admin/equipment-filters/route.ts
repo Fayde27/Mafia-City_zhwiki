@@ -19,13 +19,13 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { type, value } = await request.json()
-    if (!type || !value) {
-      return NextResponse.json({ error: '类型和值不能为空' }, { status: 400 })
+    const { type, value, categoryId } = await request.json()
+    if (!type || !value || !categoryId) {
+      return NextResponse.json({ error: '类型、值和分类不能为空' }, { status: 400 })
     }
     const { data: option, error } = await supabaseAdmin
       .from('EquipmentFilterOption')
-      .insert({ type, value })
+      .insert({ type, value, categoryId })
       .select()
       .single()
 

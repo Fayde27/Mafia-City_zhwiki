@@ -61,7 +61,7 @@ export default function EquipmentListPage() {
     Promise.all([
       fetch(`/api/wiki/equipment?category=${categorySlug}`).then(res => res.json()),
       fetch('/api/wiki/equipment/categories').then(res => res.json()),
-      fetch('/api/admin/equipment-filters').then(res => res.json()),
+      fetch(`/api/wiki/equipment/filter-options?categorySlug=${categorySlug}`).then(res => res.json()),
     ]).then(([equipData, catData, filterData]) => {
       const equips = equipData?.equipment || []
       setEquipment(equips)
