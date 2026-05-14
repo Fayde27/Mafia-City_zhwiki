@@ -78,7 +78,7 @@ export default function ItemListPage() {
   const filteredItems = items.filter(i => Object.entries(activeFilters).every(([type, value]) => {
     if (!value || value === 'all') return true
     if (type === 'rarity') return i.rarity === parseInt(value)
-    return Object.values(i as Record<string, unknown>).some(v => String(v) === value)
+    return Object.values(b as any).some(v => String(v) === value)
   }))
 
   const getRarityStars = (r: number) => '★'.repeat(r) + '☆'.repeat(5 - r)

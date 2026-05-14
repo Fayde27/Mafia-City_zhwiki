@@ -81,7 +81,7 @@ export default function TroopListPage() {
   const filteredTroops = troops.filter(t => Object.entries(activeFilters).every(([type, value]) => {
     if (!value || value === 'all') return true
     if (type === 'rarity') return t.rarity === parseInt(value)
-    return Object.values(t as Record<string, unknown>).some(v => String(v) === value)
+    return Object.values(b as any).some(v => String(v) === value)
   }))
 
   const getRarityStars = (r: number) => '★'.repeat(r) + '☆'.repeat(5 - r)

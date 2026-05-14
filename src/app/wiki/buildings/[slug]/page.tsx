@@ -80,7 +80,7 @@ export default function BuildingListPage() {
   const filteredBuildings = buildings.filter(b => Object.entries(activeFilters).every(([type, value]) => {
     if (!value || value === 'all') return true
     if (type === 'rarity') return b.rarity === parseInt(value)
-    return Object.values(b as Record<string, unknown>).some(v => String(v) === value)
+    return Object.values(b as any).some(v => String(v) === value)
   }))
 
   const getRarityStars = (r: number) => '★'.repeat(r) + '☆'.repeat(5 - r)
