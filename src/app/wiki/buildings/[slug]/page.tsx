@@ -53,8 +53,7 @@ export default function BuildingListPage() {
   const [buildings, setBuildings] = useState<Building[]>([])
   const [category, setCategory] = useState<BuildingCategory | null>(null)
   const [loading, setLoading] = useState(true)
-  const [filterRarity, setFilterRarity] = useState<string>('all')
-  const [filterType, setFilterType] = useState<string>('all')
+  const [activeFilters, setActiveFilters] = useState<Record<string, string>>({})
   const [filterOptions, setFilterOptions] = useState<BuildingFilterOption[]>([])
 
   useEffect(() => {
@@ -78,18 +77,18 @@ export default function BuildingListPage() {
     })
   }, [categorySlug])
 
-  const filteredBuildings = buildings.filter(b => {
-    if (filterRarity !== 'all' && b.rarity !== parseInt(filterRarity)) return false
-    if (filterType !== 'all' && b.type !== filterType) return false
-    return true
-  })
+  const filteredBuildings = buildings.filter(b => Object.entries(activeFilters).every(([type, value]) => {
+    if (!value || value === 'all') return true
+    if (type === 'rarity') return b.rarity === parseInt(value)
+    return Object.values(b as Record<string, unknown>).some(v => String(v) === value)
+  }))
 
-  const getRarityStars = (rarity: number) => {
-    return '★'.repeat(rarity) + '☆'.repeat(5 - rarity)
-  }
-
-  const rarityOptions = filterOptions.filter(o => o.type === 'rarity')
-  const typeOptions = filterOptions.filter(o => o.type === 'type')
+  const getRarityStars = (r: number) => '★'.repeat(r) + '☆'.repeat(5 - r)
+  const filterTypes = Array.from(new Set(filterOptions.map(o => o.type)))
+  const groupedFilters = filterTypes.reduce((acc, type) => {
+    acc[type] = filterOptions.filter(o => o.type === type).sort((a, b) => a.sortOrder - b.sortOrder)
+    return acc
+  }, {} as Record<string, typeof filterOptions[0][]>)
 
   return (
     <div className="min-h-screen bg-wiki-bg">
@@ -123,68 +122,28 @@ export default function BuildingListPage() {
           )}
         </div>
 
-        {(rarityOptions.length > 0 || typeOptions.length > 0) && (
+        {filterTypes.length > 0 && (
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-4 md:p-6 mb-6 space-y-4">
-            {rarityOptions.length > 0 && (
-              <div>
-                <div className="text-sm font-bold text-wiki-accent uppercase tracking-wider mb-2">稀有度</div>
+            {filterTypes.map(type => (
+              <div key={type}>
+                <div className="text-sm font-bold text-wiki-accent uppercase tracking-wider mb-2">{type}</div>
                 <div className="flex flex-wrap gap-2">
                   <button
-                    onClick={() => setFilterRarity('all')}
-                    className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
-                      filterRarity === 'all'
-                        ? 'bg-wiki-accent text-wiki-darker'
-                        : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
-                    }`}
-                  >
-                    全部
-                  </button>
-                  {rarityOptions.map((opt) => (
+                    onClick={() => setActiveFilters(prev => ({ ...prev, [type]: 'all' }))}
+                    className={}
+                  >全部</button>
+                  {groupedFilters[type].map(opt => (
                     <button
                       key={opt.id}
-                      onClick={() => setFilterRarity(opt.value)}
-                      className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
-                        filterRarity === opt.value
-                          ? 'bg-wiki-accent text-wiki-darker'
-                          : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
-                      }`}
+                      onClick={() => setActiveFilters(prev => ({ ...prev, [type]: opt.value }))}
+                      className={}
                     >
-                      {getRarityStars(parseInt(opt.value))}
+                      {type === 'rarity' && !isNaN(parseInt(opt.value)) ? getRarityStars(parseInt(opt.value)) : opt.value}
                     </button>
                   ))}
                 </div>
               </div>
-            )}
-            {typeOptions.length > 0 && (
-              <div>
-                <div className="text-sm font-bold text-wiki-accent uppercase tracking-wider mb-2">建筑类型</div>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => setFilterType('all')}
-                    className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
-                      filterType === 'all'
-                        ? 'bg-wiki-accent text-wiki-darker'
-                        : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
-                    }`}
-                  >
-                    全部
-                  </button>
-                  {typeOptions.map((opt) => (
-                    <button
-                      key={opt.id}
-                      onClick={() => setFilterType(opt.value)}
-                      className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
-                        filterType === opt.value
-                          ? 'bg-wiki-accent text-wiki-darker'
-                          : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
-                      }`}
-                    >
-                      {opt.value}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+            ))}
           </div>
         )}
 

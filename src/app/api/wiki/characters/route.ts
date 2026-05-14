@@ -10,9 +10,11 @@ export async function GET(request: Request) {
     const slug = searchParams.get('slug')
     const search = searchParams.get('search')
 
+    const selectStr = category ? '*, CharacterCategory!inner(*)' : '*, CharacterCategory(*)'
+
     let query = supabaseAdmin
       .from('Character')
-      .select('*, CharacterCategory(*)')
+      .select(selectStr)
       .eq('isPublished', true)
 
     if (category) {
