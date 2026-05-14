@@ -86,10 +86,10 @@ export default function EquipmentListPage() {
 
   const getRarityStars = (r: number) => '★'.repeat(r) + '☆'.repeat(5 - r)
   const filterTypes = Array.from(new Set(filterOptions.map(o => o.type)))
-  const groupedFilters = filterTypes.reduce((acc, type) => {
-    acc[type] = filterOptions.filter(o => o.type === type).sort((a, b) => a.sortOrder - b.sortOrder)
-    return acc
-  }, {} as Record<string, EquipmentFilterOption[]>)
+  const groupedFilters: {[k: string]: typeof filterOptions} = {}
+  filterTypes.forEach(type => {
+    groupedFilters[type] = filterOptions.filter(o => o.type === type).sort((a, b) => a.sortOrder - b.sortOrder)
+  })
 
   return (
     <div className="min-h-screen bg-wiki-bg">
