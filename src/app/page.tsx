@@ -65,6 +65,7 @@ interface SidebarSection {
 const adminLinks = [
   { href: '/admin/dashboard', icon: '🖥️', label: '管理后台' },
   { href: '/admin/site-config', icon: '⚙️', label: '站点配置' },
+  { href: '/admin/submissions', icon: '📝', label: '投稿管理' },
   { href: '/admin/categories', icon: '📁', label: '攻略分类管理' },
   { href: '/admin/wiki-categories', icon: '📚', label: '图鉴分类管理' },
   { href: '/admin/announcements', icon: '📢', label: '公告管理' },
@@ -255,6 +256,22 @@ export default function HomePage() {
                   </div>
                 </div>
               )}
+
+              {/* 攻略投稿入口 */}
+              <div className="bg-wiki-card border border-wiki-border rounded-xl p-5">
+                <h3 className="text-wiki-text font-bold text-sm mb-3 flex items-center gap-2">
+                  <span className="text-wiki-accent">◆</span>攻略投稿
+                </h3>
+                <p className="text-wiki-text-muted text-xs mb-3 leading-relaxed">
+                  分享你的游戏心得，优质投稿将获得游戏内奖励！
+                </p>
+                <Link
+                  href="/wiki/submit"
+                  className="flex items-center justify-center gap-2 w-full py-2 bg-wiki-accent/10 border border-wiki-accent/30 text-wiki-accent text-sm font-bold rounded-lg hover:bg-wiki-accent/20 transition-colors"
+                >
+                  <span>📝</span>立即投稿
+                </Link>
+              </div>
 
               {/* 管理入口（仅管理员可见，默认折叠） */}
               {isAdmin && (
