@@ -20,7 +20,7 @@ export default function SiteConfigPage() {
 
   useEffect(() => {
     if (isLoaded && !isAdmin) router.push('/admin/login')
-  }, [isAdmin, authLoading, router])
+  }, [isAdmin, isLoaded, router])
 
   useEffect(() => {
     fetch('/api/admin/site-config')
