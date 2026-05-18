@@ -321,8 +321,9 @@ export default function HomePage() {
                     <span className="text-wiki-accent text-sm font-bold uppercase tracking-wider">玩法攻略</span>
                     <span className="text-wiki-text-muted text-xs">从入门到精通，带你征战天下</span>
                   </div>
-                  <h1 className="text-3xl md:text-4xl font-bold text-wiki-text mb-6">
-                    黑道風雲 <span className="text-wiki-accent">Wiki</span>
+                  <h1 className="text-3xl md:text-4xl font-bold mb-6" style={{ color: '#fff', textShadow: '0 2px 8px rgba(0,0,0,0.6)' }}>
+                    <span className="text-wiki-accent">黑道風雲</span>{' '}
+                    <span className="text-wiki-accent">Wiki</span>
                   </h1>
                   <form onSubmit={handleSearch} className="max-w-xl mb-6">
                     <div className="relative">
