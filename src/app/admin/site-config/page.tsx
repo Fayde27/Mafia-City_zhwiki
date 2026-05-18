@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation'
 import ImageUploadInput from '@/components/ImageUploadInput'
 
 export default function SiteConfigPage() {
-  const { isAdmin, loading: authLoading } = useAdminAuth()
+  const { isAdmin, isLoaded } = useAdminAuth()
   const router = useRouter()
 
   const [bannerImage, setBannerImage] = useState('')
@@ -19,7 +19,7 @@ export default function SiteConfigPage() {
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
-    if (!authLoading && !isAdmin) router.push('/admin/login')
+    if (isLoaded && !isAdmin) router.push('/admin/login')
   }, [isAdmin, authLoading, router])
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export default function SiteConfigPage() {
     }
   }
 
-  if (authLoading || loading) {
+  if (!isLoaded || loading) {
     return <div className="min-h-screen bg-wiki-bg flex items-center justify-center text-wiki-text-muted">加载中...</div>
   }
 
