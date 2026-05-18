@@ -47,11 +47,11 @@ export default function EditSidebarNavPage() {
       router.push('/admin/login')
       return
     }
-    // 加载所有顶级项（用于父级选择器）
+    // 加載所有頂級項（用於父級選擇器）
     fetch('/api/admin/sidebar-nav')
       .then(res => res.json())
       .then(data => setAllTopItems(Array.isArray(data) ? data : []))
-    // 加载动态分类
+    // 加載動態分類
     fetch('/api/admin/sidebar-sections')
       .then(res => res.json())
       .then(data => setSections(Array.isArray(data) ? data : []))
@@ -92,13 +92,13 @@ export default function EditSidebarNavPage() {
       if (res.ok) {
         router.push('/admin/sidebar-nav')
       } else {
-        alert('保存失败')
+        alert('保存失敗')
       }
-    } catch { alert('网络错误') }
+    } catch { alert('網絡錯誤') }
     finally { setSaving(false) }
   }
 
-  // 可选作为父级的项（不含自身，不含已是子项的）
+  // 可選作為父級的項（不含自身，不含已是子項的）
   const parentOptions = allTopItems.filter(item => item.id !== itemId)
 
   if (!isAdmin) return null
@@ -108,7 +108,7 @@ export default function EditSidebarNavPage() {
       <div className="min-h-screen bg-wiki-bg">
         <WikiHeader />
         <div className="flex items-center justify-center py-24">
-          <div className="text-wiki-text-muted text-xl">加载中...</div>
+          <div className="text-wiki-text-muted text-xl">載入中...</div>
         </div>
         <WikiFooter />
       </div>
@@ -123,9 +123,9 @@ export default function EditSidebarNavPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">
-              {isNew ? '新增导航项' : '编辑导航项'}
+              {isNew ? '新增導航項' : '編輯導航項'}
             </h1>
-            <p className="text-wiki-text-muted text-sm mt-1">设置侧边栏导航的显示内容和跳转链接</p>
+            <p className="text-wiki-text-muted text-sm mt-1">設置側邊欄導航的顯示內容和跳轉連結</p>
           </div>
           <Link href="/admin/sidebar-nav" className="text-wiki-text-muted hover:text-wiki-accent text-sm">
             返回列表
@@ -134,15 +134,15 @@ export default function EditSidebarNavPage() {
 
         <form onSubmit={handleSubmit} className="bg-wiki-gray-light border border-wiki-border rounded-lg p-8 space-y-6">
 
-          {/* 父级菜单（如选择父级，则变为子菜单） */}
+          {/* 父級菜單（如選擇父級，則變為子菜單） */}
           <div>
-            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">父级菜单</label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">父級菜單</label>
             <select
               value={formData.parentId}
               onChange={(e) => setFormData({ ...formData, parentId: e.target.value })}
               className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
             >
-              <option value="">无（顶级菜单）</option>
+              <option value="">無（頂級菜單）</option>
               {parentOptions.map(item => (
                 <option key={item.id} value={item.id}>
                   {item.icon ? `${item.icon} ` : ''}{item.label} ({item.section === 'quick-entry' ? '新手快速入口' : '快捷功能'})
@@ -150,21 +150,21 @@ export default function EditSidebarNavPage() {
               ))}
             </select>
             {formData.parentId && (
-              <p className="text-wiki-text-muted text-xs mt-1">此项将作为子菜单显示在父级下方，点击父级可展开</p>
+              <p className="text-wiki-text-muted text-xs mt-1">此項將作為子菜單顯示在父級下方，點擊父級可展開</p>
             )}
           </div>
 
-          {/* 所属分组（选了父级时沿用父级分组，可不改） */}
+          {/* 所屬分組（選了父級時沿用父級分組，可不改） */}
           {!formData.parentId && (
             <div>
-              <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">所属分类 *</label>
+              <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">所屬分類 *</label>
               <select
                 value={formData.section}
                 onChange={(e) => setFormData({ ...formData, section: e.target.value })}
                 className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
                 required
               >
-                <option value="">请选择分类</option>
+                <option value="">請選擇分類</option>
                 {sections.map(s => (
                   <option key={s.id} value={s.slug}>{s.name} ({s.slug})</option>
                 ))}
@@ -173,19 +173,19 @@ export default function EditSidebarNavPage() {
           )}
 
           <div>
-            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">显示名称 *</label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">顯示名稱 *</label>
             <input
               type="text"
               value={formData.label}
               onChange={(e) => setFormData({ ...formData, label: e.target.value })}
               className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-              placeholder="例如: 图鉴、角色图鉴"
+              placeholder="例如: 圖鑑、角色圖鑑"
               required
             />
           </div>
 
           <div>
-            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">图标 (Emoji)</label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">圖標 (Emoji)</label>
             <input
               type="text"
               value={formData.icon}
@@ -197,29 +197,29 @@ export default function EditSidebarNavPage() {
 
           <div>
             <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">
-              跳转链接 {formData.parentId ? '' : '*'}
+              跳轉連結 {formData.parentId ? '' : '*'}
             </label>
             <input
               type="text"
               value={formData.href}
               onChange={(e) => setFormData({ ...formData, href: e.target.value })}
               className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-              placeholder={formData.parentId ? '子菜单链接（可留空仅展示）' : '例如: /wiki、/wiki/guides'}
+              placeholder={formData.parentId ? '子菜單連結（可留空僅展示）' : '例如: /wiki、/wiki/guides'}
               required={!formData.parentId}
             />
             {!formData.parentId && (
-              <p className="text-wiki-text-muted text-xs mt-1">顶级菜单若有子菜单，链接可留空（点击展开子菜单）</p>
+              <p className="text-wiki-text-muted text-xs mt-1">頂級菜單若有子菜單，連結可留空（點擊展開子菜單）</p>
             )}
           </div>
 
           <div>
-            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">排序权重</label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">排序權重</label>
             <input
               type="number"
               value={formData.sortOrder}
               onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value) || 0 })}
               className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-              placeholder="数字越大越靠前"
+              placeholder="數字越大越靠前"
             />
           </div>
 
@@ -231,7 +231,7 @@ export default function EditSidebarNavPage() {
                 onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
                 className="w-5 h-5"
               />
-              <span className="text-wiki-text font-bold">在侧边栏显示</span>
+              <span className="text-wiki-text font-bold">在側邊欄顯示</span>
             </label>
           </div>
 

@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     const from = (page - 1) * limit
     const to = from + limit - 1
 
-    // 有分类过滤时用 !inner（INNER JOIN），避免返回 category 为 null 的文章
+    // 有分類過濾時用 !inner（INNER JOIN），避免返回 category 為 null 的文章
     const selectStr = category ? '*, Category!inner(*)' : '*, Category(*)'
 
     let query = supabaseAdmin
@@ -43,7 +43,7 @@ export async function GET(request: Request) {
 
     if (error) throw error
 
-    // Supabase 返回关联数据用大写表名，映射为前端期望的小写 category
+    // Supabase 返回關聯數據用大寫表名，映射為前端期望的小寫 category
     const mapped = (articles || []).map(({ Category, ...rest }: any) => ({
       ...rest,
       category: Category,
@@ -59,6 +59,6 @@ export async function GET(request: Request) {
       },
     })
   } catch (error) {
-    return NextResponse.json({ error: '获取文章失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取文章失敗' }, { status: 500 })
   }
 }

@@ -22,7 +22,7 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="min-h-screen bg-wiki-bg flex items-center justify-center">
-      <p className="text-wiki-text-muted">跳转中...</p>
+      <p className="text-wiki-text-muted">跳轉中...</p>
     </div>
   )
 }

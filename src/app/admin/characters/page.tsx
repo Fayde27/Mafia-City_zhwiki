@@ -60,13 +60,13 @@ export default function AdminCharactersPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('确定要删除这个角色吗？')) return
+    if (!confirm('確定要刪除這個角色嗎？')) return
 
     try {
       await fetch(`/api/admin/characters/${id}`, { method: 'DELETE' })
       fetchData()
     } catch (err) {
-      alert('删除失败')
+      alert('刪除失敗')
     }
   }
 
@@ -79,7 +79,7 @@ export default function AdminCharactersPage() {
       })
       fetchData()
     } catch (err) {
-      alert('更新失败')
+      alert('更新失敗')
     }
   }
 
@@ -103,14 +103,14 @@ export default function AdminCharactersPage() {
             <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">
               角色管理
             </h1>
-            <p className="text-wiki-text-muted text-sm mt-1">管理角色图鉴内容，新增、编辑或删除角色</p>
+            <p className="text-wiki-text-muted text-sm mt-1">管理角色圖鑑內容，新增、編輯或刪除角色</p>
           </div>
           <div className="flex gap-3">
             <Link href="/admin/character-filters" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
-              筛选管理
+              篩選管理
             </Link>
             <Link href="/admin/character-categories" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
-              分类管理
+              分類管理
             </Link>
             <Link href="/admin/characters/new" className="btn-hard text-wiki-text text-sm">
               + 新增角色
@@ -145,10 +145,10 @@ export default function AdminCharactersPage() {
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
+          <div className="text-center py-12 text-wiki-text-muted">載入中...</div>
         ) : filteredCharacters.length === 0 ? (
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-8 md:p-12 text-center text-wiki-text-muted">
-            暂无角色数据
+            暫無角色數據
           </div>
         ) : (
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg overflow-hidden">
@@ -158,9 +158,9 @@ export default function AdminCharactersPage() {
                   <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">角色</th>
                   <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">稀有度</th>
                   <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">命途</th>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">属性</th>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">分类</th>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">状态</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">屬性</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">分類</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">狀態</th>
                   <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">操作</th>
                 </tr>
               </thead>
@@ -197,7 +197,7 @@ export default function AdminCharactersPage() {
                             : 'bg-wiki-danger/20 text-wiki-danger'
                         }`}
                       >
-                        {character.isPublished ? '已发布' : '草稿'}
+                        {character.isPublished ? '已發佈' : '草稿'}
                       </button>
                     </td>
                     <td className="px-6 py-4">
@@ -206,13 +206,13 @@ export default function AdminCharactersPage() {
                           href={`/admin/characters/edit/${character.id}`}
                           className="px-3 py-1 bg-wiki-accent/20 text-wiki-accent text-sm font-bold hover:bg-wiki-accent/30"
                         >
-                          编辑
+                          編輯
                         </Link>
                         <button
                           onClick={() => handleDelete(character.id)}
                           className="px-3 py-1 bg-wiki-danger/20 text-wiki-danger text-sm font-bold hover:bg-wiki-danger/30"
                         >
-                          删除
+                          刪除
                         </button>
                       </div>
                     </td>

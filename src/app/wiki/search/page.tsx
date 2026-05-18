@@ -50,20 +50,20 @@ function SearchContent() {
       
       <main className="container mx-auto px-4 py-8">
         <div className="text-sm text-wiki-text-muted mb-6">
-          <Link href="/" className="hover:text-wiki-accent">首页</Link>
+          <Link href="/" className="hover:text-wiki-accent">首頁</Link>
           <span className="mx-2">/</span>
           <span className="text-wiki-text">搜索: {query}</span>
         </div>
 
         <h1 className="text-3xl font-heading font-bold text-wiki-accent heading-hard mb-8">
-          搜索结果: {query}
+          搜索結果: {query}
         </h1>
 
         {loading ? (
-          <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
+          <div className="text-center py-12 text-wiki-text-muted">載入中...</div>
         ) : articles.length === 0 ? (
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-12 text-center text-wiki-text-muted">
-            没有找到相关文章
+            沒有找到相關文章
           </div>
         ) : (
           <div className="space-y-3">
@@ -84,7 +84,7 @@ function SearchContent() {
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-wiki-accent text-xs font-bold">{article.category.name}</span>
                       {article.isPinned && (
-                        <span className="px-2 py-0.5 bg-wiki-danger/10 text-wiki-danger text-xs rounded">置顶</span>
+                        <span className="px-2 py-0.5 bg-wiki-danger/10 text-wiki-danger text-xs rounded">置頂</span>
                       )}
                       {article.badges && article.badges.split(',').filter(Boolean).map(badge => {
                         const badgeStyle = badge === 'HOT' ? 'bg-wiki-danger/10 text-wiki-danger'
@@ -126,7 +126,7 @@ function SearchContent() {
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-wiki-bg flex items-center justify-center text-wiki-text-muted">加载中...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-wiki-bg flex items-center justify-center text-wiki-text-muted">載入中...</div>}>
       <SearchContent />
     </Suspense>
   )

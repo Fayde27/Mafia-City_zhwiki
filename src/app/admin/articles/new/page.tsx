@@ -69,7 +69,7 @@ export default function NewArticlePage() {
         setFormData(prev => ({ ...prev, coverImage: data.url }))
       }
     } catch (err) {
-      alert('上传失败')
+      alert('上傳失敗')
     } finally {
       setUploading(false)
     }
@@ -78,7 +78,7 @@ export default function NewArticlePage() {
   const insertImageToContent = (url: string) => {
     setFormData(prev => ({
       ...prev,
-      content: prev.content + `\n![图片](${url})\n`,
+      content: prev.content + `\n![圖片](${url})\n`,
     }))
   }
 
@@ -96,10 +96,10 @@ export default function NewArticlePage() {
       if (res.ok) {
         router.push('/wiki/article/' + formData.slug)
       } else {
-        alert('创建失败')
+        alert('創建失敗')
       }
     } catch (err) {
-      alert('网络错误')
+      alert('網絡錯誤')
     } finally {
       setLoading(false)
     }
@@ -117,13 +117,13 @@ export default function NewArticlePage() {
             <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">
               新增文章
             </h1>
-            <p className="text-wiki-text-muted text-sm mt-1">创建新的Wiki文章，支持Markdown格式</p>
+            <p className="text-wiki-text-muted text-sm mt-1">創建新的Wiki文章，支持Markdown格式</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-8 space-y-6">
           <div>
-            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">标题 *</label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">標題 *</label>
             <input
               type="text"
               value={formData.title}
@@ -134,7 +134,7 @@ export default function NewArticlePage() {
           </div>
 
           <div>
-            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">别名 (URL Slug) *</label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">別名 (URL Slug) *</label>
             <input
               type="text"
               value={formData.slug}
@@ -156,7 +156,7 @@ export default function NewArticlePage() {
 
           <div>
             <ImageUploadInput
-              label="封面图片"
+              label="封面圖片"
               value={formData.coverImage}
               position={formData.coverImagePosition}
               onChange={(url) => setFormData({ ...formData, coverImage: url })}
@@ -166,14 +166,14 @@ export default function NewArticlePage() {
           </div>
 
           <div>
-            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">分类 *</label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">分類 *</label>
             <select
               value={formData.categoryId}
               onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
               className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
               required
             >
-              <option value="">请选择分类</option>
+              <option value="">請選擇分類</option>
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.name}
@@ -183,23 +183,23 @@ export default function NewArticlePage() {
           </div>
 
           <div>
-            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">内容 *</label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">內容 *</label>
             <RichTextEditor
               value={formData.content}
               onChange={(html) => setFormData({ ...formData, content: html })}
-              placeholder="请输入文章内容..."
+              placeholder="請輸入文章內容..."
               minHeight="min-h-[400px]"
             />
           </div>
 
           <div>
-            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">标签 (逗号分隔)</label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">標籤 (逗號分隔)</label>
             <input
               type="text"
               value={formData.tags}
               onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
               className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-              placeholder="例如: 角色,图鉴,攻略"
+              placeholder="例如: 角色,圖鑑,攻略"
             />
           </div>
 
@@ -211,7 +211,7 @@ export default function NewArticlePage() {
                 onChange={(e) => setFormData({ ...formData, isPublished: e.target.checked })}
                 className="w-5 h-5"
               />
-              <span className="text-wiki-text font-bold">立即发布</span>
+              <span className="text-wiki-text font-bold">立即發佈</span>
             </label>
             <label className="flex items-center gap-2">
               <input
@@ -220,7 +220,7 @@ export default function NewArticlePage() {
                 onChange={(e) => setFormData({ ...formData, isPinned: e.target.checked })}
                 className="w-5 h-5"
               />
-              <span className="text-wiki-text font-bold">置顶文章</span>
+              <span className="text-wiki-text font-bold">置頂文章</span>
             </label>
             <label className="flex items-center gap-2">
               <input
@@ -229,14 +229,14 @@ export default function NewArticlePage() {
                 onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
                 className="w-5 h-5"
               />
-              <span className="text-wiki-text font-bold">在首页热门攻略显示</span>
+              <span className="text-wiki-text font-bold">在首頁熱門攻略顯示</span>
             </label>
           </div>
 
           <div>
-            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">文章标志 (逗号分隔)</label>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">文章標誌 (逗號分隔)</label>
             <div className="flex flex-wrap gap-2 mb-2">
-              {['HOT', 'NEW', 'STAR', '推荐', '精华'].map((badge) => (
+              {['HOT', 'NEW', 'STAR', '推薦', '精華'].map((badge) => (
                 <button
                   key={badge}
                   type="button"
@@ -262,7 +262,7 @@ export default function NewArticlePage() {
               value={formData.badges}
               onChange={(e) => setFormData({ ...formData, badges: e.target.value })}
               className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-              placeholder="自定义标志，逗号分隔，如: HOT,星标"
+              placeholder="自定義標誌，逗號分隔，如: HOT,星標"
             />
           </div>
 

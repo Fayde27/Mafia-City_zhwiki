@@ -18,7 +18,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     const tableName = tableMap[type]
 
     if (!tableName) {
-      return NextResponse.json({ error: '无效的类型' }, { status: 400 })
+      return NextResponse.json({ error: '無效的類型' }, { status: 400 })
     }
 
     const { name, slug, description, icon, sortOrder } = await request.json()
@@ -32,8 +32,8 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (error) throw error
     return NextResponse.json(category)
   } catch (error) {
-    console.error('更新分类失败:', error)
-    return NextResponse.json({ error: '更新分类失败' }, { status: 500 })
+    console.error('更新分類失敗:', error)
+    return NextResponse.json({ error: '更新分類失敗' }, { status: 500 })
   }
 }
 
@@ -44,7 +44,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     const tableName = tableMap[type]
 
     if (!tableName) {
-      return NextResponse.json({ error: '无效的类型' }, { status: 400 })
+      return NextResponse.json({ error: '無效的類型' }, { status: 400 })
     }
 
     const { error } = await supabaseAdmin
@@ -55,7 +55,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     if (error) throw error
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('删除分类失败:', error)
-    return NextResponse.json({ error: '删除分类失败' }, { status: 500 })
+    console.error('刪除分類失敗:', error)
+    return NextResponse.json({ error: '刪除分類失敗' }, { status: 500 })
   }
 }

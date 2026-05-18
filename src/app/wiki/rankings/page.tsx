@@ -14,7 +14,7 @@ export default function RankingsPage() {
           <h1 className="text-3xl font-bold text-wiki-text mb-4">
             <span className="text-wiki-accent">◆</span> 排行榜
           </h1>
-          <p className="text-wiki-text-muted text-sm">敬请期待，内容正在建设中...</p>
+          <p className="text-wiki-text-muted text-sm">敬請期待，內容正在建設中...</p>
         </div>
       </main>
       <WikiFooter />

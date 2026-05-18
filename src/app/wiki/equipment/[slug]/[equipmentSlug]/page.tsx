@@ -65,15 +65,15 @@ export default function EquipmentDetailPage() {
   }
 
   const tabs = [
-    { id: 'stats', label: '属性详情' },
-    { id: 'enhancement', label: '强化信息' },
+    { id: 'stats', label: '屬性詳情' },
+    { id: 'enhancement', label: '強化信息' },
   ]
 
   if (loading) {
     return (
       <div className="min-h-screen bg-wiki-bg">
         <WikiHeader />
-        <div className="text-center py-20 text-wiki-text-muted">加载中...</div>
+        <div className="text-center py-20 text-wiki-text-muted">載入中...</div>
         <WikiFooter />
       </div>
     )
@@ -85,7 +85,7 @@ export default function EquipmentDetailPage() {
         <WikiHeader />
         <main className="container mx-auto px-4 py-12">
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-12 text-center text-wiki-text-muted">
-            装备不存在
+            裝備不存在
           </div>
         </main>
         <WikiFooter />
@@ -99,11 +99,11 @@ export default function EquipmentDetailPage() {
       
       <main className="container mx-auto px-4 py-6 md:py-8">
         <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
-          <Link href="/" className="hover:text-wiki-accent">首页</Link>
+          <Link href="/" className="hover:text-wiki-accent">首頁</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki" className="hover:text-wiki-accent">图鉴</Link>
+          <Link href="/wiki" className="hover:text-wiki-accent">圖鑑</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki/equipment" className="hover:text-wiki-accent">装备图鉴</Link>
+          <Link href="/wiki/equipment" className="hover:text-wiki-accent">裝備圖鑑</Link>
           <span className="mx-2">/</span>
           <Link href={`/wiki/equipment/${equipment.category.slug}`} className="hover:text-wiki-accent">
             {equipment.category.name}
@@ -140,7 +140,7 @@ export default function EquipmentDetailPage() {
                   href={`/admin/equipment/edit/${equipment.id}`}
                   className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90"
                 >
-                  编辑装备
+                  編輯裝備
                 </Link>
               </div>
             )}
@@ -158,7 +158,7 @@ export default function EquipmentDetailPage() {
               <div>
                 <h2 className="text-2xl md:text-3xl font-bold text-wiki-text">{equipment.name}</h2>
                 {equipment.type && (
-                  <p className="text-wiki-text-muted mt-1">类型：{equipment.type}</p>
+                  <p className="text-wiki-text-muted mt-1">類型：{equipment.type}</p>
                 )}
               </div>
             </div>
@@ -199,7 +199,7 @@ export default function EquipmentDetailPage() {
 
           <div className="lg:col-span-1">
             <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6 sticky top-4">
-              <h3 className="text-lg font-bold text-wiki-accent mb-4">装备信息</h3>
+              <h3 className="text-lg font-bold text-wiki-accent mb-4">裝備信息</h3>
               <div className="space-y-3 text-sm">
                 {equipment.rarity && (
                   <div className="flex justify-between">
@@ -209,7 +209,7 @@ export default function EquipmentDetailPage() {
                 )}
                 {equipment.type && (
                   <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">类型</span>
+                    <span className="text-wiki-text-muted">類型</span>
                     <span className="text-wiki-text font-bold">{equipment.type}</span>
                   </div>
                 )}
@@ -221,13 +221,13 @@ export default function EquipmentDetailPage() {
                 )}
                 {equipment.attack > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">攻击力</span>
+                    <span className="text-wiki-text-muted">攻擊力</span>
                     <span className="text-wiki-text font-bold">{equipment.attack}</span>
                   </div>
                 )}
                 {equipment.defense > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">防御力</span>
+                    <span className="text-wiki-text-muted">防禦力</span>
                     <span className="text-wiki-text font-bold">{equipment.defense}</span>
                   </div>
                 )}
@@ -245,7 +245,7 @@ export default function EquipmentDetailPage() {
                 )}
                 {equipment.acquisition && (
                   <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">获取方式</span>
+                    <span className="text-wiki-text-muted">獲取方式</span>
                     <span className="text-wiki-text">{equipment.acquisition}</span>
                   </div>
                 )}

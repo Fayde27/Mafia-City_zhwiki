@@ -51,14 +51,14 @@ export default function AdminSidebarNavPage() {
 
   const handleDelete = async (id: string, hasChildren: boolean) => {
     const msg = hasChildren
-      ? '此项有子菜单，删除后子菜单将失去父级关联。确定要删除吗？'
-      : '确定要删除这个导航项吗？'
+      ? '此項有子菜單，刪除後子菜單將失去父級關聯。確定要刪除嗎？'
+      : '確定要刪除這個導航項嗎？'
     if (!confirm(msg)) return
     try {
       const res = await fetch(`/api/admin/sidebar-nav/${id}`, { method: 'DELETE' })
       if (res.ok) fetchItems()
-      else alert('删除失败')
-    } catch { alert('网络错误') }
+      else alert('刪除失敗')
+    } catch { alert('網絡錯誤') }
   }
 
   const handleToggleActive = async (item: SidebarNavItem) => {
@@ -69,7 +69,7 @@ export default function AdminSidebarNavPage() {
         body: JSON.stringify({ ...item, isActive: !item.isActive }),
       })
       if (res.ok) fetchItems()
-    } catch { alert('操作失败') }
+    } catch { alert('操作失敗') }
   }
 
   const getSectionLabel = (slug: string) => {
@@ -97,15 +97,15 @@ export default function AdminSidebarNavPage() {
               <span className="font-bold text-wiki-text">{item.label}</span>
               {(item.children?.length ?? 0) > 0 && (
                 <span className="px-2 py-0.5 bg-wiki-accent/20 text-wiki-accent text-xs rounded">
-                  {item.children!.length} 个子菜单
+                  {item.children!.length} 個子菜單
                 </span>
               )}
               {!item.isActive && (
-                <span className="px-2 py-0.5 bg-wiki-gray text-wiki-text-muted text-xs rounded">已隐藏</span>
+                <span className="px-2 py-0.5 bg-wiki-gray text-wiki-text-muted text-xs rounded">已隱藏</span>
               )}
             </div>
             <span className="text-wiki-text-muted text-sm truncate block">
-              {item.href || <em className="opacity-50">无链接（展开父级）</em>}
+              {item.href || <em className="opacity-50">無連結（展開父級）</em>}
             </span>
           </div>
         </div>
@@ -118,23 +118,23 @@ export default function AdminSidebarNavPage() {
                 : 'bg-wiki-gray text-wiki-text-muted border-wiki-border hover:border-wiki-accent/50'
             }`}
           >
-            {item.isActive ? '显示中' : '已隐藏'}
+            {item.isActive ? '顯示中' : '已隱藏'}
           </button>
           <Link
             href={`/admin/sidebar-nav/${item.id}`}
             className="px-3 py-1.5 bg-wiki-accent/20 text-wiki-accent text-xs font-bold rounded border border-wiki-accent/40 hover:bg-wiki-accent/30"
           >
-            编辑
+            編輯
           </Link>
           <button
             onClick={() => handleDelete(item.id, (item.children?.length ?? 0) > 0)}
             className="px-3 py-1.5 bg-wiki-danger/20 text-wiki-danger text-xs font-bold rounded border border-wiki-danger/40 hover:bg-wiki-danger/30"
           >
-            删除
+            刪除
           </button>
         </div>
       </div>
-      {/* 子项 */}
+      {/* 子項 */}
       {item.children && item.children.length > 0 && (
         <div className="divide-y divide-wiki-border/50">
           {item.children.map(child => renderItem(child, true))}
@@ -152,11 +152,11 @@ export default function AdminSidebarNavPage() {
       <main className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">侧边栏导航管理</h1>
-            <p className="text-wiki-text-muted text-sm mt-1">支持多级菜单，父级可展开显示子菜单</p>
+            <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">側邊欄導航管理</h1>
+            <p className="text-wiki-text-muted text-sm mt-1">支持多級菜單，父級可展開顯示子菜單</p>
           </div>
           <Link href="/admin/sidebar-nav/new" className="btn-hard text-wiki-text text-sm">
-            + 新增导航项
+            + 新增導航項
           </Link>
         </div>
 
@@ -180,10 +180,10 @@ export default function AdminSidebarNavPage() {
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
+          <div className="text-center py-12 text-wiki-text-muted">載入中...</div>
         ) : items.length === 0 ? (
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-12 text-center text-wiki-text-muted">
-            暂无导航项，点击上方按钮新增
+            暫無導航項，點擊上方按鈕新增
           </div>
         ) : (
           <div className="space-y-6">
@@ -191,7 +191,7 @@ export default function AdminSidebarNavPage() {
               <div key={section} className="bg-wiki-gray-light border border-wiki-border rounded-lg overflow-hidden">
                 <div className="px-6 py-4 border-b border-wiki-border bg-wiki-gray flex items-center justify-between">
                   <h2 className="text-lg font-bold text-wiki-text">{getSectionLabel(section)}</h2>
-                  <span className="text-wiki-text-muted text-xs">{sectionItems.length} 个顶级项</span>
+                  <span className="text-wiki-text-muted text-xs">{sectionItems.length} 個頂級項</span>
                 </div>
                 <div className="divide-y divide-wiki-border">
                   {sectionItems.map(item => renderItem(item))}

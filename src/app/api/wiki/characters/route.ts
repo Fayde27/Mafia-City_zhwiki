@@ -39,6 +39,6 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ characters: mapped })
   } catch (error) {
-    return NextResponse.json({ error: '获取角色失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取角色失敗' }, { status: 500 })
   }
 }

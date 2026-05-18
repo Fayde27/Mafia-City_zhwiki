@@ -15,11 +15,11 @@ export async function GET(
       .single()
 
     if (error || !category) {
-      return NextResponse.json({ error: '角色分类不存在' }, { status: 404 })
+      return NextResponse.json({ error: '角色分類不存在' }, { status: 404 })
     }
     return NextResponse.json(category)
   } catch (error) {
-    return NextResponse.json({ error: '获取角色分类失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取角色分類失敗' }, { status: 500 })
   }
 }
 
@@ -39,7 +39,7 @@ export async function PUT(
     if (error) throw error
     return NextResponse.json(category)
   } catch (error) {
-    return NextResponse.json({ error: '更新角色分类失败' }, { status: 500 })
+    return NextResponse.json({ error: '更新角色分類失敗' }, { status: 500 })
   }
 }
 
@@ -56,6 +56,6 @@ export async function DELETE(
     if (error) throw error
     return NextResponse.json({ success: true })
   } catch (error) {
-    return NextResponse.json({ error: '删除角色分类失败' }, { status: 500 })
+    return NextResponse.json({ error: '刪除角色分類失敗' }, { status: 500 })
   }
 }

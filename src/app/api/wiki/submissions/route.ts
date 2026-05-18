@@ -8,7 +8,7 @@ export async function POST(request: Request) {
     const { title, content, gameId, category } = await request.json()
 
     if (!title?.trim() || !content?.trim() || !gameId?.trim()) {
-      return NextResponse.json({ error: '请填写完整信息' }, { status: 400 })
+      return NextResponse.json({ error: '請填寫完整信息' }, { status: 400 })
     }
 
     const { error } = await supabaseAdmin
@@ -25,6 +25,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true }, { status: 201 })
   } catch {
-    return NextResponse.json({ error: '提交失败，请稍后重试' }, { status: 500 })
+    return NextResponse.json({ error: '提交失敗，請稍後重試' }, { status: 500 })
   }
 }

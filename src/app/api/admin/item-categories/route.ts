@@ -21,7 +21,7 @@ export async function GET() {
     )
     return NextResponse.json(withCounts)
   } catch (error) {
-    return NextResponse.json({ error: '获取道具分类失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取道具分類失敗' }, { status: 500 })
   }
 }
 
@@ -36,6 +36,6 @@ export async function POST(request: Request) {
     if (error) throw error
     return NextResponse.json(category, { status: 201 })
   } catch (error) {
-    return NextResponse.json({ error: '创建道具分类失败' }, { status: 500 })
+    return NextResponse.json({ error: '創建道具分類失敗' }, { status: 500 })
   }
 }

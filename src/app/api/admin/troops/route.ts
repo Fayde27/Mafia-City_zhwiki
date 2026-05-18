@@ -37,7 +37,7 @@ export async function GET(request: Request) {
       },
     })
   } catch (error) {
-    return NextResponse.json({ error: '获取兵种列表失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取兵種列表失敗' }, { status: 500 })
   }
 }
 
@@ -75,6 +75,6 @@ export async function POST(request: Request) {
     if (error) throw error
     return NextResponse.json(troop, { status: 201 })
   } catch (error) {
-    return NextResponse.json({ error: '创建兵种失败' }, { status: 500 })
+    return NextResponse.json({ error: '創建兵種失敗' }, { status: 500 })
   }
 }

@@ -35,7 +35,7 @@ export default function ImageUploadInput({
     onPositionChangeRef.current = onPositionChange
   }, [onPositionChange])
 
-  // 全局 Ctrl+V 粘贴监听：鼠标悬停在组件上时激活
+  // 全局 Ctrl+V 粘貼監聽：鼠標懸停在組件上時激活
   useEffect(() => {
     const handleGlobalPaste = (e: ClipboardEvent) => {
       if (!isActiveRef.current) return
@@ -69,10 +69,10 @@ export default function ImageUploadInput({
         const data = await res.json()
         onChange(data.url)
       } else {
-        alert('上传失败，请重试')
+        alert('上傳失敗，請重試')
       }
     } catch {
-      alert('上传失败，请检查网络')
+      alert('上傳失敗，請檢查網絡')
     } finally {
       setUploading(false)
     }
@@ -162,7 +162,7 @@ export default function ImageUploadInput({
             draggable={false}
           />
           <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded pointer-events-none">
-            {isActive ? '🖼️ Ctrl+V 粘贴 · 拖动调整位置' : '拖动调整显示区域'}
+            {isActive ? '🖼️ Ctrl+V 粘貼 · 拖動調整位置' : '拖動調整顯示區域'}
           </div>
         </div>
       ) : (
@@ -173,8 +173,8 @@ export default function ImageUploadInput({
           onMouseLeave={() => { isActiveRef.current = false; setIsActive(false) }}
           tabIndex={0}
         >
-          <span>{uploading ? '上传中...' : '暂无图片'}</span>
-          <span className="text-xs opacity-60">{isActive ? '🖼️ 现在可以 Ctrl+V 粘贴图片' : '悬停后可 Ctrl+V 粘贴'}</span>
+          <span>{uploading ? '上傳中...' : '暫無圖片'}</span>
+          <span className="text-xs opacity-60">{isActive ? '🖼️ 現在可以 Ctrl+V 粘貼圖片' : '懸停後可 Ctrl+V 粘貼'}</span>
         </div>
       )}
 
@@ -184,7 +184,7 @@ export default function ImageUploadInput({
         onChange={(e) => onChange(e.target.value)}
         onPaste={handlePaste}
         className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none mb-2"
-        placeholder="直接输入图片 URL，或使用下方按钮上传"
+        placeholder="直接輸入圖片 URL，或使用下方按鈕上傳"
       />
 
       <div className="flex items-center gap-2 flex-wrap">
@@ -194,7 +194,7 @@ export default function ImageUploadInput({
           disabled={uploading}
           className="px-4 py-2 bg-wiki-gray border border-wiki-border text-wiki-text text-sm hover:border-wiki-accent disabled:opacity-50"
         >
-          {uploading ? '上传中...' : '选择文件上传'}
+          {uploading ? '上傳中...' : '選擇文件上傳'}
         </button>
         {value && (
           <button

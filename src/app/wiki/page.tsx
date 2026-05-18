@@ -23,9 +23,9 @@ interface WikiCategory {
 const wikiCategories: WikiCategory[] = [
   {
     id: 'characters',
-    name: '角色图鉴',
+    name: '角色圖鑑',
     slug: 'characters',
-    description: '查看游戏内所有角色的详细信息，包括属性、技能、阵容搭配等',
+    description: '查看遊戲內所有角色的詳細信息，包括屬性、技能、陣容搭配等',
     icon: '👤',
     route: '/wiki/characters',
     count: 0,
@@ -33,43 +33,43 @@ const wikiCategories: WikiCategory[] = [
   },
   {
     id: 'buildings',
-    name: '建筑图鉴',
+    name: '建築圖鑑',
     slug: 'buildings',
-    description: '了解各类建筑的功能、升级需求和产出效果',
+    description: '瞭解各類建築的功能、升級需求和產出效果',
     icon: '🏠',
     route: '/wiki/buildings',
     count: 0,
-    countLabel: '座建筑',
+    countLabel: '座建築',
   },
   {
     id: 'equipment',
-    name: '装备图鉴',
+    name: '裝備圖鑑',
     slug: 'equipment',
-    description: '浏览武器装备的属性、强化方式和获取途径',
+    description: '瀏覽武器裝備的屬性、強化方式和獲取途徑',
     icon: '⚔️',
     route: '/wiki/equipment',
     count: 0,
-    countLabel: '件装备',
+    countLabel: '件裝備',
   },
   {
     id: 'items',
-    name: '道具图鉴',
+    name: '道具圖鑑',
     slug: 'items',
-    description: '查询道具用途、合成配方和使用效果',
+    description: '查詢道具用途、合成配方和使用效果',
     icon: '🎁',
     route: '/wiki/items',
     count: 0,
-    countLabel: '个道具',
+    countLabel: '個道具',
   },
   {
     id: 'troops',
-    name: '兵种图鉴',
+    name: '兵種圖鑑',
     slug: 'troops',
-    description: '了解各兵种的特点、克制关系和搭配策略',
+    description: '瞭解各兵種的特點、剋制關係和搭配策略',
     icon: '🛡️',
     route: '/wiki/troops',
     count: 0,
-    countLabel: '种兵种',
+    countLabel: '種兵種',
   },
 ]
 
@@ -94,7 +94,7 @@ export default function WikiIndexPage() {
     return (
       <div className="min-h-screen bg-wiki-bg">
         <WikiHeader />
-        <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
+        <div className="text-center py-12 text-wiki-text-muted">載入中...</div>
       </div>
     )
   }
@@ -105,30 +105,30 @@ export default function WikiIndexPage() {
       
       <main className="container mx-auto px-4 py-6 md:py-8">
         <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
-          <Link href="/" className="hover:text-wiki-accent">首页</Link>
+          <Link href="/" className="hover:text-wiki-accent">首頁</Link>
           <span className="mx-2">/</span>
-          <span className="text-wiki-text">图鉴</span>
+          <span className="text-wiki-text">圖鑑</span>
         </div>
 
         <div className="flex items-center justify-between mb-6 md:mb-8">
           <div>
             <h1 className="text-3xl md:text-4xl font-heading font-bold text-wiki-accent heading-hard">
-              图鉴
+              圖鑑
             </h1>
-            <p className="text-wiki-text-muted text-sm mt-2">选择图鉴类型，浏览游戏内容</p>
+            <p className="text-wiki-text-muted text-sm mt-2">選擇圖鑑類型，瀏覽遊戲內容</p>
           </div>
           {isAdmin && (
             <Link
               href="/admin/wiki-categories"
               className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90"
             >
-              管理分类
+              管理分類
             </Link>
           )}
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
+          <div className="text-center py-12 text-wiki-text-muted">載入中...</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
             {wikiCategories.map((category) => (
@@ -146,7 +146,7 @@ export default function WikiIndexPage() {
                 </p>
                 <div className="flex items-center justify-between">
                   <span className="text-wiki-accent text-sm font-bold">
-                    {category.count > 0 ? `${category.count} ${category.countLabel}` : '即将上线'}
+                    {category.count > 0 ? `${category.count} ${category.countLabel}` : '即將上線'}
                   </span>
                   <span className="text-wiki-accent text-lg group-hover:translate-x-1 transition-transform">→</span>
                 </div>

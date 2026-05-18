@@ -27,11 +27,11 @@ interface WikiCategory {
 }
 
 const wikiTypes = [
-  { key: 'characters', label: '角色图鉴', model: 'characterCategory' },
-  { key: 'buildings', label: '建筑图鉴', model: 'buildingCategory' },
-  { key: 'equipment', label: '装备图鉴', model: 'equipmentCategory' },
-  { key: 'items', label: '道具图鉴', model: 'itemCategory' },
-  { key: 'troops', label: '兵种图鉴', model: 'troopCategory' },
+  { key: 'characters', label: '角色圖鑑', model: 'characterCategory' },
+  { key: 'buildings', label: '建築圖鑑', model: 'buildingCategory' },
+  { key: 'equipment', label: '裝備圖鑑', model: 'equipmentCategory' },
+  { key: 'items', label: '道具圖鑑', model: 'itemCategory' },
+  { key: 'troops', label: '兵種圖鑑', model: 'troopCategory' },
 ]
 
 function AdminWikiCategoriesContent() {
@@ -91,10 +91,10 @@ function AdminWikiCategoriesContent() {
         setEditingCategory(null)
         setFormData({ name: '', slug: '', description: '', icon: '', sortOrder: 0 })
       } else {
-        alert('保存失败')
+        alert('保存失敗')
       }
     } catch (err) {
-      alert('网络错误')
+      alert('網絡錯誤')
     }
   }
 
@@ -111,7 +111,7 @@ function AdminWikiCategoriesContent() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('确定要删除这个分类吗？')) return
+    if (!confirm('確定要刪除這個分類嗎？')) return
 
     try {
       const res = await fetch(`/api/admin/wiki-categories/${id}?type=${selectedType}`, { method: 'DELETE' })
@@ -122,7 +122,7 @@ function AdminWikiCategoriesContent() {
         fetchCategories()
       }
     } catch (err) {
-      alert('删除失败')
+      alert('刪除失敗')
     }
   }
 
@@ -146,7 +146,7 @@ function AdminWikiCategoriesContent() {
       ])
       fetchCategories()
     } catch (err) {
-      alert('排序更新失败')
+      alert('排序更新失敗')
     }
   }
 
@@ -170,7 +170,7 @@ function AdminWikiCategoriesContent() {
       ])
       fetchCategories()
     } catch (err) {
-      alert('排序更新失败')
+      alert('排序更新失敗')
     }
   }
 
@@ -190,8 +190,8 @@ function AdminWikiCategoriesContent() {
       case 'characters': return '名'
       case 'buildings': return '座'
       case 'equipment': return '件'
-      case 'items': return '个'
-      case 'troops': return '种'
+      case 'items': return '個'
+      case 'troops': return '種'
       default: return ''
     }
   }
@@ -206,9 +206,9 @@ function AdminWikiCategoriesContent() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">
-              图鉴分类管理
+              圖鑑分類管理
             </h1>
-            <p className="text-wiki-text-muted text-sm mt-1">管理各图鉴类型的分类</p>
+            <p className="text-wiki-text-muted text-sm mt-1">管理各圖鑑類型的分類</p>
           </div>
           <button
             onClick={() => {
@@ -218,7 +218,7 @@ function AdminWikiCategoriesContent() {
             }}
             className="btn-hard text-wiki-text text-sm"
           >
-            + 新增分类
+            + 新增分類
           </button>
         </div>
 
@@ -239,17 +239,17 @@ function AdminWikiCategoriesContent() {
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
+          <div className="text-center py-12 text-wiki-text-muted">載入中...</div>
         ) : (
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg overflow-hidden">
             <table className="w-full">
               <thead className="bg-wiki-gray">
                 <tr>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">图标</th>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">名称</th>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">别名</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">圖標</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">名稱</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">別名</th>
                   <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">描述</th>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">数量</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">數量</th>
                   <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">排序</th>
                   <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">操作</th>
                 </tr>
@@ -285,13 +285,13 @@ function AdminWikiCategoriesContent() {
                           onClick={() => handleEdit(category)}
                           className="px-3 py-1 bg-wiki-accent/20 text-wiki-accent text-sm font-bold hover:bg-wiki-accent/30"
                         >
-                          编辑
+                          編輯
                         </button>
                         <button
                           onClick={() => handleDelete(category.id)}
                           className="px-3 py-1 bg-wiki-danger/20 text-wiki-danger text-sm font-bold hover:bg-wiki-danger/30"
                         >
-                          删除
+                          刪除
                         </button>
                       </div>
                     </td>
@@ -307,11 +307,11 @@ function AdminWikiCategoriesContent() {
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-8 w-full max-w-md mx-4">
             <h2 className="text-2xl font-heading font-bold text-wiki-accent heading-hard mb-6">
-              {editingCategory ? '编辑分类' : '新增分类'}
+              {editingCategory ? '編輯分類' : '新增分類'}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">名称 *</label>
+                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">名稱 *</label>
                 <input
                   type="text"
                   value={formData.name}
@@ -321,7 +321,7 @@ function AdminWikiCategoriesContent() {
                 />
               </div>
               <div>
-                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">别名 (URL Slug) *</label>
+                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">別名 (URL Slug) *</label>
                 <input
                   type="text"
                   value={formData.slug}
@@ -331,7 +331,7 @@ function AdminWikiCategoriesContent() {
                 />
               </div>
               <div>
-                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">图标 (Emoji)</label>
+                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">圖標 (Emoji)</label>
                 <input
                   type="text"
                   value={formData.icon}
@@ -379,7 +379,7 @@ function AdminWikiCategoriesContent() {
 
 export default function AdminWikiCategoriesPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-wiki-bg flex items-center justify-center text-wiki-text-muted">加载中...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-wiki-bg flex items-center justify-center text-wiki-text-muted">載入中...</div>}>
       <AdminWikiCategoriesContent />
     </Suspense>
   )

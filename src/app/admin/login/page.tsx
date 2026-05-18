@@ -31,10 +31,10 @@ export default function AdminLoginPage() {
         localStorage.setItem('token', data.token)
         router.push('/')
       } else {
-        setError(data.error || '登录失败')
+        setError(data.error || '登入失敗')
       }
     } catch (err) {
-      setError('网络错误，请稍后重试')
+      setError('網絡錯誤，請稍後重試')
     } finally {
       setLoading(false)
     }
@@ -48,7 +48,7 @@ export default function AdminLoginPage() {
             黑道風雲
           </h1>
           <p className="text-wiki-text-muted uppercase tracking-widest">
-            管理后台登录
+            管理後台登入
           </p>
         </div>
 
@@ -61,28 +61,28 @@ export default function AdminLoginPage() {
 
           <div>
             <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">
-              账号
+              賬號
             </label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-              placeholder="请输入管理员账号"
+              placeholder="請輸入管理員賬號"
               required
             />
           </div>
 
           <div>
             <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">
-              密码
+              密碼
             </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-              placeholder="请输入密码"
+              placeholder="請輸入密碼"
               required
             />
           </div>
@@ -92,7 +92,7 @@ export default function AdminLoginPage() {
             disabled={loading}
             className="w-full btn-hard text-wiki-text disabled:opacity-50"
           >
-            {loading ? '登录中...' : '登录'}
+            {loading ? '登入中...' : '登入'}
           </button>
 
           <div className="text-center text-wiki-text-muted text-sm">

@@ -78,7 +78,7 @@ export default async function AnnouncementPage({ params }: { params: { id: strin
                 </h3>
                 <div className="space-y-2">
                   {announcements.length === 0 ? (
-                    <p className="text-wiki-text-muted text-sm">暂无公告</p>
+                    <p className="text-wiki-text-muted text-sm">暫無公告</p>
                   ) : (
                     announcements.map((ann: any) => (
                       <Link

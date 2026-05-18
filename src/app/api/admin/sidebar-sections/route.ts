@@ -13,7 +13,7 @@ export async function GET() {
     if (error) throw error
     return NextResponse.json(sections || [])
   } catch (error) {
-    return NextResponse.json({ error: '获取侧边栏分类失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取側邊欄分類失敗' }, { status: 500 })
   }
 }
 
@@ -35,6 +35,6 @@ export async function POST(request: Request) {
     if (error) throw error
     return NextResponse.json(section, { status: 201 })
   } catch (error) {
-    return NextResponse.json({ error: '创建分类失败' }, { status: 500 })
+    return NextResponse.json({ error: '創建分類失敗' }, { status: 500 })
   }
 }

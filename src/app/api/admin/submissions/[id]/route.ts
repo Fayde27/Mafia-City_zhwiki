@@ -14,7 +14,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
     if (error) throw error
     return NextResponse.json(data)
   } catch {
-    return NextResponse.json({ error: '获取投稿失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取投稿失敗' }, { status: 500 })
   }
 }
 
@@ -41,7 +41,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (error) throw error
     return NextResponse.json(data)
   } catch {
-    return NextResponse.json({ error: '更新投稿失败' }, { status: 500 })
+    return NextResponse.json({ error: '更新投稿失敗' }, { status: 500 })
   }
 }
 
@@ -55,6 +55,6 @@ export async function DELETE(_: Request, { params }: { params: { id: string } })
     if (error) throw error
     return NextResponse.json({ success: true })
   } catch {
-    return NextResponse.json({ error: '删除投稿失败' }, { status: 500 })
+    return NextResponse.json({ error: '刪除投稿失敗' }, { status: 500 })
   }
 }

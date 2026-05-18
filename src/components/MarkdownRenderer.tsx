@@ -189,7 +189,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
     return elements
   }
 
-  // 如果内容是 HTML（富文本编辑器输出），直接渲染 HTML
+  // 如果內容是 HTML（富文本編輯器輸出），直接渲染 HTML
   if (content && content.trim().startsWith('<')) {
     return (
       <div

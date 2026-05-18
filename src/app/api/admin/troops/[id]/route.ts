@@ -12,11 +12,11 @@ export async function GET(
       .eq('id', params.id)
       .single()
     if (!troop) {
-      return NextResponse.json({ error: '兵种不存在' }, { status: 404 })
+      return NextResponse.json({ error: '兵種不存在' }, { status: 404 })
     }
     return NextResponse.json(troop)
   } catch (error) {
-    return NextResponse.json({ error: '获取兵种失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取兵種失敗' }, { status: 500 })
   }
 }
 
@@ -56,7 +56,7 @@ export async function PUT(
     if (error) throw error
     return NextResponse.json(troop)
   } catch (error) {
-    return NextResponse.json({ error: '更新兵种失败' }, { status: 500 })
+    return NextResponse.json({ error: '更新兵種失敗' }, { status: 500 })
   }
 }
 
@@ -69,6 +69,6 @@ export async function DELETE(
       .eq('id', params.id )
     return NextResponse.json({ success: true })
   } catch (error) {
-    return NextResponse.json({ error: '删除兵种失败' }, { status: 500 })
+    return NextResponse.json({ error: '刪除兵種失敗' }, { status: 500 })
   }
 }

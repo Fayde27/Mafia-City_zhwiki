@@ -62,7 +62,7 @@ export default function ItemDetailPage() {
   }
 
   const tabs = [
-    { id: 'description', label: '道具详情' },
+    { id: 'description', label: '道具詳情' },
     { id: 'usage', label: '使用方法' },
     { id: 'recipe', label: '合成配方' },
   ]
@@ -71,7 +71,7 @@ export default function ItemDetailPage() {
     return (
       <div className="min-h-screen bg-wiki-bg">
         <WikiHeader />
-        <div className="text-center py-20 text-wiki-text-muted">加载中...</div>
+        <div className="text-center py-20 text-wiki-text-muted">載入中...</div>
         <WikiFooter />
       </div>
     )
@@ -97,11 +97,11 @@ export default function ItemDetailPage() {
       
       <main className="container mx-auto px-4 py-6 md:py-8">
         <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
-          <Link href="/" className="hover:text-wiki-accent">首页</Link>
+          <Link href="/" className="hover:text-wiki-accent">首頁</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki" className="hover:text-wiki-accent">图鉴</Link>
+          <Link href="/wiki" className="hover:text-wiki-accent">圖鑑</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki/items" className="hover:text-wiki-accent">道具图鉴</Link>
+          <Link href="/wiki/items" className="hover:text-wiki-accent">道具圖鑑</Link>
           <span className="mx-2">/</span>
           <Link href={`/wiki/items/${item.category.slug}`} className="hover:text-wiki-accent">
             {item.category.name}
@@ -138,7 +138,7 @@ export default function ItemDetailPage() {
                   href={`/admin/items/edit/${item.id}`}
                   className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90"
                 >
-                  编辑道具
+                  編輯道具
                 </Link>
               </div>
             )}
@@ -156,7 +156,7 @@ export default function ItemDetailPage() {
               <div>
                 <h2 className="text-2xl md:text-3xl font-bold text-wiki-text">{item.name}</h2>
                 {item.type && (
-                  <p className="text-wiki-text-muted mt-1">类型：{item.type}</p>
+                  <p className="text-wiki-text-muted mt-1">類型：{item.type}</p>
                 )}
               </div>
             </div>
@@ -214,25 +214,25 @@ export default function ItemDetailPage() {
                 )}
                 {item.type && (
                   <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">类型</span>
+                    <span className="text-wiki-text-muted">類型</span>
                     <span className="text-wiki-text font-bold">{item.type}</span>
                   </div>
                 )}
                 {item.quality && (
                   <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">品质</span>
+                    <span className="text-wiki-text-muted">品質</span>
                     <span className="text-wiki-text">{item.quality}</span>
                   </div>
                 )}
                 {item.stackable !== undefined && (
                   <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">可堆叠</span>
+                    <span className="text-wiki-text-muted">可堆疊</span>
                     <span className="text-wiki-text">{item.stackable ? '是' : '否'}</span>
                   </div>
                 )}
                 {item.source && (
                   <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">来源</span>
+                    <span className="text-wiki-text-muted">來源</span>
                     <span className="text-wiki-text">{item.source}</span>
                   </div>
                 )}

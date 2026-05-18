@@ -11,12 +11,12 @@ interface WikiSection {
 }
 
 const navSections: WikiSection[] = [
-  { label: '首页', href: '/' },
-  { label: '游戏图鉴', href: '/wiki' },
+  { label: '首頁', href: '/' },
+  { label: '遊戲圖鑑', href: '/wiki' },
   { label: '排行榜', href: '/wiki/rankings' },
   { label: '玩法攻略', href: '/wiki/guides' },
-  { label: '活动一览', href: '/wiki/events' },
-  { label: '游戏工具', href: '/wiki/tools' },
+  { label: '活動一覽', href: '/wiki/events' },
+  { label: '遊戲工具', href: '/wiki/tools' },
 ]
 
 export default function WikiHeader() {

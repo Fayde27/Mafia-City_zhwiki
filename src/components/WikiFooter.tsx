@@ -1,12 +1,12 @@
 import Link from 'next/link'
 
 const quickLinks = [
-  { label: '首页', href: '/' },
-  { label: '游戏图鉴', href: '/wiki' },
+  { label: '首頁', href: '/' },
+  { label: '遊戲圖鑑', href: '/wiki' },
   { label: '排行榜', href: '/wiki/rankings' },
   { label: '玩法攻略', href: '/wiki/guides' },
-  { label: '活动一览', href: '/wiki/events' },
-  { label: '游戏工具', href: '/wiki/tools' },
+  { label: '活動一覽', href: '/wiki/events' },
+  { label: '遊戲工具', href: '/wiki/tools' },
 ]
 
 function LineIcon() {
@@ -38,20 +38,20 @@ export default function WikiFooter() {
     <footer className="bg-wiki-dark border-t border-wiki-border/20 mt-8 md:mt-12">
       <div className="container mx-auto px-4 py-6 md:py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-          {/* 品牌简介 */}
+          {/* 品牌簡介 */}
           <div>
             <h3 className="text-wiki-accent font-bold uppercase tracking-wider mb-3 md:mb-4 text-sm md:text-base">
               黑道風雲 Wiki
             </h3>
             <p className="text-wiki-text-muted text-xs md:text-sm">
-              最全面的游戏攻略站，为玩家提供详细的游戏资讯、角色图鉴、任务攻略等内容。
+              最全面的遊戲攻略站，為玩家提供詳細的遊戲資訊、角色圖鑑、任務攻略等內容。
             </p>
           </div>
 
-          {/* 快速链接 */}
+          {/* 快速連結 */}
           <div>
             <h3 className="text-wiki-accent font-bold uppercase tracking-wider mb-3 md:mb-4 text-sm md:text-base">
-              快速链接
+              快速連結
             </h3>
             <ul className="grid grid-cols-2 gap-x-4 gap-y-1 md:gap-y-2 text-xs md:text-sm">
               {quickLinks.map(link => (
@@ -64,10 +64,10 @@ export default function WikiFooter() {
             </ul>
           </div>
 
-          {/* 联系我们 */}
+          {/* 聯繫我們 */}
           <div>
             <h3 className="text-wiki-accent font-bold uppercase tracking-wider mb-3 md:mb-4 text-sm md:text-base">
-              联系我们
+              聯繫我們
             </h3>
             <ul className="space-y-3 text-xs md:text-sm">
               <li>
@@ -102,7 +102,7 @@ export default function WikiFooter() {
           </div>
         </div>
 
-        {/* 底部版权 + 站点管理 */}
+        {/* 底部版權 + 站點管理 */}
         <div className="border-t border-wiki-border/20 mt-6 md:mt-8 pt-4 md:pt-6 text-center">
           <p className="text-wiki-text-muted text-xs">
             &copy; {new Date().getFullYear()} 黑道風雲 Wiki 攻略站
@@ -112,7 +112,7 @@ export default function WikiFooter() {
               className="text-[#999] hover:text-wiki-accent transition-colors"
               style={{ fontSize: '12px' }}
             >
-              站点管理
+              站點管理
             </a>
           </p>
         </div>

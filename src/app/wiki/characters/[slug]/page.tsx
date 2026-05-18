@@ -82,14 +82,14 @@ export default function CharacterListPage() {
       if (type === 'rarity') return c.rarity === parseInt(value)
       if (type === 'role') return c.role === value
       if (type === 'weapon') return c.weapon === value
-      // 自定义类型：尝试匹配角色所有字段
+      // 自定義類型：嘗試匹配角色所有字段
       return Object.values(c as any).some((v: unknown) => String(v) === value)
     })
   })
 
   const getRarityStars = (rarity: number) => '★'.repeat(rarity) + '☆'.repeat(5 - rarity)
 
-  // 动态分组
+  // 動態分組
   const filterTypes = Array.from(new Set(filterOptions.map(o => o.type)))
   const groupedFilters = filterTypes.reduce((acc, type) => {
     acc[type] = filterOptions.filter(o => o.type === type).sort((a, b) => a.sortOrder - b.sortOrder)
@@ -102,13 +102,13 @@ export default function CharacterListPage() {
       
       <main className="container mx-auto px-4 py-6 md:py-8">
         <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
-          <Link href="/" className="hover:text-wiki-accent">首页</Link>
+          <Link href="/" className="hover:text-wiki-accent">首頁</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki" className="hover:text-wiki-accent">图鉴</Link>
+          <Link href="/wiki" className="hover:text-wiki-accent">圖鑑</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki/characters/characters" className="hover:text-wiki-accent">角色图鉴</Link>
+          <Link href="/wiki/characters/characters" className="hover:text-wiki-accent">角色圖鑑</Link>
           <span className="mx-2">/</span>
-          <span className="text-wiki-text">{category?.name || '加载中...'}</span>
+          <span className="text-wiki-text">{category?.name || '載入中...'}</span>
         </div>
 
         <div className="flex items-center justify-between mb-6">
@@ -166,10 +166,10 @@ export default function CharacterListPage() {
         )}
 
         {loading ? (
-          <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
+          <div className="text-center py-12 text-wiki-text-muted">載入中...</div>
         ) : filteredCharacters.length === 0 ? (
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-8 md:p-12 text-center text-wiki-text-muted">
-            该分类下暂无角色
+            該分類下暫無角色
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">

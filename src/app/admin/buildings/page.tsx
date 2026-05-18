@@ -58,13 +58,13 @@ export default function AdminBuildingsPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('确定要删除这个建筑吗？')) return
+    if (!confirm('確定要刪除這個建築嗎？')) return
 
     try {
       await fetch(`/api/admin/buildings/${id}`, { method: 'DELETE' })
       fetchData()
     } catch (err) {
-      alert('删除失败')
+      alert('刪除失敗')
     }
   }
 
@@ -77,7 +77,7 @@ export default function AdminBuildingsPage() {
       })
       fetchData()
     } catch (err) {
-      alert('更新失败')
+      alert('更新失敗')
     }
   }
 
@@ -99,19 +99,19 @@ export default function AdminBuildingsPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">
-              建筑管理
+              建築管理
             </h1>
-            <p className="text-wiki-text-muted text-sm mt-1">管理建筑图鉴内容，新增、编辑或删除建筑</p>
+            <p className="text-wiki-text-muted text-sm mt-1">管理建築圖鑑內容，新增、編輯或刪除建築</p>
           </div>
           <div className="flex gap-3">
             <Link href="/admin/building-filters" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
-              筛选管理
+              篩選管理
             </Link>
             <Link href="/admin/building-categories" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
-              分类管理
+              分類管理
             </Link>
             <Link href="/admin/buildings/new" className="btn-hard text-wiki-text text-sm">
-              + 新增建筑
+              + 新增建築
             </Link>
           </div>
         </div>
@@ -143,22 +143,22 @@ export default function AdminBuildingsPage() {
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
+          <div className="text-center py-12 text-wiki-text-muted">載入中...</div>
         ) : filteredBuildings.length === 0 ? (
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-8 md:p-12 text-center text-wiki-text-muted">
-            暂无建筑数据
+            暫無建築數據
           </div>
         ) : (
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg overflow-hidden">
             <table className="w-full">
               <thead className="bg-wiki-gray">
                 <tr>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">建筑</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">建築</th>
                   <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">稀有度</th>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">类型</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">類型</th>
                   <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">功能</th>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">分类</th>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">状态</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">分類</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">狀態</th>
                   <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">操作</th>
                 </tr>
               </thead>
@@ -196,7 +196,7 @@ export default function AdminBuildingsPage() {
                             : 'bg-wiki-danger/20 text-wiki-danger'
                         }`}
                       >
-                        {building.isPublished ? '已发布' : '草稿'}
+                        {building.isPublished ? '已發佈' : '草稿'}
                       </button>
                     </td>
                     <td className="px-6 py-4">
@@ -205,13 +205,13 @@ export default function AdminBuildingsPage() {
                           href={`/admin/buildings/edit/${building.id}`}
                           className="px-3 py-1 bg-wiki-accent/20 text-wiki-accent text-sm font-bold hover:bg-wiki-accent/30"
                         >
-                          编辑
+                          編輯
                         </Link>
                         <button
                           onClick={() => handleDelete(building.id)}
                           className="px-3 py-1 bg-wiki-danger/20 text-wiki-danger text-sm font-bold hover:bg-wiki-danger/30"
                         >
-                          删除
+                          刪除
                         </button>
                       </div>
                     </td>

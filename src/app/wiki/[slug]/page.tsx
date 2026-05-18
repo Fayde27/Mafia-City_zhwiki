@@ -53,12 +53,12 @@ export default function WikiCategoryPage() {
   }, [categorySlug])
 
   const handleDeleteArticle = async (id: string) => {
-    if (!confirm('确定要删除这篇文章吗？')) return
+    if (!confirm('確定要刪除這篇文章嗎？')) return
     try {
       await fetch(`/api/admin/articles/${id}`, { method: 'DELETE' })
       setArticles(articles.filter(a => a.id !== id))
     } catch (err) {
-      alert('删除失败')
+      alert('刪除失敗')
     }
   }
 
@@ -68,7 +68,7 @@ export default function WikiCategoryPage() {
       
       <main className="container mx-auto px-4 py-6 md:py-8">
         <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
-          <Link href="/" className="hover:text-wiki-accent">首页</Link>
+          <Link href="/" className="hover:text-wiki-accent">首頁</Link>
           <span className="mx-2">/</span>
           <span className="text-wiki-text">{categoryName}</span>
         </div>
@@ -85,10 +85,10 @@ export default function WikiCategoryPage() {
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
+          <div className="text-center py-12 text-wiki-text-muted">載入中...</div>
         ) : articles.length === 0 ? (
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-8 md:p-12 text-center text-wiki-text-muted">
-            该分类下暂无文章
+            該分類下暫無文章
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
@@ -111,7 +111,7 @@ export default function WikiCategoryPage() {
                       </h3>
                       {article.isPinned && (
                         <span className="px-2 py-0.5 bg-wiki-danger/20 text-wiki-danger text-xs font-bold border border-wiki-danger/40 flex-shrink-0">
-                          置顶
+                          置頂
                         </span>
                       )}
                     </div>
@@ -142,10 +142,10 @@ export default function WikiCategoryPage() {
                 {isAdmin && (
                   <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                     <Link href={`/admin/articles/edit/${article.id}`} className="px-2 py-1 bg-wiki-accent/20 text-wiki-accent text-xs font-bold hover:bg-wiki-accent/30">
-                      编辑
+                      編輯
                     </Link>
                     <button onClick={() => handleDeleteArticle(article.id)} className="px-2 py-1 bg-wiki-danger/20 text-wiki-danger text-xs font-bold hover:bg-wiki-danger/30">
-                      删除
+                      刪除
                     </button>
                   </div>
                 )}

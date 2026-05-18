@@ -37,7 +37,7 @@ export async function GET(request: Request) {
       },
     })
   } catch (error) {
-    return NextResponse.json({ error: '获取道具列表失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取道具列表失敗' }, { status: 500 })
   }
 }
 
@@ -72,6 +72,6 @@ export async function POST(request: Request) {
     if (error) throw error
     return NextResponse.json(item, { status: 201 })
   } catch (error) {
-    return NextResponse.json({ error: '创建道具失败' }, { status: 500 })
+    return NextResponse.json({ error: '創建道具失敗' }, { status: 500 })
   }
 }

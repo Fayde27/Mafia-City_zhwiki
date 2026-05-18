@@ -8,7 +8,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const section = searchParams.get('section')
 
-    // 获取所有激活的顶级项
+    // 獲取所有激活的頂級項
     let topQuery = supabaseAdmin
       .from('SidebarNav')
       .select('*')
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
     const { data: topItems, error: topError } = await topQuery
     if (topError) throw topError
 
-    // 为每个顶级项获取子项
+    // 為每個頂級項獲取子項
     const withChildren = await Promise.all(
       (topItems || []).map(async (item) => {
         const { data: children } = await supabaseAdmin
@@ -38,6 +38,6 @@ export async function GET(request: Request) {
 
     return NextResponse.json(withChildren)
   } catch (error) {
-    return NextResponse.json({ error: '获取导航数据失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取導航數據失敗' }, { status: 500 })
   }
 }

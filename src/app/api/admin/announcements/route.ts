@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     if (error) throw error
     return NextResponse.json(announcements)
   } catch (error) {
-    return NextResponse.json({ error: '获取失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取失敗' }, { status: 500 })
   }
 }
 
@@ -36,6 +36,6 @@ export async function POST(request: Request) {
     if (error) throw error
     return NextResponse.json(announcement)
   } catch (error) {
-    return NextResponse.json({ error: '创建失败' }, { status: 500 })
+    return NextResponse.json({ error: '創建失敗' }, { status: 500 })
   }
 }

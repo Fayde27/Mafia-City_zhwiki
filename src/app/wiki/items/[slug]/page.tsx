@@ -94,13 +94,13 @@ export default function ItemListPage() {
       
       <main className="container mx-auto px-4 py-6 md:py-8">
         <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
-          <Link href="/" className="hover:text-wiki-accent">首页</Link>
+          <Link href="/" className="hover:text-wiki-accent">首頁</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki" className="hover:text-wiki-accent">图鉴</Link>
+          <Link href="/wiki" className="hover:text-wiki-accent">圖鑑</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki/items" className="hover:text-wiki-accent">道具图鉴</Link>
+          <Link href="/wiki/items" className="hover:text-wiki-accent">道具圖鑑</Link>
           <span className="mx-2">/</span>
-          <span className="text-wiki-text">{category?.name || '加载中...'}</span>
+          <span className="text-wiki-text">{category?.name || '載入中...'}</span>
         </div>
 
         <div className="flex items-center justify-between mb-6">
@@ -146,10 +146,10 @@ export default function ItemListPage() {
         )}
 
         {loading ? (
-          <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
+          <div className="text-center py-12 text-wiki-text-muted">載入中...</div>
         ) : filteredItems.length === 0 ? (
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-8 md:p-12 text-center text-wiki-text-muted">
-            该分类下暂无道具
+            該分類下暫無道具
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">

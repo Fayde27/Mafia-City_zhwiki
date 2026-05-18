@@ -37,7 +37,7 @@ export async function GET(request: Request) {
       },
     })
   } catch (error) {
-    return NextResponse.json({ error: '获取建筑列表失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取建築列表失敗' }, { status: 500 })
   }
 }
 
@@ -73,6 +73,6 @@ export async function POST(request: Request) {
     if (error) throw error
     return NextResponse.json(building, { status: 201 })
   } catch (error) {
-    return NextResponse.json({ error: '创建建筑失败' }, { status: 500 })
+    return NextResponse.json({ error: '創建建築失敗' }, { status: 500 })
   }
 }

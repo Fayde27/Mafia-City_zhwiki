@@ -96,13 +96,13 @@ export default function BuildingListPage() {
       
       <main className="container mx-auto px-4 py-6 md:py-8">
         <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
-          <Link href="/" className="hover:text-wiki-accent">首页</Link>
+          <Link href="/" className="hover:text-wiki-accent">首頁</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki" className="hover:text-wiki-accent">图鉴</Link>
+          <Link href="/wiki" className="hover:text-wiki-accent">圖鑑</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki/buildings" className="hover:text-wiki-accent">建筑图鉴</Link>
+          <Link href="/wiki/buildings" className="hover:text-wiki-accent">建築圖鑑</Link>
           <span className="mx-2">/</span>
-          <span className="text-wiki-text">{category?.name || '加载中...'}</span>
+          <span className="text-wiki-text">{category?.name || '載入中...'}</span>
         </div>
 
         <div className="flex items-center justify-between mb-6">
@@ -117,7 +117,7 @@ export default function BuildingListPage() {
               href="/admin/buildings"
               className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90"
             >
-              管理建筑
+              管理建築
             </Link>
           )}
         </div>
@@ -148,10 +148,10 @@ export default function BuildingListPage() {
         )}
 
         {loading ? (
-          <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
+          <div className="text-center py-12 text-wiki-text-muted">載入中...</div>
         ) : filteredBuildings.length === 0 ? (
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-8 md:p-12 text-center text-wiki-text-muted">
-            该分类下暂无建筑
+            該分類下暫無建築
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">

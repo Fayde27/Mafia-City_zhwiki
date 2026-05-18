@@ -14,11 +14,11 @@ export async function GET(
 
     if (error) throw error
     if (!item) {
-      return NextResponse.json({ error: '导航项不存在' }, { status: 404 })
+      return NextResponse.json({ error: '導航項不存在' }, { status: 404 })
     }
     return NextResponse.json(item)
   } catch (error) {
-    return NextResponse.json({ error: '获取导航项失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取導航項失敗' }, { status: 500 })
   }
 }
 
@@ -44,7 +44,7 @@ export async function PUT(
     if (error) throw error
     return NextResponse.json(item)
   } catch (error) {
-    return NextResponse.json({ error: '更新导航项失败' }, { status: 500 })
+    return NextResponse.json({ error: '更新導航項失敗' }, { status: 500 })
   }
 }
 
@@ -57,6 +57,6 @@ export async function DELETE(
       .eq('id', params.id )
     return NextResponse.json({ success: true })
   } catch (error) {
-    return NextResponse.json({ error: '删除导航项失败' }, { status: 500 })
+    return NextResponse.json({ error: '刪除導航項失敗' }, { status: 500 })
   }
 }

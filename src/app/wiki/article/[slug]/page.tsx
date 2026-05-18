@@ -55,7 +55,7 @@ export default function ArticleDetailPage() {
       
       <main className="container mx-auto px-4 py-8">
         <div className="text-sm text-wiki-text-muted mb-6">
-          <Link href="/" className="hover:text-wiki-accent">首页</Link>
+          <Link href="/" className="hover:text-wiki-accent">首頁</Link>
           <span className="mx-2">/</span>
           {article && (
             <>
@@ -65,11 +65,11 @@ export default function ArticleDetailPage() {
               <span className="mx-2">/</span>
             </>
           )}
-          <span className="text-wiki-text">{article?.title || '加载中...'}</span>
+          <span className="text-wiki-text">{article?.title || '載入中...'}</span>
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
+          <div className="text-center py-12 text-wiki-text-muted">載入中...</div>
         ) : !article ? (
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-12 text-center text-wiki-text-muted">
             文章不存在
@@ -93,7 +93,7 @@ export default function ArticleDetailPage() {
                     <div className="flex items-center gap-2 mb-2">
                       {article.isPinned && (
                         <span className="px-2 py-0.5 bg-wiki-danger/20 text-wiki-danger text-xs font-bold border border-wiki-danger/40">
-                          置顶
+                          置頂
                         </span>
                       )}
                       {article.badges && article.badges.split(',').filter(Boolean).map((badge) => {
@@ -112,9 +112,9 @@ export default function ArticleDetailPage() {
                       {article.title}
                     </h1>
                     <div className="flex items-center gap-6 text-sm text-wiki-text-muted">
-                      <span>分类: {article.category.name}</span>
-                      <span>👁 {article.views} 浏览</span>
-                      <span>更新于 {new Date(article.updatedAt).toLocaleDateString('zh-TW')}</span>
+                      <span>分類: {article.category.name}</span>
+                      <span>👁 {article.views} 瀏覽</span>
+                      <span>更新於 {new Date(article.updatedAt).toLocaleDateString('zh-TW')}</span>
                     </div>
                     {article.tags && (
                       <div className="flex gap-2 mt-4">
@@ -128,7 +128,7 @@ export default function ArticleDetailPage() {
                   </div>
                   {isAdmin && (
                     <Link href={`/admin/articles/edit/${article.id}`} className="btn-hard text-wiki-text text-sm flex-shrink-0">
-                      编辑文章
+                      編輯文章
                     </Link>
                   )}
                 </div>

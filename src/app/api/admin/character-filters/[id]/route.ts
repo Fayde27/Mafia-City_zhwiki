@@ -19,7 +19,7 @@ export async function PUT(
     if (error) throw error
     return NextResponse.json(option)
   } catch {
-    return NextResponse.json({ error: '更新筛选选项失败' }, { status: 500 })
+    return NextResponse.json({ error: '更新篩選選項失敗' }, { status: 500 })
   }
 }
 
@@ -32,6 +32,6 @@ export async function DELETE(
       .eq('id', params.id )
     return NextResponse.json({ success: true })
   } catch {
-    return NextResponse.json({ error: '删除筛选选项失败' }, { status: 500 })
+    return NextResponse.json({ error: '刪除篩選選項失敗' }, { status: 500 })
   }
 }

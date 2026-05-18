@@ -65,16 +65,16 @@ export default function AdminEquipmentFiltersPage() {
         body: JSON.stringify({ type: newType.trim(), value: newValue.trim(), categoryId: selectedCategoryId }),
       })
       if (res.ok) { setNewValue(''); fetchOptions() }
-    } catch { alert('添加失败') }
+    } catch { alert('添加失敗') }
     finally { setSaving(false) }
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('确定删除？')) return
+    if (!confirm('確定刪除？')) return
     try {
       const res = await fetch(`/api/admin/equipment-filters/${id}`, { method: 'DELETE' })
       if (res.ok) fetchOptions()
-    } catch { alert('删除失败') }
+    } catch { alert('刪除失敗') }
   }
 
   const handleSortChange = async (id: string, sortOrder: number) => {
@@ -85,7 +85,7 @@ export default function AdminEquipmentFiltersPage() {
         body: JSON.stringify({ sortOrder }),
       })
       fetchOptions()
-    } catch { alert('更新失败') }
+    } catch { alert('更新失敗') }
   }
 
   if (!isAdmin) return null
@@ -105,16 +105,16 @@ export default function AdminEquipmentFiltersPage() {
       <main className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">装备筛选选项管理</h1>
-            <p className="text-wiki-text-muted text-sm mt-1">为每个分类单独配置筛选选项</p>
+            <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">裝備篩選選項管理</h1>
+            <p className="text-wiki-text-muted text-sm mt-1">為每個分類單獨配置篩選選項</p>
           </div>
           <Link href="/admin/equipment" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
-            返回装备管理
+            返回裝備管理
           </Link>
         </div>
 
         <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-4 mb-6 flex items-center gap-4">
-          <span className="text-wiki-text font-bold text-sm flex-shrink-0">当前分类：</span>
+          <span className="text-wiki-text font-bold text-sm flex-shrink-0">當前分類：</span>
           <div className="flex flex-wrap gap-2">
             {categories.map(cat => (
               <button
@@ -134,11 +134,11 @@ export default function AdminEquipmentFiltersPage() {
 
         <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6 mb-6">
           <h3 className="text-lg font-bold text-wiki-accent mb-4">
-            添加筛选选项（到「{categories.find(c => c.id === selectedCategoryId)?.name ?? '...'}」）
+            添加篩選選項（到「{categories.find(c => c.id === selectedCategoryId)?.name ?? '...'}」）
           </h3>
           <div className="flex gap-4 items-end">
             <div className="flex-shrink-0">
-              <label className="block text-wiki-text-muted text-xs mb-1">筛选大类</label>
+              <label className="block text-wiki-text-muted text-xs mb-1">篩選大類</label>
               <input
                 type="text"
                 value={newType}
@@ -152,13 +152,13 @@ export default function AdminEquipmentFiltersPage() {
               </datalist>
             </div>
             <div className="flex-1">
-              <label className="block text-wiki-text-muted text-xs mb-1">选项值</label>
+              <label className="block text-wiki-text-muted text-xs mb-1">選項值</label>
               <input
                 type="text"
                 value={newValue}
                 onChange={(e) => setNewValue(e.target.value)}
                 className="w-full bg-wiki-gray border-2 border-wiki-border px-3 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                placeholder="如：★★★★★ 或 输出"
+                placeholder="如：★★★★★ 或 輸出"
                 onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
               />
             </div>
@@ -170,14 +170,14 @@ export default function AdminEquipmentFiltersPage() {
               添加
             </button>
           </div>
-          <p className="text-wiki-text-muted text-xs mt-2">筛选大类可自由命名，相同大类名称的选项会归为同一组显示。</p>
+          <p className="text-wiki-text-muted text-xs mt-2">篩選大類可自由命名，相同大類名稱的選項會歸為同一組顯示。</p>
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
+          <div className="text-center py-12 text-wiki-text-muted">載入中...</div>
         ) : existingTypes.length === 0 ? (
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-8 text-center text-wiki-text-muted">
-            该分类暂无筛选选项，在上方添加第一个选项
+            該分類暫無篩選選項，在上方添加第一個選項
           </div>
         ) : (
           <div className="space-y-6">
@@ -194,7 +194,7 @@ export default function AdminEquipmentFiltersPage() {
                         className="w-16 bg-wiki-carder border border-wiki-border px-2 py-1 text-wiki-text text-center"
                       />
                       <span className="text-wiki-text flex-1">{opt.value}</span>
-                      <button onClick={() => handleDelete(opt.id)} className="text-wiki-danger text-sm hover:opacity-70">删除</button>
+                      <button onClick={() => handleDelete(opt.id)} className="text-wiki-danger text-sm hover:opacity-70">刪除</button>
                     </div>
                   ))}
                 </div>

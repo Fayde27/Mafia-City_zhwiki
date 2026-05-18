@@ -33,6 +33,6 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ buildings: mapped })
   } catch {
-    return NextResponse.json({ error: '获取建筑失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取建築失敗' }, { status: 500 })
   }
 }

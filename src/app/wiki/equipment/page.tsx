@@ -43,35 +43,35 @@ export default function EquipmentWikiPage() {
       
       <main className="container mx-auto px-4 py-6 md:py-8">
         <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
-          <Link href="/" className="hover:text-wiki-accent">首页</Link>
+          <Link href="/" className="hover:text-wiki-accent">首頁</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki" className="hover:text-wiki-accent">图鉴</Link>
+          <Link href="/wiki" className="hover:text-wiki-accent">圖鑑</Link>
           <span className="mx-2">/</span>
-          <span className="text-wiki-text">装备图鉴</span>
+          <span className="text-wiki-text">裝備圖鑑</span>
         </div>
 
         <div className="flex items-center justify-between mb-6 md:mb-8">
           <div>
             <h1 className="text-3xl md:text-4xl font-heading font-bold text-wiki-accent heading-hard">
-              装备图鉴
+              裝備圖鑑
             </h1>
-            <p className="text-wiki-text-muted text-sm mt-2">选择装备分类，查看详细信息</p>
+            <p className="text-wiki-text-muted text-sm mt-2">選擇裝備分類，查看詳細信息</p>
           </div>
           {isAdmin && (
             <Link
               href="/admin/equipment"
               className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90"
             >
-              管理装备
+              管理裝備
             </Link>
           )}
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
+          <div className="text-center py-12 text-wiki-text-muted">載入中...</div>
         ) : categories.length === 0 ? (
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-8 md:p-12 text-center text-wiki-text-muted">
-            暂无装备分类
+            暫無裝備分類
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
@@ -90,7 +90,7 @@ export default function EquipmentWikiPage() {
                 </p>
                 <div className="flex items-center justify-between">
                   <span className="text-wiki-accent text-sm font-bold">
-                    {category._count.equipment} 件装备
+                    {category._count.equipment} 件裝備
                   </span>
                   <span className="text-wiki-accent text-lg group-hover:translate-x-1 transition-transform">→</span>
                 </div>

@@ -12,11 +12,11 @@ export async function GET(
       .eq('id', params.id)
       .single()
     if (!equipment) {
-      return NextResponse.json({ error: '装备不存在' }, { status: 404 })
+      return NextResponse.json({ error: '裝備不存在' }, { status: 404 })
     }
     return NextResponse.json(equipment)
   } catch (error) {
-    return NextResponse.json({ error: '获取装备失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取裝備失敗' }, { status: 500 })
   }
 }
 
@@ -56,7 +56,7 @@ export async function PUT(
     if (error) throw error
     return NextResponse.json(equip)
   } catch (error) {
-    return NextResponse.json({ error: '更新装备失败' }, { status: 500 })
+    return NextResponse.json({ error: '更新裝備失敗' }, { status: 500 })
   }
 }
 
@@ -69,6 +69,6 @@ export async function DELETE(
       .eq('id', params.id )
     return NextResponse.json({ success: true })
   } catch (error) {
-    return NextResponse.json({ error: '删除装备失败' }, { status: 500 })
+    return NextResponse.json({ error: '刪除裝備失敗' }, { status: 500 })
   }
 }

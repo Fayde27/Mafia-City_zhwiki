@@ -19,7 +19,7 @@ export async function GET(
     }
     return NextResponse.json(article)
   } catch (error) {
-    return NextResponse.json({ error: '获取文章失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取文章失敗' }, { status: 500 })
   }
 }
 
@@ -53,7 +53,7 @@ export async function PUT(
     if (error) throw error
     return NextResponse.json(article)
   } catch (error) {
-    return NextResponse.json({ error: '更新文章失败' }, { status: 500 })
+    return NextResponse.json({ error: '更新文章失敗' }, { status: 500 })
   }
 }
 
@@ -70,6 +70,6 @@ export async function DELETE(
     if (error) throw error
     return NextResponse.json({ success: true })
   } catch (error) {
-    return NextResponse.json({ error: '删除文章失败' }, { status: 500 })
+    return NextResponse.json({ error: '刪除文章失敗' }, { status: 500 })
   }
 }

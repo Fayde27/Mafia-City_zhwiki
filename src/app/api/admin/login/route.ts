@@ -10,7 +10,7 @@ export async function POST(request: Request) {
 
     if (!username || !password) {
       return NextResponse.json(
-        { error: '用户名和密码不能为空' },
+        { error: '用戶名和密碼不能為空' },
         { status: 400 }
       )
     }
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
 
     if (error || !user) {
       return NextResponse.json(
-        { error: '用户名或密码错误' },
+        { error: '用戶名或密碼錯誤' },
         { status: 401 }
       )
     }
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 
     if (!isValid) {
       return NextResponse.json(
-        { error: '用户名或密码错误' },
+        { error: '用戶名或密碼錯誤' },
         { status: 401 }
       )
     }
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Login error:', error)
     return NextResponse.json(
-      { error: '登录失败，请稍后重试' },
+      { error: '登入失敗，請稍後重試' },
       { status: 500 }
     )
   }

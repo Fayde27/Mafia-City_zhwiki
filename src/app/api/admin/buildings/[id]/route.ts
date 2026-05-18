@@ -12,11 +12,11 @@ export async function GET(
       .eq('id', params.id)
       .single()
     if (!building) {
-      return NextResponse.json({ error: '建筑不存在' }, { status: 404 })
+      return NextResponse.json({ error: '建築不存在' }, { status: 404 })
     }
     return NextResponse.json(building)
   } catch (error) {
-    return NextResponse.json({ error: '获取建筑失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取建築失敗' }, { status: 500 })
   }
 }
 
@@ -54,7 +54,7 @@ export async function PUT(
     if (error) throw error
     return NextResponse.json(building)
   } catch (error) {
-    return NextResponse.json({ error: '更新建筑失败' }, { status: 500 })
+    return NextResponse.json({ error: '更新建築失敗' }, { status: 500 })
   }
 }
 
@@ -67,6 +67,6 @@ export async function DELETE(
       .eq('id', params.id )
     return NextResponse.json({ success: true })
   } catch (error) {
-    return NextResponse.json({ error: '删除建筑失败' }, { status: 500 })
+    return NextResponse.json({ error: '刪除建築失敗' }, { status: 500 })
   }
 }

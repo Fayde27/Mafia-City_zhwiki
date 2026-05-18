@@ -10,10 +10,10 @@ export async function GET(request: Request, { params }: { params: { id: string }
       .select('*')
       .eq('id', params.id)
       .single()
-    if (error || !data) return NextResponse.json({ error: '分类不存在' }, { status: 404 })
+    if (error || !data) return NextResponse.json({ error: '分類不存在' }, { status: 404 })
     return NextResponse.json(data)
   } catch {
-    return NextResponse.json({ error: '获取分类失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取分類失敗' }, { status: 500 })
   }
 }
 
@@ -35,7 +35,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (error) throw error
     return NextResponse.json(section)
   } catch {
-    return NextResponse.json({ error: '更新分类失败' }, { status: 500 })
+    return NextResponse.json({ error: '更新分類失敗' }, { status: 500 })
   }
 }
 
@@ -48,6 +48,6 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     if (error) throw error
     return NextResponse.json({ success: true })
   } catch {
-    return NextResponse.json({ error: '删除分类失败' }, { status: 500 })
+    return NextResponse.json({ error: '刪除分類失敗' }, { status: 500 })
   }
 }

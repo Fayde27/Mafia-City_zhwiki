@@ -33,6 +33,6 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ troops: mapped })
   } catch {
-    return NextResponse.json({ error: '获取兵种失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取兵種失敗' }, { status: 500 })
   }
 }

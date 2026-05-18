@@ -13,7 +13,7 @@ export async function GET() {
     if (error) throw error
     return NextResponse.json(options)
   } catch {
-    return NextResponse.json({ error: '获取筛选选项失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取篩選選項失敗' }, { status: 500 })
   }
 }
 
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   try {
     const { type, value, categoryId } = await request.json()
     if (!type || !value || !categoryId) {
-      return NextResponse.json({ error: '类型、值和分类不能为空' }, { status: 400 })
+      return NextResponse.json({ error: '類型、值和分類不能為空' }, { status: 400 })
     }
     const { data: option, error } = await supabaseAdmin
       .from('TroopFilterOption')
@@ -32,6 +32,6 @@ export async function POST(request: Request) {
     if (error) throw error
     return NextResponse.json(option, { status: 201 })
   } catch {
-    return NextResponse.json({ error: '创建筛选选项失败' }, { status: 500 })
+    return NextResponse.json({ error: '創建篩選選項失敗' }, { status: 500 })
   }
 }

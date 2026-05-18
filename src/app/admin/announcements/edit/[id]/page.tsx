@@ -65,10 +65,10 @@ export default function AdminAnnouncementEditPage() {
         router.push('/admin/announcements')
       } else {
         const data = await res.json()
-        alert(data.error || '保存失败')
+        alert(data.error || '保存失敗')
       }
     } catch {
-      alert('网络错误')
+      alert('網絡錯誤')
     } finally {
       setSaving(false)
     }
@@ -80,7 +80,7 @@ export default function AdminAnnouncementEditPage() {
     return (
       <div className="min-h-screen bg-wiki-bg">
         <WikiHeader />
-        <div className="text-center py-20 text-wiki-text-muted">加载中...</div>
+        <div className="text-center py-20 text-wiki-text-muted">載入中...</div>
         <WikiFooter />
       </div>
     )
@@ -93,8 +93,8 @@ export default function AdminAnnouncementEditPage() {
       <main className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">编辑公告</h1>
-            <p className="text-wiki-text-muted text-sm mt-1">修改公告详细信息</p>
+            <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">編輯公告</h1>
+            <p className="text-wiki-text-muted text-sm mt-1">修改公告詳細信息</p>
           </div>
           <Link href="/admin/announcements" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
             返回列表
@@ -106,7 +106,7 @@ export default function AdminAnnouncementEditPage() {
             <h3 className="text-lg font-bold text-wiki-accent mb-4">基本信息</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">公告标题 *</label>
+                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">公告標題 *</label>
                 <input
                   type="text"
                   value={formData.title}
@@ -117,17 +117,17 @@ export default function AdminAnnouncementEditPage() {
               </div>
 
               <div>
-                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">公告内容 *</label>
+                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">公告內容 *</label>
                 <RichTextEditor
                   value={formData.content}
                   onChange={(html) => setFormData({ ...formData, content: html })}
-                  placeholder="请输入公告内容..."
+                  placeholder="請輸入公告內容..."
                 />
               </div>
 
               <div>
                 <ImageUploadInput
-                  label="BANNER 图片"
+                  label="BANNER 圖片"
                   value={formData.banner}
                   position={formData.bannerPosition}
                   onChange={(url) => setFormData({ ...formData, banner: url })}
@@ -138,7 +138,7 @@ export default function AdminAnnouncementEditPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">公告类型</label>
+                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">公告類型</label>
                   <select
                     value={formData.type}
                     onChange={(e) => setFormData({ ...formData, type: e.target.value })}
@@ -169,7 +169,7 @@ export default function AdminAnnouncementEditPage() {
                     onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
                     className="w-5 h-5 accent-wiki-accent cursor-pointer"
                   />
-                  <span className="font-bold">立即发布</span>
+                  <span className="font-bold">立即發佈</span>
                 </label>
               </div>
             </div>

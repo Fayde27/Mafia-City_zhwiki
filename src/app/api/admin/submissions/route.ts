@@ -34,6 +34,6 @@ export async function GET(request: Request) {
       },
     })
   } catch {
-    return NextResponse.json({ error: '获取投稿列表失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取投稿列表失敗' }, { status: 500 })
   }
 }

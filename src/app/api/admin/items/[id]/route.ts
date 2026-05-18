@@ -16,7 +16,7 @@ export async function GET(
     }
     return NextResponse.json(item)
   } catch (error) {
-    return NextResponse.json({ error: '获取道具失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取道具失敗' }, { status: 500 })
   }
 }
 
@@ -53,7 +53,7 @@ export async function PUT(
     if (error) throw error
     return NextResponse.json(item)
   } catch (error) {
-    return NextResponse.json({ error: '更新道具失败' }, { status: 500 })
+    return NextResponse.json({ error: '更新道具失敗' }, { status: 500 })
   }
 }
 
@@ -66,6 +66,6 @@ export async function DELETE(
       .eq('id', params.id )
     return NextResponse.json({ success: true })
   } catch (error) {
-    return NextResponse.json({ error: '删除道具失败' }, { status: 500 })
+    return NextResponse.json({ error: '刪除道具失敗' }, { status: 500 })
   }
 }

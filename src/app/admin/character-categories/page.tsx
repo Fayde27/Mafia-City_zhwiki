@@ -80,10 +80,10 @@ export default function AdminCharacterCategoriesPage() {
         setFormData({ name: '', slug: '', description: '', icon: '', sortOrder: 0 })
       } else {
         const data = await res.json()
-        alert(data.error || '保存失败')
+        alert(data.error || '保存失敗')
       }
     } catch (err) {
-      alert('网络错误')
+      alert('網絡錯誤')
     }
   }
 
@@ -100,13 +100,13 @@ export default function AdminCharacterCategoriesPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('确定要删除这个分类吗？该分类下的角色将失去分类关联。')) return
+    if (!confirm('確定要刪除這個分類嗎？該分類下的角色將失去分類關聯。')) return
 
     try {
       await fetch(`/api/admin/character-categories/${id}`, { method: 'DELETE' })
       fetchCategories()
     } catch (err) {
-      alert('删除失败')
+      alert('刪除失敗')
     }
   }
 
@@ -130,7 +130,7 @@ export default function AdminCharacterCategoriesPage() {
       ])
       fetchCategories()
     } catch (err) {
-      alert('排序更新失败')
+      alert('排序更新失敗')
     }
   }
 
@@ -154,7 +154,7 @@ export default function AdminCharacterCategoriesPage() {
       ])
       fetchCategories()
     } catch (err) {
-      alert('排序更新失败')
+      alert('排序更新失敗')
     }
   }
 
@@ -168,9 +168,9 @@ export default function AdminCharacterCategoriesPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">
-              角色分类管理
+              角色分類管理
             </h1>
-            <p className="text-wiki-text-muted text-sm mt-1">管理角色图鉴分类，新增、编辑或删除分类</p>
+            <p className="text-wiki-text-muted text-sm mt-1">管理角色圖鑑分類，新增、編輯或刪除分類</p>
           </div>
           <div className="flex gap-3">
             <Link href="/admin/characters" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
@@ -184,23 +184,23 @@ export default function AdminCharacterCategoriesPage() {
               }}
               className="btn-hard text-wiki-text text-sm"
             >
-              + 新增分类
+              + 新增分類
             </button>
           </div>
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
+          <div className="text-center py-12 text-wiki-text-muted">載入中...</div>
         ) : (
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg overflow-hidden">
             <table className="w-full">
               <thead className="bg-wiki-gray">
                 <tr>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">图标</th>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">名称</th>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">别名</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">圖標</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">名稱</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">別名</th>
                   <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">描述</th>
-                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">角色数</th>
+                  <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">角色數</th>
                   <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">排序</th>
                   <th className="text-left px-6 py-4 text-wiki-accent font-bold uppercase tracking-wider text-sm">操作</th>
                 </tr>
@@ -236,13 +236,13 @@ export default function AdminCharacterCategoriesPage() {
                           onClick={() => handleEdit(category)}
                           className="px-3 py-1 bg-wiki-accent/20 text-wiki-accent text-sm font-bold hover:bg-wiki-accent/30"
                         >
-                          编辑
+                          編輯
                         </button>
                         <button
                           onClick={() => handleDelete(category.id)}
                           className="px-3 py-1 bg-wiki-danger/20 text-wiki-danger text-sm font-bold hover:bg-wiki-danger/30"
                         >
-                          删除
+                          刪除
                         </button>
                       </div>
                     </td>
@@ -258,11 +258,11 @@ export default function AdminCharacterCategoriesPage() {
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-8 w-full max-w-md mx-4">
             <h2 className="text-2xl font-heading font-bold text-wiki-accent heading-hard mb-6">
-              {editingCategory ? '编辑分类' : '新增分类'}
+              {editingCategory ? '編輯分類' : '新增分類'}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">名称 *</label>
+                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">名稱 *</label>
                 <input
                   type="text"
                   value={formData.name}
@@ -272,7 +272,7 @@ export default function AdminCharacterCategoriesPage() {
                 />
               </div>
               <div>
-                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">别名 (URL Slug) *</label>
+                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">別名 (URL Slug) *</label>
                 <input
                   type="text"
                   value={formData.slug}
@@ -282,7 +282,7 @@ export default function AdminCharacterCategoriesPage() {
                 />
               </div>
               <div>
-                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">图标 (Emoji)</label>
+                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">圖標 (Emoji)</label>
                 <input
                   type="text"
                   value={formData.icon}

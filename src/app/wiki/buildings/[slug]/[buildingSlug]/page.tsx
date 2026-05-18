@@ -63,15 +63,15 @@ export default function BuildingDetailPage() {
   }
 
   const tabs = [
-    { id: 'details', label: '建筑详情' },
-    { id: 'upgrade', label: '升级信息' },
+    { id: 'details', label: '建築詳情' },
+    { id: 'upgrade', label: '升級信息' },
   ]
 
   if (loading) {
     return (
       <div className="min-h-screen bg-wiki-bg">
         <WikiHeader />
-        <div className="text-center py-20 text-wiki-text-muted">加载中...</div>
+        <div className="text-center py-20 text-wiki-text-muted">載入中...</div>
         <WikiFooter />
       </div>
     )
@@ -83,7 +83,7 @@ export default function BuildingDetailPage() {
         <WikiHeader />
         <main className="container mx-auto px-4 py-12">
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-12 text-center text-wiki-text-muted">
-            建筑不存在
+            建築不存在
           </div>
         </main>
         <WikiFooter />
@@ -97,11 +97,11 @@ export default function BuildingDetailPage() {
       
       <main className="container mx-auto px-4 py-6 md:py-8">
         <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
-          <Link href="/" className="hover:text-wiki-accent">首页</Link>
+          <Link href="/" className="hover:text-wiki-accent">首頁</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki" className="hover:text-wiki-accent">图鉴</Link>
+          <Link href="/wiki" className="hover:text-wiki-accent">圖鑑</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki/buildings" className="hover:text-wiki-accent">建筑图鉴</Link>
+          <Link href="/wiki/buildings" className="hover:text-wiki-accent">建築圖鑑</Link>
           <span className="mx-2">/</span>
           <Link href={`/wiki/buildings/${building.category.slug}`} className="hover:text-wiki-accent">
             {building.category.name}
@@ -138,7 +138,7 @@ export default function BuildingDetailPage() {
                   href={`/admin/buildings/edit/${building.id}`}
                   className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90"
                 >
-                  编辑建筑
+                  編輯建築
                 </Link>
               </div>
             )}
@@ -156,7 +156,7 @@ export default function BuildingDetailPage() {
               <div>
                 <h2 className="text-2xl md:text-3xl font-bold text-wiki-text">{building.name}</h2>
                 {building.type && (
-                  <p className="text-wiki-text-muted mt-1">类型：{building.type}</p>
+                  <p className="text-wiki-text-muted mt-1">類型：{building.type}</p>
                 )}
               </div>
             </div>
@@ -197,7 +197,7 @@ export default function BuildingDetailPage() {
 
           <div className="lg:col-span-1">
             <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6 sticky top-4">
-              <h3 className="text-lg font-bold text-wiki-accent mb-4">建筑信息</h3>
+              <h3 className="text-lg font-bold text-wiki-accent mb-4">建築信息</h3>
               <div className="space-y-3 text-sm">
                 {building.rarity && (
                   <div className="flex justify-between">
@@ -207,13 +207,13 @@ export default function BuildingDetailPage() {
                 )}
                 {building.type && (
                   <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">类型</span>
+                    <span className="text-wiki-text-muted">類型</span>
                     <span className="text-wiki-text font-bold">{building.type}</span>
                   </div>
                 )}
                 {building.level && (
                   <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">等级</span>
+                    <span className="text-wiki-text-muted">等級</span>
                     <span className="text-wiki-text">{building.level}/{building.maxLevel}</span>
                   </div>
                 )}
@@ -225,7 +225,7 @@ export default function BuildingDetailPage() {
                 )}
                 {building.production && (
                   <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">产出</span>
+                    <span className="text-wiki-text-muted">產出</span>
                     <span className="text-wiki-text">{building.production}</span>
                   </div>
                 )}

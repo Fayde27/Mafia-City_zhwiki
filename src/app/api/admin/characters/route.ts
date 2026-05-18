@@ -40,7 +40,7 @@ export async function GET(request: Request) {
       },
       })
   } catch (error) {
-    return NextResponse.json({ error: '获取角色列表失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取角色列表失敗' }, { status: 500 })
   }
 }
 
@@ -78,6 +78,6 @@ export async function POST(request: Request) {
     if (error) throw error
     return NextResponse.json(character, { status: 201 })
   } catch (error) {
-    return NextResponse.json({ error: '创建角色失败' }, { status: 500 })
+    return NextResponse.json({ error: '創建角色失敗' }, { status: 500 })
   }
 }

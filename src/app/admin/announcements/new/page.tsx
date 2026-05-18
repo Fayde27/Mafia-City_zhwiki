@@ -62,14 +62,14 @@ export default function AdminAnnouncementNewPage() {
       })
 
       if (res.ok) {
-        alert('创建成功')
+        alert('創建成功')
         router.push('/admin/announcements')
       } else {
         const data = await res.json()
-        alert(data.error || '保存失败')
+        alert(data.error || '保存失敗')
       }
     } catch (err) {
-      alert('网络错误')
+      alert('網絡錯誤')
     } finally {
       setSaving(false)
     }
@@ -87,7 +87,7 @@ export default function AdminAnnouncementNewPage() {
             <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">
               新增公告
             </h1>
-            <p className="text-wiki-text-muted text-sm mt-1">填写公告详细信息</p>
+            <p className="text-wiki-text-muted text-sm mt-1">填寫公告詳細信息</p>
           </div>
           <Link href="/admin/announcements" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
             返回列表
@@ -99,7 +99,7 @@ export default function AdminAnnouncementNewPage() {
             <h3 className="text-lg font-bold text-wiki-accent mb-4">基本信息</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">公告标题 *</label>
+                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">公告標題 *</label>
                 <input
                   type="text"
                   value={formData.title}
@@ -110,7 +110,7 @@ export default function AdminAnnouncementNewPage() {
               </div>
 
               <div>
-                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">公告内容 *</label>
+                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">公告內容 *</label>
                 <textarea
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
@@ -121,11 +121,11 @@ export default function AdminAnnouncementNewPage() {
               </div>
 
               <div>
-                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">Banner 图片</label>
+                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">Banner 圖片</label>
                 <div className="space-y-3">
                   <div className="flex gap-4">
                     <label className="flex-1">
-                      <span className="block text-wiki-text-muted text-xs mb-1">上传图片</span>
+                      <span className="block text-wiki-text-muted text-xs mb-1">上傳圖片</span>
                       <input
                         type="file"
                         accept="image/*"
@@ -134,7 +134,7 @@ export default function AdminAnnouncementNewPage() {
                       />
                     </label>
                     <div className="flex-1">
-                      <span className="block text-wiki-text-muted text-xs mb-1">或输入图片 URL</span>
+                      <span className="block text-wiki-text-muted text-xs mb-1">或輸入圖片 URL</span>
                       <input
                         type="text"
                         value={formData.banner}
@@ -146,7 +146,7 @@ export default function AdminAnnouncementNewPage() {
                   </div>
                   {bannerPreview && (
                     <div className="relative rounded-lg overflow-hidden border border-wiki-border">
-                      <img src={bannerPreview} alt="Banner 预览" className="w-full h-48 object-cover" />
+                      <img src={bannerPreview} alt="Banner 預覽" className="w-full h-48 object-cover" />
                       <button
                         type="button"
                         onClick={() => { setBannerPreview(null); setFormData({ ...formData, banner: '' }) }}
@@ -161,7 +161,7 @@ export default function AdminAnnouncementNewPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">公告类型</label>
+                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">公告類型</label>
                   <select
                     value={formData.type}
                     onChange={(e) => setFormData({ ...formData, type: e.target.value })}
@@ -193,7 +193,7 @@ export default function AdminAnnouncementNewPage() {
                     onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
                     className="w-5 h-5 accent-wiki-accent cursor-pointer"
                   />
-                  <span className="font-bold">立即发布</span>
+                  <span className="font-bold">立即發佈</span>
                 </label>
               </div>
             </div>

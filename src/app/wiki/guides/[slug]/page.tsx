@@ -67,11 +67,11 @@ export default function GuideCategoryPage() {
       
       <main className="container mx-auto px-4 py-6 md:py-8">
         <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
-          <Link href="/" className="hover:text-wiki-accent">首页</Link>
+          <Link href="/" className="hover:text-wiki-accent">首頁</Link>
           <span className="mx-2">/</span>
           <Link href="/wiki/guides" className="hover:text-wiki-accent">玩法攻略</Link>
           <span className="mx-2">/</span>
-          <span className="text-wiki-text">{category?.name || '加载中...'}</span>
+          <span className="text-wiki-text">{category?.name || '載入中...'}</span>
         </div>
 
         <div className="flex items-center justify-between mb-6">
@@ -97,10 +97,10 @@ export default function GuideCategoryPage() {
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-wiki-text-muted">加载中...</div>
+          <div className="text-center py-12 text-wiki-text-muted">載入中...</div>
         ) : articles.length === 0 ? (
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-8 md:p-12 text-center text-wiki-text-muted">
-            该分类下暂无攻略文章
+            該分類下暫無攻略文章
           </div>
         ) : (
           <div className="space-y-4">
@@ -132,7 +132,7 @@ export default function GuideCategoryPage() {
                         <span className="text-wiki-accent text-xs font-bold">{article.category?.name}</span>
                         {article.isPinned && (
                           <span className="px-2 py-0.5 bg-wiki-danger/10 text-wiki-danger text-xs rounded">
-                            置顶
+                            置頂
                           </span>
                         )}
                         {article.badges &&

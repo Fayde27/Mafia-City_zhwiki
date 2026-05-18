@@ -14,6 +14,6 @@ export async function GET() {
     if (error) throw error
     return NextResponse.json(sections || [])
   } catch (error) {
-    return NextResponse.json({ error: '获取侧边栏分类失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取側邊欄分類失敗' }, { status: 500 })
   }
 }

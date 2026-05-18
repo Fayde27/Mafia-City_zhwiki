@@ -65,18 +65,18 @@ export default function CharacterDetailPage() {
   }
 
   const tabs = [
-    { id: 'attributes', label: '角色属性' },
-    { id: 'skills', label: '技能详情' },
-    { id: 'rumors', label: '黑道传闻' },
-    { id: 'teamComp', label: '阵容搭配' },
-    { id: 'troopRec', label: '配兵推荐' },
+    { id: 'attributes', label: '角色屬性' },
+    { id: 'skills', label: '技能詳情' },
+    { id: 'rumors', label: '黑道傳聞' },
+    { id: 'teamComp', label: '陣容搭配' },
+    { id: 'troopRec', label: '配兵推薦' },
   ]
 
   if (loading) {
     return (
       <div className="min-h-screen bg-wiki-bg">
         <WikiHeader />
-        <div className="text-center py-20 text-wiki-text-muted">加载中...</div>
+        <div className="text-center py-20 text-wiki-text-muted">載入中...</div>
         <WikiFooter />
       </div>
     )
@@ -102,11 +102,11 @@ export default function CharacterDetailPage() {
       
       <main className="container mx-auto px-4 py-6 md:py-8">
         <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
-          <Link href="/" className="hover:text-wiki-accent">首页</Link>
+          <Link href="/" className="hover:text-wiki-accent">首頁</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki" className="hover:text-wiki-accent">图鉴</Link>
+          <Link href="/wiki" className="hover:text-wiki-accent">圖鑑</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki/characters/characters" className="hover:text-wiki-accent">角色图鉴</Link>
+          <Link href="/wiki/characters/characters" className="hover:text-wiki-accent">角色圖鑑</Link>
           <span className="mx-2">/</span>
           <Link href={`/wiki/characters/${character.category.slug}`} className="hover:text-wiki-accent">
             {character.category.name}
@@ -143,7 +143,7 @@ export default function CharacterDetailPage() {
                   href={`/admin/characters/edit/${character.id}`}
                   className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90"
                 >
-                  编辑角色
+                  編輯角色
                 </Link>
               </div>
             )}
@@ -175,14 +175,14 @@ export default function CharacterDetailPage() {
                   <p className="text-wiki-text-muted text-sm mt-2">核心加成：{character.coreBonus}</p>
                 )}
                 {character.acquisition && (
-                  <p className="text-wiki-text-muted text-sm">获取方式：{character.acquisition}</p>
+                  <p className="text-wiki-text-muted text-sm">獲取方式：{character.acquisition}</p>
                 )}
               </div>
             </div>
 
             {character.description && (
               <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6 mb-6">
-                <h3 className="text-lg font-bold text-wiki-accent mb-3">角色简介</h3>
+                <h3 className="text-lg font-bold text-wiki-accent mb-3">角色簡介</h3>
                 {character.description.trim().startsWith('<') ? (
                   <div className="rich-content text-wiki-text leading-relaxed" dangerouslySetInnerHTML={{ __html: character.description }} />
                 ) : (
@@ -231,19 +231,19 @@ export default function CharacterDetailPage() {
                 <MarkdownRenderer content={character.troopRec} />
               )}
               {activeTab === 'attributes' && !character.attributes && (
-                <p className="text-wiki-text-muted text-center py-8">暂无角色属性</p>
+                <p className="text-wiki-text-muted text-center py-8">暫無角色屬性</p>
               )}
               {activeTab === 'skills' && !character.skills && (
-                <p className="text-wiki-text-muted text-center py-8">暂无技能详情</p>
+                <p className="text-wiki-text-muted text-center py-8">暫無技能詳情</p>
               )}
               {activeTab === 'rumors' && !character.rumors && (
-                <p className="text-wiki-text-muted text-center py-8">暂无黑道传闻</p>
+                <p className="text-wiki-text-muted text-center py-8">暫無黑道傳聞</p>
               )}
               {activeTab === 'teamComp' && !character.teamComp && (
-                <p className="text-wiki-text-muted text-center py-8">暂无阵容搭配</p>
+                <p className="text-wiki-text-muted text-center py-8">暫無陣容搭配</p>
               )}
               {activeTab === 'troopRec' && !character.troopRec && (
-                <p className="text-wiki-text-muted text-center py-8">暂无配兵推荐</p>
+                <p className="text-wiki-text-muted text-center py-8">暫無配兵推薦</p>
               )}
             </div>
           </div>
@@ -266,7 +266,7 @@ export default function CharacterDetailPage() {
                 )}
                 {character.weapon && (
                   <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">适配兵种</span>
+                    <span className="text-wiki-text-muted">適配兵種</span>
                     <span className="text-wiki-text">{character.weapon}</span>
                   </div>
                 )}
@@ -278,7 +278,7 @@ export default function CharacterDetailPage() {
                 )}
                 {character.acquisition && (
                   <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">获取方式</span>
+                    <span className="text-wiki-text-muted">獲取方式</span>
                     <span className="text-wiki-text">{character.acquisition}</span>
                   </div>
                 )}
@@ -290,7 +290,7 @@ export default function CharacterDetailPage() {
         {isAdmin && (
           <div className="mt-8 flex justify-end">
             <Link href={`/admin/characters/edit/${character.id}`} className="btn-hard text-wiki-text text-sm">
-              编辑角色
+              編輯角色
             </Link>
           </div>
         )}

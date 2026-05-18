@@ -16,7 +16,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     }
     return NextResponse.json(announcement)
   } catch (error) {
-    return NextResponse.json({ error: '获取失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取失敗' }, { status: 500 })
   }
 }
 
@@ -40,7 +40,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (error) throw error
     return NextResponse.json(announcement)
   } catch (error) {
-    return NextResponse.json({ error: '更新失败' }, { status: 500 })
+    return NextResponse.json({ error: '更新失敗' }, { status: 500 })
   }
 }
 
@@ -54,6 +54,6 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     if (error) throw error
     return NextResponse.json({ success: true })
   } catch (error) {
-    return NextResponse.json({ error: '删除失败' }, { status: 500 })
+    return NextResponse.json({ error: '刪除失敗' }, { status: 500 })
   }
 }

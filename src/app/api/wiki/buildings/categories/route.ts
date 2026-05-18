@@ -25,6 +25,6 @@ export async function GET() {
 
     return NextResponse.json(withCounts)
   } catch {
-    return NextResponse.json({ error: '获取建筑分类失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取建築分類失敗' }, { status: 500 })
   }
 }

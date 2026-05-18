@@ -72,14 +72,14 @@ export default function AdminEquipmentNewPage() {
       })
 
       if (res.ok) {
-        alert('创建成功')
+        alert('創建成功')
         router.push('/admin/equipment')
       } else {
         const data = await res.json()
-        alert(data.error || '保存失败')
+        alert(data.error || '保存失敗')
       }
     } catch (err) {
-      alert('网络错误')
+      alert('網絡錯誤')
     } finally {
       setSaving(false)
     }
@@ -91,7 +91,7 @@ export default function AdminEquipmentNewPage() {
     return (
       <div className="min-h-screen bg-wiki-bg">
         <WikiHeader />
-        <div className="text-center py-20 text-wiki-text-muted">加载中...</div>
+        <div className="text-center py-20 text-wiki-text-muted">載入中...</div>
         <WikiFooter />
       </div>
     )
@@ -105,9 +105,9 @@ export default function AdminEquipmentNewPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">
-              新增装备
+              新增裝備
             </h1>
-            <p className="text-wiki-text-muted text-sm mt-1">填写装备详细信息</p>
+            <p className="text-wiki-text-muted text-sm mt-1">填寫裝備詳細信息</p>
           </div>
           <Link href="/admin/equipment" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
             返回列表
@@ -120,7 +120,7 @@ export default function AdminEquipmentNewPage() {
               <h3 className="text-lg font-bold text-wiki-accent mb-4">基本信息</h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">装备名称 *</label>
+                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">裝備名稱 *</label>
                   <input
                     type="text"
                     value={formData.name}
@@ -136,19 +136,19 @@ export default function AdminEquipmentNewPage() {
                     value={formData.slug}
                     onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                     className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                    placeholder="英文小写，如: legendary-sword"
+                    placeholder="英文小寫，如: legendary-sword"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">所属分类 *</label>
+                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">所屬分類 *</label>
                   <select
                     value={formData.categoryId}
                     onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
                     className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none cursor-pointer"
                     required
                   >
-                    <option value="">请选择分类</option>
+                    <option value="">請選擇分類</option>
                     {categories.map((cat) => (
                       <option key={cat.id} value={cat.id}>{cat.name}</option>
                     ))}
@@ -158,10 +158,10 @@ export default function AdminEquipmentNewPage() {
             </div>
 
             <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
-              <h3 className="text-lg font-bold text-wiki-accent mb-4">图片上传</h3>
+              <h3 className="text-lg font-bold text-wiki-accent mb-4">圖片上傳</h3>
               <div className="space-y-6">
                 <ImageUploadInput
-                  label="图标"
+                  label="圖標"
                   value={formData.icon}
                   position={formData.iconPosition}
                   onChange={(url) => setFormData({ ...formData, icon: url })}
@@ -169,7 +169,7 @@ export default function AdminEquipmentNewPage() {
                   previewHeight="h-32 aspect-square"
                 />
                 <ImageUploadInput
-                  label="图片"
+                  label="圖片"
                   value={formData.image}
                   position={formData.imagePosition}
                   onChange={(url) => setFormData({ ...formData, image: url })}
@@ -182,7 +182,7 @@ export default function AdminEquipmentNewPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
-              <h3 className="text-lg font-bold text-wiki-accent mb-4">装备属性</h3>
+              <h3 className="text-lg font-bold text-wiki-accent mb-4">裝備屬性</h3>
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -200,7 +200,7 @@ export default function AdminEquipmentNewPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">装备类型</label>
+                    <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">裝備類型</label>
                     <input
                       type="text"
                       value={formData.type}
@@ -211,7 +211,7 @@ export default function AdminEquipmentNewPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">装备部位</label>
+                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">裝備部位</label>
                   <input
                     type="text"
                     value={formData.slot}
@@ -221,20 +221,20 @@ export default function AdminEquipmentNewPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">属性加成</label>
+                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">屬性加成</label>
                   <input
                     type="text"
                     value={formData.stats}
                     onChange={(e) => setFormData({ ...formData, stats: e.target.value })}
                     className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                    placeholder="如: 攻击力+100"
+                    placeholder="如: 攻擊力+100"
                   />
                 </div>
               </div>
             </div>
 
             <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
-              <h3 className="text-lg font-bold text-wiki-accent mb-4">发布设置</h3>
+              <h3 className="text-lg font-bold text-wiki-accent mb-4">發佈設置</h3>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <label className="flex items-center gap-2 text-wiki-text cursor-pointer select-none">
@@ -244,7 +244,7 @@ export default function AdminEquipmentNewPage() {
                       onChange={(e) => setFormData({ ...formData, isPublished: e.target.checked })}
                       className="w-5 h-5 accent-wiki-accent cursor-pointer"
                     />
-                    <span className="font-bold">立即发布</span>
+                    <span className="font-bold">立即發佈</span>
                   </label>
                 </div>
                 <div>
@@ -261,7 +261,7 @@ export default function AdminEquipmentNewPage() {
           </div>
 
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
-            <h3 className="text-lg font-bold text-wiki-accent mb-4">装备简介 (Markdown)</h3>
+            <h3 className="text-lg font-bold text-wiki-accent mb-4">裝備簡介 (Markdown)</h3>
             <RichTextEditor
               value={formData.description}
               onChange={(html) => setFormData({ ...formData, description: html })}
@@ -270,7 +270,7 @@ export default function AdminEquipmentNewPage() {
           </div>
 
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
-            <h3 className="text-lg font-bold text-wiki-accent mb-4">详细信息 (Markdown)</h3>
+            <h3 className="text-lg font-bold text-wiki-accent mb-4">詳細信息 (Markdown)</h3>
             <RichTextEditor
               value={formData.details}
               onChange={(html) => setFormData({ ...formData, details: html })}
@@ -279,7 +279,7 @@ export default function AdminEquipmentNewPage() {
           </div>
 
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
-            <h3 className="text-lg font-bold text-wiki-accent mb-4">套装加成 (Markdown)</h3>
+            <h3 className="text-lg font-bold text-wiki-accent mb-4">套裝加成 (Markdown)</h3>
             <RichTextEditor
               value={formData.setBonus}
               onChange={(html) => setFormData({ ...formData, setBonus: html })}

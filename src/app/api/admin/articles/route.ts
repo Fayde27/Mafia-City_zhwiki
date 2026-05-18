@@ -29,7 +29,7 @@ export async function GET(request: Request) {
       },
       })
   } catch (error) {
-    return NextResponse.json({ error: '获取文章失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取文章失敗' }, { status: 500 })
   }
 }
 
@@ -58,6 +58,6 @@ export async function POST(request: Request) {
     if (error) throw error
     return NextResponse.json(article, { status: 201 })
   } catch (error) {
-    return NextResponse.json({ error: '创建文章失败' }, { status: 500 })
+    return NextResponse.json({ error: '創建文章失敗' }, { status: 500 })
   }
 }

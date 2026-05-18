@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     const file = formData.get('file') as File
 
     if (!file) {
-      return NextResponse.json({ error: '没有文件上传' }, { status: 400 })
+      return NextResponse.json({ error: '沒有文件上傳' }, { status: 400 })
     }
 
     const bytes = await file.arrayBuffer()
@@ -38,6 +38,6 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     console.error('Upload error:', error)
-    return NextResponse.json({ error: '上传失败' }, { status: 500 })
+    return NextResponse.json({ error: '上傳失敗' }, { status: 500 })
   }
 }

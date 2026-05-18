@@ -14,6 +14,6 @@ export async function GET() {
     if (error) throw error
     return NextResponse.json(announcements)
   } catch (error) {
-    return NextResponse.json({ error: '获取公告失败' }, { status: 500 })
+    return NextResponse.json({ error: '獲取公告失敗' }, { status: 500 })
   }
 }

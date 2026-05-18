@@ -64,14 +64,14 @@ interface SidebarSection {
 }
 
 const adminLinks = [
-  { href: '/admin/dashboard', icon: '🖥️', label: '管理后台' },
-  { href: '/admin/site-config', icon: '⚙️', label: '站点配置' },
+  { href: '/admin/dashboard', icon: '🖥️', label: '管理後台' },
+  { href: '/admin/site-config', icon: '⚙️', label: '站點配置' },
   { href: '/admin/submissions', icon: '📝', label: '投稿管理' },
-  { href: '/admin/categories', icon: '📁', label: '攻略分类管理' },
-  { href: '/admin/wiki-categories', icon: '📚', label: '图鉴分类管理' },
+  { href: '/admin/categories', icon: '📁', label: '攻略分類管理' },
+  { href: '/admin/wiki-categories', icon: '📚', label: '圖鑑分類管理' },
   { href: '/admin/announcements', icon: '📢', label: '公告管理' },
-  { href: '/admin/sidebar-sections', icon: '📂', label: '侧边栏分类' },
-  { href: '/admin/sidebar-nav', icon: '🧭', label: '侧边栏导航' },
+  { href: '/admin/sidebar-sections', icon: '📂', label: '側邊欄分類' },
+  { href: '/admin/sidebar-nav', icon: '🧭', label: '側邊欄導航' },
 ]
 
 export default function HomePage() {
@@ -106,13 +106,13 @@ export default function HomePage() {
       const items: SidebarNavItem[] = Array.isArray(navItems) ? navItems : []
       setSidebarNavItems(items)
       setSidebarSections(Array.isArray(sections) ? sections : [])
-      // 默认展开所有有子项的导航
+      // 預設展開所有有子項的導航
       setExpandedItems(items.filter(i => i.children && i.children.length > 0).map(i => i.id))
-      // 站点配置
+      // 站點配置
       setBannerImage(config.searchBannerImage || '')
       setBannerPosition(config.searchBannerPosition || '50% 50%')
       setHotTags(
-        (config.hotSearchTags || '新手入门,角色攻略,装备图鉴,建筑攻略,阵容搭配,赛事活动')
+        (config.hotSearchTags || '新手入門,角色攻略,裝備圖鑑,建築攻略,陣容搭配,賽事活動')
           .split(',').map((t: string) => t.trim()).filter(Boolean)
       )
       setLoading(false)
@@ -127,12 +127,12 @@ export default function HomePage() {
   }
 
   const handleDeleteArticle = async (id: string) => {
-    if (!confirm('确定要删除这篇文章吗？')) return
+    if (!confirm('確定要刪除這篇文章嗎？')) return
     try {
       await fetch(`/api/admin/articles/${id}`, { method: 'DELETE' })
       setArticles(articles.filter(a => a.id !== id))
     } catch {
-      alert('删除失败')
+      alert('刪除失敗')
     }
   }
 
@@ -216,10 +216,10 @@ export default function HomePage() {
 
       <main className="container mx-auto px-4 py-6">
         <div className="flex flex-col lg:flex-row gap-6">
-          {/* 侧边栏 */}
+          {/* 側邊欄 */}
           <div className="lg:w-72 flex-shrink-0 order-2 lg:order-1">
             <div className="sticky top-20 space-y-6">
-              {/* 动态 SidebarSection */}
+              {/* 動態 SidebarSection */}
               {sidebarSections.length > 0 ? sidebarSections.map(section => {
                 const sectionItems = sidebarNavItems.filter(item => item.section === section.slug)
                 return (
@@ -231,7 +231,7 @@ export default function HomePage() {
                     <div className="space-y-1">
                       {sectionItems.length > 0
                         ? sectionItems.map(renderNavItem)
-                        : <div className="text-wiki-text-muted text-sm text-center py-4">暂无内容，请在管理后台添加</div>
+                        : <div className="text-wiki-text-muted text-sm text-center py-4">暫無內容，請在管理後台添加</div>
                       }
                     </div>
                   </div>
@@ -243,7 +243,7 @@ export default function HomePage() {
                   </h3>
                   <div className="space-y-1">
                     {[
-                      { label: '游戏图鉴', href: '/wiki', icon: '📚' },
+                      { label: '遊戲圖鑑', href: '/wiki', icon: '📚' },
                       { label: '玩法攻略', href: '/wiki/guides', icon: '📖' },
                     ].map(link => (
                       <Link key={link.href} href={link.href} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors group">
@@ -264,7 +264,7 @@ export default function HomePage() {
                   <span className="text-wiki-accent">◆</span>攻略投稿
                 </h3>
                 <p className="text-wiki-text-muted text-xs mb-3 leading-relaxed">
-                  分享你的游戏心得，优质投稿将获得游戏内奖励！
+                  分享你的遊戲心得，優質投稿將獲得遊戲內獎勵！
                 </p>
                 <Link
                   href="/wiki/submit"
@@ -274,7 +274,7 @@ export default function HomePage() {
                 </Link>
               </div>
 
-              {/* 管理入口（仅管理员可见，默认折叠） */}
+              {/* 管理入口（僅管理員可見，預設摺疊） */}
               {isAdmin && (
                 <div className="bg-wiki-card border border-wiki-border rounded-xl p-5">
                   <button
@@ -311,7 +311,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* 主内容区 */}
+          {/* 主內容區 */}
           <div className="flex-1 order-1 lg:order-2">
             {/* 搜索 Banner */}
             <section className="mb-8">
@@ -326,7 +326,7 @@ export default function HomePage() {
                   : { background: 'var(--wiki-gray-light, #1a1a2e)' }
                 }
               >
-                {/* 遮罩：有 banner 时加深色蒙层，无 banner 时显示纹理 */}
+                {/* 遮罩：有 banner 時加深色蒙層，無 banner 時顯示紋理 */}
                 {bannerImage ? (
                   <div className="absolute inset-0 bg-black/50" />
                 ) : (
@@ -337,7 +337,7 @@ export default function HomePage() {
                 <div className="relative z-10">
                   <div className="flex items-center gap-3 mb-4">
                     <span className="text-wiki-accent text-sm font-bold uppercase tracking-wider">玩法攻略</span>
-                    <span className="text-wiki-text-muted text-xs">从入门到精通，带你征战天下</span>
+                    <span className="text-wiki-text-muted text-xs">從入門到精通，帶你征戰天下</span>
                   </div>
                   <h1 className="text-3xl md:text-4xl font-bold mb-6" style={{ color: '#fff', textShadow: '0 2px 8px rgba(0,0,0,0.6)' }}>
                     <span className="text-wiki-accent">黑道風雲</span>{' '}
@@ -349,7 +349,7 @@ export default function HomePage() {
                         type="text"
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
-                        placeholder="搜索攻略、角色、装备..."
+                        placeholder="搜索攻略、角色、裝備..."
                         className="w-full bg-wiki-card border border-wiki-border px-5 py-3 text-wiki-text placeholder-wiki-text-muted focus:border-wiki-accent focus:outline-none rounded-lg"
                       />
                       <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-wiki-text-muted hover:text-wiki-accent">
@@ -375,11 +375,11 @@ export default function HomePage() {
               </div>
             </section>
 
-            {/* 热门攻略 */}
+            {/* 熱門攻略 */}
             <section className="mb-8 bg-wiki-gray-light border border-wiki-border rounded-xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-wiki-text">
-                  <span className="text-wiki-accent mr-2">◆</span>热门攻略
+                  <span className="text-wiki-accent mr-2">◆</span>熱門攻略
                 </h2>
                 {isAdmin && (
                   <Link href="/admin/articles/new" className="text-wiki-accent text-xs hover:underline">
@@ -404,7 +404,7 @@ export default function HomePage() {
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-wiki-accent text-xs font-bold">{article.category.name}</span>
                           {article.isPinned && (
-                            <span className="px-2 py-0.5 bg-wiki-danger/10 text-wiki-danger text-xs rounded">置顶</span>
+                            <span className="px-2 py-0.5 bg-wiki-danger/10 text-wiki-danger text-xs rounded">置頂</span>
                           )}
                           {article.badges && article.badges.split(',').filter(Boolean).map(badge => {
                             const badgeStyle = badge === 'HOT' ? 'bg-wiki-danger/10 text-wiki-danger'
@@ -437,13 +437,13 @@ export default function HomePage() {
                       {isAdmin && (
                         <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Link href={`/admin/articles/edit/${article.id}`} className="px-2 py-1 bg-wiki-accent/10 text-wiki-accent text-xs rounded hover:bg-wiki-accent/30">
-                            编辑
+                            編輯
                           </Link>
                           <button
                             onClick={e => { e.preventDefault(); handleDeleteArticle(article.id) }}
                             className="px-2 py-1 bg-wiki-danger/10 text-wiki-danger text-xs rounded hover:bg-wiki-danger/30"
                           >
-                            删除
+                            刪除
                           </button>
                         </div>
                       )}
@@ -467,7 +467,7 @@ export default function HomePage() {
               </div>
               <div className="bg-wiki-card border border-wiki-border rounded-xl p-5">
                 {announcements.length === 0 ? (
-                  <p className="text-wiki-text-muted text-sm">暂无公告</p>
+                  <p className="text-wiki-text-muted text-sm">暫無公告</p>
                 ) : (
                   <div className="space-y-3">
                     {announcements.map(ann => (

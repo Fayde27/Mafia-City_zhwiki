@@ -19,10 +19,10 @@ interface Submission {
 }
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  pending:  { label: '待审核', color: 'text-wiki-accent bg-wiki-accent/10' },
+  pending:  { label: '待審核', color: 'text-wiki-accent bg-wiki-accent/10' },
   reviewed: { label: '已查看', color: 'text-blue-400 bg-blue-400/10' },
-  approved: { label: '已采用', color: 'text-green-400 bg-green-400/10' },
-  rejected: { label: '已拒绝', color: 'text-wiki-danger bg-wiki-danger/10' },
+  approved: { label: '已採用', color: 'text-green-400 bg-green-400/10' },
+  rejected: { label: '已拒絕', color: 'text-wiki-danger bg-wiki-danger/10' },
 }
 
 export default function SubmissionsAdminPage() {
@@ -75,14 +75,14 @@ export default function SubmissionsAdminPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('确定删除这条投稿？')) return
+    if (!confirm('確定刪除這條投稿？')) return
     await fetch(`/api/admin/submissions/${id}`, { method: 'DELETE' })
     setSelected(null)
     fetchSubmissions()
   }
 
   if (!isLoaded || loading) {
-    return <div className="min-h-screen bg-wiki-bg flex items-center justify-center text-wiki-text-muted">加载中...</div>
+    return <div className="min-h-screen bg-wiki-bg flex items-center justify-center text-wiki-text-muted">載入中...</div>
   }
 
   return (
@@ -93,13 +93,13 @@ export default function SubmissionsAdminPage() {
             <span className="text-wiki-accent mr-2">◆</span>投稿管理
           </h1>
           <button onClick={() => router.push('/admin/dashboard')} className="text-wiki-text-muted text-sm hover:text-wiki-accent">
-            ← 返回后台
+            ← 返回後台
           </button>
         </div>
 
-        {/* 状态筛选 */}
+        {/* 狀態篩選 */}
         <div className="flex gap-2 mb-6 flex-wrap">
-          {[['', '全部'], ['pending', '待审核'], ['reviewed', '已查看'], ['approved', '已采用'], ['rejected', '已拒绝']].map(([val, label]) => (
+          {[['', '全部'], ['pending', '待審核'], ['reviewed', '已查看'], ['approved', '已採用'], ['rejected', '已拒絕']].map(([val, label]) => (
             <button
               key={val}
               onClick={() => setFilterStatus(val)}
@@ -116,7 +116,7 @@ export default function SubmissionsAdminPage() {
 
         {/* 列表 */}
         {submissions.length === 0 ? (
-          <div className="text-center py-16 text-wiki-text-muted">暂无投稿</div>
+          <div className="text-center py-16 text-wiki-text-muted">暫無投稿</div>
         ) : (
           <div className="space-y-3">
             {submissions.map(s => {
@@ -146,7 +146,7 @@ export default function SubmissionsAdminPage() {
         )}
       </div>
 
-      {/* 详情弹窗 */}
+      {/* 詳情彈窗 */}
       {selected && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setSelected(null)}>
           <div
@@ -160,8 +160,8 @@ export default function SubmissionsAdminPage() {
               </div>
 
               <div className="flex gap-3 mb-4 text-xs">
-                <span className="text-wiki-text-muted">游戏ID：<span className="text-wiki-accent font-bold">{selected.gameId}</span></span>
-                {selected.category && <span className="text-wiki-text-muted">分类：{selected.category}</span>}
+                <span className="text-wiki-text-muted">遊戲ID：<span className="text-wiki-accent font-bold">{selected.gameId}</span></span>
+                {selected.category && <span className="text-wiki-text-muted">分類：{selected.category}</span>}
                 <span className="text-wiki-text-muted">{new Date(selected.createdAt).toLocaleString('zh-CN')}</span>
               </div>
 
@@ -169,10 +169,10 @@ export default function SubmissionsAdminPage() {
                 {selected.content}
               </div>
 
-              {/* 编辑状态 */}
+              {/* 編輯狀態 */}
               <div className="space-y-3 mb-5">
                 <div>
-                  <label className="text-wiki-text text-sm font-bold mb-1.5 block">处理状态</label>
+                  <label className="text-wiki-text text-sm font-bold mb-1.5 block">處理狀態</label>
                   <div className="flex gap-2 flex-wrap">
                     {Object.entries(STATUS_LABELS).map(([val, { label, color }]) => (
                       <button
@@ -188,12 +188,12 @@ export default function SubmissionsAdminPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-wiki-text text-sm font-bold mb-1.5 block">内部备注</label>
+                  <label className="text-wiki-text text-sm font-bold mb-1.5 block">內部備註</label>
                   <textarea
                     value={editNote}
                     onChange={e => setEditNote(e.target.value)}
                     rows={3}
-                    placeholder="记录处理情况（仅管理员可见）"
+                    placeholder="記錄處理情況（僅管理員可見）"
                     className="w-full bg-wiki-bg border border-wiki-border rounded-lg px-3 py-2 text-wiki-text text-sm focus:border-wiki-accent focus:outline-none resize-none"
                   />
                 </div>
@@ -211,7 +211,7 @@ export default function SubmissionsAdminPage() {
                   onClick={() => handleDelete(selected.id)}
                   className="px-5 py-2.5 bg-wiki-danger/10 text-wiki-danger text-sm font-bold rounded-lg hover:bg-wiki-danger/20"
                 >
-                  删除
+                  刪除
                 </button>
               </div>
             </div>
