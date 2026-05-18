@@ -2,7 +2,6 @@
 
 export const runtime = 'edge'
 
-
 import { useState, useEffect } from 'react'
 import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
@@ -15,9 +14,7 @@ interface Category {
   slug: string
   description: string
   icon: string
-  _count: {
-    articles: number
-  }
+  _count: { articles: number }
 }
 
 interface Article {
@@ -27,10 +24,7 @@ interface Article {
   summary: string
   coverImage: string
   categoryId: string
-  category: {
-    name: string
-    slug: string
-  }
+  category: { name: string; slug: string }
   isPublished: boolean
   isPinned: boolean
   badges: string
@@ -68,8 +62,18 @@ interface SidebarSection {
   isActive: boolean
 }
 
+const adminLinks = [
+  { href: '/admin/dashboard', icon: '🖥️', label: '管理后台' },
+  { href: '/admin/site-config', icon: '⚙️', label: '站点配置' },
+  { href: '/admin/categories', icon: '📁', label: '攻略分类管理' },
+  { href: '/admin/wiki-categories', icon: '📚', label: '图鉴分类管理' },
+  { href: '/admin/announcements', icon: '📢', label: '公告管理' },
+  { href: '/admin/sidebar-sections', icon: '📂', label: '侧边栏分类' },
+  { href: '/admin/sidebar-nav', icon: '🧭', label: '侧边栏导航' },
+]
+
 export default function HomePage() {
-  const { isAdmin, token } = useAdminAuth()
+  const { isAdmin } = useAdminAuth()
   const [categories, setCategories] = useState<Category[]>([])
   const [articles, setArticles] = useState<Article[]>([])
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
@@ -78,24 +82,39 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [expandedItems, setExpandedItems] = useState<string[]>([])
+  const [adminExpanded, setAdminExpanded] = useState(false)
+
+  // SiteConfig
+  const [bannerImage, setBannerImage] = useState('')
+  const [bannerPosition, setBannerPosition] = useState('50% 50%')
+  const [hotTags, setHotTags] = useState<string[]>([])
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/wiki/categories').then(res => res.json()),
-      fetch('/api/wiki/articles?featured=true&limit=12').then(res => res.json()),
-      fetch('/api/wiki/announcements').then(res => res.json()),
-      fetch('/api/wiki/sidebar-nav').then(res => res.json()),
-      fetch('/api/wiki/sidebar-sections').then(res => res.json()),
-    ]).then(([cats, arts, anns, navItems, sections]) => {
+      fetch('/api/wiki/categories').then(r => r.json()),
+      fetch('/api/wiki/articles?featured=true&limit=12').then(r => r.json()),
+      fetch('/api/wiki/announcements').then(r => r.json()),
+      fetch('/api/wiki/sidebar-nav').then(r => r.json()),
+      fetch('/api/wiki/sidebar-sections').then(r => r.json()),
+      fetch('/api/wiki/site-config').then(r => r.json()),
+    ]).then(([cats, arts, anns, navItems, sections, config]) => {
       setCategories(cats || [])
       setArticles(arts?.articles || [])
       setAnnouncements(anns || [])
-      setSidebarNavItems(Array.isArray(navItems) ? navItems : [])
+      const items: SidebarNavItem[] = Array.isArray(navItems) ? navItems : []
+      setSidebarNavItems(items)
       setSidebarSections(Array.isArray(sections) ? sections : [])
+      // 默认展开所有有子项的导航
+      setExpandedItems(items.filter(i => i.children && i.children.length > 0).map(i => i.id))
+      // 站点配置
+      setBannerImage(config.searchBannerImage || '')
+      setBannerPosition(config.searchBannerPosition || '50% 50%')
+      setHotTags(
+        (config.hotSearchTags || '新手入门,角色攻略,装备图鉴,建筑攻略,阵容搭配,赛事活动')
+          .split(',').map((t: string) => t.trim()).filter(Boolean)
+      )
       setLoading(false)
-    }).catch(() => {
-      setLoading(false)
-    })
+    }).catch(() => setLoading(false))
   }, [])
 
   const handleSearch = (e: React.FormEvent) => {
@@ -110,7 +129,7 @@ export default function HomePage() {
     try {
       await fetch(`/api/admin/articles/${id}`, { method: 'DELETE' })
       setArticles(articles.filter(a => a.id !== id))
-    } catch (err) {
+    } catch {
       alert('删除失败')
     }
   }
@@ -123,11 +142,6 @@ export default function HomePage() {
       default: return '公告'
     }
   }
-
-  const quickLinks = [
-    { label: '图鉴', href: '/wiki', icon: '📚' },
-    { label: '玩法攻略', href: '/wiki/guides', icon: '' },
-  ]
 
   const toggleExpand = (id: string) => {
     setExpandedItems(prev =>
@@ -178,9 +192,15 @@ export default function HomePage() {
     }
 
     return (
-      <Link key={item.id} href={item.href} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors group">
+      <Link
+        key={item.id}
+        href={item.href}
+        className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors group"
+      >
         {item.icon && <span className="text-lg">{item.icon}</span>}
-        <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors flex-1">{item.label}</span>
+        <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors flex-1">
+          {item.label}
+        </span>
         <svg className="w-4 h-4 text-wiki-text-secondary ml-auto group-hover:text-wiki-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
@@ -194,8 +214,10 @@ export default function HomePage() {
 
       <main className="container mx-auto px-4 py-6">
         <div className="flex flex-col lg:flex-row gap-6">
+          {/* 侧边栏 */}
           <div className="lg:w-72 flex-shrink-0 order-2 lg:order-1">
             <div className="sticky top-20 space-y-6">
+              {/* 动态 SidebarSection */}
               {sidebarSections.length > 0 ? sidebarSections.map(section => {
                 const sectionItems = sidebarNavItems.filter(item => item.section === section.slug)
                 return (
@@ -213,14 +235,15 @@ export default function HomePage() {
                   </div>
                 )
               }) : (
-                // Fallback when no sections configured yet
                 <div className="bg-wiki-card border border-wiki-border rounded-xl p-5">
                   <h3 className="text-wiki-text font-bold text-sm mb-4 flex items-center gap-2">
-                    <span className="text-wiki-accent">◆</span>
-                    快速入口
+                    <span className="text-wiki-accent">◆</span>快速入口
                   </h3>
                   <div className="space-y-1">
-                    {quickLinks.map((link) => (
+                    {[
+                      { label: '游戏图鉴', href: '/wiki', icon: '📚' },
+                      { label: '玩法攻略', href: '/wiki/guides', icon: '📖' },
+                    ].map(link => (
                       <Link key={link.href} href={link.href} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors group">
                         <span className="text-lg">{link.icon}</span>
                         <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors flex-1">{link.label}</span>
@@ -233,49 +256,66 @@ export default function HomePage() {
                 </div>
               )}
 
+              {/* 管理入口（仅管理员可见，默认折叠） */}
               {isAdmin && (
                 <div className="bg-wiki-card border border-wiki-border rounded-xl p-5">
-                  <h3 className="text-wiki-text font-bold text-sm mb-4 flex items-center gap-2">
-                    <span className="text-wiki-accent">◆</span>
-                    管理入口
-                  </h3>
-                  <div className="space-y-2">
-                    <Link href="/admin/dashboard" className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors group">
-                      <span className="text-lg">️</span>
-                      <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors">管理后台</span>
-                    </Link>
-                    <Link href="/admin/categories" className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors group">
-                      <span className="text-lg">📁</span>
-                      <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors">攻略分类管理</span>
-                    </Link>
-                    <Link href="/admin/wiki-categories" className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors group">
-                      <span className="text-lg">📚</span>
-                      <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors">图鉴分类管理</span>
-                    </Link>
-                    <Link href="/admin/announcements" className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors group">
-                      <span className="text-lg">📢</span>
-                      <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors">公告管理</span>
-                    </Link>
-                    <Link href="/admin/sidebar-sections" className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors group">
-                      <span className="text-lg">📂</span>
-                      <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors">侧边栏分类</span>
-                    </Link>
-                    <Link href="/admin/sidebar-nav" className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors group">
-                      <span className="text-lg">🧭</span>
-                      <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors">侧边栏导航</span>
-                    </Link>
-                  </div>
+                  <button
+                    onClick={() => setAdminExpanded(v => !v)}
+                    className="w-full flex items-center gap-2 text-left"
+                  >
+                    <span className="text-wiki-accent text-sm">◆</span>
+                    <span className="text-wiki-text font-bold text-sm flex-1">管理入口</span>
+                    <svg
+                      className={`w-4 h-4 text-wiki-text-secondary transition-transform duration-200 ${adminExpanded ? 'rotate-90' : ''}`}
+                      fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                  {adminExpanded && (
+                    <div className="mt-3 space-y-1">
+                      {adminLinks.map(link => (
+                        <Link
+                          key={link.href}
+                          href={link.href}
+                          className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors group"
+                        >
+                          <span className="text-lg">{link.icon}</span>
+                          <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors">
+                            {link.label}
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           </div>
 
+          {/* 主内容区 */}
           <div className="flex-1 order-1 lg:order-2">
+            {/* 搜索 Banner */}
             <section className="mb-8">
-              <div className="relative rounded-xl overflow-hidden bg-wiki-gray-light border border-wiki-border p-8">
-                <div className="absolute inset-0 opacity-5">
-                  <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNlOGM1NDciIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRoLTJ2LTRoMnYtMmgtNHY2aDR2LTJoLTJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] bg-repeat" />
-                </div>
+              <div
+                className="relative rounded-xl overflow-hidden border border-wiki-border p-8"
+                style={bannerImage
+                  ? {
+                      backgroundImage: `url(${bannerImage})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: bannerPosition,
+                    }
+                  : { background: 'var(--wiki-gray-light, #1a1a2e)' }
+                }
+              >
+                {/* 遮罩：有 banner 时加深色蒙层，无 banner 时显示纹理 */}
+                {bannerImage ? (
+                  <div className="absolute inset-0 bg-black/50" />
+                ) : (
+                  <div className="absolute inset-0 opacity-5">
+                    <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNlOGM1NDciIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRoLTJ2LTRoMnYtMmgtNHY2aDR2LTJoLTJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] bg-repeat" />
+                  </div>
+                )}
                 <div className="relative z-10">
                   <div className="flex items-center gap-3 mb-4">
                     <span className="text-wiki-accent text-sm font-bold uppercase tracking-wider">玩法攻略</span>
@@ -289,7 +329,7 @@ export default function HomePage() {
                       <input
                         type="text"
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={e => setSearchQuery(e.target.value)}
                         placeholder="搜索攻略、角色、装备..."
                         className="w-full bg-wiki-card border border-wiki-border px-5 py-3 text-wiki-text placeholder-wiki-text-muted focus:border-wiki-accent focus:outline-none rounded-lg"
                       />
@@ -301,7 +341,7 @@ export default function HomePage() {
                     </div>
                   </form>
                   <div className="flex flex-wrap gap-2">
-                    {['新手入门', '角色攻略', '装备图鉴', '建筑攻略', '阵容搭配', '赛事活动'].map((tag) => (
+                    {hotTags.map(tag => (
                       <button
                         key={tag}
                         type="button"
@@ -316,11 +356,11 @@ export default function HomePage() {
               </div>
             </section>
 
+            {/* 热门攻略 */}
             <section className="mb-8 bg-wiki-gray-light border border-wiki-border rounded-xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-wiki-text">
-                  <span className="text-wiki-accent mr-2">◆</span>
-                  热门攻略
+                  <span className="text-wiki-accent mr-2">◆</span>热门攻略
                 </h2>
                 {isAdmin && (
                   <Link href="/admin/articles/new" className="text-wiki-accent text-xs hover:underline">
@@ -329,7 +369,7 @@ export default function HomePage() {
                 )}
               </div>
               <div className="space-y-3">
-                {articles.map((article, index) => (
+                {articles.map(article => (
                   <Link key={article.id} href={`/wiki/article/${article.slug}`} className="block group">
                     <div className="flex gap-4 bg-wiki-card border border-wiki-border rounded-xl p-4 hover:border-wiki-accent/30 transition-all duration-300 relative">
                       {article.coverImage ? (
@@ -347,7 +387,7 @@ export default function HomePage() {
                           {article.isPinned && (
                             <span className="px-2 py-0.5 bg-wiki-danger/10 text-wiki-danger text-xs rounded">置顶</span>
                           )}
-                          {article.badges && article.badges.split(',').filter(Boolean).map((badge) => {
+                          {article.badges && article.badges.split(',').filter(Boolean).map(badge => {
                             const badgeStyle = badge === 'HOT' ? 'bg-wiki-danger/10 text-wiki-danger'
                               : badge === 'NEW' ? 'bg-wiki-accent/10 text-wiki-accent'
                               : 'bg-blue-500/10 text-blue-500'
@@ -380,7 +420,10 @@ export default function HomePage() {
                           <Link href={`/admin/articles/edit/${article.id}`} className="px-2 py-1 bg-wiki-accent/10 text-wiki-accent text-xs rounded hover:bg-wiki-accent/30">
                             编辑
                           </Link>
-                          <button onClick={(e) => { e.preventDefault(); handleDeleteArticle(article.id) }} className="px-2 py-1 bg-wiki-danger/10 text-wiki-danger text-xs rounded hover:bg-wiki-danger/100/30">
+                          <button
+                            onClick={e => { e.preventDefault(); handleDeleteArticle(article.id) }}
+                            className="px-2 py-1 bg-wiki-danger/10 text-wiki-danger text-xs rounded hover:bg-wiki-danger/30"
+                          >
                             删除
                           </button>
                         </div>
@@ -391,11 +434,11 @@ export default function HomePage() {
               </div>
             </section>
 
+            {/* 全站公告 */}
             <section className="mb-8 bg-wiki-gray-light border border-wiki-border rounded-xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-wiki-text">
-                  <span className="text-wiki-danger mr-2">◆</span>
-                  全站公告
+                  <span className="text-wiki-danger mr-2">◆</span>全站公告
                 </h2>
                 {isAdmin && (
                   <a href="/admin/announcements" className="text-sm text-wiki-accent hover:underline">
@@ -408,12 +451,8 @@ export default function HomePage() {
                   <p className="text-wiki-text-muted text-sm">暂无公告</p>
                 ) : (
                   <div className="space-y-3">
-                    {announcements.map((ann) => (
-                      <Link 
-                        key={ann.id} 
-                        href={`/wiki/announcements/${ann.id}`}
-                        className="block group"
-                      >
+                    {announcements.map(ann => (
+                      <Link key={ann.id} href={`/wiki/announcements/${ann.id}`} className="block group">
                         <div className="flex items-start gap-3 pb-3 border-b border-wiki-border last:border-0 last:pb-0 hover:bg-wiki-gray/50 -mx-2 px-2 py-1 rounded-lg transition-colors">
                           <span className="text-wiki-accent text-xs font-bold flex-shrink-0 mt-0.5">[{getTypeLabel(ann.type)}]</span>
                           <div className="flex-1 min-w-0">

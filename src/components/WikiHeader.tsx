@@ -10,6 +10,15 @@ interface WikiSection {
   href: string
 }
 
+const navSections: WikiSection[] = [
+  { label: '首页', href: '/' },
+  { label: '游戏图鉴', href: '/wiki' },
+  { label: '排行榜', href: '/wiki/rankings' },
+  { label: '玩法攻略', href: '/wiki/guides' },
+  { label: '活动一览', href: '/wiki/events' },
+  { label: '游戏工具', href: '/wiki/tools' },
+]
+
 export default function WikiHeader() {
   const pathname = usePathname()
   const router = useRouter()
@@ -43,32 +52,7 @@ export default function WikiHeader() {
   const isActive = (href: string): boolean => {
     if (href === '/') return pathname === '/'
     if (href === '/wiki') return pathname === '/wiki' || pathname === '/wiki/'
-    if (href === '/wiki/guides') return pathname === '/wiki/guides' || pathname === '/wiki/guides/'
     return pathname === href || pathname?.startsWith(href + '/')
-  }
-
-  const navSections: WikiSection[] = [
-    { label: '首页', href: '/' },
-    { label: '图鉴', href: '/wiki' },
-    { label: '玩法攻略', href: '/wiki/guides' },
-  ]
-
-  const renderNavItem = (section: WikiSection) => {
-    const active = isActive(section.href)
-
-    return (
-      <Link
-        key={section.href}
-        href={section.href}
-        className={`px-3 py-1.5 text-sm transition-colors rounded ${
-          active
-            ? 'text-wiki-accent bg-wiki-accent/10'
-            : 'text-wiki-text-muted hover:text-white'
-        }`}
-      >
-        {section.label}
-      </Link>
-    )
   }
 
   return (
@@ -77,16 +61,24 @@ export default function WikiHeader() {
         <div className="container mx-auto px-4" style={{ overflow: 'visible' }}>
           <div className="flex items-center justify-between py-3" style={{ overflow: 'visible' }}>
             <Link href="/" className="flex items-center gap-3 flex-shrink-0">
-              <div className="text-xl font-bold text-wiki-accent">
-                黑道風雲
-              </div>
-              <div className="hidden sm:block text-wiki-text-muted text-xs">
-                Wiki 攻略站
-              </div>
+              <div className="text-xl font-bold text-wiki-accent">黑道風雲</div>
+              <div className="hidden sm:block text-wiki-text-muted text-xs">Wiki 攻略站</div>
             </Link>
 
             <nav className="hidden md:flex items-center gap-1 overflow-visible">
-              {navSections.map(renderNavItem)}
+              {navSections.map(section => (
+                <Link
+                  key={section.href}
+                  href={section.href}
+                  className={`px-3 py-1.5 text-sm transition-colors rounded ${
+                    isActive(section.href)
+                      ? 'text-wiki-accent bg-wiki-accent/10'
+                      : 'text-wiki-text-muted hover:text-white'
+                  }`}
+                >
+                  {section.label}
+                </Link>
+              ))}
             </nav>
 
             <div className="flex items-center gap-3">
@@ -94,7 +86,7 @@ export default function WikiHeader() {
                 <input
                   type="text"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   placeholder="搜索攻略..."
                   className="bg-wiki-darker border border-wiki-border/30 px-3 py-1.5 text-sm text-white w-48 focus:border-wiki-accent focus:outline-none rounded"
                 />
@@ -105,20 +97,10 @@ export default function WikiHeader() {
                 </button>
               </form>
 
-              {isAdmin ? (
-                <button
-                  onClick={handleLogout}
-                  className="text-wiki-danger text-xs hover:text-wiki-danger"
-                >
+              {isAdmin && (
+                <button onClick={handleLogout} className="text-wiki-danger text-xs hover:text-wiki-danger/80 transition-colors">
                   退出
                 </button>
-              ) : (
-                <Link
-                  href="/admin/login"
-                  className="text-wiki-text-muted text-xs hover:text-wiki-accent"
-                >
-                  管理
-                </Link>
               )}
 
               <button
@@ -135,7 +117,7 @@ export default function WikiHeader() {
       {mobileMenuOpen && (
         <div className="md:hidden bg-wiki-dark border-b border-wiki-border/20">
           <div className="container mx-auto px-4 py-3 space-y-1">
-            {navSections.map((section) => (
+            {navSections.map(section => (
               <Link
                 key={section.href}
                 href={section.href}
@@ -153,7 +135,7 @@ export default function WikiHeader() {
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 placeholder="搜索攻略..."
                 className="w-full bg-wiki-darker border border-wiki-border/30 px-3 py-2 text-sm text-white focus:border-wiki-accent focus:outline-none rounded"
               />
