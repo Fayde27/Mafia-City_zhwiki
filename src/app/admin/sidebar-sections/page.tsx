@@ -43,7 +43,7 @@ export default function AdminSidebarSectionsPage() {
 
   const openNew = () => {
     setEditingSection(null)
-    setFormData({ name: '', slug: '', sortOrder: 0, isActive: true })
+    setFormData({ name: '', slug: '', icon: '◆', sortOrder: 0, isActive: true })
     setShowModal(true)
   }
 
