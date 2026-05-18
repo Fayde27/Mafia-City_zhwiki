@@ -1,12 +1,13 @@
 'use client'
 
-import { useEditor, EditorContent } from '@tiptap/react'
+import { useEditor, EditorContent, Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
 import TextAlign from '@tiptap/extension-text-align'
 import Underline from '@tiptap/extension-underline'
 import { TextStyle } from '@tiptap/extension-text-style'
 import Color from '@tiptap/extension-color'
+import Image from '@tiptap/extension-image'
 import { useEffect, useRef, useState } from 'react'
 
 interface RichTextEditorProps {
@@ -22,6 +23,19 @@ const PRESET_COLORS = [
   '#666666', '#333333',
 ]
 
+async function uploadImageFile(file: File): Promise<string | null> {
+  const fd = new FormData()
+  fd.append('file', file)
+  try {
+    const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+    if (!res.ok) return null
+    const data = await res.json()
+    return data.url || null
+  } catch {
+    return null
+  }
+}
+
 export default function RichTextEditor({
   value,
   onChange,
@@ -29,7 +43,10 @@ export default function RichTextEditor({
   minHeight = 'min-h-[200px]',
 }: RichTextEditorProps) {
   const [showColorPicker, setShowColorPicker] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const colorPickerRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const editorRef = useRef<Editor | null>(null)
 
   const editor = useEditor({
     extensions: [
@@ -37,8 +54,9 @@ export default function RichTextEditor({
       Underline,
       TextStyle,
       Color,
+      Image.configure({ allowBase64: true, inline: false }),
       Link.configure({ openOnClick: false }),
-      TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      TextAlign.configure({ types: ['heading', 'paragraph', 'image'] }),
     ],
     content: value,
     onUpdate: ({ editor }) => {
@@ -49,8 +67,38 @@ export default function RichTextEditor({
         class: `focus:outline-none ${minHeight} px-4 py-3`,
         'data-placeholder': placeholder,
       },
+      handlePaste: (_view, event) => {
+        const items = Array.from(event.clipboardData?.items || [])
+        // 优先处理直接粘贴的图片文件（截图、复制的图片文件）
+        for (const item of items) {
+          if (item.type.startsWith('image/')) {
+            const file = item.getAsFile()
+            if (file) {
+              ;(async () => {
+                setUploading(true)
+                try {
+                  const url = await uploadImageFile(file)
+                  if (url) {
+                    editorRef.current?.chain().focus().setImage({ src: url }).run()
+                  }
+                } finally {
+                  setUploading(false)
+                }
+              })()
+              return true // 阻止默认粘贴行为
+            }
+          }
+        }
+        // 其余情况（含外链图片的 HTML 等）交给 TipTap 默认处理
+        return false
+      },
     },
   })
+
+  // 同步 editor ref，供 handlePaste 闭包使用
+  useEffect(() => {
+    editorRef.current = editor
+  }, [editor])
 
   useEffect(() => {
     if (editor && value !== editor.getHTML()) {
@@ -68,6 +116,28 @@ export default function RichTextEditor({
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
+
+  // 本地文件上传
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !editor) return
+    e.target.value = ''
+    setUploading(true)
+    try {
+      const url = await uploadImageFile(file)
+      if (url) editor.chain().focus().setImage({ src: url }).run()
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  // 输入 URL 插入图片
+  const handleInsertUrl = () => {
+    const url = prompt('请输入图片 URL：')
+    if (url?.trim()) {
+      editor?.chain().focus().setImage({ src: url.trim() }).run()
+    }
+  }
 
   if (!editor) return null
 
@@ -91,14 +161,11 @@ export default function RichTextEditor({
           <button
             type="button"
             onClick={() => setShowColorPicker(v => !v)}
-            className={`flex items-center gap-1 px-2 py-1 text-xs rounded hover:bg-black/10 text-gray-700`}
+            className="flex items-center gap-1 px-2 py-1 text-xs rounded hover:bg-black/10 text-gray-700"
             title="字体颜色"
           >
             <span style={{ color: currentColor }}>A</span>
-            <span
-              className="w-3 h-1.5 rounded-sm border border-wiki-border"
-              style={{ backgroundColor: currentColor }}
-            />
+            <span className="w-3 h-1.5 rounded-sm border border-wiki-border" style={{ backgroundColor: currentColor }} />
             <span className="text-wiki-text-muted">▾</span>
           </button>
           {showColorPicker && (
@@ -108,10 +175,7 @@ export default function RichTextEditor({
                   <button
                     key={color}
                     type="button"
-                    onClick={() => {
-                      editor.chain().focus().setColor(color).run()
-                      setShowColorPicker(false)
-                    }}
+                    onClick={() => { editor.chain().focus().setColor(color).run(); setShowColorPicker(false) }}
                     className="w-5 h-5 rounded border border-wiki-border hover:scale-125 transition-transform"
                     style={{ backgroundColor: color }}
                     title={color}
@@ -122,7 +186,7 @@ export default function RichTextEditor({
                 <input
                   type="color"
                   defaultValue={currentColor}
-                  onChange={(e) => editor.chain().focus().setColor(e.target.value).run()}
+                  onChange={e => editor.chain().focus().setColor(e.target.value).run()}
                   className="w-8 h-7 cursor-pointer rounded border border-wiki-border bg-transparent"
                   title="自定义颜色"
                 />
@@ -174,6 +238,34 @@ export default function RichTextEditor({
           title="插入链接"
         >🔗</button>
         <button type="button" onClick={() => editor.chain().focus().unsetLink().run()} className={btn(false)} title="移除链接">✕链接</button>
+
+        <div className="w-px bg-wiki-border mx-0.5" />
+
+        {/* 图片插入 */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleFileChange}
+        />
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+          className={`${btn(false)} ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          title="上传图片"
+        >
+          {uploading ? '上传中…' : '🖼️上传'}
+        </button>
+        <button
+          type="button"
+          onClick={handleInsertUrl}
+          className={btn(false)}
+          title="输入图片URL"
+        >
+          🔗图片
+        </button>
 
         <div className="w-px bg-wiki-border mx-0.5" />
 
