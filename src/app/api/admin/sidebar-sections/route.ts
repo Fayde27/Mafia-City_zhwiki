@@ -25,6 +25,7 @@ export async function POST(request: Request) {
       .insert({
         name: data.name,
         slug: data.slug,
+        icon: data.icon || '◆',
         sortOrder: data.sortOrder || 0,
         isActive: data.isActive !== false,
       })

@@ -13,6 +13,7 @@ interface SidebarSection {
   id: string
   name: string
   slug: string
+  icon: string
   sortOrder: number
   isActive: boolean
 }
@@ -25,7 +26,7 @@ export default function AdminSidebarSectionsPage() {
   const [apiError, setApiError] = useState<string>('')
   const [showModal, setShowModal] = useState(false)
   const [editingSection, setEditingSection] = useState<SidebarSection | null>(null)
-  const [formData, setFormData] = useState({ name: '', slug: '', sortOrder: 0, isActive: true })
+  const [formData, setFormData] = useState({ name: '', slug: '', icon: '◆', sortOrder: 0, isActive: true })
 
   useEffect(() => {
     if (!isLoaded) return
@@ -48,7 +49,7 @@ export default function AdminSidebarSectionsPage() {
 
   const openEdit = (section: SidebarSection) => {
     setEditingSection(section)
-    setFormData({ name: section.name, slug: section.slug, sortOrder: section.sortOrder, isActive: section.isActive })
+    setFormData({ name: section.name, slug: section.slug, icon: section.icon || '◆', sortOrder: section.sortOrder, isActive: section.isActive })
     setShowModal(true)
   }
 
@@ -137,7 +138,9 @@ export default function AdminSidebarSectionsPage() {
                 <tbody>
                   {sections.map(section => (
                     <tr key={section.id} className="border-t border-wiki-border hover:bg-wiki-gray/50">
-                      <td className="px-6 py-4 font-bold text-wiki-text">{section.name}</td>
+                      <td className="px-6 py-4 font-bold text-wiki-text">
+                        <span className="text-wiki-accent mr-2">{section.icon || '◆'}</span>{section.name}
+                      </td>
                       <td className="px-6 py-4 font-mono text-wiki-text-muted text-sm">{section.slug}</td>
                       <td className="px-6 py-4 text-wiki-text-muted">{section.sortOrder}</td>
                       <td className="px-6 py-4">
@@ -194,6 +197,21 @@ export default function AdminSidebarSectionsPage() {
               {editingSection ? '编辑分类' : '新增分类'}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">标题图标</label>
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl w-10 text-center">{formData.icon || '◆'}</span>
+                  <input
+                    type="text"
+                    value={formData.icon}
+                    onChange={e => setFormData(prev => ({ ...prev, icon: e.target.value }))}
+                    className="flex-1 bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
+                    placeholder="可输入 emoji 或符号，如 ⚔️ 🏆 ★"
+                    maxLength={4}
+                  />
+                </div>
+                <p className="text-wiki-text-muted text-xs mt-1">显示在分类标题左侧，默认为 ◆</p>
+              </div>
               <div>
                 <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">分类名称 *</label>
                 <input

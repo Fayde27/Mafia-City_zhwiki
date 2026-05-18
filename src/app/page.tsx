@@ -58,6 +58,7 @@ interface SidebarSection {
   id: string
   name: string
   slug: string
+  icon: string
   sortOrder: number
   isActive: boolean
 }
@@ -224,7 +225,7 @@ export default function HomePage() {
                 return (
                   <div key={section.id} className="bg-wiki-card border border-wiki-border rounded-xl p-5">
                     <h3 className="text-wiki-text font-bold text-sm mb-4 flex items-center gap-2">
-                      <span className="text-wiki-accent">◆</span>
+                      <span className="text-wiki-accent">{section.icon || '◆'}</span>
                       {section.name}
                     </h3>
                     <div className="space-y-1">
