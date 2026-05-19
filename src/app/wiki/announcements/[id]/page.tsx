@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { supabaseAdmin as supabase } from '@/lib/supabase'
 import { notFound } from 'next/navigation'
 import AdminEditButton from './AdminEditButton'
+import LikeButton from '@/components/LikeButton'
 
 interface Announcement {
   id: string
@@ -15,6 +16,7 @@ interface Announcement {
   type: string
   isActive: boolean
   sortOrder: number
+  likes?: number
   createdAt: string
 }
 
@@ -149,6 +151,10 @@ export default async function AnnouncementPage({ params }: { params: { id: strin
                     {announcement.content}
                   </div>
                 )}
+              </div>
+
+              <div className="mt-8 pt-6 border-t border-wiki-border flex justify-center">
+                <LikeButton entityType="announcement" entityId={announcement.id} initialLikes={announcement.likes || 0} />
               </div>
             </div>
           </div>

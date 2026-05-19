@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
+ import LikeButton from '@/components/LikeButton'
 
 interface Item {
   id: string
@@ -241,6 +242,11 @@ export default function ItemDetailPage() {
           </div>
         </div>
       </main>
+
+
+      <div className="mt-8 flex justify-center">
+        <LikeButton entityType="" entityId={?.id || ''} initialLikes={?.likes || 0} />
+      </div>
 
       <WikiFooter />
     </div>

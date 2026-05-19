@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
+import LikeButton from '@/components/LikeButton'
 
 interface Article {
   id: string
@@ -27,6 +28,7 @@ interface Article {
   }
   tags: string
   views: number
+  likes: number
   createdAt: string
   updatedAt: string
 }
@@ -43,7 +45,14 @@ export default function ArticleDetailPage() {
       .then(res => res.json())
       .then(data => {
         if (data.articles && data.articles.length > 0) {
-          setArticle(data.articles[0])
+          const a = data.articles[0]
+          setArticle(a)
+          // 累加瀏覽次數
+          fetch('/api/wiki/view', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ entityType: 'article', entityId: a.id }),
+          })
         }
         setLoading(false)
       })
@@ -136,6 +145,10 @@ export default function ArticleDetailPage() {
 
               <div className="prose prose-invert max-w-none">
                 <MarkdownRenderer content={article.content} />
+              </div>
+
+              <div className="mt-10 pt-6 border-t border-wiki-border flex justify-center">
+                <LikeButton entityType="article" entityId={article.id} initialLikes={article.likes || 0} />
               </div>
             </div>
           </article>
