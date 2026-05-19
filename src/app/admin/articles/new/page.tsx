@@ -2,7 +2,6 @@
 
 export const runtime = 'edge'
 
-
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import WikiHeader from '@/components/WikiHeader'
@@ -23,7 +22,7 @@ export default function NewArticlePage() {
   const { isAdmin, isLoaded } = useAdminAuth()
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(false)
-  const [uploading, setUploading] = useState(false)
+  const [previewing, setPreviewing] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -42,63 +41,25 @@ export default function NewArticlePage() {
 
   useEffect(() => {
     if (!isLoaded) return
-    if (!isAdmin) {
-      router.push('/admin/login')
-      return
-    }
-    fetch('/api/admin/categories')
-      .then(res => res.json())
-      .then(data => setCategories(data))
+    if (!isAdmin) { router.push('/admin/login'); return }
+    fetch('/api/admin/categories').then(res => res.json()).then(data => setCategories(data))
   }, [isAdmin, isLoaded, router])
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    setUploading(true)
-    const formData = new FormData()
-    formData.append('file', file)
-
-    try {
-      const res = await fetch('/api/admin/upload', {
-        method: 'POST',
-        body: formData,
-      })
-      const data = await res.json()
-      if (data.url) {
-        setFormData(prev => ({ ...prev, coverImage: data.url }))
-      }
-    } catch (err) {
-      alert('上傳失敗')
-    } finally {
-      setUploading(false)
-    }
-  }
-
-  const insertImageToContent = (url: string) => {
-    setFormData(prev => ({
-      ...prev,
-      content: prev.content + `\n![圖片](${url})\n`,
-    }))
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-
     try {
       const res = await fetch('/api/admin/articles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       })
-
       if (res.ok) {
-        router.push('/wiki/article/' + formData.slug)
+        router.push('/admin/articles/edit/' + (await res.json()).id)
       } else {
         alert('創建失敗')
       }
-    } catch (err) {
+    } catch {
       alert('網絡錯誤')
     } finally {
       setLoading(false)
@@ -111,17 +72,57 @@ export default function NewArticlePage() {
     <div className="min-h-screen bg-wiki-bg">
       <WikiHeader />
 
+      {/* 預覽覆蓋層 */}
+      {previewing && (
+        <div className="fixed inset-0 z-50 bg-wiki-bg overflow-y-auto">
+          <div className="sticky top-0 z-10 bg-wiki-dark border-b border-wiki-border/20 px-4 py-3 flex items-center justify-between">
+            <span className="text-wiki-text-muted text-sm">預覽模式（未儲存）</span>
+            <button
+              onClick={() => setPreviewing(false)}
+              className="flex items-center gap-2 px-4 py-1.5 bg-wiki-accent text-wiki-dark text-sm font-bold rounded-lg hover:bg-wiki-accent/90"
+            >
+              ← 返回編輯
+            </button>
+          </div>
+          <div className="container mx-auto px-4 py-8 max-w-4xl">
+            {formData.coverImage && (
+              <div className="w-full h-64 rounded-xl overflow-hidden mb-6">
+                <img
+                  src={formData.coverImage}
+                  alt={formData.title}
+                  className="w-full h-full object-cover"
+                  style={{ objectPosition: formData.coverImagePosition }}
+                />
+              </div>
+            )}
+            <h1 className="text-3xl font-bold text-wiki-text mb-4">{formData.title || '（無標題）'}</h1>
+            {formData.summary && (
+              <p className="text-wiki-text-muted mb-6 text-sm border-l-4 border-wiki-accent pl-4">{formData.summary}</p>
+            )}
+            <div
+              className="prose prose-invert max-w-none text-wiki-text"
+              dangerouslySetInnerHTML={{ __html: formData.content || '<p class="text-wiki-text-muted">（無內容）</p>' }}
+            />
+          </div>
+        </div>
+      )}
+
       <main className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">
-              新增文章
-            </h1>
-            <p className="text-wiki-text-muted text-sm mt-1">創建新的Wiki文章，支持Markdown格式</p>
+            <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">新增文章</h1>
+            <p className="text-wiki-text-muted text-sm mt-1">創建新的Wiki文章，支持富文本格式</p>
           </div>
+          <button
+            type="button"
+            onClick={() => setPreviewing(true)}
+            className="flex items-center gap-2 px-4 py-2 border border-wiki-border text-wiki-text-secondary text-sm rounded-lg hover:border-wiki-accent hover:text-wiki-accent transition-colors"
+          >
+            👁 預覽
+          </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="bg-wiki-gray-light border border-wiki-border rounded-lg p-8 space-y-6">
           <div>
             <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">標題 *</label>
             <input
@@ -175,9 +176,7 @@ export default function NewArticlePage() {
             >
               <option value="">請選擇分類</option>
               {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
               ))}
             </select>
           </div>
@@ -203,32 +202,17 @@ export default function NewArticlePage() {
             />
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={formData.isPublished}
-                onChange={(e) => setFormData({ ...formData, isPublished: e.target.checked })}
-                className="w-5 h-5"
-              />
+              <input type="checkbox" checked={formData.isPublished} onChange={(e) => setFormData({ ...formData, isPublished: e.target.checked })} className="w-5 h-5" />
               <span className="text-wiki-text font-bold">立即發佈</span>
             </label>
             <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={formData.isPinned}
-                onChange={(e) => setFormData({ ...formData, isPinned: e.target.checked })}
-                className="w-5 h-5"
-              />
+              <input type="checkbox" checked={formData.isPinned} onChange={(e) => setFormData({ ...formData, isPinned: e.target.checked })} className="w-5 h-5" />
               <span className="text-wiki-text font-bold">置頂文章</span>
             </label>
             <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={formData.isFeatured}
-                onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
-                className="w-5 h-5"
-              />
+              <input type="checkbox" checked={formData.isFeatured} onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })} className="w-5 h-5" />
               <span className="text-wiki-text font-bold">在首頁熱門攻略顯示</span>
             </label>
           </div>
@@ -242,16 +226,10 @@ export default function NewArticlePage() {
                   type="button"
                   onClick={() => {
                     const current = formData.badges ? formData.badges.split(',').filter(Boolean) : []
-                    const updated = current.includes(badge)
-                      ? current.filter(b => b !== badge).join(',')
-                      : [...current, badge].join(',')
+                    const updated = current.includes(badge) ? current.filter(b => b !== badge).join(',') : [...current, badge].join(',')
                     setFormData({ ...formData, badges: updated })
                   }}
-                  className={`px-3 py-1 text-xs font-bold border-2 ${
-                    formData.badges?.split(',').includes(badge)
-                      ? 'bg-wiki-accent/20 border-wiki-accent text-wiki-accent'
-                      : 'bg-wiki-gray border-wiki-border text-wiki-text-muted hover:border-wiki-accent/50'
-                  }`}
+                  className={`px-3 py-1 text-xs font-bold border-2 ${formData.badges?.split(',').includes(badge) ? 'bg-wiki-accent/20 border-wiki-accent text-wiki-accent' : 'bg-wiki-gray border-wiki-border text-wiki-text-muted hover:border-wiki-accent/50'}`}
                 >
                   {badge}
                 </button>
@@ -268,9 +246,12 @@ export default function NewArticlePage() {
 
           <div className="flex gap-4 pt-4">
             <button type="submit" className="btn-hard text-wiki-text" disabled={loading}>
-              {loading ? '保存中...' : '保存'}
+              {loading ? '儲存中...' : '儲存'}
             </button>
-            <Link href="/" className="px-6 py-3 bg-wiki-gray text-wiki-text font-bold uppercase tracking-wider">
+            <button type="button" onClick={() => setPreviewing(true)} className="px-6 py-3 border border-wiki-border text-wiki-text-secondary font-bold hover:border-wiki-accent hover:text-wiki-accent transition-colors">
+              👁 預覽
+            </button>
+            <Link href="/admin/dashboard" className="px-6 py-3 bg-wiki-gray text-wiki-text font-bold uppercase tracking-wider">
               取消
             </Link>
           </div>
