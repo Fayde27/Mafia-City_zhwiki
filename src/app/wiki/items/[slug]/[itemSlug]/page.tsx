@@ -10,7 +10,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
- import LikeButton from '@/components/LikeButton'
+import LikeButton from '@/components/LikeButton'
 
 interface Item {
   id: string
