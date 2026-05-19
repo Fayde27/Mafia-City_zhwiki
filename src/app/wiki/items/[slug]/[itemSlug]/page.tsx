@@ -245,7 +245,7 @@ export default function ItemDetailPage() {
 
 
       <div className="mt-8 flex justify-center">
-        <LikeButton entityType="" entityId={?.id || ''} initialLikes={?.likes || 0} />
+        <LikeButton entityType="item" entityId={item?.id || ''} initialLikes={item?.likes || 0} />
       </div>
 
       <WikiFooter />

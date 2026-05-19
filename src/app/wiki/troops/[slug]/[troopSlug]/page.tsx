@@ -266,7 +266,7 @@ export default function TroopDetailPage() {
 
 
       <div className="mt-8 flex justify-center">
-        <LikeButton entityType="" entityId={?.id || ''} initialLikes={?.likes || 0} />
+        <LikeButton entityType="troop" entityId={troop?.id || ''} initialLikes={troop?.likes || 0} />
       </div>
 
       <WikiFooter />

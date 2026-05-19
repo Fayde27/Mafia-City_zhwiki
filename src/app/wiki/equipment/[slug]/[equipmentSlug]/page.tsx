@@ -258,7 +258,7 @@ export default function EquipmentDetailPage() {
 
 
       <div className="mt-8 flex justify-center">
-        <LikeButton entityType="" entityId={?.id || ''} initialLikes={?.likes || 0} />
+        <LikeButton entityType="equipment" entityId={equipment?.id || ''} initialLikes={equipment?.likes || 0} />
       </div>
 
       <WikiFooter />
