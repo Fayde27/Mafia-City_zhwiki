@@ -14,6 +14,7 @@ import LikeButton from '@/components/LikeButton'
 
 interface Troop {
   id: string
+  likes?: number
   name: string
   slug: string
   icon: string

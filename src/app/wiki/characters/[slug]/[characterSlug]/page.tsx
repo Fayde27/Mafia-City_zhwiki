@@ -14,6 +14,7 @@ import LikeButton from '@/components/LikeButton'
 
 interface Character {
   id: string
+  likes?: number
   name: string
   slug: string
   title: string
