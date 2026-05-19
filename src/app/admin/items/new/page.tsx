@@ -39,7 +39,7 @@ export default function AdminItemNewPage() {
     usage: '',
     categoryId: '',
     sortOrder: 0,
-    isPublished: false,
+    isPublished: true,
   })
 
   useEffect(() => {

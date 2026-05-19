@@ -45,7 +45,7 @@ export default function AdminCharacterNewPage() {
     troopRec: '',
     categoryId: '',
     sortOrder: 0,
-    isPublished: false,
+    isPublished: true,
   })
 
   useEffect(() => {

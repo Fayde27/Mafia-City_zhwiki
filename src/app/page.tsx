@@ -66,6 +66,7 @@ interface SidebarSection {
 const adminLinks = [
   { href: '/admin/dashboard', icon: '🖥️', label: '管理後台' },
   { href: '/admin/site-config', icon: '⚙️', label: '站點配置' },
+  { href: '/admin/drafts', icon: '📋', label: '草稿箱' },
   { href: '/admin/submissions', icon: '📝', label: '投稿管理' },
   { href: '/admin/categories', icon: '📁', label: '攻略分類管理' },
   { href: '/admin/wiki-categories', icon: '📚', label: '圖鑑分類管理' },

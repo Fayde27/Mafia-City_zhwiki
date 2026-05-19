@@ -40,7 +40,7 @@ export default function AdminEquipmentNewPage() {
     setBonus: '',
     categoryId: '',
     sortOrder: 0,
-    isPublished: false,
+    isPublished: true,
   })
 
   useEffect(() => {

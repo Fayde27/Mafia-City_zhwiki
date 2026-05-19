@@ -43,7 +43,7 @@ export default function AdminBuildingNewPage() {
     upgradeInfo: '',
     categoryId: '',
     sortOrder: 0,
-    isPublished: false,
+    isPublished: true,
   })
 
   useEffect(() => {

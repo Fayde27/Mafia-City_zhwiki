@@ -42,7 +42,7 @@ export default function AdminTroopNewPage() {
     counterInfo: '',
     categoryId: '',
     sortOrder: 0,
-    isPublished: false,
+    isPublished: true,
   })
 
   useEffect(() => {

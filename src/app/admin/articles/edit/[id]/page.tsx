@@ -35,7 +35,7 @@ export default function EditArticlePage() {
     coverImagePosition: '50% 50%',
     categoryId: '',
     tags: '',
-    isPublished: false,
+    isPublished: true,
     isPinned: false,
     isFeatured: false,
     badges: '',

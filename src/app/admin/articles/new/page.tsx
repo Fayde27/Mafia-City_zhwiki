@@ -33,7 +33,7 @@ export default function NewArticlePage() {
     tags: '',
     coverImage: '',
     coverImagePosition: '50% 50%',
-    isPublished: false,
+    isPublished: true,
     isPinned: false,
     isFeatured: false,
     badges: '',

@@ -23,6 +23,9 @@ export async function GET(request: Request) {
         .eq('CharacterCategory.slug', category)
     }
 
+    const draft = searchParams.get('draft')
+    if (draft === 'true') query = query.eq('isPublished', false)
+
     const { data: characters, error, count } = await query
       .order('sortOrder', { ascending: false })
       .order('createdAt', { ascending: false })

@@ -11,9 +11,13 @@ export async function GET(request: Request) {
     const from = (page - 1) * limit
     const to = from + limit - 1
 
-    const { data: articles, error, count } = await supabaseAdmin
+    const draft = searchParams.get('draft')
+    let query = supabaseAdmin
       .from('Article')
       .select('*, Category(*)', { count: 'exact' })
+    if (draft === 'true') query = query.eq('isPublished', false)
+
+    const { data: articles, error, count } = await query
       .order('createdAt', { ascending: false })
       .range(from, to)
 

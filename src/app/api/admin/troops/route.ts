@@ -20,6 +20,9 @@ export async function GET(request: Request) {
       query = query.eq('TroopCategory.slug', category)
     }
 
+    const draft = searchParams.get('draft')
+    if (draft === 'true') query = query.eq('isPublished', false)
+
     const { data: troops, error, count: total } = await query
       .order('sortOrder', { ascending: false })
       .order('createdAt', { ascending: false })
