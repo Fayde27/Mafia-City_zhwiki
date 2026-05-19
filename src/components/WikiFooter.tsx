@@ -102,18 +102,10 @@ export default function WikiFooter() {
           </div>
         </div>
 
-        {/* 底部版權 + 站點管理 */}
+        {/* 底部版權 */}
         <div className="border-t border-wiki-border/20 mt-6 md:mt-8 pt-4 md:pt-6 text-center">
           <p className="text-wiki-text-muted text-xs">
             &copy; {new Date().getFullYear()} 黑道風雲 Wiki 攻略站
-            <span className="mx-2 opacity-30">·</span>
-            <a
-              href="/admin/login"
-              className="text-[#999] hover:text-wiki-accent transition-colors"
-              style={{ fontSize: '12px' }}
-            >
-              站點管理
-            </a>
           </p>
         </div>
       </div>
