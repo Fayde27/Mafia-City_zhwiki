@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
 import ImageUploadInput from '@/components/ImageUploadInput'
 import RichTextEditor from '@/components/RichTextEditor'
+import { useLocalDraft } from '@/hooks/useLocalDraft'
 
 interface Category {
   id: string
@@ -27,6 +28,7 @@ export default function EditArticlePage() {
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [previewing, setPreviewing] = useState(false)
+  const [draftReady, setDraftReady] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -43,6 +45,8 @@ export default function EditArticlePage() {
     sortOrder: 0,
   })
 
+  const { getDraft, clearDraft } = useLocalDraft(`draft_article_${articleId}`, formData, draftReady)
+
   useEffect(() => {
     if (!isLoaded) return
     if (!isAdmin) { router.push('/admin/login'); return }
@@ -51,7 +55,7 @@ export default function EditArticlePage() {
       fetch(`/api/admin/articles/${articleId}`).then(res => res.json()),
     ]).then(([cats, article]) => {
       setCategories(cats)
-      setFormData({
+      const serverData = {
         title: article.title,
         slug: article.slug,
         content: article.content,
@@ -65,8 +69,24 @@ export default function EditArticlePage() {
         isFeatured: article.isFeatured || false,
         badges: article.badges || '',
         sortOrder: article.sortOrder,
-      })
+      }
+
+      // 檢查是否有比伺服器更新的草稿
+      const draft = getDraft()
+      if (draft && draft.savedAt > new Date(article.updatedAt).getTime()) {
+        const ago = Math.round((Date.now() - draft.savedAt) / 60000)
+        const msg = `偵測到 ${ago} 分鐘前的未儲存草稿，是否還原？（取消則使用已儲存版本）`
+        if (confirm(msg)) {
+          setFormData(draft.data)
+        } else {
+          clearDraft()
+          setFormData(serverData)
+        }
+      } else {
+        setFormData(serverData)
+      }
       setLoading(false)
+      setDraftReady(true)
     })
   }, [articleId, isAdmin, isLoaded, router])
 
@@ -80,6 +100,7 @@ export default function EditArticlePage() {
         body: JSON.stringify(formData),
       })
       if (res.ok) {
+        clearDraft()
         alert('已儲存')
       } else {
         alert('更新失敗')

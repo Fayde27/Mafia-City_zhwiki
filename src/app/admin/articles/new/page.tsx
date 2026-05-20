@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
 import ImageUploadInput from '@/components/ImageUploadInput'
 import RichTextEditor from '@/components/RichTextEditor'
+import { useLocalDraft } from '@/hooks/useLocalDraft'
 
 interface Category {
   id: string
@@ -23,6 +24,7 @@ export default function NewArticlePage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(false)
   const [previewing, setPreviewing] = useState(false)
+  const [draftReady, setDraftReady] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -39,10 +41,25 @@ export default function NewArticlePage() {
     sortOrder: 0,
   })
 
+  const { getDraft, clearDraft } = useLocalDraft('draft_article_new', formData, draftReady)
+
   useEffect(() => {
     if (!isLoaded) return
     if (!isAdmin) { router.push('/admin/login'); return }
     fetch('/api/admin/categories').then(res => res.json()).then(data => setCategories(data))
+
+    // 檢查是否有未儲存的草稿
+    const draft = getDraft()
+    if (draft && draft.data.title) {
+      const ago = Math.round((Date.now() - draft.savedAt) / 60000)
+      const msg = `偵測到 ${ago} 分鐘前的未儲存草稿「${draft.data.title}」，是否還原？`
+      if (confirm(msg)) {
+        setFormData(draft.data)
+      } else {
+        clearDraft()
+      }
+    }
+    setDraftReady(true)
   }, [isAdmin, isLoaded, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -55,6 +72,7 @@ export default function NewArticlePage() {
         body: JSON.stringify(formData),
       })
       if (res.ok) {
+        clearDraft()
         router.push('/admin/articles/edit/' + (await res.json()).id)
       } else {
         alert('創建失敗')
