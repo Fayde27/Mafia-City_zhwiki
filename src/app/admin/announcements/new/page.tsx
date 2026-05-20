@@ -9,12 +9,14 @@ import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
 import { useRouter } from 'next/navigation'
+import { useLocalDraft } from '@/hooks/useLocalDraft'
 
 export default function AdminAnnouncementNewPage() {
   const router = useRouter()
   const { isAdmin, isLoaded } = useAdminAuth()
   const [saving, setSaving] = useState(false)
   const [bannerPreview, setBannerPreview] = useState<string | null>(null)
+  const [draftReady, setDraftReady] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -24,12 +26,21 @@ export default function AdminAnnouncementNewPage() {
     sortOrder: 0,
   })
 
+  const { getDraft, clearDraft } = useLocalDraft('draft_announcement_new', formData, draftReady)
+
   useEffect(() => {
     if (!isLoaded) return
-    if (!isAdmin) {
-      router.push('/admin/login')
-      return
+    if (!isAdmin) { router.push('/admin/login'); return }
+    const draft = getDraft()
+    if (draft && draft.data.title) {
+      const ago = Math.round((Date.now() - draft.savedAt) / 60000)
+      if (confirm(`偵測到 ${ago} 分鐘前的未儲存草稿「${draft.data.title}」，是否還原？`)) {
+        setFormData(draft.data)
+      } else {
+        clearDraft()
+      }
     }
+    setDraftReady(true)
   }, [isAdmin, isLoaded, router])
 
   const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,6 +73,7 @@ export default function AdminAnnouncementNewPage() {
       })
 
       if (res.ok) {
+        clearDraft()
         alert('創建成功')
         router.push('/admin/announcements')
       } else {

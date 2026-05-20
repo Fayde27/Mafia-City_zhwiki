@@ -10,6 +10,7 @@ import { useAdminAuth } from '@/hooks/useAdminAuth'
 import { useRouter, useParams } from 'next/navigation'
 import ImageUploadInput from '@/components/ImageUploadInput'
 import RichTextEditor from '@/components/RichTextEditor'
+import { useLocalDraft } from '@/hooks/useLocalDraft'
 
 export default function AdminAnnouncementEditPage() {
   const router = useRouter()
@@ -18,6 +19,7 @@ export default function AdminAnnouncementEditPage() {
   const { isAdmin, isLoaded } = useAdminAuth()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [draftReady, setDraftReady] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -28,16 +30,15 @@ export default function AdminAnnouncementEditPage() {
     sortOrder: 0,
   })
 
+  const { getDraft, clearDraft } = useLocalDraft(`draft_announcement_${announcementId}`, formData, draftReady)
+
   useEffect(() => {
     if (!isLoaded) return
-    if (!isAdmin) {
-      router.push('/admin/login')
-      return
-    }
+    if (!isAdmin) { router.push('/admin/login'); return }
     fetch(`/api/admin/announcements/${announcementId}`)
       .then(res => res.json())
       .then(data => {
-        setFormData({
+        const serverData = {
           title: data.title || '',
           content: data.content || '',
           banner: data.banner || '',
@@ -45,8 +46,21 @@ export default function AdminAnnouncementEditPage() {
           type: data.type || 'info',
           isActive: data.isActive !== false,
           sortOrder: data.sortOrder || 0,
-        })
+        }
+        const draft = getDraft()
+        if (draft && draft.savedAt > new Date(data.updatedAt).getTime()) {
+          const ago = Math.round((Date.now() - draft.savedAt) / 60000)
+          if (confirm(`偵測到 ${ago} 分鐘前的未儲存草稿，是否還原？`)) {
+            setFormData(draft.data)
+          } else {
+            clearDraft()
+            setFormData(serverData)
+          }
+        } else {
+          setFormData(serverData)
+        }
         setLoading(false)
+        setDraftReady(true)
       })
       .catch(() => setLoading(false))
   }, [isAdmin, isLoaded, router, announcementId])
@@ -61,6 +75,7 @@ export default function AdminAnnouncementEditPage() {
         body: JSON.stringify(formData),
       })
       if (res.ok) {
+        clearDraft()
         alert('更新成功')
         router.push('/admin/announcements')
       } else {
