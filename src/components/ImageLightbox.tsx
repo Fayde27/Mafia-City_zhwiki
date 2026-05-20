@@ -140,7 +140,7 @@ export default function ImageLightbox({ images, currentIndex, onClose, onPrev, o
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/88 select-none"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md select-none"
       onClick={handleOverlayClick}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
