@@ -3,7 +3,7 @@
 export const runtime = 'edge'
 
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
@@ -11,6 +11,7 @@ import { useParams } from 'next/navigation'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
 import LikeButton from '@/components/LikeButton'
+import ImageLightbox from '@/components/ImageLightbox'
 
 interface Article {
   id: string
@@ -39,6 +40,9 @@ export default function ArticleDetailPage() {
   const { isAdmin } = useAdminAuth()
   const [article, setArticle] = useState<Article | null>(null)
   const [loading, setLoading] = useState(true)
+  const [lightboxImages, setLightboxImages] = useState<string[]>([])
+  const [lightboxIndex, setLightboxIndex] = useState(0)
+  const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetch(`/api/wiki/articles?slug=${slug}&limit=1`)
@@ -143,7 +147,21 @@ export default function ArticleDetailPage() {
                 </div>
               </header>
 
-              <div className="prose prose-invert max-w-none">
+              <div
+                ref={contentRef}
+                className="prose prose-invert max-w-none [&_img]:cursor-zoom-in"
+                onClick={(e) => {
+                  const target = e.target as HTMLElement
+                  if (target.tagName !== 'IMG') return
+                  const imgs = Array.from(contentRef.current?.querySelectorAll('img') || [])
+                    .map(img => img.getAttribute('src') || '')
+                    .filter(Boolean)
+                  const clickedSrc = (target as HTMLImageElement).src
+                  const idx = imgs.findIndex(src => src === clickedSrc || clickedSrc.endsWith(src))
+                  setLightboxImages(imgs)
+                  setLightboxIndex(idx >= 0 ? idx : 0)
+                }}
+              >
                 <MarkdownRenderer content={article.content} />
               </div>
 
@@ -156,6 +174,16 @@ export default function ArticleDetailPage() {
       </main>
 
       <WikiFooter />
+
+      {lightboxImages.length > 0 && (
+        <ImageLightbox
+          images={lightboxImages}
+          currentIndex={lightboxIndex}
+          onClose={() => setLightboxImages([])}
+          onPrev={() => setLightboxIndex(i => (i - 1 + lightboxImages.length) % lightboxImages.length)}
+          onNext={() => setLightboxIndex(i => (i + 1) % lightboxImages.length)}
+        />
+      )}
     </div>
   )
 }
