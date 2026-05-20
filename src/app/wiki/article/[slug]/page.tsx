@@ -68,7 +68,7 @@ export default function ArticleDetailPage() {
           <span className="mx-2">/</span>
           {article && (
             <>
-              <Link href={`/wiki/${article.category.slug}`} className="hover:text-wiki-accent">
+              <Link href={`/wiki/guides/${article.category.slug}`} className="hover:text-wiki-accent">
                 {article.category.name}
               </Link>
               <span className="mx-2">/</span>
