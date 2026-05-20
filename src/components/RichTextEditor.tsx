@@ -28,10 +28,14 @@ async function uploadImageFile(file: File): Promise<string | null> {
   fd.append('file', file)
   try {
     const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
-    if (!res.ok) return null
     const data = await res.json()
+    if (!res.ok) {
+      alert(`圖片上傳失敗\n${data.error || '未知錯誤'}`)
+      return null
+    }
     return data.url || null
-  } catch {
+  } catch (err) {
+    alert(`圖片上傳失敗\n網絡錯誤：${err instanceof Error ? err.message : '請檢查網絡連線'}`)
     return null
   }
 }

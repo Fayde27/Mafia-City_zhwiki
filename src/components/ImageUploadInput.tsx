@@ -65,14 +65,14 @@ export default function ImageUploadInput({
       const fd = new FormData()
       fd.append('file', file)
       const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+      const data = await res.json()
       if (res.ok) {
-        const data = await res.json()
         onChange(data.url)
       } else {
-        alert('上傳失敗，請重試')
+        alert(`圖片上傳失敗\n${data.error || '未知錯誤'}`)
       }
-    } catch {
-      alert('上傳失敗，請檢查網絡')
+    } catch (err) {
+      alert(`圖片上傳失敗\n網絡錯誤：${err instanceof Error ? err.message : '請檢查網絡連線'}`)
     } finally {
       setUploading(false)
     }
