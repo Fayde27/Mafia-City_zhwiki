@@ -20,6 +20,7 @@ export default function AdminAnnouncementEditPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [draftReady, setDraftReady] = useState(false)
+  const [previewing, setPreviewing] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -105,15 +106,56 @@ export default function AdminAnnouncementEditPage() {
     <div className="min-h-screen bg-wiki-bg">
       <WikiHeader />
 
+      {/* 預覽覆蓋層 */}
+      {previewing && (
+        <div className="fixed inset-0 z-50 bg-wiki-bg overflow-y-auto">
+          <div className="sticky top-0 z-10 bg-wiki-dark border-b border-wiki-border/20 px-4 py-3 flex items-center justify-between">
+            <span className="text-wiki-text-muted text-sm">預覽模式（未儲存的修改不會影響線上版本）</span>
+            <button
+              onClick={() => setPreviewing(false)}
+              className="flex items-center gap-2 px-4 py-1.5 bg-wiki-accent text-wiki-dark text-sm font-bold rounded-lg hover:bg-wiki-accent/90"
+            >
+              ← 返回編輯
+            </button>
+          </div>
+          <div className="container mx-auto px-4 py-8 max-w-4xl">
+            {formData.banner && (
+              <div className="w-full aspect-[3/1] rounded-xl overflow-hidden mb-6">
+                <img
+                  src={formData.banner}
+                  alt="Banner"
+                  className="w-full h-full object-cover"
+                  style={{ objectPosition: formData.bannerPosition }}
+                />
+              </div>
+            )}
+            <h1 className="text-2xl font-bold text-wiki-text mb-4">{formData.title || '（無標題）'}</h1>
+            <div
+              className="text-wiki-text leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: formData.content || '<p class="text-wiki-text-muted">（無內容）</p>' }}
+            />
+          </div>
+        </div>
+      )}
+
       <main className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">編輯公告</h1>
             <p className="text-wiki-text-muted text-sm mt-1">修改公告詳細信息</p>
           </div>
-          <Link href="/admin/announcements" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
-            返回列表
-          </Link>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setPreviewing(true)}
+              className="flex items-center gap-2 px-4 py-2 border border-wiki-border text-wiki-text-secondary text-sm rounded-lg hover:border-wiki-accent hover:text-wiki-accent transition-colors"
+            >
+              👁 預覽
+            </button>
+            <Link href="/admin/announcements" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
+              返回列表
+            </Link>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
