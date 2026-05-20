@@ -113,7 +113,7 @@ export default function GuideCategoryPage() {
                 <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-4 md:p-5 hover:border-wiki-accent transition-all duration-300">
                   <div className="flex gap-4">
                     {article.coverImage ? (
-                      <div className="w-24 h-24 md:w-32 md:h-24 flex-shrink-0 rounded-lg overflow-hidden">
+                      <div className="w-24 h-16 md:w-36 md:h-24 flex-shrink-0 rounded-lg overflow-hidden">
                         <img
                           src={article.coverImage}
                           alt={article.title}
@@ -121,7 +121,7 @@ export default function GuideCategoryPage() {
                         />
                       </div>
                     ) : (
-                      <div className="w-24 h-24 md:w-32 md:h-24 flex-shrink-0 rounded-lg bg-wiki-gray flex items-center justify-center">
+                      <div className="w-24 h-16 md:w-36 md:h-24 flex-shrink-0 rounded-lg bg-wiki-gray flex items-center justify-center">
                         <span className="text-2xl text-wiki-text-muted">
                           {article.category?.name?.charAt(0) || '📄'}
                         </span>

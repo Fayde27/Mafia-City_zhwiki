@@ -393,11 +393,11 @@ export default function HomePage() {
                   <Link key={article.id} href={`/wiki/article/${article.slug}`} className="block group">
                     <div className="flex gap-4 bg-wiki-card border border-wiki-border rounded-xl p-4 hover:border-wiki-accent/30 transition-all duration-300 relative">
                       {article.coverImage ? (
-                        <div className="w-24 h-24 md:w-32 md:h-24 flex-shrink-0 rounded-lg overflow-hidden">
+                        <div className="w-24 h-16 md:w-36 md:h-24 flex-shrink-0 rounded-lg overflow-hidden">
                           <img src={article.coverImage} alt={article.title} className="w-full h-full object-cover" />
                         </div>
                       ) : (
-                        <div className="w-24 h-24 md:w-32 md:h-24 flex-shrink-0 rounded-lg bg-wiki-gray flex items-center justify-center">
+                        <div className="w-24 h-16 md:w-36 md:h-24 flex-shrink-0 rounded-lg bg-wiki-gray flex items-center justify-center">
                           <span className="text-2xl">{article.category.name?.charAt(0) || '📄'}</span>
                         </div>
                       )}
