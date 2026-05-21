@@ -53,10 +53,10 @@ export default function WikiFooter() {
   return (
     <footer className="bg-wiki-dark border-t border-wiki-border/20 mt-8 md:mt-12">
       <div className="container mx-auto px-4 py-5 md:py-6">
-        <div className="flex flex-wrap justify-center gap-8 md:gap-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
 
           {/* 品牌簡介 */}
-          <div className="w-44">
+          <div>
             <h3 className="text-wiki-accent font-bold text-sm mb-2">黑道風雲 Wiki</h3>
             <p className="text-wiki-text-muted text-xs leading-relaxed">
               最全面的遊戲攻略站，為玩家提供詳細的遊戲資訊、角色圖鑑、任務攻略等內容。
