@@ -1,6 +1,7 @@
 'use client'
 
 import { useEditor, EditorContent, Editor, Extension } from '@tiptap/react'
+import { ReactNodeViewRenderer } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
 import TextAlign from '@tiptap/extension-text-align'
@@ -8,6 +9,7 @@ import Underline from '@tiptap/extension-underline'
 import { TextStyle } from '@tiptap/extension-text-style'
 import Color from '@tiptap/extension-color'
 import Image from '@tiptap/extension-image'
+import ImageNodeView from './ImageNode'
 import { useEffect, useRef, useState } from 'react'
 
 // 自訂 FontSize extension（inline，僅作用於選取的文字）
@@ -39,6 +41,28 @@ const FontSize = Extension.create({
 })
 
 const FONT_SIZES = ['8','9','10','11','12','14','16','18','20','24','28','32','36','48','72']
+
+// 自訂 Image extension（支援 width 和 align 屬性 + NodeView）
+const CustomImage = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      width: {
+        default: null,
+        renderHTML: attrs => attrs.width ? { width: String(attrs.width) } : {},
+        parseHTML: el => el.getAttribute('width') ? Number(el.getAttribute('width')) : null,
+      },
+      align: {
+        default: 'left',
+        renderHTML: attrs => ({ 'data-align': attrs.align || 'left' }),
+        parseHTML: el => el.getAttribute('data-align') || 'left',
+      },
+    }
+  },
+  addNodeView() {
+    return ReactNodeViewRenderer(ImageNodeView)
+  },
+})
 
 interface RichTextEditorProps {
   value: string
@@ -89,7 +113,7 @@ export default function RichTextEditor({
       TextStyle,
       Color,
       FontSize,
-      Image.configure({ allowBase64: true, inline: false }),
+      CustomImage.configure({ allowBase64: true, inline: false }),
       Link.configure({ openOnClick: false }),
       TextAlign.configure({ types: ['heading', 'paragraph', 'image'] }),
     ],
