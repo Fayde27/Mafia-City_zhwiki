@@ -109,7 +109,7 @@ export default function WikiFooter() {
             <h3 className="text-wiki-accent font-bold text-sm mb-2">遊戲下載</h3>
             <div className="space-y-1.5">
               <a
-                href="https://apps.apple.com/"
+                href="https://apps.apple.com/tw/app/id1163967490?l=zh-tw"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 bg-wiki-gray border border-wiki-border rounded-md px-2.5 py-1.5 w-32 hover:border-wiki-accent/50 transition-colors group"
@@ -121,7 +121,7 @@ export default function WikiFooter() {
                 </div>
               </a>
               <a
-                href="https://play.google.com/"
+                href="https://play.google.com/store/apps/details?id=com.yottagames.mafiawar"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 bg-wiki-gray border border-wiki-border rounded-md px-2.5 py-1.5 w-32 hover:border-wiki-accent/50 transition-colors group"
