@@ -1,6 +1,6 @@
 'use client'
 
-import { useEditor, EditorContent, Editor } from '@tiptap/react'
+import { useEditor, EditorContent, Editor, Extension } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
 import TextAlign from '@tiptap/extension-text-align'
@@ -9,6 +9,36 @@ import { TextStyle } from '@tiptap/extension-text-style'
 import Color from '@tiptap/extension-color'
 import Image from '@tiptap/extension-image'
 import { useEffect, useRef, useState } from 'react'
+
+// 自訂 FontSize extension（inline，僅作用於選取的文字）
+const FontSize = Extension.create({
+  name: 'fontSize',
+  addOptions() { return { types: ['textStyle'] } },
+  addGlobalAttributes() {
+    return [{
+      types: this.options.types,
+      attributes: {
+        fontSize: {
+          default: null,
+          parseHTML: el => el.style.fontSize?.replace('px', '') || null,
+          renderHTML: attrs => attrs.fontSize
+            ? { style: `font-size: ${attrs.fontSize}px` }
+            : {},
+        },
+      },
+    }]
+  },
+  addCommands() {
+    return {
+      setFontSize: (size: string) => ({ chain }: any) =>
+        chain().setMark('textStyle', { fontSize: size }).run(),
+      unsetFontSize: () => ({ chain }: any) =>
+        chain().setMark('textStyle', { fontSize: null }).removeEmptyTextStyle().run(),
+    } as any
+  },
+})
+
+const FONT_SIZES = ['8','9','10','11','12','14','16','18','20','24','28','32','36','48','72']
 
 interface RichTextEditorProps {
   value: string
@@ -58,6 +88,7 @@ export default function RichTextEditor({
       Underline,
       TextStyle,
       Color,
+      FontSize,
       Image.configure({ allowBase64: true, inline: false }),
       Link.configure({ openOnClick: false }),
       TextAlign.configure({ types: ['heading', 'paragraph', 'image'] }),
@@ -154,6 +185,26 @@ export default function RichTextEditor({
     <div className="border-2 border-wiki-border rounded-lg overflow-hidden focus-within:border-wiki-accent" style={{ background: '#f5f5f0' }}>
       {/* 工具欄 */}
       <div className="flex flex-wrap gap-1 px-3 py-2 border-b border-wiki-border" style={{ background: '#e8e0d0' }}>
+        {/* 字號選擇 */}
+        <select
+          title="字號"
+          value={editor.getAttributes('textStyle').fontSize || ''}
+          onChange={e => {
+            const size = e.target.value
+            if (size) {
+              (editor.chain().focus() as any).setFontSize(size).run()
+            } else {
+              (editor.chain().focus() as any).unsetFontSize().run()
+            }
+          }}
+          className="text-xs bg-white border border-wiki-border rounded px-1 py-0.5 text-gray-700 h-[26px] w-16 cursor-pointer focus:outline-none focus:border-wiki-accent"
+        >
+          <option value="">字號</option>
+          {FONT_SIZES.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+
+        <div className="w-px bg-wiki-border mx-0.5" />
+
         {/* 格式 */}
         <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={btn(editor.isActive('bold'))} title="粗體"><strong>B</strong></button>
         <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={btn(editor.isActive('italic'))} title="斜體"><em>I</em></button>
