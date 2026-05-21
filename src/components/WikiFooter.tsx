@@ -53,10 +53,10 @@ export default function WikiFooter() {
   return (
     <footer className="bg-wiki-dark border-t border-wiki-border/20 mt-8 md:mt-12">
       <div className="container mx-auto px-4 py-5 md:py-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-6">
+        <div className="flex flex-wrap justify-center gap-8 md:gap-12">
 
           {/* 品牌簡介 */}
-          <div className="col-span-2 md:col-span-1">
+          <div className="w-44">
             <h3 className="text-wiki-accent font-bold text-sm mb-2">黑道風雲 Wiki</h3>
             <p className="text-wiki-text-muted text-xs leading-relaxed">
               最全面的遊戲攻略站，為玩家提供詳細的遊戲資訊、角色圖鑑、任務攻略等內容。
@@ -66,10 +66,10 @@ export default function WikiFooter() {
           {/* 快速連結 */}
           <div>
             <h3 className="text-wiki-accent font-bold text-sm mb-2">快速連結</h3>
-            <ul className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
+            <ul className="grid grid-cols-2 gap-x-5 gap-y-1.5 text-xs">
               {quickLinks.map(link => (
                 <li key={link.href}>
-                  <Link href={link.href} className="text-wiki-text-muted hover:text-wiki-accent transition-colors">
+                  <Link href={link.href} className="text-wiki-text-muted hover:text-wiki-accent transition-colors whitespace-nowrap">
                     {link.label}
                   </Link>
                 </li>
@@ -107,29 +107,29 @@ export default function WikiFooter() {
           {/* 遊戲下載 */}
           <div>
             <h3 className="text-wiki-accent font-bold text-sm mb-2">遊戲下載</h3>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <a
                 href="https://apps.apple.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2.5 bg-wiki-gray border border-wiki-border rounded-lg px-3 py-2 hover:border-wiki-accent/50 transition-colors group"
+                className="flex items-center gap-2 bg-wiki-gray border border-wiki-border rounded-md px-2.5 py-1.5 w-32 hover:border-wiki-accent/50 transition-colors group"
               >
-                <span className="text-wiki-text-muted group-hover:text-white transition-colors"><AppleIcon /></span>
-                <div>
-                  <p className="text-wiki-text-muted text-[10px] leading-none mb-0.5">Download on the</p>
-                  <p className="text-wiki-text text-xs font-bold leading-none">App Store</p>
+                <span className="text-wiki-text-muted group-hover:text-white transition-colors flex-shrink-0"><AppleIcon /></span>
+                <div className="min-w-0">
+                  <p className="text-wiki-text-muted text-[9px] leading-none mb-0.5">Download on the</p>
+                  <p className="text-wiki-text text-[11px] font-bold leading-none">App Store</p>
                 </div>
               </a>
               <a
                 href="https://play.google.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2.5 bg-wiki-gray border border-wiki-border rounded-lg px-3 py-2 hover:border-wiki-accent/50 transition-colors group"
+                className="flex items-center gap-2 bg-wiki-gray border border-wiki-border rounded-md px-2.5 py-1.5 w-32 hover:border-wiki-accent/50 transition-colors group"
               >
-                <span className="text-wiki-text-muted group-hover:text-white transition-colors"><GooglePlayIcon /></span>
-                <div>
-                  <p className="text-wiki-text-muted text-[10px] leading-none mb-0.5">Get it on</p>
-                  <p className="text-wiki-text text-xs font-bold leading-none">Google Play</p>
+                <span className="text-wiki-text-muted group-hover:text-white transition-colors flex-shrink-0"><GooglePlayIcon /></span>
+                <div className="min-w-0">
+                  <p className="text-wiki-text-muted text-[9px] leading-none mb-0.5">Get it on</p>
+                  <p className="text-wiki-text text-[11px] font-bold leading-none">Google Play</p>
                 </div>
               </a>
             </div>
