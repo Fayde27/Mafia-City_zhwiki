@@ -12,10 +12,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '沒有文件上傳' }, { status: 400 })
     }
 
-    // 檢查檔案大小（Edge Runtime 限制，建議 5MB 以內）
-    if (file.size > 5 * 1024 * 1024) {
+    // 檢查檔案大小（Supabase Free 方案上限 50MB，Edge Runtime 記憶體約 128MB）
+    if (file.size > 50 * 1024 * 1024) {
       return NextResponse.json({
-        error: `檔案過大（${(file.size / 1024 / 1024).toFixed(1)}MB），請壓縮後再上傳，建議 5MB 以內`
+        error: `檔案過大（${(file.size / 1024 / 1024).toFixed(1)}MB），上限為 50MB`
       }, { status: 413 })
     }
 
