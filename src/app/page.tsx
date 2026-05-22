@@ -63,20 +63,6 @@ interface SidebarSection {
   isActive: boolean
 }
 
-const adminLinks = [
-  { href: '/admin/dashboard', icon: '🖥️', label: '管理後台' },
-  { href: '/admin/articles', icon: '📝', label: '攻略文章' },
-  { href: '/admin/announcements', icon: '📢', label: '公告管理' },
-  { href: '/admin/characters', icon: '👤', label: '角色圖鑑' },
-  { href: '/admin/equipment', icon: '⚔️', label: '裝備圖鑑' },
-  { href: '/admin/items', icon: '🎒', label: '道具圖鑑' },
-  { href: '/admin/troops', icon: '🛡️', label: '兵種圖鑑' },
-  { href: '/admin/buildings', icon: '🏛️', label: '建築圖鑑' },
-  { href: '/admin/sidebar', icon: '📋', label: '側邊欄' },
-  { href: '/admin/site-config', icon: '⚙️', label: '站點配置' },
-  { href: '/admin/submissions', icon: '📬', label: '投稿管理' },
-  { href: '/admin/drafts', icon: '📂', label: '草稿箱' },
-]
 
 export default function HomePage() {
   const { isAdmin } = useAdminAuth()
@@ -88,7 +74,6 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [expandedItems, setExpandedItems] = useState<string[]>([])
-  const [adminExpanded, setAdminExpanded] = useState(false)
 
   // SiteConfig
   const [bannerImage, setBannerImage] = useState('')
@@ -278,39 +263,13 @@ export default function HomePage() {
                 </Link>
               </div>
 
-              {/* 管理入口（僅管理員可見，預設摺疊） */}
+              {/* 管理入口（僅管理員可見） */}
               {isAdmin && (
-                <div className="bg-wiki-card border border-wiki-border rounded-xl p-5">
-                  <button
-                    onClick={() => setAdminExpanded(v => !v)}
-                    className="w-full flex items-center gap-2 text-left"
-                  >
-                    <span className="text-wiki-accent text-sm">◆</span>
-                    <span className="text-wiki-text font-bold text-sm flex-1">管理入口</span>
-                    <svg
-                      className={`w-4 h-4 text-wiki-text-secondary transition-transform duration-200 ${adminExpanded ? 'rotate-90' : ''}`}
-                      fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
-                  {adminExpanded && (
-                    <div className="mt-3 space-y-1">
-                      {adminLinks.map(link => (
-                        <Link
-                          key={link.href}
-                          href={link.href}
-                          className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-wiki-gray transition-colors group"
-                        >
-                          <span className="text-lg">{link.icon}</span>
-                          <span className="text-wiki-text-secondary text-sm group-hover:text-wiki-accent transition-colors">
-                            {link.label}
-                          </span>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <Link href="/admin/dashboard" className="bg-wiki-card border border-wiki-accent/40 rounded-xl p-4 flex items-center gap-3 hover:bg-wiki-gray transition-colors group">
+                  <span className="text-wiki-accent text-sm">◆</span>
+                  <span className="text-wiki-text font-bold text-sm flex-1 group-hover:text-wiki-accent transition-colors">管理後台</span>
+                  <span className="text-wiki-text-muted text-xs">→</span>
+                </Link>
               )}
             </div>
           </div>
