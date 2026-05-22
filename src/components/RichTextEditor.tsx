@@ -49,15 +49,27 @@ const CustomImage = Image.extend({
       ...this.parent?.(),
       width: {
         default: null,
-        renderHTML: attrs => attrs.width ? { width: String(attrs.width) } : {},
-        parseHTML: el => el.getAttribute('width') ? Number(el.getAttribute('width')) : null,
+        parseHTML: el => {
+          const s = el.style.width; if (s) return parseInt(s)
+          const a = el.getAttribute('width'); return a ? Number(a) : null
+        },
+        renderHTML: () => ({}), // 統一由 renderHTML 處理
       },
       align: {
         default: 'left',
-        renderHTML: attrs => ({ 'data-align': attrs.align || 'left' }),
         parseHTML: el => el.getAttribute('data-align') || 'left',
+        renderHTML: () => ({}), // 統一由 renderHTML 處理
       },
     }
+  },
+  renderHTML({ HTMLAttributes }) {
+    const { src, alt, width, align, ...rest } = HTMLAttributes
+    const styles: string[] = ['max-width: 100%']
+    if (align === 'center') styles.push('display: block', 'margin-left: auto', 'margin-right: auto')
+    else if (align === 'right') styles.push('display: block', 'margin-left: auto')
+    else styles.push('display: block')
+    if (width) styles.push(`width: ${width}px`)
+    return ['img', { ...rest, src, alt: alt || '', 'data-align': align || 'left', style: styles.join('; ') }]
   },
   addNodeView() {
     return ReactNodeViewRenderer(ImageNodeView)
