@@ -65,14 +65,17 @@ interface SidebarSection {
 
 const adminLinks = [
   { href: '/admin/dashboard', icon: '🖥️', label: '管理後台' },
-  { href: '/admin/site-config', icon: '⚙️', label: '站點配置' },
-  { href: '/admin/drafts', icon: '📋', label: '草稿箱' },
-  { href: '/admin/submissions', icon: '📝', label: '投稿管理' },
-  { href: '/admin/categories', icon: '📁', label: '攻略分類管理' },
-  { href: '/admin/wiki-categories', icon: '📚', label: '圖鑑分類管理' },
+  { href: '/admin/articles', icon: '📝', label: '攻略文章' },
   { href: '/admin/announcements', icon: '📢', label: '公告管理' },
-  { href: '/admin/sidebar-sections', icon: '📂', label: '側邊欄分類' },
-  { href: '/admin/sidebar-nav', icon: '🧭', label: '側邊欄導航' },
+  { href: '/admin/characters', icon: '👤', label: '角色圖鑑' },
+  { href: '/admin/equipment', icon: '⚔️', label: '裝備圖鑑' },
+  { href: '/admin/items', icon: '🎒', label: '道具圖鑑' },
+  { href: '/admin/troops', icon: '🛡️', label: '兵種圖鑑' },
+  { href: '/admin/buildings', icon: '🏛️', label: '建築圖鑑' },
+  { href: '/admin/sidebar', icon: '📋', label: '側邊欄' },
+  { href: '/admin/site-config', icon: '⚙️', label: '站點配置' },
+  { href: '/admin/submissions', icon: '📬', label: '投稿管理' },
+  { href: '/admin/drafts', icon: '📂', label: '草稿箱' },
 ]
 
 export default function HomePage() {

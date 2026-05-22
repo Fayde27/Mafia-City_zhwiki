@@ -1,4 +1,90 @@
-'use client'
+import { writeFileSync } from 'fs'
+
+const entities = [
+  {
+    name: 'equipment',
+    title: '裝備圖鑑',
+    label: '裝備',
+    apiBase: 'equipment',
+    catApi: 'equipment-categories',
+    filterApi: 'equipment-filters',
+    catCountKey: 'equipment',
+    newUrl: '/admin/equipment/new',
+    catName: 'EquipmentCategory',
+    entityVar: 'eq',
+    listHeaders: ['裝備', '稀有度', '類型', '部位', '分類', '狀態', '操作'],
+    extraFields: '  icon?: string; type?: string; slot?: string',
+    rowData: `eq.icon ? <img src={eq.icon} alt={eq.name} className="w-10 h-10 rounded object-cover" /> : <div className="w-10 h-10 rounded bg-wiki-gray flex items-center justify-center text-wiki-text-muted">{eq.name[0]}</div>`,
+    rowExtra: `<td className="px-6 py-4 text-wiki-text text-sm">{eq.type || '-'}</td>
+                            <td className="px-6 py-4 text-wiki-text text-sm">{eq.slot || '-'}</td>`,
+    catSlug: `eq.category?.slug || eq.EquipmentCategory?.slug`,
+    catName2: `eq.category?.name || eq.EquipmentCategory?.name || '-'`,
+  },
+  {
+    name: 'items',
+    title: '道具圖鑑',
+    label: '道具',
+    apiBase: 'items',
+    catApi: 'item-categories',
+    filterApi: 'item-filters',
+    catCountKey: 'items',
+    newUrl: '/admin/items/new',
+    catName: 'ItemCategory',
+    entityVar: 'it',
+    listHeaders: ['道具', '稀有度', '類型', '品質', '分類', '狀態', '操作'],
+    extraFields: '  icon?: string; type?: string; quality?: string',
+    rowData: `it.icon ? <img src={it.icon} alt={it.name} className="w-10 h-10 rounded object-cover" /> : <div className="w-10 h-10 rounded bg-wiki-gray flex items-center justify-center text-wiki-text-muted">{it.name[0]}</div>`,
+    rowExtra: `<td className="px-6 py-4 text-wiki-text text-sm">{it.type || '-'}</td>
+                            <td className="px-6 py-4 text-wiki-text text-sm">{it.quality || '-'}</td>`,
+    catSlug: `it.category?.slug || it.ItemCategory?.slug`,
+    catName2: `it.category?.name || it.ItemCategory?.name || '-'`,
+  },
+  {
+    name: 'troops',
+    title: '兵種圖鑑',
+    label: '兵種',
+    apiBase: 'troops',
+    catApi: 'troop-categories',
+    filterApi: 'troop-filters',
+    catCountKey: 'troops',
+    newUrl: '/admin/troops/new',
+    catName: 'TroopCategory',
+    entityVar: 'tr',
+    listHeaders: ['兵種', '稀有度', '類型', '克制', '分類', '狀態', '操作'],
+    extraFields: '  icon?: string; type?: string; counter?: string',
+    rowData: `tr.icon ? <img src={tr.icon} alt={tr.name} className="w-10 h-10 rounded object-cover" /> : <div className="w-10 h-10 rounded bg-wiki-gray flex items-center justify-center text-wiki-text-muted">{tr.name[0]}</div>`,
+    rowExtra: `<td className="px-6 py-4 text-wiki-text text-sm">{tr.type || '-'}</td>
+                            <td className="px-6 py-4 text-wiki-text text-sm">{tr.counter || '-'}</td>`,
+    catSlug: `tr.category?.slug || tr.TroopCategory?.slug`,
+    catName2: `tr.category?.name || tr.TroopCategory?.name || '-'`,
+  },
+  {
+    name: 'buildings',
+    title: '建築圖鑑',
+    label: '建築',
+    apiBase: 'buildings',
+    catApi: 'building-categories',
+    filterApi: 'building-filters',
+    catCountKey: 'buildings',
+    newUrl: '/admin/buildings/new',
+    catName: 'BuildingCategory',
+    entityVar: 'bld',
+    listHeaders: ['建築', '稀有度', '類型', '功能', '分類', '狀態', '操作'],
+    extraFields: '  icon?: string; type?: string; func?: string',
+    rowData: `bld.icon ? <img src={bld.icon} alt={bld.name} className="w-10 h-10 rounded object-cover" /> : <div className="w-10 h-10 rounded bg-wiki-gray flex items-center justify-center text-wiki-text-muted">{bld.name[0]}</div>`,
+    rowExtra: `<td className="px-6 py-4 text-wiki-text text-sm">{bld.type || '-'}</td>
+                            <td className="px-6 py-4 text-wiki-text text-sm">{(bld as any).function || '-'}</td>`,
+    catSlug: `bld.category?.slug || bld.BuildingCategory?.slug`,
+    catName2: `bld.category?.name || bld.BuildingCategory?.name || '-'`,
+  },
+]
+
+for (const e of entities) {
+  const Entities = e.name.charAt(0).toUpperCase() + e.name.slice(1)
+  const v = e.entityVar
+  const ck = e.catCountKey
+
+  const code = `'use client'
 
 export const runtime = 'edge'
 
@@ -14,18 +100,18 @@ type Tab = 'list' | 'categories' | 'filters'
 interface EntityItem {
   id: string; name: string; slug: string; rarity: number
   isPublished: boolean; sortOrder: number
-  icon?: string; type?: string; counter?: string
+${e.extraFields}
   category?: { name: string; slug: string }
-  TroopCategory?: { name: string; slug: string }
+  ${e.catName}?: { name: string; slug: string }
 }
 interface EntityCategory {
   id: string; name: string; slug: string; description: string
   icon: string; sortOrder: number
-  _count: { troops: number }
+  _count: { ${ck}: number }
 }
 interface FilterOption { id: string; type: string; value: string; sortOrder: number; categoryId: string }
 
-export default function AdminTroopsPage() {
+export default function Admin${Entities}Page() {
   const router = useRouter()
   const { isAdmin, isLoaded } = useAdminAuth()
   const [activeTab, setActiveTab] = useState<Tab>('list')
@@ -51,11 +137,11 @@ export default function AdminTroopsPage() {
   const fetchAll = async () => {
     try {
       const [itemRes, catRes, filterRes] = await Promise.all([
-        fetch('/api/admin/troops').then(r => r.json()),
-        fetch('/api/admin/troop-categories').then(r => r.json()),
-        fetch('/api/admin/troop-filters').then(r => r.json()),
+        fetch('/api/admin/${e.apiBase}').then(r => r.json()),
+        fetch('/api/admin/${e.catApi}').then(r => r.json()),
+        fetch('/api/admin/${e.filterApi}').then(r => r.json()),
       ])
-      const raw = itemRes?.troops || itemRes
+      const raw = itemRes?.${e.apiBase} || itemRes
       setItems(Array.isArray(raw) ? raw : [])
       const cats = Array.isArray(catRes) ? catRes : []
       setCategories(cats)
@@ -65,24 +151,24 @@ export default function AdminTroopsPage() {
   }
 
   const refetchItems = async () => {
-    const d = await fetch('/api/admin/troops').then(r => r.json())
-    const raw = d?.troops || d; setItems(Array.isArray(raw) ? raw : [])
+    const d = await fetch('/api/admin/${e.apiBase}').then(r => r.json())
+    const raw = d?.${e.apiBase} || d; setItems(Array.isArray(raw) ? raw : [])
   }
-  const refetchCats = () => fetch('/api/admin/troop-categories').then(r => r.json()).then(d => setCategories(Array.isArray(d) ? d : []))
-  const refetchFilters = () => fetch('/api/admin/troop-filters').then(r => r.json()).then(d => setFilterOptions(Array.isArray(d) ? d : []))
+  const refetchCats = () => fetch('/api/admin/${e.catApi}').then(r => r.json()).then(d => setCategories(Array.isArray(d) ? d : []))
+  const refetchFilters = () => fetch('/api/admin/${e.filterApi}').then(r => r.json()).then(d => setFilterOptions(Array.isArray(d) ? d : []))
 
   const handleTogglePublish = async (item: EntityItem) => {
-    await fetch(`/api/admin/troops/${item.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...item, isPublished: !item.isPublished }) })
+    await fetch(\`/api/admin/${e.apiBase}/\${item.id}\`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...item, isPublished: !item.isPublished }) })
     refetchItems()
   }
   const handleDelete = async (id: string) => {
     if (!confirm('確定要刪除嗎？')) return
-    await fetch(`/api/admin/troops/${id}`, { method: 'DELETE' }); refetchItems()
+    await fetch(\`/api/admin/${e.apiBase}/\${id}\`, { method: 'DELETE' }); refetchItems()
   }
 
   const handleCatSubmit = async (ev: React.FormEvent) => {
     ev.preventDefault()
-    const url = editingCat ? `/api/admin/troop-categories/${editingCat.id}` : '/api/admin/troop-categories'
+    const url = editingCat ? \`/api/admin/${e.catApi}/\${editingCat.id}\` : '/api/admin/${e.catApi}'
     const res = await fetch(url, { method: editingCat ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(catForm) })
     if (res.ok) { refetchCats(); setShowCatModal(false); setEditingCat(null); setCatForm({ name: '', slug: '', description: '', icon: '', sortOrder: 0 }) }
     else { const d = await res.json(); alert(d.error || '保存失敗') }
@@ -90,15 +176,15 @@ export default function AdminTroopsPage() {
   const handleCatEdit = (cat: EntityCategory) => { setEditingCat(cat); setCatForm({ name: cat.name, slug: cat.slug, description: cat.description || '', icon: cat.icon || '', sortOrder: cat.sortOrder }); setShowCatModal(true) }
   const handleCatDelete = async (id: string) => {
     if (!confirm('確定要刪除這個分類嗎？')) return
-    await fetch(`/api/admin/troop-categories/${id}`, { method: 'DELETE' }); refetchCats()
+    await fetch(\`/api/admin/${e.catApi}/\${id}\`, { method: 'DELETE' }); refetchCats()
   }
   const handleCatMove = async (cat: EntityCategory, dir: 'up' | 'down') => {
     const idx = categories.indexOf(cat)
     const target = dir === 'up' ? categories[idx - 1] : categories[idx + 1]
     if (!target) return
     await Promise.all([
-      fetch(`/api/admin/troop-categories/${cat.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...cat, sortOrder: target.sortOrder }) }),
-      fetch(`/api/admin/troop-categories/${target.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...target, sortOrder: cat.sortOrder }) }),
+      fetch(\`/api/admin/${e.catApi}/\${cat.id}\`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...cat, sortOrder: target.sortOrder }) }),
+      fetch(\`/api/admin/${e.catApi}/\${target.id}\`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...target, sortOrder: cat.sortOrder }) }),
     ]); refetchCats()
   }
 
@@ -106,27 +192,27 @@ export default function AdminTroopsPage() {
     if (!newValue.trim() || !newType.trim() || !selectedCatId) return
     setFilterSaving(true)
     try {
-      const res = await fetch('/api/admin/troop-filters', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: newType.trim(), value: newValue.trim(), categoryId: selectedCatId }) })
+      const res = await fetch('/api/admin/${e.filterApi}', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: newType.trim(), value: newValue.trim(), categoryId: selectedCatId }) })
       if (res.ok) { setNewValue(''); refetchFilters() }
     } finally { setFilterSaving(false) }
   }
   const handleFilterDelete = async (id: string) => {
     if (!confirm('確定刪除？')) return
-    await fetch(`/api/admin/troop-filters/${id}`, { method: 'DELETE' }); refetchFilters()
+    await fetch(\`/api/admin/${e.filterApi}/\${id}\`, { method: 'DELETE' }); refetchFilters()
   }
   const handleFilterSort = async (id: string, sortOrder: number) => {
-    await fetch(`/api/admin/troop-filters/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sortOrder }) }); refetchFilters()
+    await fetch(\`/api/admin/${e.filterApi}/\${id}\`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sortOrder }) }); refetchFilters()
   }
 
   if (!isAdmin) return null
 
-  const filtered = filterCatSlug === 'all' ? items : items.filter(tr => (tr.category?.slug || tr.TroopCategory?.slug) === filterCatSlug)
+  const filtered = filterCatSlug === 'all' ? items : items.filter(${v} => (${e.catSlug}) === filterCatSlug)
   const currentOptions = filterOptions.filter(o => o.categoryId === selectedCatId)
   const existingTypes = Array.from(new Set(currentOptions.map(o => o.type))).sort()
   const groupedOptions = existingTypes.reduce((acc, type) => { acc[type] = currentOptions.filter(o => o.type === type).sort((a, b) => a.sortOrder - b.sortOrder); return acc }, {} as Record<string, FilterOption[]>)
   const allTypes = Array.from(new Set(filterOptions.map(o => o.type))).sort()
   const getRarityStars = (r: number) => '★'.repeat(r) + '☆'.repeat(5 - r)
-  const tabCls = (t: Tab) => `px-6 py-3 font-bold text-sm border-b-2 transition-colors ${activeTab === t ? 'border-wiki-accent text-wiki-accent' : 'border-transparent text-wiki-text-muted hover:text-wiki-text'}`
+  const tabCls = (t: Tab) => \`px-6 py-3 font-bold text-sm border-b-2 transition-colors \${activeTab === t ? 'border-wiki-accent text-wiki-accent' : 'border-transparent text-wiki-text-muted hover:text-wiki-text'}\`
 
   return (
     <div className="min-h-screen bg-wiki-bg">
@@ -134,15 +220,15 @@ export default function AdminTroopsPage() {
       <main className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">兵種圖鑑管理</h1>
-            <p className="text-wiki-text-muted text-sm mt-1">管理兵種列表、分類及篩選設定</p>
+            <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">${e.title}管理</h1>
+            <p className="text-wiki-text-muted text-sm mt-1">管理${e.label}列表、分類及篩選設定</p>
           </div>
-          {activeTab === 'list' && <Link href="/admin/troops/new" className="btn-hard text-wiki-text text-sm">+ 新增兵種</Link>}
+          {activeTab === 'list' && <Link href="${e.newUrl}" className="btn-hard text-wiki-text text-sm">+ 新增${e.label}</Link>}
           {activeTab === 'categories' && <button onClick={() => { setEditingCat(null); setCatForm({ name: '', slug: '', description: '', icon: '', sortOrder: 0 }); setShowCatModal(true) }} className="btn-hard text-wiki-text text-sm">+ 新增分類</button>}
         </div>
 
         <div className="border-b border-wiki-border mb-6 flex">
-          <button className={tabCls('list')} onClick={() => setActiveTab('list')}>兵種列表</button>
+          <button className={tabCls('list')} onClick={() => setActiveTab('list')}>${e.label}列表</button>
           <button className={tabCls('categories')} onClick={() => setActiveTab('categories')}>分類管理</button>
           <button className={tabCls('filters')} onClick={() => setActiveTab('filters')}>篩選設定</button>
         </div>
@@ -152,33 +238,32 @@ export default function AdminTroopsPage() {
             {activeTab === 'list' && (
               <div>
                 <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-                  <button onClick={() => setFilterCatSlug('all')} className={`px-4 py-2 text-sm font-bold whitespace-nowrap ${filterCatSlug === 'all' ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>全部</button>
-                  {categories.map(cat => <button key={cat.id} onClick={() => setFilterCatSlug(cat.slug)} className={`px-4 py-2 text-sm font-bold whitespace-nowrap ${filterCatSlug === cat.slug ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>{cat.icon} {cat.name}</button>)}
+                  <button onClick={() => setFilterCatSlug('all')} className={\`px-4 py-2 text-sm font-bold whitespace-nowrap \${filterCatSlug === 'all' ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}\`}>全部</button>
+                  {categories.map(cat => <button key={cat.id} onClick={() => setFilterCatSlug(cat.slug)} className={\`px-4 py-2 text-sm font-bold whitespace-nowrap \${filterCatSlug === cat.slug ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}\`}>{cat.icon} {cat.name}</button>)}
                 </div>
-                {filtered.length === 0 ? <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-8 text-center text-wiki-text-muted">暫無兵種數據</div> : (
+                {filtered.length === 0 ? <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-8 text-center text-wiki-text-muted">暫無${e.label}數據</div> : (
                   <div className="bg-wiki-gray-light border border-wiki-border rounded-lg overflow-hidden">
                     <table className="w-full">
                       <thead className="bg-wiki-gray">
-                        <tr>{["兵種","稀有度","類型","克制","分類","狀態","操作"].map(h => <th key={h} className="text-left px-6 py-4 text-wiki-accent font-bold text-sm">{h}</th>)}</tr>
+                        <tr>{${JSON.stringify(e.listHeaders)}.map(h => <th key={h} className="text-left px-6 py-4 text-wiki-accent font-bold text-sm">{h}</th>)}</tr>
                       </thead>
                       <tbody>
-                        {filtered.map(tr => (
-                          <tr key={tr.id} className="border-t border-wiki-border hover:bg-wiki-gray/50">
+                        {filtered.map(${v} => (
+                          <tr key={${v}.id} className="border-t border-wiki-border hover:bg-wiki-gray/50">
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-3">
-                                {tr.icon ? <img src={tr.icon} alt={tr.name} className="w-10 h-10 rounded object-cover" /> : <div className="w-10 h-10 rounded bg-wiki-gray flex items-center justify-center text-wiki-text-muted">{tr.name[0]}</div>}
-                                <div className="text-wiki-text font-bold">{tr.name}</div>
+                                {${e.rowData}}
+                                <div className="text-wiki-text font-bold">{${v}.name}</div>
                               </div>
                             </td>
-                            <td className="px-6 py-4 text-yellow-400 text-sm">{getRarityStars(tr.rarity)}</td>
-                            <td className="px-6 py-4 text-wiki-text text-sm">{tr.type || '-'}</td>
-                            <td className="px-6 py-4 text-wiki-text text-sm">{tr.counter || '-'}</td>
-                            <td className="px-6 py-4 text-wiki-text-muted text-sm">{tr.category?.name || tr.TroopCategory?.name || '-'}</td>
+                            <td className="px-6 py-4 text-yellow-400 text-sm">{getRarityStars(${v}.rarity)}</td>
+                            ${e.rowExtra}
+                            <td className="px-6 py-4 text-wiki-text-muted text-sm">{${e.catName2}}</td>
                             <td className="px-6 py-4">
-                              <button onClick={() => handleTogglePublish(tr)} className={`px-2 py-1 text-xs font-bold ${tr.isPublished ? 'bg-green-500/20 text-green-400' : 'bg-wiki-danger/20 text-wiki-danger'}`}>{tr.isPublished ? '已發佈' : '草稿'}</button>
+                              <button onClick={() => handleTogglePublish(${v})} className={\`px-2 py-1 text-xs font-bold \${${v}.isPublished ? 'bg-green-500/20 text-green-400' : 'bg-wiki-danger/20 text-wiki-danger'}\`}>{${v}.isPublished ? '已發佈' : '草稿'}</button>
                             </td>
                             <td className="px-6 py-4">
-                              <button onClick={() => handleDelete(tr.id)} className="px-3 py-1 bg-wiki-danger/20 text-wiki-danger text-sm font-bold hover:bg-wiki-danger/30">刪除</button>
+                              <button onClick={() => handleDelete(${v}.id)} className="px-3 py-1 bg-wiki-danger/20 text-wiki-danger text-sm font-bold hover:bg-wiki-danger/30">刪除</button>
                             </td>
                           </tr>
                         ))}
@@ -193,7 +278,7 @@ export default function AdminTroopsPage() {
               <div className="bg-wiki-gray-light border border-wiki-border rounded-lg overflow-hidden">
                 <table className="w-full">
                   <thead className="bg-wiki-gray">
-                    <tr>{['圖標', '名稱', '別名', '描述', '兵種數', '排序', '操作'].map(h => <th key={h} className="text-left px-6 py-4 text-wiki-accent font-bold text-sm">{h}</th>)}</tr>
+                    <tr>{['圖標', '名稱', '別名', '描述', '${e.label}數', '排序', '操作'].map(h => <th key={h} className="text-left px-6 py-4 text-wiki-accent font-bold text-sm">{h}</th>)}</tr>
                   </thead>
                   <tbody>
                     {categories.map((cat, idx) => (
@@ -202,7 +287,7 @@ export default function AdminTroopsPage() {
                         <td className="px-6 py-4 text-wiki-text font-bold">{cat.name}</td>
                         <td className="px-6 py-4 text-wiki-text-muted font-mono text-sm">{cat.slug}</td>
                         <td className="px-6 py-4 text-wiki-text-muted text-sm max-w-xs truncate">{cat.description}</td>
-                        <td className="px-6 py-4 text-wiki-accent font-bold">{cat._count.troops}</td>
+                        <td className="px-6 py-4 text-wiki-accent font-bold">{cat._count.${ck}}</td>
                         <td className="px-6 py-4 text-wiki-text-muted">{cat.sortOrder}</td>
                         <td className="px-6 py-4">
                           <div className="flex gap-2 items-center">
@@ -224,7 +309,7 @@ export default function AdminTroopsPage() {
                 <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-4 mb-6 flex items-center gap-4">
                   <span className="text-wiki-text font-bold text-sm flex-shrink-0">當前分類：</span>
                   <div className="flex flex-wrap gap-2">
-                    {categories.map(cat => <button key={cat.id} onClick={() => setSelectedCatId(cat.id)} className={`px-4 py-1.5 text-sm font-bold transition-colors ${selectedCatId === cat.id ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>{cat.name}</button>)}
+                    {categories.map(cat => <button key={cat.id} onClick={() => setSelectedCatId(cat.id)} className={\`px-4 py-1.5 text-sm font-bold transition-colors \${selectedCatId === cat.id ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}\`}>{cat.name}</button>)}
                   </div>
                 </div>
                 <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6 mb-6">
@@ -232,8 +317,8 @@ export default function AdminTroopsPage() {
                   <div className="flex gap-4 items-end">
                     <div className="flex-shrink-0">
                       <label className="block text-wiki-text-muted text-xs mb-1">篩選大類</label>
-                      <input type="text" value={newType} onChange={ev => setNewType(ev.target.value)} list="types-troops" className="w-40 bg-wiki-gray border-2 border-wiki-border px-3 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none" placeholder="如：稀有度" />
-                      <datalist id="types-troops">{allTypes.map(t => <option key={t} value={t} />)}</datalist>
+                      <input type="text" value={newType} onChange={ev => setNewType(ev.target.value)} list="types-${e.name}" className="w-40 bg-wiki-gray border-2 border-wiki-border px-3 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none" placeholder="如：稀有度" />
+                      <datalist id="types-${e.name}">{allTypes.map(t => <option key={t} value={t} />)}</datalist>
                     </div>
                     <div className="flex-1">
                       <label className="block text-wiki-text-muted text-xs mb-1">選項值</label>
@@ -299,4 +384,9 @@ export default function AdminTroopsPage() {
       <WikiFooter />
     </div>
   )
+}
+`
+
+  writeFileSync(`src/app/admin/${e.name}/page.tsx`, code, 'utf8')
+  console.log('wrote:', e.name)
 }
