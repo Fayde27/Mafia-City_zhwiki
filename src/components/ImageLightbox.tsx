@@ -18,6 +18,7 @@ export default function ImageLightbox({ images, currentIndex, onClose, onPrev, o
   const [offset, setOffset] = useState({ x: 0, y: 0 })
 
   // 拖動狀態
+  const overlayRef = useRef<HTMLDivElement>(null)
   const isDragging = useRef(false)
   const hasDragged = useRef(false)
   const lastPos = useRef({ x: 0, y: 0 })
@@ -43,9 +44,19 @@ export default function ImageLightbox({ images, currentIndex, onClose, onPrev, o
     }
     document.addEventListener('keydown', onKey)
     document.body.style.overflow = 'hidden'
+
+    // 阻止 overlay 上所有 touch 事件的預設行為（passive: false）
+    // 解決手機雙指縮放觸發瀏覽器側滑返回的問題
+    const el = overlayRef.current
+    const block = (e: TouchEvent) => e.preventDefault()
+    el?.addEventListener('touchstart', block, { passive: false })
+    el?.addEventListener('touchmove', block, { passive: false })
+
     return () => {
       document.removeEventListener('keydown', onKey)
       document.body.style.overflow = ''
+      el?.removeEventListener('touchstart', block)
+      el?.removeEventListener('touchmove', block)
     }
   }, [onClose, onPrev, onNext, total])
 
@@ -140,6 +151,7 @@ export default function ImageLightbox({ images, currentIndex, onClose, onPrev, o
 
   return (
     <div
+      ref={overlayRef}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md select-none"
       onClick={handleOverlayClick}
       onMouseMove={handleMouseMove}
