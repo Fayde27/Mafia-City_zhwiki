@@ -88,7 +88,7 @@ export default function ArticleDetailPage() {
             文章不存在
           </div>
         ) : (
-          <article className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg overflow-hidden">
+          <article className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg overflow-hidden max-w-4xl mx-auto">
             {article.coverImage && (
               <div className="w-full aspect-[3/1] overflow-hidden">
                 <img
