@@ -16,6 +16,7 @@ interface Article {
   slug: string
   summary: string
   coverImage: string | null
+  coverImagePosition?: string
   isPublished: boolean
   isPinned: boolean
   badges: string
@@ -100,7 +101,7 @@ export default function WikiCategoryPage() {
                       <img
                         src={article.coverImage}
                         alt={article.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" style={{ objectPosition: article.coverImagePosition || "50% 50%" }}
                       />
                     </div>
                   )}
