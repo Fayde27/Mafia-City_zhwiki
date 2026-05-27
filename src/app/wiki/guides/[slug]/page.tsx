@@ -17,6 +17,7 @@ interface Article {
   summary: string
   coverImage: string
   coverImagePosition?: string
+  thumbnailPosition?: string
   categoryId: string
   category: {
     name: string
@@ -118,7 +119,7 @@ export default function GuideCategoryPage() {
                         <img
                           src={article.coverImage}
                           alt={article.title}
-                          className="w-full h-full object-cover" style={{ objectPosition: article.coverImagePosition || "50% 50%" }}
+                          className="w-full h-full object-cover" style={{ objectPosition: article.thumbnailPosition || "50% 50%" }}
                         />
                       </div>
                     ) : (

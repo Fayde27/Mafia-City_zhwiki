@@ -24,6 +24,7 @@ interface Article {
   summary: string
   coverImage: string
   coverImagePosition?: string
+  thumbnailPosition?: string
   categoryId: string
   category: { name: string; slug: string }
   isPublished: boolean
@@ -357,7 +358,7 @@ export default function HomePage() {
                     <div className="flex gap-4 bg-wiki-card border border-wiki-border rounded-xl p-4 hover:border-wiki-accent/30 transition-all duration-300 relative">
                       {article.coverImage ? (
                         <div className="w-24 h-16 md:w-36 md:h-24 flex-shrink-0 rounded-lg overflow-hidden">
-                          <img src={article.coverImage} alt={article.title} className="w-full h-full object-cover" style={{ objectPosition: article.coverImagePosition || "50% 50%" }} />
+                          <img src={article.coverImage} alt={article.title} className="w-full h-full object-cover" style={{ objectPosition: article.thumbnailPosition || "50% 50%" }} />
                         </div>
                       ) : (
                         <div className="w-24 h-16 md:w-36 md:h-24 flex-shrink-0 rounded-lg bg-wiki-gray flex items-center justify-center">

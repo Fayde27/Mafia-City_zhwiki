@@ -36,6 +36,7 @@ export default function EditArticlePage() {
     summary: '',
     coverImage: '',
     coverImagePosition: '50% 50%',
+    thumbnailPosition: '50% 50%',
     categoryId: '',
     tags: '',
     isPublished: true,
@@ -62,6 +63,7 @@ export default function EditArticlePage() {
         summary: article.summary || '',
         coverImage: article.coverImage || '',
         coverImagePosition: article.coverImagePosition || '50% 50%',
+        thumbnailPosition: article.thumbnailPosition || '50% 50%',
         categoryId: article.categoryId,
         tags: article.tags || '',
         isPublished: article.isPublished,
@@ -248,12 +250,25 @@ export default function EditArticlePage() {
 
           <div>
             <ImageUploadInput
-              label="封面圖片"
+              label="Banner 圖片（文章頂部橫幅）"
               value={formData.coverImage}
               position={formData.coverImagePosition}
               onChange={(url) => setFormData({ ...formData, coverImage: url })}
               onPositionChange={(pos) => setFormData({ ...formData, coverImagePosition: pos })}
               previewHeight="w-full aspect-[3/1]"
+            />
+          </div>
+
+          <div>
+            <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">縮圖顯示位置</label>
+            <p className="text-wiki-text-muted text-xs mb-2">控制在文章列表卡片中的裁切焦點，與 Banner 位置獨立</p>
+            <ImageUploadInput
+              label="縮圖裁切位置"
+              value={formData.coverImage}
+              position={formData.thumbnailPosition}
+              onChange={() => {}}
+              onPositionChange={(pos) => setFormData({ ...formData, thumbnailPosition: pos })}
+              previewHeight="w-24 h-16"
             />
           </div>
 

@@ -34,6 +34,7 @@ export default function NewArticlePage() {
     tags: '',
     coverImage: '',
     coverImagePosition: '50% 50%',
+    thumbnailPosition: '50% 50%',
     isPublished: true,
     isPinned: false,
     isFeatured: false,

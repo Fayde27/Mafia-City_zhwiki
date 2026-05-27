@@ -39,7 +39,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { title, slug, content, summary, coverImage, coverImagePosition, categoryId, tags, isPublished, isPinned, badges, sortOrder } = await request.json()
+    const { title, slug, content, summary, coverImage, coverImagePosition, thumbnailPosition, categoryId, tags, isPublished, isPinned, badges, sortOrder } = await request.json()
     const { data: article, error } = await supabaseAdmin
       .from('Article')
       .insert({
@@ -49,6 +49,7 @@ export async function POST(request: Request) {
         summary,
         coverImage,
         coverImagePosition,
+        thumbnailPosition: thumbnailPosition || "50% 50%",
         categoryId,
         tags,
         isPublished: isPublished || false,
