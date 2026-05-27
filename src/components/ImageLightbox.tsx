@@ -35,7 +35,7 @@ export default function ImageLightbox({ images, currentIndex, onClose, onPrev, o
   // 切換圖片時重置
   useEffect(() => { reset() }, [currentIndex])
 
-  // 鍵盤
+  // 鍵盤 + History API 劫持（防止 iOS 側滑返回離開頁面）
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
@@ -45,18 +45,17 @@ export default function ImageLightbox({ images, currentIndex, onClose, onPrev, o
     document.addEventListener('keydown', onKey)
     document.body.style.overflow = 'hidden'
 
-    // 阻止 overlay 上所有 touch 事件的預設行為（passive: false）
-    // 解決手機雙指縮放觸發瀏覽器側滑返回的問題
-    const el = overlayRef.current
-    const block = (e: TouchEvent) => e.preventDefault()
-    el?.addEventListener('touchstart', block, { passive: false })
-    el?.addEventListener('touchmove', block, { passive: false })
+    // push 假歷史記錄，讓 iOS 側滑「返回」彈窗而非離開頁面
+    history.pushState({ lightbox: true }, '')
+    const onPop = () => onClose()
+    window.addEventListener('popstate', onPop)
 
     return () => {
       document.removeEventListener('keydown', onKey)
       document.body.style.overflow = ''
-      el?.removeEventListener('touchstart', block)
-      el?.removeEventListener('touchmove', block)
+      window.removeEventListener('popstate', onPop)
+      // 若彈窗是被程式關閉（非側滑），清除假記錄
+      if (history.state?.lightbox) history.back()
     }
   }, [onClose, onPrev, onNext, total])
 
