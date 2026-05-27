@@ -101,7 +101,7 @@ export default function EditArticlePage() {
       })
       if (res.ok) {
         clearDraft()
-        alert('已儲存')
+        router.push(`/wiki/article/${formData.slug}`)
       } else {
         alert('更新失敗')
       }
@@ -189,6 +189,13 @@ export default function EditArticlePage() {
             <p className="text-wiki-text-muted text-sm mt-1">修改文章內容、分類和發佈狀態</p>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => router.push(`/wiki/article/${formData.slug}`)}
+              className="flex items-center gap-2 px-4 py-2 border border-wiki-border text-wiki-text-secondary text-sm rounded-lg hover:border-wiki-accent hover:text-wiki-accent transition-colors"
+            >
+              ← 返回文章
+            </button>
             <button
               type="button"
               onClick={() => setPreviewing(true)}
