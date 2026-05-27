@@ -268,7 +268,7 @@ export default function EditArticlePage() {
               position={formData.thumbnailPosition}
               onChange={() => {}}
               onPositionChange={(pos) => setFormData({ ...formData, thumbnailPosition: pos })}
-              previewHeight="w-full aspect-[3/2]"
+              previewHeight="w-80 aspect-[3/2]"
             />
           </div>
 
