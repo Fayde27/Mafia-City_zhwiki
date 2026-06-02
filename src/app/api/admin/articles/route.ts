@@ -62,7 +62,8 @@ export async function POST(request: Request) {
 
     if (error) throw error
     return NextResponse.json(article, { status: 201 })
-  } catch (error) {
-    return NextResponse.json({ error: '創建文章失敗' }, { status: 500 })
+  } catch (error: any) {
+    console.error('創建文章失敗:', error)
+    return NextResponse.json({ error: '創建文章失敗', detail: error?.message }, { status: 500 })
   }
 }

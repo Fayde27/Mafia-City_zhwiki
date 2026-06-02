@@ -34,8 +34,10 @@ model Article {
   slug        String   @unique
   content     String
   summary     String?
-  coverImage  String?
-  categoryId  String
+  coverImage          String?
+  coverImagePosition  String?  @default("50% 50%")
+  thumbnailPosition   String?  @default("50% 50%")
+  categoryId          String
   tags        String?
   isPublished Boolean  @default(false)
   isPinned    Boolean  @default(false)
