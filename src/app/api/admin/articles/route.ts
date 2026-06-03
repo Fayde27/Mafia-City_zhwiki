@@ -23,8 +23,11 @@ export async function GET(request: Request) {
 
     if (error) throw error
 
+    // 將 Supabase 返回的大寫 Category key 正規化為小寫 category
+    const normalized = (articles || []).map(({ Category, ...rest }: any) => ({ ...rest, category: Category ?? null }))
+
     return NextResponse.json({
-      articles,
+      articles: normalized,
       pagination: {
         page,
         limit,
@@ -61,7 +64,8 @@ export async function POST(request: Request) {
       .single()
 
     if (error) throw error
-    return NextResponse.json(article, { status: 201 })
+    const { Category, ...rest } = article as any
+    return NextResponse.json({ ...rest, category: Category ?? null }, { status: 201 })
   } catch (error: any) {
     console.error('創建文章失敗:', error)
     return NextResponse.json({ error: '創建文章失敗', detail: error?.message }, { status: 500 })

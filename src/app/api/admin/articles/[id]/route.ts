@@ -17,7 +17,8 @@ export async function GET(
     if (error || !article) {
       return NextResponse.json({ error: '文章不存在' }, { status: 404 })
     }
-    return NextResponse.json(article)
+    const { Category, ...rest } = article as any
+    return NextResponse.json({ ...rest, category: Category ?? null })
   } catch (error) {
     return NextResponse.json({ error: '獲取文章失敗' }, { status: 500 })
   }
@@ -28,7 +29,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { title, slug, content, summary, coverImage, coverImagePosition, thumbnailPosition, categoryId, tags, isPublished, isPinned, isFeatured, badges, sortOrder } = await request.json()
+    const { title, slug, content, summary, coverImage, coverImagePosition, thumbnailPosition, categoryId, tags, isPublished, isPinned, badges, sortOrder } = await request.json()
     const { data: article, error } = await supabaseAdmin
       .from('Article')
       .update({
@@ -43,7 +44,6 @@ export async function PUT(
         tags,
         isPublished,
         isPinned,
-        isFeatured,
         badges,
         sortOrder,
       })
@@ -52,7 +52,8 @@ export async function PUT(
       .single()
 
     if (error) throw error
-    return NextResponse.json(article)
+    const { Category, ...rest } = article as any
+    return NextResponse.json({ ...rest, category: Category ?? null })
   } catch (error) {
     return NextResponse.json({ error: '更新文章失敗' }, { status: 500 })
   }
