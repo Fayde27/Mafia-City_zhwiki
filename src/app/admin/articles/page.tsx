@@ -69,11 +69,16 @@ export default function AdminArticlesPage() {
   const handleMove = async (art: Article, dir: 'up' | 'down') => {
     const list = filterCatSlug === 'all' ? articles : articles.filter(a => a.category?.slug === filterCatSlug)
     const idx = list.findIndex(a => a.id === art.id)
-    const target = dir === 'up' ? list[idx - 1] : list[idx + 1]
-    if (!target) return
+    const targetIdx = dir === 'up' ? idx - 1 : idx + 1
+    if (targetIdx < 0 || targetIdx >= list.length) return
+    const target = list[targetIdx]
+    // 以 list 長度為基準給每篇文章一個唯一的 sortOrder，確保交換有效
+    const total = list.length
+    const newArtOrder = (total - targetIdx) * 10
+    const newTargetOrder = (total - idx) * 10
     await Promise.all([
-      fetch(`/api/admin/articles/${art.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...art, sortOrder: target.sortOrder }) }),
-      fetch(`/api/admin/articles/${target.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...target, sortOrder: art.sortOrder }) }),
+      fetch(`/api/admin/articles/${art.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...art, sortOrder: newArtOrder }) }),
+      fetch(`/api/admin/articles/${target.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...target, sortOrder: newTargetOrder }) }),
     ])
     refetchArticles()
   }
