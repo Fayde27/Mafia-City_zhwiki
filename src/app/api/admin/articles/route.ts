@@ -18,6 +18,7 @@ export async function GET(request: Request) {
     if (draft === 'true') query = query.eq('isPublished', false)
 
     const { data: articles, error, count } = await query
+      .order('sortOrder', { ascending: false })
       .order('createdAt', { ascending: false })
       .range(from, to)
 

@@ -38,6 +38,7 @@ export async function GET(request: Request) {
 
     const { data: articles, error, count: total } = await query
       .order('isPinned', { ascending: false })
+      .order('sortOrder', { ascending: false })
       .order('createdAt', { ascending: false })
       .range(from, to)
 

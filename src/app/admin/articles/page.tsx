@@ -14,7 +14,7 @@ type Tab = 'list' | 'categories'
 interface Article {
   id: string; title: string; slug: string; summary: string
   isPublished: boolean; isFeatured: boolean; isPinned: boolean
-  viewCount: number; createdAt: string
+  sortOrder: number; viewCount: number; createdAt: string
   category: { name: string; slug: string; icon: string } | null
 }
 interface Category {
@@ -63,6 +63,18 @@ export default function AdminArticlesPage() {
   }
   const handleToggle = async (art: Article, field: 'isPublished' | 'isFeatured' | 'isPinned') => {
     await fetch(`/api/admin/articles/${art.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...art, [field]: !art[field] }) })
+    refetchArticles()
+  }
+
+  const handleMove = async (art: Article, dir: 'up' | 'down') => {
+    const list = filterCatSlug === 'all' ? articles : articles.filter(a => a.category?.slug === filterCatSlug)
+    const idx = list.findIndex(a => a.id === art.id)
+    const target = dir === 'up' ? list[idx - 1] : list[idx + 1]
+    if (!target) return
+    await Promise.all([
+      fetch(`/api/admin/articles/${art.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...art, sortOrder: target.sortOrder }) }),
+      fetch(`/api/admin/articles/${target.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...target, sortOrder: art.sortOrder }) }),
+    ])
     refetchArticles()
   }
 
@@ -124,7 +136,7 @@ export default function AdminArticlesPage() {
                   <div className="bg-wiki-gray-light border border-wiki-border rounded-lg overflow-hidden">
                     <table className="w-full">
                       <thead className="bg-wiki-gray">
-                        <tr>{['標題', '分類', '狀態', '熱門', '置頂', '瀏覽', '日期', '操作'].map(h => <th key={h} className="text-left px-4 py-4 text-wiki-accent font-bold text-sm">{h}</th>)}</tr>
+                        <tr>{['標題', '分類', '狀態', '熱門', '置頂', '瀏覽', '日期', '排序', '操作'].map(h => <th key={h} className="text-left px-4 py-4 text-wiki-accent font-bold text-sm">{h}</th>)}</tr>
                       </thead>
                       <tbody>
                         {filtered.map(art => (
@@ -145,6 +157,18 @@ export default function AdminArticlesPage() {
                             </td>
                             <td className="px-4 py-4 text-wiki-text-muted text-sm">{art.viewCount}</td>
                             <td className="px-4 py-4 text-wiki-text-muted text-sm">{new Date(art.createdAt).toLocaleDateString('zh-TW')}</td>
+                            <td className="px-4 py-4">
+                              <div className="flex gap-1">
+                                {(() => {
+                                  const list = filterCatSlug === 'all' ? articles : articles.filter(a => a.category?.slug === filterCatSlug)
+                                  const idx = list.findIndex(a => a.id === art.id)
+                                  return <>
+                                    <button onClick={() => handleMove(art, 'up')} disabled={idx === 0} className="px-2 py-1 bg-wiki-accent/20 text-wiki-accent text-sm font-bold hover:bg-wiki-accent/30 disabled:opacity-30">↑</button>
+                                    <button onClick={() => handleMove(art, 'down')} disabled={idx === list.length - 1} className="px-2 py-1 bg-wiki-accent/20 text-wiki-accent text-sm font-bold hover:bg-wiki-accent/30 disabled:opacity-30">↓</button>
+                                  </>
+                                })()}
+                              </div>
+                            </td>
                             <td className="px-4 py-4">
                               <div className="flex gap-2">
                                 <Link href={`/admin/articles/edit/${art.id}`} className="px-3 py-1 bg-wiki-accent/20 text-wiki-accent text-sm font-bold hover:bg-wiki-accent/30">編輯</Link>
