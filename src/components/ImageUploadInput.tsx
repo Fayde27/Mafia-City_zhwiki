@@ -9,6 +9,7 @@ interface ImageUploadInputProps {
   onChange: (url: string) => void
   onPositionChange: (pos: string) => void
   previewHeight?: string
+  objectFit?: 'cover' | 'contain'
 }
 
 export default function ImageUploadInput({
@@ -18,6 +19,7 @@ export default function ImageUploadInput({
   onChange,
   onPositionChange,
   previewHeight = 'h-40',
+  objectFit = 'cover',
 }: ImageUploadInputProps) {
   const [uploading, setUploading] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
@@ -157,8 +159,8 @@ export default function ImageUploadInput({
           <img
             src={value}
             alt={label}
-            className="w-full h-full object-cover pointer-events-none"
-            style={{ objectPosition: displayPosition }}
+            className={`w-full h-full pointer-events-none ${objectFit === 'contain' ? 'object-contain' : 'object-cover'}`}
+            style={objectFit === 'cover' ? { objectPosition: displayPosition } : undefined}
             draggable={false}
           />
           <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded pointer-events-none">

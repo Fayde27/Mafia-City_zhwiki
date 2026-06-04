@@ -180,7 +180,8 @@ export default function SiteConfigPage() {
                     position="50% 50%"
                     onChange={setBgLeftUrl}
                     onPositionChange={() => {}}
-                    previewHeight="h-48"
+                    previewHeight="h-96"
+                    objectFit="contain"
                   />
                   <div className="grid grid-cols-2 gap-4 mt-4">
                     <div>
@@ -219,7 +220,8 @@ export default function SiteConfigPage() {
                     position="50% 50%"
                     onChange={setBgRightUrl}
                     onPositionChange={() => {}}
-                    previewHeight="h-48"
+                    previewHeight="h-96"
+                    objectFit="contain"
                   />
                   <div className="grid grid-cols-2 gap-4 mt-4">
                     <div>
