@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '參數錯誤' }, { status: 400 })
     }
 
-    // 先取當前 views，再 +1（僅 Article 有 views 欄位）
+    // 先取當前 views，再隨機增加 5~10（僅 Article 有 views 欄位）
     if (entityType !== 'article') {
       return NextResponse.json({ success: true })
     }
@@ -34,12 +34,15 @@ export async function POST(request: Request) {
 
     if (!current) return NextResponse.json({ success: true })
 
+    const increment = Math.floor(Math.random() * 6) + 5  // 隨機 5~10
+    const newViews = (current.views || 0) + increment
+
     await supabaseAdmin
       .from(table)
-      .update({ views: (current.views || 0) + 1 })
+      .update({ views: newViews })
       .eq('id', entityId)
 
-    return NextResponse.json({ views: (current.views || 0) + 1 })
+    return NextResponse.json({ views: newViews })
   } catch {
     return NextResponse.json({ error: '操作失敗' }, { status: 500 })
   }
