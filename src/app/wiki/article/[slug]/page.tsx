@@ -124,9 +124,11 @@ export default function ArticleDetailPage() {
                     <h1 className="text-4xl font-heading font-bold text-wiki-accent heading-hard mb-4">
                       {article.title}
                     </h1>
-                    <div className="flex items-center gap-6 text-sm text-wiki-text-muted">
-                      <span>分類: {article.category.name}</span>
-                      <span>👁 {article.views} 瀏覽</span>
+                    <div className="flex flex-col gap-1 text-sm text-wiki-text-muted">
+                      <div className="flex items-center gap-4 flex-wrap">
+                        <span>分類: {article.category.name}</span>
+                        <span>{article.views} 瀏覽</span>
+                      </div>
                       <span>更新於 {new Date(article.updatedAt).toLocaleDateString('zh-TW')}</span>
                     </div>
                     {article.tags && (
