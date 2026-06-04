@@ -9,6 +9,7 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
     const status = searchParams.get('status')
+    const category = searchParams.get('category')
     const from = (page - 1) * limit
     const to = from + limit - 1
 
@@ -17,6 +18,7 @@ export async function GET(request: Request) {
       .select('*', { count: 'exact' })
 
     if (status) query = query.eq('status', status)
+    if (category) query = query.eq('category', category)
 
     const { data, error, count } = await query
       .order('createdAt', { ascending: false })

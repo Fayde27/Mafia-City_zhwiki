@@ -10,7 +10,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
-import LikeButton from '@/components/LikeButton'
+import ArticleActionBar from '@/components/ArticleActionBar'
 import ImageLightbox from '@/components/ImageLightbox'
 
 interface Article {
@@ -165,13 +165,21 @@ export default function ArticleDetailPage() {
                 <MarkdownRenderer content={article.content} />
               </div>
 
-              <div className="mt-10 pt-6 border-t border-wiki-border flex justify-center">
-                <LikeButton entityType="article" entityId={article.id} initialLikes={article.likes || 0} />
-              </div>
+              {/* 底部留白，給手機底部操作欄讓出空間 */}
+              <div className="h-16 lg:h-0" />
             </div>
           </article>
         )}
       </main>
+
+      {article && (
+        <ArticleActionBar
+          articleId={article.id}
+          articleTitle={article.title}
+          articleSlug={article.slug}
+          initialLikes={article.likes || 0}
+        />
+      )}
 
       <WikiFooter />
 

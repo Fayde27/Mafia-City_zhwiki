@@ -32,6 +32,7 @@ export default function SubmissionsAdminPage() {
   const [submissions, setSubmissions] = useState<Submission[]>([])
   const [loading, setLoading] = useState(true)
   const [filterStatus, setFilterStatus] = useState('')
+  const [filterCategory, setFilterCategory] = useState('')
   const [selected, setSelected] = useState<Submission | null>(null)
   const [editNote, setEditNote] = useState('')
   const [editStatus, setEditStatus] = useState('')
@@ -43,14 +44,17 @@ export default function SubmissionsAdminPage() {
 
   const fetchSubmissions = () => {
     setLoading(true)
-    const q = filterStatus ? `?status=${filterStatus}` : ''
+    const params = new URLSearchParams()
+    if (filterStatus) params.set('status', filterStatus)
+    if (filterCategory) params.set('category', filterCategory)
+    const q = params.toString() ? `?${params.toString()}` : ''
     fetch(`/api/admin/submissions${q}`)
       .then(r => r.json())
       .then(data => { setSubmissions(data.submissions || []); setLoading(false) })
       .catch(() => setLoading(false))
   }
 
-  useEffect(() => { if (isAdmin) fetchSubmissions() }, [isAdmin, filterStatus])
+  useEffect(() => { if (isAdmin) fetchSubmissions() }, [isAdmin, filterStatus, filterCategory])
 
   const openDetail = (s: Submission) => {
     setSelected(s)
@@ -98,13 +102,30 @@ export default function SubmissionsAdminPage() {
         </div>
 
         {/* 狀態篩選 */}
-        <div className="flex gap-2 mb-6 flex-wrap">
+        <div className="flex gap-2 mb-3 flex-wrap">
           {[['', '全部'], ['pending', '待審核'], ['reviewed', '已查看'], ['approved', '已採用'], ['rejected', '已拒絕']].map(([val, label]) => (
             <button
               key={val}
               onClick={() => setFilterStatus(val)}
               className={`px-3 py-1.5 text-xs rounded-full border transition-colors ${
                 filterStatus === val
+                  ? 'bg-wiki-accent text-wiki-dark border-wiki-accent font-bold'
+                  : 'border-wiki-border text-wiki-text-muted hover:border-wiki-accent hover:text-wiki-accent'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* 類型篩選 */}
+        <div className="flex gap-2 mb-6 flex-wrap">
+          {[['', '所有類型'], ['糾錯', '⚠️ 糾錯'], ['疑問', '💬 疑問']].map(([val, label]) => (
+            <button
+              key={val}
+              onClick={() => setFilterCategory(val)}
+              className={`px-3 py-1.5 text-xs rounded-full border transition-colors ${
+                filterCategory === val
                   ? 'bg-wiki-accent text-wiki-dark border-wiki-accent font-bold'
                   : 'border-wiki-border text-wiki-text-muted hover:border-wiki-accent hover:text-wiki-accent'
               }`}
@@ -136,7 +157,17 @@ export default function SubmissionsAdminPage() {
                     <p className="text-wiki-text-muted text-xs line-clamp-1">{s.content}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className="text-wiki-accent text-xs font-bold">{s.gameId}</p>
+                    {s.gameId && (
+                      <a
+                        href={`/wiki/article/${s.gameId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={e => e.stopPropagation()}
+                        className="text-wiki-accent text-xs font-bold hover:underline block"
+                      >
+                        查看文章 ↗
+                      </a>
+                    )}
                     <p className="text-wiki-text-muted text-xs mt-1">{new Date(s.createdAt).toLocaleDateString('zh-CN')}</p>
                   </div>
                 </div>
