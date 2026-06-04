@@ -35,6 +35,11 @@ export default function ArticleActionBar({
     setLiked(localStorage.getItem(storageKey) === '1')
   }, [storageKey])
 
+  // 當父元件拿到最新資料時同步 likes 數
+  useEffect(() => {
+    setLikes(initialLikes)
+  }, [initialLikes])
+
   useEffect(() => {
     const onScroll = () => setShowScrollTop(window.scrollY > 400)
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -111,7 +116,7 @@ export default function ArticleActionBar({
   return (
     <>
       {/* ── 桌面：左側懸浮欄 ── */}
-      <div className="hidden lg:flex fixed left-6 top-1/2 -translate-y-1/2 flex-col items-center gap-3 z-40">
+      <div className="hidden lg:flex fixed right-6 top-1/2 -translate-y-1/2 flex-col items-center gap-3 z-40">
         {/* 點讚 */}
         <button onClick={handleLike} disabled={liked} className={btnBase} title={liked ? '已點讚' : '覺得有用'}>
           <div className={`${iconBase} ${liked ? 'border-wiki-accent bg-wiki-accent/15 text-wiki-accent' : 'border-wiki-border text-wiki-text-muted hover:border-wiki-accent hover:text-wiki-accent hover:bg-wiki-accent/5'} ${likeAnimating ? 'scale-125' : ''}`}>
