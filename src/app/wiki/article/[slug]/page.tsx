@@ -12,6 +12,7 @@ import MarkdownRenderer from '@/components/MarkdownRenderer'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
 import ArticleActionBar from '@/components/ArticleActionBar'
 import ImageLightbox from '@/components/ImageLightbox'
+import ArticleBackground from '@/components/ArticleBackground'
 
 interface Article {
   id: string
@@ -64,6 +65,7 @@ export default function ArticleDetailPage() {
 
   return (
     <div className="min-h-screen bg-wiki-bg">
+      <ArticleBackground />
       <WikiHeader />
       
       <main className="container mx-auto px-4 py-8">
