@@ -15,10 +15,7 @@ export default function ArticleActionBar({
   articleSlug,
   initialLikes,
 }: ArticleActionBarProps) {
-  const storageKey = `liked_article_${articleId}`
-
   const [likes, setLikes] = useState(initialLikes)
-  const [liked, setLiked] = useState(false)
   const [likeAnimating, setLikeAnimating] = useState(false)
 
   const [copied, setCopied] = useState(false)
@@ -30,10 +27,6 @@ export default function ArticleActionBar({
   const [feedbackDone, setFeedbackDone] = useState(false)
 
   const [showScrollTop, setShowScrollTop] = useState(false)
-
-  useEffect(() => {
-    setLiked(localStorage.getItem(storageKey) === '1')
-  }, [storageKey])
 
   // 當父元件拿到最新資料時同步 likes 數
   useEffect(() => {
@@ -47,8 +40,9 @@ export default function ArticleActionBar({
   }, [])
 
   const handleLike = async () => {
-    if (liked || likeAnimating) return
+    if (likeAnimating) return
     setLikeAnimating(true)
+    setLikes(prev => prev + 1)
     try {
       const res = await fetch('/api/wiki/like', {
         method: 'POST',
@@ -58,11 +52,9 @@ export default function ArticleActionBar({
       if (res.ok) {
         const data = await res.json()
         setLikes(data.likes)
-        setLiked(true)
-        localStorage.setItem(storageKey, '1')
       }
     } finally {
-      setTimeout(() => setLikeAnimating(false), 600)
+      setTimeout(() => setLikeAnimating(false), 300)
     }
   }
 
@@ -118,11 +110,11 @@ export default function ArticleActionBar({
       {/* ── 桌面：左側懸浮欄 ── */}
       <div className="hidden lg:flex fixed right-6 top-1/2 -translate-y-1/2 flex-col items-center gap-3 z-40">
         {/* 點讚 */}
-        <button onClick={handleLike} disabled={liked} className={btnBase} title={liked ? '已點讚' : '覺得有用'}>
-          <div className={`${iconBase} ${liked ? 'border-wiki-accent bg-wiki-accent/15 text-wiki-accent' : 'border-wiki-border text-wiki-text-muted hover:border-wiki-accent hover:text-wiki-accent hover:bg-wiki-accent/5'} ${likeAnimating ? 'scale-125' : ''}`}>
+        <button onClick={handleLike} className={btnBase} title="覺得有用">
+          <div className={`${iconBase} border-wiki-border text-wiki-text-muted hover:border-wiki-accent hover:text-wiki-accent hover:bg-wiki-accent/5 ${likeAnimating ? 'scale-125' : ''}`}>
             <span className="text-lg">👍</span>
           </div>
-          <span className={`text-xs font-bold ${liked ? 'text-wiki-accent' : 'text-wiki-text-muted'}`}>{likes}</span>
+          <span className="text-xs font-bold text-wiki-text-muted">{likes}</span>
         </button>
 
         <div className="w-6 border-t border-wiki-border/50" />
@@ -162,9 +154,9 @@ export default function ArticleActionBar({
       {/* ── 手機：底部固定欄 ── */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-wiki-gray border-t border-wiki-border flex items-center justify-around px-4 py-2">
         {/* 點讚 */}
-        <button onClick={handleLike} disabled={liked} className="flex flex-col items-center gap-0.5">
+        <button onClick={handleLike} className="flex flex-col items-center gap-0.5">
           <span className={`text-xl transition-transform ${likeAnimating ? 'scale-125' : ''}`}>👍</span>
-          <span className={`text-xs font-bold ${liked ? 'text-wiki-accent' : 'text-wiki-text-muted'}`}>{likes}</span>
+          <span className="text-xs font-bold text-wiki-text-muted">{likes}</span>
         </button>
 
         {/* 分享 */}
