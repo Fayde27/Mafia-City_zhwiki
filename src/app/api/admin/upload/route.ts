@@ -23,7 +23,15 @@ export async function POST(request: Request) {
     const buffer = new Uint8Array(bytes)
 
     const timestamp = Date.now()
-    const fileName = `${timestamp}-${file.name.replace(/\s/g, '_')}`
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'bin'
+    const safeName = file.name
+      .replace(/\.[^.]+$/, '')           // 去掉副檔名
+      .replace(/[^\x00-\x7F]/g, '')      // 去掉非 ASCII（中文等）
+      .replace(/[^a-zA-Z0-9_-]/g, '_')  // 其餘特殊字符換底線
+      .replace(/^_+|_+$/g, '')           // 去頭尾底線
+      .slice(0, 60)                       // 截斷過長檔名
+      || 'image'
+    const fileName = `${timestamp}-${safeName}.${ext}`
     const filePath = `uploads/${fileName}`
 
     const { error } = await supabaseAdmin.storage
