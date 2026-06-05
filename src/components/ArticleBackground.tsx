@@ -44,23 +44,23 @@ export default function ArticleBackground() {
   const sideStyle = (s: typeof DEFAULT_SIDE, isLeft: boolean) => ({
     opacity: s.opacity,
     transform: `scaleX(${isLeft !== s.flip ? 1 : -1}) scale(${s.scale})`,
-    transformOrigin: isLeft ? 'left bottom' : 'right bottom',
-    bottom: `${s.offsetY}px`,
+    transformOrigin: 'bottom center',
+    marginBottom: `${s.offsetY}px`,
   })
 
   return (
     <>
       {/* 左側立繪 */}
       {cfg.left.url && (
-        <div
-          className="hidden xl:block fixed left-0 top-0 bottom-0 z-0 pointer-events-none select-none overflow-hidden"
-          style={{ width: 'calc((100vw - 56rem) / 2)' }}
-        >
+        <div className="hidden xl:block fixed left-0 bottom-0 z-0 pointer-events-none select-none">
           <img
             src={cfg.left.url}
             alt=""
-            className="absolute bottom-0 left-0 w-full h-full object-contain object-bottom"
-            style={sideStyle(cfg.left, true)}
+            className="block w-auto"
+            style={{
+              maxHeight: '85vh',
+              ...sideStyle(cfg.left, true),
+            }}
             draggable={false}
           />
         </div>
@@ -68,15 +68,15 @@ export default function ArticleBackground() {
 
       {/* 右側立繪 */}
       {cfg.right.url && (
-        <div
-          className="hidden xl:block fixed right-0 top-0 bottom-0 z-0 pointer-events-none select-none overflow-hidden"
-          style={{ width: 'calc((100vw - 56rem) / 2)' }}
-        >
+        <div className="hidden xl:block fixed right-0 bottom-0 z-0 pointer-events-none select-none">
           <img
             src={cfg.right.url}
             alt=""
-            className="absolute bottom-0 right-0 w-full h-full object-contain object-bottom"
-            style={sideStyle(cfg.right, false)}
+            className="block w-auto"
+            style={{
+              maxHeight: '85vh',
+              ...sideStyle(cfg.right, false),
+            }}
             draggable={false}
           />
         </div>
