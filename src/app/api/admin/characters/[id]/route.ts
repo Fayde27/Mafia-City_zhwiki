@@ -68,6 +68,7 @@ export async function PUT(
         name: data.name,
         slug: data.slug,
         avatar: data.avatar,
+        avatarPosition: data.avatarPosition,
         banner: data.banner,
         bannerPosition: data.bannerPosition,
         rarity: data.rarity,

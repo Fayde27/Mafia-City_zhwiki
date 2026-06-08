@@ -79,7 +79,7 @@ function RadarPreview({ attrs }: { attrs: any }) {
     Number(attrs?.charismaMax) || 0,
     Number(attrs?.speedMax) || 0,
   ]
-  const globalMax = Math.max(...maxVals, 1)
+  const globalMax = 100
 
   const polyPoints = (vals: number[]) =>
     vals.map((v, i) => {
@@ -182,6 +182,7 @@ export default function AdminCharacterEditPage() {
 
   // Images
   const [avatar, setAvatar] = useState('')
+  const [avatarPosition, setAvatarPosition] = useState('50% 50%')
   const [banner, setBanner] = useState('')
   const [bannerPosition, setBannerPosition] = useState('50% 50%')
 
@@ -251,6 +252,7 @@ export default function AdminCharacterEditPage() {
           setSortOrder(d.sortOrder || 0)
           setIsPublished(d.isPublished ?? true)
           setAvatar(d.avatar || '')
+          setAvatarPosition(d.avatarPosition || '50% 50%')
           setBanner(d.banner || '')
           setBannerPosition(d.bannerPosition || '50% 50%')
           setAttrs(tryParse(d.attributes, attrs))
@@ -311,7 +313,7 @@ export default function AdminCharacterEditPage() {
           traits: JSON.stringify(traits),
           troopType, acquisition, story,
           categoryId, sortOrder, isPublished,
-          avatar, banner, bannerPosition,
+          avatar, avatarPosition, banner, bannerPosition,
           attributes: JSON.stringify(attrs),
           skills: JSON.stringify(skills),
           equipmentIds,
@@ -412,7 +414,7 @@ export default function AdminCharacterEditPage() {
                   </div>
                   <div>
                     <label className={labelCls}>兵種</label>
-                    <input className={inputCls} value={troopType} placeholder="如：步兵、騎兵"
+                    <input className={inputCls} value={troopType}
                       onChange={e => setTroopType(e.target.value)} />
                   </div>
                   <div>
@@ -464,8 +466,9 @@ export default function AdminCharacterEditPage() {
                 <h3 className="text-lg font-bold text-wiki-accent mb-5">圖片上傳</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <ImageUploadInput label="頭像" value={avatar}
+                    position={avatarPosition}
                     onChange={setAvatar}
-                    onPositionChange={() => {}}
+                    onPositionChange={setAvatarPosition}
                     previewHeight="h-48 max-w-xs mx-auto" />
                   <ImageUploadInput label="Banner" value={banner}
                     position={bannerPosition}

@@ -52,7 +52,7 @@ function RadarChart({ attrs }: { attrs: any }) {
 
   const baseVals = [attrs?.attackBase, attrs?.defenseBase, attrs?.charismaBase, attrs?.speedBase].map(Number)
   const maxVals = [attrs?.attackMax, attrs?.defenseMax, attrs?.charismaMax, attrs?.speedMax].map(Number)
-  const globalMax = Math.max(...maxVals, 1)
+  const globalMax = 100
 
   const polyPoints = (vals: number[]) =>
     vals.map((v, i) => {
