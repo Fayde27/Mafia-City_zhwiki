@@ -155,7 +155,8 @@ function BonusRepeater({ bonuses, onChange }: { bonuses: SkinBonus[]; onChange: 
 export default function AdminCharacterEditPage() {
   const router = useRouter()
   const params = useParams()
-  const characterId = params?.id as string
+  const rawId = params?.id as string
+  const characterId = rawId === 'new' ? '' : rawId
   const { isAdmin, isLoaded } = useAdminAuth()
 
   const [categories, setCategories] = useState<CharacterCategory[]>([])
