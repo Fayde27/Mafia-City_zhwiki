@@ -41,7 +41,7 @@ export async function GET(request: Request) {
         total: count || 0,
         totalPages: Math.ceil((count || 0) / limit),
       },
-      })
+    })
   } catch (error) {
     return NextResponse.json({ error: '獲取角色列表失敗' }, { status: 500 })
   }
@@ -55,22 +55,16 @@ export async function POST(request: Request) {
       .insert({
         name: data.name,
         slug: data.slug,
-        title: data.title,
         avatar: data.avatar,
-        avatarPosition: data.avatarPosition,
         banner: data.banner,
         bannerPosition: data.bannerPosition,
-        rarity: data.rarity || 5,
-        role: data.role,
-        weapon: data.weapon,
-        coreBonus: data.coreBonus,
+        rarity: data.rarity || '金',
+        traits: data.traits,
+        troopType: data.troopType,
         acquisition: data.acquisition,
-        description: data.description,
+        story: data.story,
         attributes: data.attributes,
         skills: data.skills,
-        rumors: data.rumors,
-        teamComp: data.teamComp,
-        troopRec: data.troopRec,
         categoryId: data.categoryId,
         sortOrder: data.sortOrder || 0,
         isPublished: data.isPublished || false,
@@ -79,8 +73,146 @@ export async function POST(request: Request) {
       .single()
 
     if (error) throw error
+
+    // save relations
+    if (character) {
+      await saveRelations(character.id, data)
+    }
+
     return NextResponse.json(character, { status: 201 })
   } catch (error) {
     return NextResponse.json({ error: '創建角色失敗' }, { status: 500 })
+  }
+}
+
+async function saveRelations(characterId: string, data: any) {
+  // Skins
+  if (Array.isArray(data.skins)) {
+    await supabaseAdmin.from('CharacterSkin').delete().eq('characterId', characterId)
+    if (data.skins.length > 0) {
+      await supabaseAdmin.from('CharacterSkin').insert(
+        data.skins.map((s: any, i: number) => ({
+          characterId,
+          name: s.name,
+          art: s.art,
+          icon: s.icon,
+          bonuses: JSON.stringify(s.bonuses || []),
+          acquisition: s.acquisition,
+          sortOrder: i,
+        }))
+      )
+    }
+  }
+
+  // SkinBonds
+  if (Array.isArray(data.skinBonds)) {
+    await supabaseAdmin.from('CharacterSkinBond').delete().eq('characterId', characterId)
+    if (data.skinBonds.length > 0) {
+      await supabaseAdmin.from('CharacterSkinBond').insert(
+        data.skinBonds.map((b: any, i: number) => ({
+          characterId,
+          name: b.name,
+          skinIds: JSON.stringify(b.skinIds || []),
+          bonuses: JSON.stringify(b.bonuses || []),
+          sortOrder: i,
+        }))
+      )
+    }
+  }
+
+  // TeamComps
+  if (Array.isArray(data.teamComps)) {
+    // delete members first (cascade), then comps
+    const { data: oldComps } = await supabaseAdmin
+      .from('CharacterTeamComp')
+      .select('id')
+      .eq('characterId', characterId)
+    if (oldComps && oldComps.length > 0) {
+      const ids = oldComps.map((c: any) => c.id)
+      await supabaseAdmin.from('CharacterTeamCompMember').delete().in('teamCompId', ids)
+    }
+    await supabaseAdmin.from('CharacterTeamComp').delete().eq('characterId', characterId)
+    for (let i = 0; i < data.teamComps.length; i++) {
+      const tc = data.teamComps[i]
+      const { data: inserted } = await supabaseAdmin
+        .from('CharacterTeamComp')
+        .insert({ characterId, name: tc.name, reason: tc.reason, sortOrder: i })
+        .select('id')
+        .single()
+      if (inserted && Array.isArray(tc.memberIds)) {
+        const members = tc.memberIds.map((mid: string, j: number) => ({
+          teamCompId: inserted.id,
+          memberId: mid,
+          sortOrder: j,
+        }))
+        if (members.length > 0) {
+          await supabaseAdmin.from('CharacterTeamCompMember').insert(members)
+        }
+      }
+    }
+  }
+
+  // BloodBonds
+  if (Array.isArray(data.bloodBonds)) {
+    const { data: oldBonds } = await supabaseAdmin
+      .from('CharacterBloodBond')
+      .select('id')
+      .eq('characterId', characterId)
+    if (oldBonds && oldBonds.length > 0) {
+      const ids = oldBonds.map((b: any) => b.id)
+      await supabaseAdmin.from('CharacterBloodBondMember').delete().in('bloodBondId', ids)
+    }
+    await supabaseAdmin.from('CharacterBloodBond').delete().eq('characterId', characterId)
+    for (let i = 0; i < data.bloodBonds.length; i++) {
+      const bb = data.bloodBonds[i]
+      const { data: inserted } = await supabaseAdmin
+        .from('CharacterBloodBond')
+        .insert({
+          characterId,
+          requiredStars: bb.requiredStars || 0,
+          bonuses: JSON.stringify(bb.bonuses || []),
+          sortOrder: i,
+        })
+        .select('id')
+        .single()
+      if (inserted && Array.isArray(bb.memberIds)) {
+        const members = bb.memberIds.map((mid: string, j: number) => ({
+          bloodBondId: inserted.id,
+          memberId: mid,
+          sortOrder: j,
+        }))
+        if (members.length > 0) {
+          await supabaseAdmin.from('CharacterBloodBondMember').insert(members)
+        }
+      }
+    }
+  }
+
+  // Equipment links
+  if (Array.isArray(data.equipmentIds)) {
+    await supabaseAdmin.from('CharacterEquipment').delete().eq('characterId', characterId)
+    if (data.equipmentIds.length > 0) {
+      await supabaseAdmin.from('CharacterEquipment').insert(
+        data.equipmentIds.map((eid: string, i: number) => ({
+          characterId,
+          equipmentId: eid,
+          sortOrder: i,
+        }))
+      )
+    }
+  }
+
+  // Article links
+  if (Array.isArray(data.articleIds)) {
+    await supabaseAdmin.from('CharacterArticle').delete().eq('characterId', characterId)
+    if (data.articleIds.length > 0) {
+      await supabaseAdmin.from('CharacterArticle').insert(
+        data.articleIds.map((aid: string, i: number) => ({
+          characterId,
+          articleId: aid,
+          sortOrder: i,
+        }))
+      )
+    }
   }
 }

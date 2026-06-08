@@ -83,29 +83,113 @@ model CharacterFilterOption {
 }
 
 model Character {
-  id          String            @id @default(cuid())
+  id             String            @id @default(cuid())
+  name           String
+  slug           String            @unique
+  avatar         String?
+  banner         String?
+  bannerPosition String?
+  rarity         String            @default("金")
+  traits         String?
+  troopType      String?
+  acquisition    String?
+  story          String?
+  attributes     String?
+  skills         String?
+  categoryId     String
+  sortOrder      Int               @default(0)
+  isPublished    Boolean           @default(false)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  category       CharacterCategory @relation(fields: [categoryId], references: [id])
+  skins          CharacterSkin[]
+  skinBonds      CharacterSkinBond[]
+  teamComps      CharacterTeamComp[]
+  bloodBonds     CharacterBloodBond[]
+  equipments     CharacterEquipment[]
+  articles       CharacterArticle[]
+}
+
+model CharacterSkin {
+  id          String    @id @default(cuid())
+  characterId String
   name        String
-  slug        String            @unique
-  title       String?
-  avatar      String?
-  banner      String?
-  rarity      Int               @default(5)
-  role        String?
-  weapon      String?
-  coreBonus   String?
+  art         String?
+  icon        String?
+  bonuses     String?
   acquisition String?
-  description String?
-  attributes  String?
-  skills      String?
-  rumors      String?
-  teamComp    String?
-  troopRec    String?
-  categoryId  String
-  sortOrder   Int               @default(0)
-  isPublished Boolean           @default(false)
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  category    CharacterCategory @relation(fields: [categoryId], references: [id])
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+}
+
+model CharacterSkinBond {
+  id          String    @id @default(cuid())
+  characterId String
+  name        String
+  skinIds     String    @default("[]")
+  bonuses     String?
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+}
+
+model CharacterTeamComp {
+  id          String                    @id @default(cuid())
+  characterId String
+  name        String
+  reason      String?
+  sortOrder   Int                       @default(0)
+  createdAt   DateTime                  @default(now())
+  updatedAt   DateTime                  @updatedAt
+  character   Character                 @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  members     CharacterTeamCompMember[]
+}
+
+model CharacterTeamCompMember {
+  id         String            @id @default(cuid())
+  teamCompId String
+  memberId   String
+  sortOrder  Int               @default(0)
+  teamComp   CharacterTeamComp @relation(fields: [teamCompId], references: [id], onDelete: Cascade)
+}
+
+model CharacterBloodBond {
+  id            String                     @id @default(cuid())
+  characterId   String
+  requiredStars Int                        @default(0)
+  bonuses       String?
+  sortOrder     Int                        @default(0)
+  createdAt     DateTime                   @default(now())
+  updatedAt     DateTime                   @updatedAt
+  character     Character                  @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  members       CharacterBloodBondMember[]
+}
+
+model CharacterBloodBondMember {
+  id          String             @id @default(cuid())
+  bloodBondId String
+  memberId    String
+  sortOrder   Int                @default(0)
+  bloodBond   CharacterBloodBond @relation(fields: [bloodBondId], references: [id], onDelete: Cascade)
+}
+
+model CharacterEquipment {
+  id          String    @id @default(cuid())
+  characterId String
+  equipmentId String
+  sortOrder   Int       @default(0)
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+}
+
+model CharacterArticle {
+  id          String    @id @default(cuid())
+  characterId String
+  articleId   String
+  sortOrder   Int       @default(0)
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
 }
 
 model BuildingCategory {
