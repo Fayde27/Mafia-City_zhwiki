@@ -50,7 +50,7 @@ const SECTIONS = [
 
 const TRAIT_OPTIONS = ['攻擊型', '防禦型', '輔助型', '控制型', '速度型', '魅帥型']
 const RARITY_OPTIONS = ['金', '紫', '藍']
-const SKILL_TYPES = ['帶動生效', '被動生效', '主動技能', '觸發效果']
+const SKILL_TYPES = ['帶隊生效', '被動生效']
 
 // ─── Radar chart preview ─────────────────────────────────────────────────────
 
@@ -121,6 +121,77 @@ function RadarPreview({ attrs }: { attrs: any }) {
 }
 
 // ─── Reusable sub-components ─────────────────────────────────────────────────
+
+function SkillIconInput({ value, onChange }: { value: string; onChange: (url: string) => void }) {
+  const [uploading, setUploading] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
+  const divRef = useRef<HTMLDivElement>(null)
+  const activeRef = useRef(false)
+
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      if (!activeRef.current) return
+      const items = e.clipboardData ? Array.from(e.clipboardData.items) : []
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          e.preventDefault()
+          const file = item.getAsFile()
+          if (file) upload(file)
+          return
+        }
+      }
+    }
+    document.addEventListener('paste', handlePaste)
+    return () => document.removeEventListener('paste', handlePaste)
+  }, [])
+
+  const upload = async (file: File) => {
+    setUploading(true)
+    try {
+      const fd = new FormData(); fd.append('file', file)
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (res.ok) onChange(data.url)
+      else alert(data.error || '上傳失敗')
+    } catch { alert('網絡錯誤') }
+    setUploading(false)
+  }
+
+  return (
+    <div className="flex gap-2 items-center"
+      ref={divRef}
+      onMouseEnter={() => { activeRef.current = true }}
+      onMouseLeave={() => { activeRef.current = false }}>
+      {value ? (
+        <img src={value} alt="icon" className="w-10 h-10 object-contain rounded border border-wiki-border flex-shrink-0 bg-wiki-gray" />
+      ) : (
+        <div className="w-10 h-10 rounded border border-dashed border-wiki-border flex-shrink-0 bg-wiki-gray flex items-center justify-center text-wiki-text-muted text-lg">
+          {uploading ? '…' : '?'}
+        </div>
+      )}
+      <div className="flex-1 min-w-0">
+        <input className="w-full bg-wiki-gray-light border border-wiki-border px-2 py-1.5 text-xs text-wiki-text focus:border-wiki-accent focus:outline-none mb-1"
+          value={value} placeholder="URL 或懸停後 Ctrl+V 貼圖"
+          onChange={e => onChange(e.target.value)} />
+        <div className="flex gap-1">
+          <button type="button" disabled={uploading}
+            onClick={() => fileRef.current?.click()}
+            className="text-xs px-2 py-1 bg-wiki-gray border border-wiki-border text-wiki-text-muted hover:border-wiki-accent hover:text-wiki-text disabled:opacity-50">
+            {uploading ? '上傳中…' : '選擇文件'}
+          </button>
+          {value && (
+            <button type="button" onClick={() => onChange('')}
+              className="text-xs px-2 py-1 bg-wiki-gray border border-wiki-border text-wiki-text-muted hover:border-red-500 hover:text-red-400">
+              清除
+            </button>
+          )}
+        </div>
+      </div>
+      <input ref={fileRef} type="file" accept="image/*" className="hidden"
+        onChange={e => { const f = e.target.files?.[0]; if (f) upload(f); e.target.value = '' }} />
+    </div>
+  )
+}
 
 function BonusRepeater({ bonuses, onChange }: { bonuses: SkinBonus[]; onChange: (b: SkinBonus[]) => void }) {
   return (
@@ -214,6 +285,7 @@ export default function AdminCharacterEditPage() {
 
   // Articles
   const [articleIds, setArticleIds] = useState<string[]>([])
+  const [articleSearch, setArticleSearch] = useState('')
 
   // ── Auth & data load ──────────────────────────────────────────────────────
 
@@ -541,10 +613,11 @@ export default function AdminCharacterEditPage() {
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-xs text-wiki-text-muted mb-1">圖標URL</label>
-                          <input className="w-full bg-wiki-gray-light border border-wiki-border px-3 py-2 text-sm text-wiki-text focus:border-wiki-accent focus:outline-none"
-                            value={sk.icon} placeholder="圖標URL"
-                            onChange={e => { const n = [...skills]; n[i] = { ...sk, icon: e.target.value }; setSkills(n) }} />
+                          <label className="block text-xs text-wiki-text-muted mb-1">技能圖標</label>
+                          <SkillIconInput
+                            value={sk.icon}
+                            onChange={url => { const n = [...skills]; n[i] = { ...sk, icon: url }; setSkills(n) }}
+                          />
                         </div>
                         <div>
                           <label className="block text-xs text-wiki-text-muted mb-1">類型</label>
@@ -836,23 +909,37 @@ export default function AdminCharacterEditPage() {
 
               {/* §10 關聯攻略 */}
               <div ref={el => { sectionRefs.current['articles'] = el }} className={cardCls}>
-                <h3 className="text-lg font-bold text-wiki-accent mb-5">關聯攻略</h3>
+                <h3 className="text-lg font-bold text-wiki-accent mb-4">關聯攻略</h3>
+                <input
+                  className="w-full bg-wiki-gray border border-wiki-border px-3 py-2 text-sm text-wiki-text focus:border-wiki-accent focus:outline-none mb-3"
+                  placeholder="搜尋文章標題..."
+                  value={articleSearch}
+                  onChange={e => setArticleSearch(e.target.value)}
+                />
                 <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {allArticles.map(art => {
-                    const sel = articleIds.includes(art.id)
-                    return (
-                      <label key={art.id}
-                        className={`flex items-center gap-2 p-3 border cursor-pointer transition-colors rounded
-                          ${sel ? 'border-wiki-accent bg-wiki-accent/10' : 'border-wiki-border bg-wiki-gray hover:border-wiki-accent/50'}`}>
-                        <input type="checkbox" className="accent-wiki-accent"
-                          checked={sel}
-                          onChange={e => setArticleIds(e.target.checked ? [...articleIds, art.id] : articleIds.filter(id => id !== art.id))} />
-                        <span className="text-sm text-wiki-text truncate">{art.title}</span>
-                      </label>
-                    )
-                  })}
+                  {allArticles
+                    .filter(art => !articleSearch || art.title.toLowerCase().includes(articleSearch.toLowerCase()))
+                    .map(art => {
+                      const sel = articleIds.includes(art.id)
+                      return (
+                        <label key={art.id}
+                          className={`flex items-center gap-2 p-3 border cursor-pointer transition-colors rounded
+                            ${sel ? 'border-wiki-accent bg-wiki-accent/10' : 'border-wiki-border bg-wiki-gray hover:border-wiki-accent/50'}`}>
+                          <input type="checkbox" className="accent-wiki-accent"
+                            checked={sel}
+                            onChange={e => setArticleIds(e.target.checked ? [...articleIds, art.id] : articleIds.filter(id => id !== art.id))} />
+                          <span className="text-sm text-wiki-text truncate">{art.title}</span>
+                        </label>
+                      )
+                    })}
                   {allArticles.length === 0 && <p className="text-wiki-text-muted text-sm text-center py-4">文章庫為空</p>}
+                  {allArticles.length > 0 && articleSearch && allArticles.filter(a => a.title.toLowerCase().includes(articleSearch.toLowerCase())).length === 0 && (
+                    <p className="text-wiki-text-muted text-sm text-center py-4">無符合結果</p>
+                  )}
                 </div>
+                {articleIds.length > 0 && (
+                  <p className="text-xs text-wiki-text-muted mt-2">已選 {articleIds.length} 篇</p>
+                )}
               </div>
 
               {/* Bottom save */}
