@@ -54,70 +54,239 @@ const SKILL_TYPES = ['帶隊生效', '被動生效']
 
 // ─── Radar chart preview ─────────────────────────────────────────────────────
 
-function RadarPreview({ attrs }: { attrs: any }) {
-  const size = 160
-  const cx = size / 2
-  const cy = size / 2
-  const r = 60
+// ─── Shared radar logic ──────────────────────────────────────────────────────
+
+function RadarSVG({ attrs, size, r }: { attrs: any; size: number; r: number }) {
+  const cx = size / 2, cy = size / 2
   const labels = ['攻擊', '防衛', '魅帥', '速度']
   const angles = labels.map((_, i) => (Math.PI * 2 * i) / 4 - Math.PI / 2)
-
-  const toXY = (angle: number, radius: number) => ({
-    x: cx + radius * Math.cos(angle),
-    y: cy + radius * Math.sin(angle),
-  })
-
-  const baseVals = [
-    Number(attrs?.attackBase) || 0,
-    Number(attrs?.defenseBase) || 0,
-    Number(attrs?.charismaBase) || 0,
-    Number(attrs?.speedBase) || 0,
-  ]
-  const maxVals = [
-    Number(attrs?.attackMax) || 0,
-    Number(attrs?.defenseMax) || 0,
-    Number(attrs?.charismaMax) || 0,
-    Number(attrs?.speedMax) || 0,
-  ]
+  const toXY = (angle: number, radius: number) => ({ x: cx + radius * Math.cos(angle), y: cy + radius * Math.sin(angle) })
+  const baseVals = [attrs?.attackBase, attrs?.defenseBase, attrs?.charismaBase, attrs?.speedBase].map(Number)
+  const maxVals  = [attrs?.attackMax,  attrs?.defenseMax,  attrs?.charismaMax,  attrs?.speedMax ].map(Number)
   const globalMax = 100
-
-  const polyPoints = (vals: number[]) =>
-    vals.map((v, i) => {
-      const pt = toXY(angles[i], (v / globalMax) * r)
-      return `${pt.x},${pt.y}`
-    }).join(' ')
-
+  const polyPoints = (vals: number[]) => vals.map((v, i) => { const p = toXY(angles[i], (v / globalMax) * r); return `${p.x},${p.y}` }).join(' ')
   return (
-    <svg width={size} height={size} className="mx-auto">
-      {[0.25, 0.5, 0.75, 1].map((frac) => (
-        <polygon
-          key={frac}
-          points={angles.map(a => {
-            const pt = toXY(a, r * frac)
-            return `${pt.x},${pt.y}`
-          }).join(' ')}
-          fill="none" stroke="#4b5563" strokeWidth="1"
-        />
+    <svg width={size} height={size}>
+      {[0.25, 0.5, 0.75, 1].map(f => (
+        <polygon key={f} points={angles.map(a => { const p = toXY(a, r * f); return `${p.x},${p.y}` }).join(' ')} fill="none" stroke="#4b5563" strokeWidth="1" />
       ))}
-      {angles.map((a, i) => {
-        const outer = toXY(a, r)
-        return <line key={i} x1={cx} y1={cy} x2={outer.x} y2={outer.y} stroke="#4b5563" strokeWidth="1" />
-      })}
-      {baseVals.some(v => v > 0) && (
-        <polygon points={polyPoints(baseVals)} fill="rgba(59,130,246,0.3)" stroke="#3b82f6" strokeWidth="1.5" />
-      )}
-      {maxVals.some(v => v > 0) && (
-        <polygon points={polyPoints(maxVals)} fill="rgba(212,175,55,0.25)" stroke="#d4af37" strokeWidth="1.5" />
-      )}
-      {labels.map((label, i) => {
-        const pt = toXY(angles[i], r + 14)
-        return (
-          <text key={i} x={pt.x} y={pt.y} textAnchor="middle" dominantBaseline="middle"
-            fontSize="10" fill="#d1b27a">{label}</text>
-        )
-      })}
+      {angles.map((a, i) => { const o = toXY(a, r); return <line key={i} x1={cx} y1={cy} x2={o.x} y2={o.y} stroke="#4b5563" strokeWidth="1" /> })}
+      {baseVals.some(v => v > 0) && <polygon points={polyPoints(baseVals)} fill="rgba(59,130,246,0.3)" stroke="#3b82f6" strokeWidth="1.5" />}
+      {maxVals.some(v => v > 0) && <polygon points={polyPoints(maxVals)} fill="rgba(212,175,55,0.25)" stroke="#d4af37" strokeWidth="1.5" />}
+      {labels.map((label, i) => { const p = toXY(angles[i], r + (size > 200 ? 18 : 14)); return <text key={i} x={p.x} y={p.y} textAnchor="middle" dominantBaseline="middle" fontSize={size > 200 ? 13 : 10} fill="#d1b27a" fontWeight="bold">{label}</text> })}
     </svg>
   )
+}
+
+// ─── Hero preview modal ───────────────────────────────────────────────────────
+
+interface PreviewProps {
+  name: string; slug: string; rarity: string; traits: string[]; troopType: string
+  acquisition: string; avatar: string; avatarPosition: string; banner: string; bannerPosition: string
+  attrs: any; skills: SkillEntry[]; skins: SkinEntry[]; skinBonds: SkinBondEntry[]
+  teamComps: TeamCompEntry[]; bloodBonds: BloodBondEntry[]
+  allCharacters: CharacterOption[]
+  onClose: () => void
+}
+
+function HeroPreviewModal(p: PreviewProps) {
+  const [skinTab, setSkinTab] = useState(0)
+  const [teamTab, setTeamTab] = useState(0)
+  const rarityColor = { '金': 'text-yellow-400', '紫': 'text-purple-400', '藍': 'text-blue-400' }[p.rarity] || 'text-wiki-text'
+
+  const memberName = (id: string) => p.allCharacters.find(c => c.id === id)?.name || id
+
+  return (
+    <div className="fixed inset-0 z-50 flex bg-black/80" onClick={e => { if (e.target === e.currentTarget) p.onClose() }}>
+      <div className="ml-auto w-full max-w-3xl h-full bg-wiki-bg overflow-y-auto flex flex-col shadow-2xl">
+        {/* top bar */}
+        <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-3 bg-wiki-gray-light border-b border-wiki-border">
+          <span className="text-sm font-bold text-wiki-accent">預覽（當前表單數據）</span>
+          <button onClick={p.onClose} className="text-wiki-text-muted hover:text-wiki-text text-2xl leading-none">×</button>
+        </div>
+
+        <div className="flex-1 p-5 space-y-5">
+          {/* Banner */}
+          <div className="relative rounded-xl overflow-hidden bg-wiki-gray-light border border-wiki-border" style={{ minHeight: 180 }}>
+            {p.banner && (
+              <img src={p.banner} alt={p.name} className="absolute inset-0 w-full h-full object-cover"
+                style={{ objectPosition: p.bannerPosition }} />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+            <div className="relative z-10 flex items-end gap-4 p-5">
+              {p.avatar && (
+                <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-wiki-accent bg-wiki-gray flex-shrink-0">
+                  <img src={p.avatar} alt={p.name} className="w-full h-full object-cover" style={{ objectPosition: p.avatarPosition }} />
+                </div>
+              )}
+              <div>
+                <h2 className="text-2xl font-heading font-bold text-white heading-hard">{p.name || '（未填名稱）'}</h2>
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  <span className={`font-bold ${rarityColor}`}>{p.rarity}</span>
+                  {p.traits.map(t => <span key={t} className="px-2 py-0.5 text-xs bg-wiki-accent/20 text-wiki-accent border border-wiki-accent/40 rounded">{t}</span>)}
+                  {p.troopType && <span className="px-2 py-0.5 text-xs bg-white/10 text-white/80 border border-white/20 rounded">{p.troopType}</span>}
+                  {p.acquisition && <span className="text-xs text-white/60">獲取：{p.acquisition}</span>}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Attributes */}
+          <PreviewCard title="英雄屬性">
+            <div className="flex gap-6 items-center flex-wrap">
+              <RadarSVG attrs={p.attrs} size={200} r={72} />
+              <table className="flex-1 text-sm min-w-[180px]">
+                <thead><tr className="border-b border-wiki-border">
+                  <th className="text-left py-1.5 text-wiki-text-muted">屬性</th>
+                  <th className="text-right py-1.5 text-blue-400">初始</th>
+                  <th className="text-right py-1.5 text-yellow-500">滿級</th>
+                </tr></thead>
+                <tbody>
+                  {[['攻擊','attackBase','attackMax'],['防衛','defenseBase','defenseMax'],['魅帥','charismaBase','charismaMax'],['速度','speedBase','speedMax']].map(([l,b,m]) => (
+                    <tr key={l} className="border-b border-wiki-border/40">
+                      <td className="py-2 text-wiki-text font-bold">{l}</td>
+                      <td className="py-2 text-right text-blue-300">{(p.attrs as any)?.[b] || '—'}</td>
+                      <td className="py-2 text-right text-yellow-400 font-bold">{(p.attrs as any)?.[m] || '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="flex gap-4 mt-2 text-xs text-wiki-text-muted">
+              <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 bg-blue-400"></span>初始值</span>
+              <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 bg-yellow-500"></span>滿級值</span>
+            </div>
+          </PreviewCard>
+
+          {/* Skills */}
+          {p.skills.length > 0 && (
+            <PreviewCard title="英雄技能">
+              <div className="space-y-3">
+                {p.skills.map((sk, i) => (
+                  <div key={i} className="flex gap-3 bg-wiki-gray rounded p-3">
+                    {sk.icon
+                      ? <img src={sk.icon} alt={sk.name} className="w-10 h-10 object-contain rounded flex-shrink-0" />
+                      : <div className="w-10 h-10 bg-wiki-border rounded flex-shrink-0 flex items-center justify-center text-wiki-text-muted">⚔</div>}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                        <span className="font-bold text-wiki-text text-sm">{sk.name || '（未填名稱）'}</span>
+                        <span className={`px-2 py-0.5 text-xs rounded border ${sk.type === '帶隊生效' ? 'bg-blue-900/40 border-blue-500/40 text-blue-300' : 'bg-wiki-accent/10 border-wiki-accent/30 text-wiki-accent'}`}>{sk.type}</span>
+                      </div>
+                      <p className="text-xs text-wiki-text-muted">{sk.effect || '（未填效果）'}</p>
+                      {sk.multiplier && <p className="text-xs text-wiki-accent mt-0.5">升級倍率：{sk.multiplier}</p>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </PreviewCard>
+          )}
+
+          {/* Team comps */}
+          {p.teamComps.length > 0 && (
+            <PreviewCard title="陣容搭配">
+              <div className="flex gap-2 mb-3 flex-wrap">
+                {p.teamComps.map((tc, i) => (
+                  <button key={i} type="button" onClick={() => setTeamTab(i)}
+                    className={`px-3 py-1 text-xs font-bold border rounded transition-colors ${teamTab === i ? 'border-wiki-accent text-wiki-accent bg-wiki-accent/10' : 'border-wiki-border text-wiki-text-muted'}`}>
+                    {tc.name || `搭配 ${i+1}`}
+                  </button>
+                ))}
+              </div>
+              {p.teamComps[teamTab] && (
+                <>
+                  <div className="flex gap-3 flex-wrap mb-2">
+                    {p.teamComps[teamTab].memberIds.map(id => (
+                      <div key={id} className="flex flex-col items-center gap-1">
+                        <div className="w-10 h-10 rounded-full bg-wiki-gray border border-wiki-border flex items-center justify-center text-xs text-wiki-text-muted">?</div>
+                        <span className="text-xs text-wiki-text-muted">{memberName(id)}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {p.teamComps[teamTab].reason && <p className="text-sm text-wiki-text-muted">{p.teamComps[teamTab].reason}</p>}
+                </>
+              )}
+            </PreviewCard>
+          )}
+
+          {/* Skins */}
+          {p.skins.length > 0 && (
+            <PreviewCard title="英雄皮膚">
+              <div className="flex gap-2 mb-3 flex-wrap">
+                {p.skins.map((sk, i) => (
+                  <button key={i} type="button" onClick={() => setSkinTab(i)}
+                    className={`px-3 py-1 text-xs font-bold border rounded transition-colors ${skinTab === i ? 'border-wiki-accent text-wiki-accent bg-wiki-accent/10' : 'border-wiki-border text-wiki-text-muted'}`}>
+                    {sk.name || `皮膚 ${i+1}`}
+                  </button>
+                ))}
+              </div>
+              {p.skins[skinTab] && (
+                <div className="flex gap-4 flex-col sm:flex-row">
+                  {p.skins[skinTab].art
+                    ? <div className="flex-shrink-0 flex items-end justify-center bg-wiki-gray rounded" style={{minHeight:200}}><img src={p.skins[skinTab].art} alt="" className="h-48 object-contain object-bottom" /></div>
+                    : <div className="flex-shrink-0 w-28 h-48 bg-wiki-gray rounded flex items-center justify-center text-wiki-text-muted text-sm">無立繪</div>}
+                  <div className="flex-1">
+                    <p className="font-bold text-wiki-text mb-2">{p.skins[skinTab].name}</p>
+                    {p.skins[skinTab].acquisition && <p className="text-xs text-wiki-text-muted mb-2">獲取：<span className="text-wiki-accent">{p.skins[skinTab].acquisition}</span></p>}
+                    {p.skins[skinTab].bonuses.length > 0 && p.skins[skinTab].bonuses.map((b, bi) => (
+                      <div key={bi} className="flex justify-between text-sm"><span className="text-wiki-text-muted">{b.label}</span><span className="text-wiki-accent font-bold">{b.value}</span></div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {p.skinBonds.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-wiki-border">
+                  <p className="font-bold text-wiki-text text-sm mb-2">皮膚羁绊</p>
+                  {p.skinBonds.map((sb, i) => (
+                    <div key={i} className="bg-wiki-gray rounded p-3 mb-2">
+                      <p className="font-bold text-wiki-accent text-sm mb-1">{sb.name}</p>
+                      <div className="flex flex-wrap gap-4">{sb.bonuses.map((b, bi) => <div key={bi} className="flex gap-2 text-xs"><span className="text-wiki-text-muted">{b.label}</span><span className="text-wiki-accent font-bold">{b.value}</span></div>)}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </PreviewCard>
+          )}
+
+          {/* Blood bonds */}
+          {p.bloodBonds.length > 0 && (
+            <PreviewCard title="血盟">
+              {p.bloodBonds.map((bb, i) => (
+                <div key={i} className="bg-wiki-gray rounded p-3 mb-2">
+                  <div className="flex items-center gap-3 mb-2 flex-wrap">
+                    <div className="flex gap-2">
+                      {bb.memberIds.map(id => (
+                        <div key={id} className="flex flex-col items-center gap-1">
+                          <div className="w-9 h-9 rounded-full bg-wiki-bg border border-wiki-border flex items-center justify-center text-xs text-wiki-text-muted">?</div>
+                          <span className="text-xs text-wiki-text-muted">{memberName(id)}</span>
+                        </div>
+                      ))}
+                    </div>
+                    {bb.requiredStars > 0 && <span className="text-xs text-wiki-text-muted">{'★'.repeat(bb.requiredStars)} 星解鎖</span>}
+                  </div>
+                  <div className="flex flex-wrap gap-4">{bb.bonuses.map((b, bi) => <div key={bi} className="flex gap-2 text-xs"><span className="text-wiki-text-muted">{b.label}</span><span className="text-wiki-accent font-bold">{b.value}</span></div>)}</div>
+                </div>
+              ))}
+            </PreviewCard>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function PreviewCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="bg-wiki-gray-light border border-wiki-border rounded-lg overflow-hidden">
+      <div className="px-4 py-3 border-b border-wiki-border">
+        <h3 className="text-sm font-heading font-bold text-wiki-accent heading-hard">{title}</h3>
+      </div>
+      <div className="p-4">{children}</div>
+    </div>
+  )
+}
+
+function RadarPreview({ attrs }: { attrs: any }) {
+  return <div className="mx-auto w-fit"><RadarSVG attrs={attrs} size={160} r={60} /></div>
 }
 
 // ─── Reusable sub-components ─────────────────────────────────────────────────
@@ -237,6 +406,7 @@ export default function AdminCharacterEditPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [activeSection, setActiveSection] = useState('basic')
+  const [previewOpen, setPreviewOpen] = useState(false)
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   // Basic fields
@@ -432,9 +602,16 @@ export default function AdminCharacterEditPage() {
             </h1>
             <p className="text-wiki-text-muted text-sm mt-1">英雄圖鑑詳細資料</p>
           </div>
-          <Link href="/admin/characters" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
-            返回列表
-          </Link>
+          <div className="flex items-center gap-3">
+            <button type="button"
+              onClick={() => setPreviewOpen(true)}
+              className="px-4 py-2 border border-wiki-accent text-wiki-accent font-bold text-sm hover:bg-wiki-accent hover:text-wiki-bg transition-colors">
+              預覽
+            </button>
+            <Link href="/admin/characters" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
+              返回列表
+            </Link>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -958,6 +1135,20 @@ export default function AdminCharacterEditPage() {
         </form>
       </main>
       <WikiFooter />
+
+      {previewOpen && (
+        <HeroPreviewModal
+          name={name} slug={slug} rarity={rarity} traits={traits}
+          troopType={troopType} acquisition={acquisition}
+          avatar={avatar} avatarPosition={avatarPosition}
+          banner={banner} bannerPosition={bannerPosition}
+          attrs={attrs} skills={skills}
+          skins={skins} skinBonds={skinBonds}
+          teamComps={teamComps} bloodBonds={bloodBonds}
+          allCharacters={allCharacters}
+          onClose={() => setPreviewOpen(false)}
+        />
+      )}
     </div>
   )
 }
