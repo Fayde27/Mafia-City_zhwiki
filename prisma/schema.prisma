@@ -87,6 +87,7 @@ model Character {
   name           String
   slug           String            @unique
   avatar         String?
+  avatarPosition String?
   banner         String?
   bannerPosition String?
   rarity         String            @default("金")
