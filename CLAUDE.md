@@ -40,14 +40,43 @@ const labelCls = 'block text-wiki-text text-sm font-bold uppercase tracking-wide
 
 每個模塊的通用形狀：`XxxCategory` + `Xxx` 主表 + `XxxFilterOption`。API 路由對應 `/api/admin/xxx` 和 `/api/wiki/xxx`。
 
-**英雄圖鑑**是最複雜的模塊，`Character` 主表掛 8 張關聯表（皮膚、羁绊、陣容、血盟、裝備、攻略），是後續類似模塊（如豪杰圖鑑）的參考範本。
+### 角色圖鑑（英雄 + 豪杰共用 `Character` 表）
+
+`Character` 表以 `characterType` 欄位區分：
+- `characterType = 'hero'` → 英雄圖鑑，由 `/api/admin/characters` 管理
+- `characterType = 'haojie'` → 豪杰圖鑑，由 `/api/admin/haojie` 管理
+
+**後台統一入口**：`/admin/characters`（三 Tab：全部 / 英雄 / 豪杰），編輯按鈕根據 `characterType` 智能路由：
+- 英雄 → `/admin/characters/edit/[id]`
+- 豪杰 → `/admin/characters/haojie/edit/[id]`
+
+**英雄圖鑑**（`characterType = 'hero'`）：
+- 8 張關聯表：皮膚、羁绊、陣容成員、血盟成員、裝備、攻略
+- 4 軸雷達圖：攻擊 / 防衛 / 魅帥 / 速度
+- 編輯頁：`src/app/admin/characters/edit/[id]/page.tsx`（是所有大型編輯頁的標準範本）
+
+**豪杰圖鑑**（`characterType = 'haojie'`）：
+- 無複雜關聯表，所有內容存主表 JSON 欄位
+- 5 軸雷達圖：力量 / 技術 / 體魄 / 防護 / 速度（存於 `attributes` JSON）
+- 裝備：武器 + 戰徽各一件，存於 `haojieEquip` JSON（`{weapon, warbadge}`）；後續武器/戰徽圖鑑上線後改為 ID 引用
+- 覺醒狀態：`awakenHero` Boolean 欄位
+- 編輯頁：`src/app/admin/characters/haojie/edit/[id]/page.tsx`
+- 7 個內容區塊：基本信息 / 圖片上傳 / 豪杰屬性 / 豪杰技能 / 裝備推薦 / 配隊推薦 / 黑道傳聞
+
+**`Character` 表關鍵欄位（豪杰相關）：**
+```
+characterType  TEXT DEFAULT 'hero'
+awakenHero     BOOLEAN DEFAULT false
+haojieEquip    TEXT  (JSON: {weapon, warbadge})
+attributes     TEXT  (JSON: 英雄用4軸, 豪杰用5軸)
+```
 
 ---
 
 ## 常用命令
 
 ```bash
-npm run dev          # 本地開發
+npm run dev               # 本地開發
 npx prisma migrate dev    # 本地 DB 遷移
 git push origin main      # 推送（SSH 已配置）
 # 若報 safe.directory 錯誤：
@@ -58,6 +87,9 @@ git config --global --add safe.directory 'C:/Users/danqing/Desktop/vibe coding/�
 
 ## 待辦
 
-- 英雄列表頁 `/wiki/characters/heroes`
-- 豪杰圖鑑（複用 Character 表 + categoryId 區分，新建 Wiki 詳情頁和 Wiki API 即可）
+- 英雄 Wiki 列表頁 `/wiki/characters/heroes`
+- 豪杰 Wiki 列表頁 `/wiki/characters/haojie`
+- 豪杰 Wiki 詳情頁 + 對應 `/api/wiki/haojie` 路由
+- 武器圖鑑（後續對接豪杰裝備 `weapon` 欄位）
+- 戰徽圖鑑（後續對接豪杰裝備 `warbadge` 欄位）
 - 各圖鑑跳轉 `href="#"` 預留位後續補充
