@@ -10,7 +10,6 @@ import { useAdminAuth } from '@/hooks/useAdminAuth'
 import { useRouter } from 'next/navigation'
 
 type Tab = 'list' | 'categories' | 'filters'
-type TypeFilter = 'all' | 'hero' | 'haojie'
 
 interface Character {
   id: string; name: string; slug: string; title: string; avatar: string
@@ -29,7 +28,6 @@ export default function AdminCharactersPage() {
   const { isAdmin, isLoaded } = useAdminAuth()
   const [activeTab, setActiveTab] = useState<Tab>('list')
   const [loading, setLoading] = useState(true)
-  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all')
 
   // 列表
   const [characters, setCharacters] = useState<Character[]>([])
@@ -85,10 +83,12 @@ export default function AdminCharactersPage() {
     refetchChars()
   }
 
-  const editLink = (c: Character) =>
-    c.characterType === 'haojie'
+  const editLink = (c: Character) => {
+    const isHaojie = c.characterType === 'haojie' || c.CharacterCategory?.name === '豪杰'
+    return isHaojie
       ? `/admin/characters/haojie/edit/${c.id}`
       : `/admin/characters/edit/${c.id}`
+  }
 
   const handleCatSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -132,10 +132,11 @@ export default function AdminCharactersPage() {
 
   if (!isAdmin) return null
 
-  // 依類型 + 分類篩選
-  const byType = typeFilter === 'all' ? characters
-    : characters.filter(c => c.characterType === typeFilter)
-  const filtered = filterCatSlug === 'all' ? byType : byType.filter(c => c.CharacterCategory?.slug === filterCatSlug)
+  const filtered = filterCatSlug === 'all' ? characters : characters.filter(c => c.CharacterCategory?.slug === filterCatSlug)
+
+  // 根據當前分類推斷新增類型
+  const selectedCat = categories.find(c => c.slug === filterCatSlug)
+  const selectedCatName = selectedCat?.name ?? ''
 
   const currentOptions = filterOptions.filter(o => o.categoryId === selectedCatId)
   const existingTypes = Array.from(new Set(currentOptions.map(o => o.type))).sort()
@@ -143,7 +144,6 @@ export default function AdminCharactersPage() {
   const allTypes = Array.from(new Set(filterOptions.map(o => o.type))).sort()
 
   const tabCls = (t: Tab) => `px-6 py-3 font-bold text-sm border-b-2 transition-colors ${activeTab === t ? 'border-wiki-accent text-wiki-accent' : 'border-transparent text-wiki-text-muted hover:text-wiki-text'}`
-  const typeBtnCls = (t: TypeFilter) => `px-4 py-2 text-sm font-bold whitespace-nowrap transition-colors ${typeFilter === t ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`
   const catBtnCls = (active: boolean) => `px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-colors ${active ? 'bg-wiki-accent/20 text-wiki-accent border border-wiki-accent/40' : 'bg-wiki-gray text-wiki-text-muted border border-wiki-border hover:text-wiki-text'}`
 
   const newHeroLink = '/admin/characters/edit/new'
@@ -158,14 +158,14 @@ export default function AdminCharactersPage() {
             <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">角色圖鑑管理</h1>
             <p className="text-wiki-text-muted text-sm mt-1">管理英雄與豪杰的列表、分類及篩選設定</p>
           </div>
-          {activeTab === 'list' && (
+          {activeTab === 'list' && filterCatSlug !== 'all' && (
             <div className="flex gap-2">
-              {(typeFilter === 'all' || typeFilter === 'haojie') && (
+              {selectedCatName === '豪杰' && (
                 <Link href={newHaojieLink} className="px-4 py-2 bg-wiki-gray border border-wiki-border text-wiki-text text-sm font-bold hover:border-wiki-accent transition-colors">
                   + 新增豪杰
                 </Link>
               )}
-              {(typeFilter === 'all' || typeFilter === 'hero') && (
+              {selectedCatName === '英雄' && (
                 <Link href={newHeroLink} className="btn-hard text-wiki-text text-sm">
                   + 新增英雄
                 </Link>
@@ -191,13 +191,6 @@ export default function AdminCharactersPage() {
             {/* ── 列表 ── */}
             {activeTab === 'list' && (
               <div>
-                {/* 類型切換 */}
-                <div className="flex gap-2 mb-4">
-                  <button onClick={() => { setTypeFilter('all'); setFilterCatSlug('all') }} className={typeBtnCls('all')}>全部</button>
-                  <button onClick={() => { setTypeFilter('hero'); setFilterCatSlug('all') }} className={typeBtnCls('hero')}>☆ 英雄</button>
-                  <button onClick={() => { setTypeFilter('haojie'); setFilterCatSlug('all') }} className={typeBtnCls('haojie')}>★ 豪杰</button>
-                </div>
-
                 {/* 分類篩選 */}
                 <div className="flex gap-2 mb-5 flex-wrap">
                   <button onClick={() => setFilterCatSlug('all')} className={catBtnCls(filterCatSlug === 'all')}>全部分類</button>
@@ -219,7 +212,6 @@ export default function AdminCharactersPage() {
                         <tr>
                           <th className="text-left px-4 py-3 text-wiki-accent font-bold text-sm">角色</th>
                           <th className="text-left px-4 py-3 text-wiki-accent font-bold text-sm">稀有度</th>
-                          <th className="text-left px-4 py-3 text-wiki-accent font-bold text-sm">類型</th>
                           <th className="text-left px-4 py-3 text-wiki-accent font-bold text-sm">分類</th>
                           <th className="text-left px-4 py-3 text-wiki-accent font-bold text-sm">狀態</th>
                           <th className="text-right px-4 py-3 text-wiki-accent font-bold text-sm">操作</th>
@@ -244,15 +236,12 @@ export default function AdminCharactersPage() {
                                 {c.rarity}
                               </span>
                             </td>
-                            <td className="px-4 py-3">
-                              <span className={`px-2 py-0.5 text-xs rounded border ${c.characterType === 'haojie' ? 'bg-wiki-accent/10 text-wiki-accent border-wiki-accent/30' : 'bg-blue-900/20 text-blue-300 border-blue-500/30'}`}>
-                                {c.characterType === 'haojie' ? '豪杰' : '英雄'}
-                              </span>
-                              {c.characterType === 'haojie' && c.awakenHero && (
+                            <td className="px-4 py-3 text-wiki-text-muted text-sm">
+                              {c.CharacterCategory?.name || '-'}
+                              {c.awakenHero && (
                                 <span className="ml-1 px-1.5 py-0.5 text-xs rounded bg-yellow-900/20 text-yellow-400 border border-yellow-500/30">覺醒</span>
                               )}
                             </td>
-                            <td className="px-4 py-3 text-wiki-text-muted text-sm">{c.CharacterCategory?.name || '-'}</td>
                             <td className="px-4 py-3">
                               <button onClick={() => handleTogglePublish(c)}
                                 className={`px-2 py-1 text-xs font-bold rounded ${c.isPublished ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
