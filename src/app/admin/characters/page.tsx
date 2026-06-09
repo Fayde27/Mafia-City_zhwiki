@@ -84,7 +84,8 @@ export default function AdminCharactersPage() {
   }
 
   const editLink = (c: Character) => {
-    const isHaojie = c.characterType === 'haojie' || c.CharacterCategory?.name === '豪杰'
+    const catName = c.CharacterCategory?.name ?? ''
+    const isHaojie = c.characterType === 'haojie' || catName.includes('豪')
     return isHaojie
       ? `/admin/characters/haojie/edit/${c.id}`
       : `/admin/characters/edit/${c.id}`
@@ -160,12 +161,12 @@ export default function AdminCharactersPage() {
           </div>
           {activeTab === 'list' && filterCatSlug !== 'all' && (
             <div className="flex gap-2">
-              {selectedCatName === '豪杰' && (
+              {(selectedCatName.includes('豪') || selectedCatName.toLowerCase().includes('haojie')) && (
                 <Link href={newHaojieLink} className="px-4 py-2 bg-wiki-gray border border-wiki-border text-wiki-text text-sm font-bold hover:border-wiki-accent transition-colors">
                   + 新增豪杰
                 </Link>
               )}
-              {selectedCatName === '英雄' && (
+              {(selectedCatName.includes('英雄') || selectedCatName.toLowerCase().includes('hero')) && (
                 <Link href={newHeroLink} className="btn-hard text-wiki-text text-sm">
                   + 新增英雄
                 </Link>
