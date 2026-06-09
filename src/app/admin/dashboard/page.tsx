@@ -34,7 +34,8 @@ const NAV_SECTIONS = [
   {
     title: '圖鑑管理',
     links: [
-      { label: '角色圖鑑', href: '/admin/characters', icon: '👤', desc: '列表、分類、篩選設定' },
+      { label: '英雄圖鑑', href: '/admin/characters', icon: '👤', desc: '列表、分類、篩選設定' },
+      { label: '豪杰圖鑑', href: '/admin/haojie', icon: '🦸', desc: '豪杰條目管理' },
       { label: '裝備圖鑑', href: '/admin/equipment', icon: '⚔️', desc: '列表、分類、篩選設定' },
       { label: '道具圖鑑', href: '/admin/items', icon: '🎒', desc: '列表、分類、篩選設定' },
       { label: '兵種圖鑑', href: '/admin/troops', icon: '🛡️', desc: '列表、分類、篩選設定' },

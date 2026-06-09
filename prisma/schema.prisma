@@ -97,6 +97,8 @@ model Character {
   story          String?
   attributes     String?
   skills         String?
+  fanNumber      String?
+  awakenHero     Boolean?          @default(false)
   categoryId     String
   sortOrder      Int               @default(0)
   isPublished    Boolean           @default(false)
