@@ -10,10 +10,12 @@ import { useAdminAuth } from '@/hooks/useAdminAuth'
 import { useRouter } from 'next/navigation'
 
 type Tab = 'list' | 'categories' | 'filters'
+type TypeFilter = 'all' | 'hero' | 'haojie'
 
 interface Character {
   id: string; name: string; slug: string; title: string; avatar: string
-  rarity: number; role: string; weapon: string; isPublished: boolean; sortOrder: number
+  rarity: string; role: string; weapon: string; isPublished: boolean; sortOrder: number
+  awakenHero: boolean; characterType: string
   CharacterCategory: { name: string; slug: string } | null
 }
 interface CharacterCategory {
@@ -27,6 +29,7 @@ export default function AdminCharactersPage() {
   const { isAdmin, isLoaded } = useAdminAuth()
   const [activeTab, setActiveTab] = useState<Tab>('list')
   const [loading, setLoading] = useState(true)
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all')
 
   // 列表
   const [characters, setCharacters] = useState<Character[]>([])
@@ -54,7 +57,7 @@ export default function AdminCharactersPage() {
   const fetchAll = async () => {
     try {
       const [charRes, catRes, filterRes] = await Promise.all([
-        fetch('/api/admin/characters').then(r => r.json()),
+        fetch('/api/admin/characters?limit=200').then(r => r.json()),
         fetch('/api/admin/character-categories').then(r => r.json()),
         fetch('/api/admin/character-filters').then(r => r.json()),
       ])
@@ -66,19 +69,26 @@ export default function AdminCharactersPage() {
     } finally { setLoading(false) }
   }
 
-  const refetchChars = () => fetch('/api/admin/characters').then(r => r.json()).then(d => setCharacters(d?.characters || []))
+  const refetchChars = () => fetch('/api/admin/characters?limit=200').then(r => r.json()).then(d => setCharacters(d?.characters || []))
   const refetchCats = () => fetch('/api/admin/character-categories').then(r => r.json()).then(d => setCategories(Array.isArray(d) ? d : []))
   const refetchFilters = () => fetch('/api/admin/character-filters').then(r => r.json()).then(d => setFilterOptions(Array.isArray(d) ? d : []))
 
   const handleTogglePublish = async (c: Character) => {
-    await fetch(`/api/admin/characters/${c.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...c, isPublished: !c.isPublished }) })
+    const api = c.characterType === 'haojie' ? `/api/admin/haojie/${c.id}` : `/api/admin/characters/${c.id}`
+    await fetch(api, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...c, isPublished: !c.isPublished }) })
     refetchChars()
   }
-  const handleDeleteChar = async (id: string) => {
-    if (!confirm('確定要刪除這個角色嗎？')) return
-    await fetch(`/api/admin/characters/${id}`, { method: 'DELETE' })
+  const handleDelete = async (c: Character) => {
+    if (!confirm(`確定要刪除「${c.name}」嗎？`)) return
+    const api = c.characterType === 'haojie' ? `/api/admin/haojie/${c.id}` : `/api/admin/characters/${c.id}`
+    await fetch(api, { method: 'DELETE' })
     refetchChars()
   }
+
+  const editLink = (c: Character) =>
+    c.characterType === 'haojie'
+      ? `/admin/characters/haojie/edit/${c.id}`
+      : `/admin/characters/edit/${c.id}`
 
   const handleCatSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -122,13 +132,22 @@ export default function AdminCharactersPage() {
 
   if (!isAdmin) return null
 
-  const filtered = filterCatSlug === 'all' ? characters : characters.filter(c => c.CharacterCategory?.slug === filterCatSlug)
+  // 依類型 + 分類篩選
+  const byType = typeFilter === 'all' ? characters
+    : characters.filter(c => c.characterType === typeFilter)
+  const filtered = filterCatSlug === 'all' ? byType : byType.filter(c => c.CharacterCategory?.slug === filterCatSlug)
+
   const currentOptions = filterOptions.filter(o => o.categoryId === selectedCatId)
   const existingTypes = Array.from(new Set(currentOptions.map(o => o.type))).sort()
   const groupedOptions = existingTypes.reduce((acc, type) => { acc[type] = currentOptions.filter(o => o.type === type).sort((a, b) => a.sortOrder - b.sortOrder); return acc }, {} as Record<string, FilterOption[]>)
   const allTypes = Array.from(new Set(filterOptions.map(o => o.type))).sort()
-  const getRarityStars = (r: number) => '★'.repeat(r) + '☆'.repeat(5 - r)
+
   const tabCls = (t: Tab) => `px-6 py-3 font-bold text-sm border-b-2 transition-colors ${activeTab === t ? 'border-wiki-accent text-wiki-accent' : 'border-transparent text-wiki-text-muted hover:text-wiki-text'}`
+  const typeBtnCls = (t: TypeFilter) => `px-4 py-2 text-sm font-bold whitespace-nowrap transition-colors ${typeFilter === t ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`
+  const catBtnCls = (active: boolean) => `px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-colors ${active ? 'bg-wiki-accent/20 text-wiki-accent border border-wiki-accent/40' : 'bg-wiki-gray text-wiki-text-muted border border-wiki-border hover:text-wiki-text'}`
+
+  const newHeroLink = '/admin/characters/edit/new'
+  const newHaojieLink = '/admin/characters/haojie/edit/new'
 
   return (
     <div className="min-h-screen bg-wiki-bg">
@@ -137,10 +156,28 @@ export default function AdminCharactersPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">角色圖鑑管理</h1>
-            <p className="text-wiki-text-muted text-sm mt-1">管理角色列表、分類及篩選設定</p>
+            <p className="text-wiki-text-muted text-sm mt-1">管理英雄與豪杰的列表、分類及篩選設定</p>
           </div>
-          {activeTab === 'list' && <Link href="/admin/characters/new" className="btn-hard text-wiki-text text-sm">+ 新增角色</Link>}
-          {activeTab === 'categories' && <button onClick={() => { setEditingCat(null); setCatForm({ name: '', slug: '', description: '', icon: '', sortOrder: 0 }); setShowCatModal(true) }} className="btn-hard text-wiki-text text-sm">+ 新增分類</button>}
+          {activeTab === 'list' && (
+            <div className="flex gap-2">
+              {(typeFilter === 'all' || typeFilter === 'haojie') && (
+                <Link href={newHaojieLink} className="px-4 py-2 bg-wiki-gray border border-wiki-border text-wiki-text text-sm font-bold hover:border-wiki-accent transition-colors">
+                  + 新增豪杰
+                </Link>
+              )}
+              {(typeFilter === 'all' || typeFilter === 'hero') && (
+                <Link href={newHeroLink} className="btn-hard text-wiki-text text-sm">
+                  + 新增英雄
+                </Link>
+              )}
+            </div>
+          )}
+          {activeTab === 'categories' && (
+            <button onClick={() => { setEditingCat(null); setCatForm({ name: '', slug: '', description: '', icon: '', sortOrder: 0 }); setShowCatModal(true) }}
+              className="btn-hard text-wiki-text text-sm">
+              + 新增分類
+            </button>
+          )}
         </div>
 
         <div className="border-b border-wiki-border mb-6 flex">
@@ -151,41 +188,81 @@ export default function AdminCharactersPage() {
 
         {loading ? <div className="text-center py-12 text-wiki-text-muted">載入中...</div> : (
           <>
-            {/* 列表 */}
+            {/* ── 列表 ── */}
             {activeTab === 'list' && (
               <div>
-                <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-                  <button onClick={() => setFilterCatSlug('all')} className={`px-4 py-2 text-sm font-bold whitespace-nowrap ${filterCatSlug === 'all' ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>全部</button>
-                  {categories.map(cat => <button key={cat.id} onClick={() => setFilterCatSlug(cat.slug)} className={`px-4 py-2 text-sm font-bold whitespace-nowrap ${filterCatSlug === cat.slug ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>{cat.icon} {cat.name}</button>)}
+                {/* 類型切換 */}
+                <div className="flex gap-2 mb-4">
+                  <button onClick={() => { setTypeFilter('all'); setFilterCatSlug('all') }} className={typeBtnCls('all')}>全部</button>
+                  <button onClick={() => { setTypeFilter('hero'); setFilterCatSlug('all') }} className={typeBtnCls('hero')}>☆ 英雄</button>
+                  <button onClick={() => { setTypeFilter('haojie'); setFilterCatSlug('all') }} className={typeBtnCls('haojie')}>★ 豪杰</button>
                 </div>
-                {filtered.length === 0 ? <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-8 text-center text-wiki-text-muted">暫無角色數據</div> : (
+
+                {/* 分類篩選 */}
+                <div className="flex gap-2 mb-5 flex-wrap">
+                  <button onClick={() => setFilterCatSlug('all')} className={catBtnCls(filterCatSlug === 'all')}>全部分類</button>
+                  {categories.map(cat => (
+                    <button key={cat.id} onClick={() => setFilterCatSlug(cat.slug)} className={catBtnCls(filterCatSlug === cat.slug)}>
+                      {cat.icon} {cat.name}
+                    </button>
+                  ))}
+                </div>
+
+                {filtered.length === 0 ? (
+                  <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-8 text-center text-wiki-text-muted">
+                    暫無數據
+                  </div>
+                ) : (
                   <div className="bg-wiki-gray-light border border-wiki-border rounded-lg overflow-hidden">
                     <table className="w-full">
                       <thead className="bg-wiki-gray">
                         <tr>
-                          {['角色', '稀有度', '職業', '武器', '分類', '狀態', '操作'].map(h => <th key={h} className="text-left px-6 py-4 text-wiki-accent font-bold text-sm">{h}</th>)}
+                          <th className="text-left px-4 py-3 text-wiki-accent font-bold text-sm">角色</th>
+                          <th className="text-left px-4 py-3 text-wiki-accent font-bold text-sm">稀有度</th>
+                          <th className="text-left px-4 py-3 text-wiki-accent font-bold text-sm">類型</th>
+                          <th className="text-left px-4 py-3 text-wiki-accent font-bold text-sm">分類</th>
+                          <th className="text-left px-4 py-3 text-wiki-accent font-bold text-sm">狀態</th>
+                          <th className="text-right px-4 py-3 text-wiki-accent font-bold text-sm">操作</th>
                         </tr>
                       </thead>
                       <tbody>
                         {filtered.map(c => (
                           <tr key={c.id} className="border-t border-wiki-border hover:bg-wiki-gray/50">
-                            <td className="px-6 py-4">
+                            <td className="px-4 py-3">
                               <div className="flex items-center gap-3">
-                                {c.avatar ? <img src={c.avatar} alt={c.name} className="w-10 h-10 rounded object-cover" /> : <div className="w-10 h-10 rounded bg-wiki-gray flex items-center justify-center text-wiki-text-muted">{c.name[0]}</div>}
-                                <div><div className="text-wiki-text font-bold">{c.name}</div>{c.title && <div className="text-wiki-text-muted text-xs">{c.title}</div>}</div>
+                                {c.avatar
+                                  ? <img src={c.avatar} alt={c.name} className="w-9 h-9 rounded-full object-cover border border-wiki-border" />
+                                  : <div className="w-9 h-9 rounded-full bg-wiki-gray border border-wiki-border flex items-center justify-center text-wiki-text-muted text-sm">{c.name[0]}</div>}
+                                <div>
+                                  <div className="text-wiki-text font-bold text-sm">{c.name}</div>
+                                  <div className="text-wiki-text-muted text-xs">{c.slug}</div>
+                                </div>
                               </div>
                             </td>
-                            <td className="px-6 py-4 text-yellow-400 text-sm">{getRarityStars(c.rarity)}</td>
-                            <td className="px-6 py-4 text-wiki-text text-sm">{c.role || '-'}</td>
-                            <td className="px-6 py-4 text-wiki-text text-sm">{c.weapon || '-'}</td>
-                            <td className="px-6 py-4 text-wiki-text-muted text-sm">{c.CharacterCategory?.name || '-'}</td>
-                            <td className="px-6 py-4">
-                              <button onClick={() => handleTogglePublish(c)} className={`px-2 py-1 text-xs font-bold ${c.isPublished ? 'bg-green-500/20 text-green-400' : 'bg-wiki-danger/20 text-wiki-danger'}`}>{c.isPublished ? '已發佈' : '草稿'}</button>
+                            <td className="px-4 py-3">
+                              <span className={`text-sm font-bold ${c.rarity === '金' ? 'text-yellow-400' : c.rarity === '紫' ? 'text-purple-400' : 'text-blue-400'}`}>
+                                {c.rarity}
+                              </span>
                             </td>
-                            <td className="px-6 py-4">
-                              <div className="flex gap-2">
-                                <Link href={`/admin/characters/edit/${c.id}`} className="px-3 py-1 bg-wiki-accent/20 text-wiki-accent text-sm font-bold hover:bg-wiki-accent/30">編輯</Link>
-                                <button onClick={() => handleDeleteChar(c.id)} className="px-3 py-1 bg-wiki-danger/20 text-wiki-danger text-sm font-bold hover:bg-wiki-danger/30">刪除</button>
+                            <td className="px-4 py-3">
+                              <span className={`px-2 py-0.5 text-xs rounded border ${c.characterType === 'haojie' ? 'bg-wiki-accent/10 text-wiki-accent border-wiki-accent/30' : 'bg-blue-900/20 text-blue-300 border-blue-500/30'}`}>
+                                {c.characterType === 'haojie' ? '豪杰' : '英雄'}
+                              </span>
+                              {c.characterType === 'haojie' && c.awakenHero && (
+                                <span className="ml-1 px-1.5 py-0.5 text-xs rounded bg-yellow-900/20 text-yellow-400 border border-yellow-500/30">覺醒</span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-wiki-text-muted text-sm">{c.CharacterCategory?.name || '-'}</td>
+                            <td className="px-4 py-3">
+                              <button onClick={() => handleTogglePublish(c)}
+                                className={`px-2 py-1 text-xs font-bold rounded ${c.isPublished ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                                {c.isPublished ? '已發佈' : '草稿'}
+                              </button>
+                            </td>
+                            <td className="px-4 py-3 text-right">
+                              <div className="flex gap-2 justify-end">
+                                <Link href={editLink(c)} className="px-3 py-1 bg-wiki-accent/20 text-wiki-accent text-xs font-bold hover:bg-wiki-accent/30 rounded">編輯</Link>
+                                <button onClick={() => handleDelete(c)} className="px-3 py-1 bg-red-500/20 text-red-400 text-xs font-bold hover:bg-red-500/30 rounded">刪除</button>
                               </div>
                             </td>
                           </tr>
@@ -197,28 +274,28 @@ export default function AdminCharactersPage() {
               </div>
             )}
 
-            {/* 分類管理 */}
+            {/* ── 分類管理 ── */}
             {activeTab === 'categories' && (
               <div className="bg-wiki-gray-light border border-wiki-border rounded-lg overflow-hidden">
                 <table className="w-full">
                   <thead className="bg-wiki-gray">
-                    <tr>{['圖標', '名稱', '別名', '描述', '角色數', '排序', '操作'].map(h => <th key={h} className="text-left px-6 py-4 text-wiki-accent font-bold text-sm">{h}</th>)}</tr>
+                    <tr>{['圖標', '名稱', '別名', '描述', '角色數', '排序', '操作'].map(h => <th key={h} className="text-left px-4 py-3 text-wiki-accent font-bold text-sm">{h}</th>)}</tr>
                   </thead>
                   <tbody>
                     {categories.map((cat, idx) => (
                       <tr key={cat.id} className="border-t border-wiki-border hover:bg-wiki-gray/50">
-                        <td className="px-6 py-4 text-2xl">{cat.icon}</td>
-                        <td className="px-6 py-4 text-wiki-text font-bold">{cat.name}</td>
-                        <td className="px-6 py-4 text-wiki-text-muted font-mono text-sm">{cat.slug}</td>
-                        <td className="px-6 py-4 text-wiki-text-muted text-sm max-w-xs truncate">{cat.description}</td>
-                        <td className="px-6 py-4 text-wiki-accent font-bold">{cat._count.characters}</td>
-                        <td className="px-6 py-4 text-wiki-text-muted">{cat.sortOrder}</td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 py-3 text-2xl">{cat.icon}</td>
+                        <td className="px-4 py-3 text-wiki-text font-bold text-sm">{cat.name}</td>
+                        <td className="px-4 py-3 text-wiki-text-muted font-mono text-xs">{cat.slug}</td>
+                        <td className="px-4 py-3 text-wiki-text-muted text-sm max-w-xs truncate">{cat.description}</td>
+                        <td className="px-4 py-3 text-wiki-accent font-bold">{cat._count?.characters ?? 0}</td>
+                        <td className="px-4 py-3 text-wiki-text-muted">{cat.sortOrder}</td>
+                        <td className="px-4 py-3">
                           <div className="flex gap-2 items-center">
-                            <button onClick={() => handleCatMove(cat, 'up')} disabled={idx === 0} className="px-2 py-1 bg-wiki-accent/20 text-wiki-accent text-sm font-bold hover:bg-wiki-accent/30 disabled:opacity-30">↑</button>
-                            <button onClick={() => handleCatMove(cat, 'down')} disabled={idx === categories.length - 1} className="px-2 py-1 bg-wiki-accent/20 text-wiki-accent text-sm font-bold hover:bg-wiki-accent/30 disabled:opacity-30">↓</button>
-                            <button onClick={() => handleCatEdit(cat)} className="px-3 py-1 bg-wiki-accent/20 text-wiki-accent text-sm font-bold hover:bg-wiki-accent/30">編輯</button>
-                            <button onClick={() => handleCatDelete(cat.id)} className="px-3 py-1 bg-wiki-danger/20 text-wiki-danger text-sm font-bold hover:bg-wiki-danger/30">刪除</button>
+                            <button onClick={() => handleCatMove(cat, 'up')} disabled={idx === 0} className="px-2 py-1 bg-wiki-accent/20 text-wiki-accent text-xs font-bold hover:bg-wiki-accent/30 disabled:opacity-30 rounded">↑</button>
+                            <button onClick={() => handleCatMove(cat, 'down')} disabled={idx === categories.length - 1} className="px-2 py-1 bg-wiki-accent/20 text-wiki-accent text-xs font-bold hover:bg-wiki-accent/30 disabled:opacity-30 rounded">↓</button>
+                            <button onClick={() => handleCatEdit(cat)} className="px-3 py-1 bg-wiki-accent/20 text-wiki-accent text-xs font-bold hover:bg-wiki-accent/30 rounded">編輯</button>
+                            <button onClick={() => handleCatDelete(cat.id)} className="px-3 py-1 bg-red-500/20 text-red-400 text-xs font-bold hover:bg-red-500/30 rounded">刪除</button>
                           </div>
                         </td>
                       </tr>
@@ -228,30 +305,36 @@ export default function AdminCharactersPage() {
               </div>
             )}
 
-            {/* 篩選設定 */}
+            {/* ── 篩選設定 ── */}
             {activeTab === 'filters' && (
               <div>
-                <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-4 mb-6 flex items-center gap-4">
+                <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-4 mb-6 flex items-center gap-4 flex-wrap">
                   <span className="text-wiki-text font-bold text-sm flex-shrink-0">當前分類：</span>
                   <div className="flex flex-wrap gap-2">
                     {categories.map(cat => (
-                      <button key={cat.id} onClick={() => setSelectedCatId(cat.id)} className={`px-4 py-1.5 text-sm font-bold transition-colors ${selectedCatId === cat.id ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>{cat.name}</button>
+                      <button key={cat.id} onClick={() => setSelectedCatId(cat.id)}
+                        className={`px-4 py-1.5 text-sm font-bold transition-colors ${selectedCatId === cat.id ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>
+                        {cat.name}
+                      </button>
                     ))}
                   </div>
                 </div>
                 <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6 mb-6">
-                  <h3 className="text-lg font-bold text-wiki-accent mb-4">添加篩選選項（到「{categories.find(c => c.id === selectedCatId)?.name ?? '...'}」）</h3>
-                  <div className="flex gap-4 items-end">
+                  <h3 className="text-base font-bold text-wiki-accent mb-4">添加篩選選項（到「{categories.find(c => c.id === selectedCatId)?.name ?? '...'}」）</h3>
+                  <div className="flex gap-4 items-end flex-wrap">
                     <div className="flex-shrink-0">
                       <label className="block text-wiki-text-muted text-xs mb-1">篩選大類</label>
-                      <input type="text" value={newType} onChange={e => setNewType(e.target.value)} list="type-suggestions" className="w-40 bg-wiki-gray border-2 border-wiki-border px-3 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none" placeholder="如：稀有度" />
+                      <input type="text" value={newType} onChange={e => setNewType(e.target.value)} list="type-suggestions"
+                        className="w-40 bg-wiki-gray border-2 border-wiki-border px-3 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none text-sm" placeholder="如：稀有度" />
                       <datalist id="type-suggestions">{allTypes.map(t => <option key={t} value={t} />)}</datalist>
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-[160px]">
                       <label className="block text-wiki-text-muted text-xs mb-1">選項值</label>
-                      <input type="text" value={newValue} onChange={e => setNewValue(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleFilterAdd()} className="w-full bg-wiki-gray border-2 border-wiki-border px-3 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none" placeholder="如：★★★★★ 或 輸出" />
+                      <input type="text" value={newValue} onChange={e => setNewValue(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleFilterAdd()}
+                        className="w-full bg-wiki-gray border-2 border-wiki-border px-3 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none text-sm" placeholder="如：金色" />
                     </div>
-                    <button onClick={handleFilterAdd} disabled={filterSaving || !newValue.trim() || !newType.trim() || !selectedCatId} className="btn-hard text-wiki-text disabled:opacity-50 px-6 py-2">添加</button>
+                    <button onClick={handleFilterAdd} disabled={filterSaving || !newValue.trim() || !newType.trim() || !selectedCatId}
+                      className="btn-hard text-wiki-text disabled:opacity-50 px-6 py-2 text-sm">添加</button>
                   </div>
                 </div>
                 {existingTypes.length === 0 ? (
@@ -259,14 +342,15 @@ export default function AdminCharactersPage() {
                 ) : (
                   <div className="space-y-4">
                     {existingTypes.map(type => (
-                      <div key={type} className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6">
-                        <h3 className="text-lg font-bold text-wiki-accent mb-4">{type}</h3>
+                      <div key={type} className="bg-wiki-gray-light border border-wiki-border rounded-lg p-4">
+                        <h3 className="text-sm font-bold text-wiki-accent mb-3">{type}</h3>
                         <div className="space-y-2">
                           {groupedOptions[type].map(opt => (
-                            <div key={opt.id} className="flex items-center gap-4 bg-wiki-gray rounded-lg p-3">
-                              <input type="number" value={opt.sortOrder} onChange={e => handleFilterSort(opt.id, parseInt(e.target.value) || 0)} className="w-16 bg-wiki-carder border border-wiki-border px-2 py-1 text-wiki-text text-center" />
-                              <span className="text-wiki-text flex-1">{opt.value}</span>
-                              <button onClick={() => handleFilterDelete(opt.id)} className="text-wiki-danger text-sm hover:opacity-70">刪除</button>
+                            <div key={opt.id} className="flex items-center gap-4 bg-wiki-gray rounded p-2.5">
+                              <input type="number" value={opt.sortOrder} onChange={e => handleFilterSort(opt.id, parseInt(e.target.value) || 0)}
+                                className="w-16 bg-wiki-gray-light border border-wiki-border px-2 py-1 text-wiki-text text-center text-sm" />
+                              <span className="text-wiki-text flex-1 text-sm">{opt.value}</span>
+                              <button onClick={() => handleFilterDelete(opt.id)} className="text-red-400 text-sm hover:opacity-70">刪除</button>
                             </div>
                           ))}
                         </div>
@@ -283,21 +367,29 @@ export default function AdminCharactersPage() {
       {showCatModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-8 w-full max-w-md mx-4">
-            <h2 className="text-2xl font-heading font-bold text-wiki-accent heading-hard mb-6">{editingCat ? '編輯分類' : '新增分類'}</h2>
+            <h2 className="text-xl font-heading font-bold text-wiki-accent heading-hard mb-6">{editingCat ? '編輯分類' : '新增分類'}</h2>
             <form onSubmit={handleCatSubmit} className="space-y-4">
-              {[{ label: '名稱 *', key: 'name', required: true }, { label: '別名 (URL Slug) *', key: 'slug', required: true }, { label: '圖標 (Emoji)', key: 'icon', placeholder: '例如: ⚔️' }].map(({ label, key, required, placeholder }) => (
+              {[
+                { label: '名稱 *', key: 'name', required: true },
+                { label: '別名 (URL Slug) *', key: 'slug', required: true },
+                { label: '圖標 (Emoji)', key: 'icon', placeholder: '例如: ⚔️' },
+              ].map(({ label, key, required, placeholder }) => (
                 <div key={key}>
                   <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">{label}</label>
-                  <input type="text" value={(catForm as any)[key]} onChange={e => setCatForm({ ...catForm, [key]: e.target.value })} className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none" required={required} placeholder={placeholder} />
+                  <input type="text" value={(catForm as any)[key]} onChange={e => setCatForm({ ...catForm, [key]: e.target.value })}
+                    className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
+                    required={required} placeholder={placeholder} />
                 </div>
               ))}
               <div>
                 <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">描述</label>
-                <textarea value={catForm.description} onChange={e => setCatForm({ ...catForm, description: e.target.value })} className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none h-20" />
+                <textarea value={catForm.description} onChange={e => setCatForm({ ...catForm, description: e.target.value })}
+                  className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none h-20" />
               </div>
               <div>
                 <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">排序</label>
-                <input type="number" value={catForm.sortOrder} onChange={e => setCatForm({ ...catForm, sortOrder: parseInt(e.target.value) })} className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none" />
+                <input type="number" value={catForm.sortOrder} onChange={e => setCatForm({ ...catForm, sortOrder: parseInt(e.target.value) })}
+                  className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none" />
               </div>
               <div className="flex gap-4 pt-4">
                 <button type="submit" className="btn-hard text-wiki-text">保存</button>

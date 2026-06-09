@@ -99,6 +99,7 @@ model Character {
   skills         String?
   awakenHero     Boolean?          @default(false)
   haojieEquip    String?
+  characterType  String            @default("hero")
   categoryId     String
   sortOrder      Int               @default(0)
   isPublished    Boolean           @default(false)

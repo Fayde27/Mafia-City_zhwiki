@@ -14,13 +14,7 @@ export async function GET(request: Request) {
     let query = supabaseAdmin
       .from('Character')
       .select('*, CharacterCategory(*)', { count: 'exact' })
-      .eq('CharacterCategory.slug', 'haojie')
-
-    // Use inner join to filter by category slug
-    query = supabaseAdmin
-      .from('Character')
-      .select('*, CharacterCategory!inner(*)', { count: 'exact' })
-      .eq('CharacterCategory.slug', 'haojie')
+      .eq('characterType', 'haojie')
 
     const draft = searchParams.get('draft')
     if (draft === 'true') query = query.eq('isPublished', false)
@@ -67,6 +61,7 @@ export async function POST(request: Request) {
         skills: data.skills,
         awakenHero: data.awakenHero || false,
         haojieEquip: data.haojieEquip,
+        characterType: 'haojie',
         categoryId: data.categoryId,
         sortOrder: data.sortOrder || 0,
         isPublished: data.isPublished || false,

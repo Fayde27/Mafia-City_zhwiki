@@ -12,6 +12,8 @@ export async function GET(request: Request) {
     const from = (page - 1) * limit
     const to = from + limit - 1
 
+    const type = searchParams.get('type')
+
     let query = supabaseAdmin
       .from('Character')
       .select('*, CharacterCategory(*)', { count: 'exact' })
@@ -22,6 +24,8 @@ export async function GET(request: Request) {
         .select('*, CharacterCategory!inner(*)', { count: 'exact' })
         .eq('CharacterCategory.slug', category)
     }
+
+    if (type && type !== 'all') query = query.eq('characterType', type)
 
     const draft = searchParams.get('draft')
     if (draft === 'true') query = query.eq('isPublished', false)
@@ -67,6 +71,7 @@ export async function POST(request: Request) {
         attributes: data.attributes,
         skills: data.skills,
         categoryId: data.categoryId,
+        characterType: 'hero',
         sortOrder: data.sortOrder || 0,
         isPublished: data.isPublished || false,
       })
