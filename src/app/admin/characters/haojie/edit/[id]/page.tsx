@@ -14,7 +14,6 @@ import RichTextEditor from '@/components/RichTextEditor'
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface HaojieCategory { id: string; name: string; slug: string }
-interface EquipmentOption { id: string; name: string; icon?: string; rarity?: number }
 interface CharacterOption { id: string; name: string; avatar?: string }
 
 interface SkillEntry {
@@ -22,6 +21,9 @@ interface SkillEntry {
 }
 interface TeamCompEntry {
   name: string; memberIds: string[]; reason: string
+}
+interface HaojieEquip {
+  weapon: string; warbadge: string
 }
 
 const SECTIONS = [
@@ -38,7 +40,6 @@ const RARITY_OPTIONS = ['金', '紫']
 const HAOJIE_STYLES = ['無畏風格', '迅捷風格', '智謀風格', '穩固風格']
 const TROOP_TYPES = ['暴徒', '槍手', '飛車黨', '改裝車輛']
 const SKILL_TYPES = ['帶隊生效', '被動生效']
-const HAOJIE_CATEGORIES = ['S1賽季豪杰', 'S2賽季豪杰', '征服賽季豪杰', 'SP豪杰', '聯動豪杰']
 
 // ─── 5-axis Radar ─────────────────────────────────────────────────────────────
 
@@ -156,7 +157,6 @@ export default function AdminHaojieEditPage() {
 
   const [categories, setCategories] = useState<HaojieCategory[]>([])
   const [allHaojie, setAllHaojie] = useState<CharacterOption[]>([])
-  const [allEquipments, setAllEquipments] = useState<EquipmentOption[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [activeSection, setActiveSection] = useState('basic')
@@ -165,7 +165,6 @@ export default function AdminHaojieEditPage() {
   // Basic fields
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
-  const [fanNumber, setFanNumber] = useState('')
   const [rarity, setRarity] = useState('金')
   const [traits, setTraits] = useState<string[]>([])
   const [troopType, setTroopType] = useState('')
@@ -174,7 +173,6 @@ export default function AdminHaojieEditPage() {
   const [categoryId, setCategoryId] = useState('')
   const [sortOrder, setSortOrder] = useState(0)
   const [isPublished, setIsPublished] = useState(true)
-  const [publishAt, setPublishAt] = useState('')
 
   // Images
   const [avatar, setAvatar] = useState('')
@@ -194,8 +192,8 @@ export default function AdminHaojieEditPage() {
   // Skills
   const [skills, setSkills] = useState<SkillEntry[]>([])
 
-  // Equipment
-  const [equipmentIds, setEquipmentIds] = useState<string[]>([])
+  // Equipment（武器 + 戰徽各一件）
+  const [haojieEquip, setHaojieEquip] = useState<HaojieEquip>({ weapon: '', warbadge: '' })
 
   // TeamComps
   const [teamComps, setTeamComps] = useState<TeamCompEntry[]>([])
@@ -213,23 +211,20 @@ export default function AdminHaojieEditPage() {
 
   const fetchData = async () => {
     try {
-      const [catRes, haojieListRes, eqRes, haojieRes] = await Promise.all([
+      const [catRes, haojieListRes, haojieRes] = await Promise.all([
         fetch('/api/admin/character-categories'),
         fetch('/api/admin/haojie?limit=200'),
-        fetch('/api/admin/equipment?limit=200'),
         haojieId ? fetch(`/api/admin/haojie/${haojieId}`) : Promise.resolve(null),
       ])
 
       setCategories(await catRes.json().then(d => Array.isArray(d) ? d : []))
       setAllHaojie(await haojieListRes.json().then(d => d.haojie || []))
-      setAllEquipments(await eqRes.json().then(d => d.equipment || d.equipments || []))
 
       if (haojieRes && haojieId) {
         const d = await haojieRes.json()
         if (d.id) {
           setName(d.name || '')
           setSlug(d.slug || '')
-          setFanNumber(d.fanNumber || '')
           setRarity(d.rarity || '金')
           setTraits(tryParse(d.traits, []))
           setTroopType(d.troopType || '')
@@ -244,7 +239,7 @@ export default function AdminHaojieEditPage() {
           setBannerPosition(d.bannerPosition || '50% 50%')
           setAttrs(tryParse(d.attributes, attrs))
           setSkills(tryParse(d.skills, []))
-          setEquipmentIds(d.equipmentIds || [])
+          setHaojieEquip(tryParse(d.haojieEquip, { weapon: '', warbadge: '' }))
           setTeamComps(d.teamComps || [])
           setStory(d.story || '')
         }
@@ -283,7 +278,7 @@ export default function AdminHaojieEditPage() {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name, slug, fanNumber, rarity,
+          name, slug, rarity,
           traits: JSON.stringify(traits),
           troopType, acquisition, awakenHero,
           story,
@@ -291,14 +286,14 @@ export default function AdminHaojieEditPage() {
           avatar, avatarPosition, banner, bannerPosition,
           attributes: JSON.stringify(attrs),
           skills: JSON.stringify(skills),
-          equipmentIds,
+          haojieEquip: JSON.stringify(haojieEquip),
           teamComps,
         }),
       })
       if (res.ok) {
         const saved = await res.json()
         alert(haojieId ? '更新成功' : '創建成功')
-        if (!haojieId) router.push(`/admin/haojie/edit/${saved.id}`)
+        if (!haojieId) router.push(`/admin/characters/haojie/edit/${saved.id}`)
       } else {
         const d = await res.json()
         alert(d.error || '保存失敗')
@@ -332,7 +327,7 @@ export default function AdminHaojieEditPage() {
             </h1>
             <p className="text-wiki-text-muted text-sm mt-1">豪杰圖鑑詳細資料</p>
           </div>
-          <Link href="/admin/haojie" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
+          <Link href="/admin/characters/haojie" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
             返回列表
           </Link>
         </div>
@@ -375,10 +370,6 @@ export default function AdminHaojieEditPage() {
                   <div>
                     <label className={labelCls}>URL Slug *</label>
                     <input className={inputCls} value={slug} required onChange={e => setSlug(e.target.value)} />
-                  </div>
-                  <div>
-                    <label className={labelCls}>粉號</label>
-                    <input className={inputCls} value={fanNumber} placeholder="如：#123456" onChange={e => setFanNumber(e.target.value)} />
                   </div>
                   <div>
                     <label className={labelCls}>稀有度</label>
@@ -555,28 +546,35 @@ export default function AdminHaojieEditPage() {
                 </div>
               </div>
 
-              {/* §5 裝備推薦 */}
+              {/* §5 裝備推薦（武器 + 戰徽各一件） */}
               <div ref={el => { sectionRefs.current['equipment'] = el }} className={cardCls}>
-                <h3 className="text-lg font-bold text-wiki-accent mb-5">裝備推薦 <span className="text-sm font-normal text-wiki-text-muted">（最多6件）</span></h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {allEquipments.map(eq => {
-                    const sel = equipmentIds.includes(eq.id)
-                    return (
-                      <label key={eq.id}
-                        className={`flex items-center gap-2 p-3 border cursor-pointer transition-colors rounded
-                          ${sel ? 'border-wiki-accent bg-wiki-accent/10' : 'border-wiki-border bg-wiki-gray hover:border-wiki-accent/50'}`}>
-                        <input type="checkbox" className="accent-wiki-accent"
-                          checked={sel}
-                          onChange={e => {
-                            if (e.target.checked && equipmentIds.length < 6) setEquipmentIds([...equipmentIds, eq.id])
-                            else if (!e.target.checked) setEquipmentIds(equipmentIds.filter(id => id !== eq.id))
-                          }} />
-                        {eq.icon && <img src={eq.icon} alt={eq.name} className="w-8 h-8 object-contain" />}
-                        <span className="text-sm text-wiki-text truncate">{eq.name}</span>
-                      </label>
-                    )
-                  })}
-                  {allEquipments.length === 0 && <p className="col-span-3 text-wiki-text-muted text-sm text-center py-4">裝備庫為空</p>}
+                <h3 className="text-lg font-bold text-wiki-accent mb-2">裝備推薦</h3>
+                <p className="text-xs text-wiki-text-muted mb-5">豪杰同時只能裝備一件武器和一件戰徽。後續武器/戰徽圖鑑上線後將改為下拉選擇。</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-wiki-gray border border-wiki-border rounded p-4 space-y-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm font-bold text-wiki-accent">⚔ 武器</span>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-wiki-text-muted mb-1">武器名稱</label>
+                      <input className="w-full bg-wiki-gray-light border border-wiki-border px-3 py-2 text-sm text-wiki-text focus:border-wiki-accent focus:outline-none"
+                        value={haojieEquip.weapon}
+                        placeholder="暫填武器名稱"
+                        onChange={e => setHaojieEquip({ ...haojieEquip, weapon: e.target.value })} />
+                    </div>
+                  </div>
+                  <div className="bg-wiki-gray border border-wiki-border rounded p-4 space-y-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm font-bold text-wiki-accent">🛡 戰徽</span>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-wiki-text-muted mb-1">戰徽名稱</label>
+                      <input className="w-full bg-wiki-gray-light border border-wiki-border px-3 py-2 text-sm text-wiki-text focus:border-wiki-accent focus:outline-none"
+                        value={haojieEquip.warbadge}
+                        placeholder="暫填戰徽名稱"
+                        onChange={e => setHaojieEquip({ ...haojieEquip, warbadge: e.target.value })} />
+                    </div>
+                  </div>
                 </div>
               </div>
 

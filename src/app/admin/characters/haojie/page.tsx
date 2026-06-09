@@ -64,10 +64,10 @@ export default function AdminHaojiePage() {
             <p className="text-wiki-text-muted mt-1">管理所有豪杰條目</p>
           </div>
           <div className="flex gap-3">
-            <Link href="/admin" className="px-4 py-2 bg-wiki-gray border border-wiki-border text-wiki-text text-sm hover:border-wiki-accent transition-colors">
-              ← 返回後台
+            <Link href="/admin/characters" className="px-4 py-2 bg-wiki-gray border border-wiki-border text-wiki-text text-sm hover:border-wiki-accent transition-colors">
+              ← 英雄圖鑑
             </Link>
-            <Link href="/admin/haojie/edit/new" className="px-4 py-2 bg-wiki-accent text-wiki-bg text-sm font-bold hover:opacity-90 transition-opacity">
+            <Link href="/admin/characters/haojie/edit/new" className="px-4 py-2 bg-wiki-accent text-wiki-bg text-sm font-bold hover:opacity-90 transition-opacity">
               + 新增豪杰
             </Link>
           </div>
@@ -124,7 +124,7 @@ export default function AdminHaojiePage() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex justify-end gap-2">
-                        <Link href={`/admin/haojie/edit/${h.id}`}
+                        <Link href={`/admin/characters/haojie/edit/${h.id}`}
                           className="px-3 py-1 text-xs bg-wiki-gray border border-wiki-border text-wiki-text hover:border-wiki-accent transition-colors">
                           編輯
                         </Link>
