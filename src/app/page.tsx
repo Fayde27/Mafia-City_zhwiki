@@ -2,7 +2,7 @@
 
 export const runtime = 'edge'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
@@ -65,6 +65,109 @@ interface SidebarSection {
   isActive: boolean
 }
 
+
+// ─── 首頁輪播 Banner ──────────────────────────────────────────────────────────
+
+function HomeBannerCarousel({ articles }: { articles: Article[] }) {
+  const slides = articles.filter(a => a.coverImage)
+  const [current, setCurrent] = useState(0)
+  const pausedRef = useRef(false)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  const startTimer = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current)
+    timerRef.current = setInterval(() => {
+      if (!pausedRef.current) setCurrent(c => (c + 1) % slides.length)
+    }, 4500)
+  }, [slides.length])
+
+  useEffect(() => {
+    if (slides.length <= 1) return
+    startTimer()
+    return () => { if (timerRef.current) clearInterval(timerRef.current) }
+  }, [slides.length, startTimer])
+
+  if (slides.length === 0) return null
+
+  const go = (idx: number) => { setCurrent((idx + slides.length) % slides.length); startTimer() }
+
+  return (
+    <section className="mb-6">
+      <div
+        className="relative rounded-xl overflow-hidden group"
+        style={{ aspectRatio: '21/6', minHeight: 140 }}
+        onMouseEnter={() => { pausedRef.current = true }}
+        onMouseLeave={() => { pausedRef.current = false }}
+      >
+        {/* Slides */}
+        {slides.map((article, i) => (
+          <Link
+            key={article.id}
+            href={`/wiki/article/${article.slug}`}
+            className={`absolute inset-0 transition-opacity duration-700 ${i === current ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}
+          >
+            <img
+              src={article.coverImage}
+              alt={article.title}
+              className="w-full h-full object-cover"
+              style={{ objectPosition: article.coverImagePosition || '50% 50%' }}
+            />
+            {/* 底部漸變 */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
+            {/* 文字信息 */}
+            <div className="absolute bottom-0 left-0 right-0 px-5 pb-4 pt-8">
+              <span className="inline-block px-2 py-0.5 bg-wiki-accent text-wiki-darker text-xs font-bold rounded mb-2">
+                {article.category.name}
+              </span>
+              <h3 className="text-white font-bold text-base md:text-lg leading-tight drop-shadow-md line-clamp-1">
+                {article.title}
+              </h3>
+              {article.summary && (
+                <p className="text-white/65 text-xs mt-0.5 line-clamp-1 hidden sm:block">{article.summary}</p>
+              )}
+            </div>
+          </Link>
+        ))}
+
+        {/* 左右箭頭 */}
+        {slides.length > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={() => go(current - 1)}
+              className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/40 text-white text-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/65 select-none"
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              onClick={() => go(current + 1)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/40 text-white text-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/65 select-none"
+            >
+              ›
+            </button>
+          </>
+        )}
+
+        {/* 指示點 */}
+        {slides.length > 1 && (
+          <div className="absolute bottom-3 right-4 z-20 flex items-center gap-1.5">
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => go(i)}
+                className={`h-1.5 rounded-full transition-all duration-300 ${i === current ? 'w-5 bg-wiki-accent' : 'w-1.5 bg-white/40 hover:bg-white/65'}`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+// ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function HomePage() {
   const { isAdmin } = useAdminAuth()
@@ -339,6 +442,9 @@ export default function HomePage() {
                 </div>
               </div>
             </section>
+
+            {/* 輪播 Banner */}
+            <HomeBannerCarousel articles={articles} />
 
             {/* 熱門攻略 */}
             <section className="mb-8 bg-wiki-gray-light border border-wiki-border rounded-xl p-6">
