@@ -94,106 +94,57 @@ function HomeBannerCarousel({ articles }: { articles: Article[] }) {
     startTimer()
   }
 
-  // 每張 slide 相對 current 的偏移（-1=prev, 0=current, 1=next, 其他=hidden）
-  const getSlideState = (i: number) => {
-    const total = slides.length
-    const rel = (i - current + total) % total
-    if (rel === 0) return 'current'
-    if (rel === 1) return 'next'
-    if (rel === total - 1) return 'prev'
-    return 'hidden'
-  }
-
-  // 單張 slide 佈局（%相對於容器寬）：
-  //   peek = 8%，gap = 1.5%，slide = 81%
-  //   current left = 9.5%  → 9.5 + 81 = 90.5，居中留 9.5% 兩側
-  //   next    left = 91.5% → 91.5 ... 172.5，容器 clip 後只顯示 91.5-100 = 8.5%
-  //   prev    left = -72%  → -72 ... 9，容器 clip 後只顯示 0-9 = 9%
-  const SLIDE_W = 81   // % of container
-  const PEEK = 8.5     // % visible for side slides
-  const GAP = 1        // % gap between center and sides
-  const LEFT_CURRENT = PEEK + GAP          // ≈ 9.5
-  const LEFT_NEXT = 100 - PEEK             // ≈ 91.5
-  const LEFT_PREV = LEFT_CURRENT - SLIDE_W - GAP  // ≈ 9.5 - 81 - 1 = -72.5
-
-  const getSlideStyle = (state: string): React.CSSProperties => {
-    const base: React.CSSProperties = {
-      position: 'absolute',
-      top: 0,
-      bottom: 0,
-      width: `${SLIDE_W}%`,
-      transition: 'left 420ms cubic-bezier(0.4,0,0.2,1), opacity 420ms ease',
-      borderRadius: 10,
-      overflow: 'hidden',
-    }
-    if (state === 'current') return { ...base, left: `${LEFT_CURRENT}%`, zIndex: 10, opacity: 1 }
-    if (state === 'next')    return { ...base, left: `${LEFT_NEXT}%`,    zIndex: 5,  opacity: 0.6 }
-    if (state === 'prev')    return { ...base, left: `${LEFT_PREV}%`,    zIndex: 5,  opacity: 0.6 }
-    return { ...base, left: '200%', zIndex: 1, opacity: 0 }
-  }
-
   return (
     <section className="mb-6">
       <div
-        className="relative overflow-hidden rounded-xl"
-        style={{ aspectRatio: '16/5', minHeight: 120 }}
+        className="relative rounded-xl overflow-hidden bg-black"
         onMouseEnter={() => { pausedRef.current = true }}
         onMouseLeave={() => { pausedRef.current = false }}
       >
         {/* Slides */}
-        {slides.map((article, i) => {
-          const state = getSlideState(i)
-          const isCurrent = state === 'current'
-          return (
-            <div key={article.id} style={getSlideStyle(state)}>
-              <Link
-                href={`/wiki/article/${article.slug}`}
-                tabIndex={isCurrent ? 0 : -1}
-                className="block w-full h-full"
-              >
-                <img
-                  src={article.coverImage}
-                  alt={article.title}
-                  className="w-full h-full object-cover"
-                  style={{ objectPosition: article.coverImagePosition || '50% 50%' }}
-                />
-                {/* 非當前 slide 遮罩 */}
-                {!isCurrent && (
-                  <div className="absolute inset-0 bg-black/40" />
+        {slides.map((article, i) => (
+          <div
+            key={article.id}
+            className={`transition-opacity duration-500 ${i === current ? 'opacity-100 relative z-10' : 'opacity-0 absolute inset-0 z-0 pointer-events-none'}`}
+          >
+            <Link href={`/wiki/article/${article.slug}`} className="block w-full">
+              <img
+                src={article.coverImage}
+                alt={article.title}
+                className="w-full h-auto block"
+                style={{ objectPosition: article.coverImagePosition || '50% 50%' }}
+              />
+              {/* 底部漸變 + 標題 */}
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent px-4 pb-3 pt-10">
+                {article.category && (
+                  <span className="inline-block px-2 py-0.5 bg-wiki-accent text-black text-xs font-bold rounded mb-1.5">
+                    {article.category.name}
+                  </span>
                 )}
-                {/* 底部漸變 + 標題 */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 px-4 pb-3 pt-8">
-                  {article.category && (
-                    <span className="inline-block px-2 py-0.5 bg-wiki-accent text-black text-xs font-bold rounded mb-1.5">
-                      {article.category.name}
-                    </span>
-                  )}
-                  <h3 className="text-white font-bold text-sm md:text-base leading-tight drop-shadow-lg line-clamp-1">
-                    {article.title}
-                  </h3>
-                </div>
-              </Link>
-            </div>
-          )
-        })}
+                <h3 className="text-white font-bold text-sm md:text-base leading-tight drop-shadow-lg line-clamp-1">
+                  {article.title}
+                </h3>
+              </div>
+            </Link>
+          </div>
+        ))}
 
-        {/* 左右箭頭 — 始終可見 */}
+        {/* 左右箭頭 */}
         {slides.length > 1 && (
           <>
             <button
               type="button"
               onClick={() => go(current - 1)}
-              className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-black/55 text-white flex items-center justify-center hover:bg-black/80 transition-colors select-none shadow-md"
-              style={{ fontSize: 18, lineHeight: 1 }}
+              className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/75 transition-colors select-none shadow-md"
+              style={{ fontSize: 20, lineHeight: 1 }}
             >
               ‹
             </button>
             <button
               type="button"
               onClick={() => go(current + 1)}
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-black/55 text-white flex items-center justify-center hover:bg-black/80 transition-colors select-none shadow-md"
-              style={{ fontSize: 18, lineHeight: 1 }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/75 transition-colors select-none shadow-md"
+              style={{ fontSize: 20, lineHeight: 1 }}
             >
               ›
             </button>
@@ -202,7 +153,7 @@ function HomeBannerCarousel({ articles }: { articles: Article[] }) {
 
         {/* 指示點 */}
         {slides.length > 1 && (
-          <div className="absolute bottom-2.5 z-20 flex items-center gap-1.5"
+          <div className="absolute bottom-3 z-20 flex items-center gap-1.5"
             style={{ left: '50%', transform: 'translateX(-50%)' }}
           >
             {slides.map((_, i) => (
