@@ -23,7 +23,8 @@ interface TeamCompEntry {
   name: string; memberIds: string[]; reason: string
 }
 interface HaojieEquip {
-  weapon: string; warbadge: string
+  weapon: string; weaponIcon: string; weaponDesc: string
+  warbadge: string; warbadgeIcon: string; warbadgeDesc: string
 }
 
 const SECTIONS = [
@@ -146,6 +147,178 @@ function tryParse(val: any, fallback: any) {
   try { return JSON.parse(val) } catch { return fallback }
 }
 
+// ─── Preview helpers ──────────────────────────────────────────────────────────
+
+function PreviewCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="bg-wiki-gray-light border border-wiki-border rounded-lg overflow-hidden">
+      <div className="px-4 py-3 border-b border-wiki-border">
+        <h3 className="text-sm font-heading font-bold text-wiki-accent heading-hard">{title}</h3>
+      </div>
+      <div className="p-4">{children}</div>
+    </div>
+  )
+}
+
+interface HaojiePreviewProps {
+  name: string; rarity: string; traits: string[]; troopType: string; acquisition: string
+  awakenHero: boolean; avatar: string; avatarPosition: string; banner: string; bannerPosition: string
+  attrs: any; skills: SkillEntry[]; haojieEquip: HaojieEquip
+  teamComps: TeamCompEntry[]; allHaojie: CharacterOption[]
+  onClose: () => void
+}
+
+function HaojiePreviewModal(p: HaojiePreviewProps) {
+  const [teamTab, setTeamTab] = useState(0)
+  const rarityColor = { '金': 'text-yellow-400', '紫': 'text-purple-400' }[p.rarity] || 'text-wiki-text'
+  const memberName = (id: string) => p.allHaojie.find(c => c.id === id)?.name || id
+
+  return (
+    <div className="fixed inset-0 z-50 flex bg-black/80" onClick={e => { if (e.target === e.currentTarget) p.onClose() }}>
+      <div className="ml-auto w-full max-w-3xl h-full bg-wiki-bg overflow-y-auto flex flex-col shadow-2xl">
+        <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-3 bg-wiki-gray-light border-b border-wiki-border">
+          <span className="text-sm font-bold text-wiki-accent">預覽（當前表單數據）</span>
+          <button onClick={p.onClose} className="text-wiki-text-muted hover:text-wiki-text text-2xl leading-none">×</button>
+        </div>
+
+        <div className="flex-1 p-5 space-y-5">
+          {/* Banner */}
+          <div className="relative rounded-xl overflow-hidden bg-wiki-gray-light border border-wiki-border" style={{ minHeight: 180 }}>
+            {p.banner && <img src={p.banner} alt={p.name} className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: p.bannerPosition }} />}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+            <div className="relative z-10 flex items-end gap-4 p-5">
+              {p.avatar && (
+                <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-wiki-accent bg-wiki-gray flex-shrink-0">
+                  <img src={p.avatar} alt={p.name} className="w-full h-full object-cover" style={{ objectPosition: p.avatarPosition }} />
+                </div>
+              )}
+              <div>
+                <h2 className="text-2xl font-heading font-bold text-white heading-hard">
+                  {p.name || '（未填名稱）'}
+                  {p.awakenHero && <span className="ml-2 text-sm px-2 py-0.5 bg-yellow-900/60 border border-yellow-500/50 text-yellow-400 rounded">覺醒</span>}
+                </h2>
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  <span className={`font-bold ${rarityColor}`}>{p.rarity}</span>
+                  {p.traits.map(t => <span key={t} className="px-2 py-0.5 text-xs bg-wiki-accent/20 text-wiki-accent border border-wiki-accent/40 rounded">{t}</span>)}
+                  {p.troopType && <span className="px-2 py-0.5 text-xs bg-white/10 text-white/80 border border-white/20 rounded">{p.troopType}</span>}
+                  {p.acquisition && <span className="text-xs text-white/60">獲取：{p.acquisition}</span>}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Attributes */}
+          <PreviewCard title="豪杰屬性">
+            <div className="flex gap-6 items-center flex-wrap">
+              <Radar5SVG attrs={p.attrs} size={200} r={72} />
+              <table className="flex-1 text-sm min-w-[180px]">
+                <thead><tr className="border-b border-wiki-border">
+                  <th className="text-left py-1.5 text-wiki-text-muted">屬性</th>
+                  <th className="text-right py-1.5 text-blue-400">初始</th>
+                  <th className="text-right py-1.5 text-yellow-500">滿級</th>
+                </tr></thead>
+                <tbody>
+                  {[['力量','strengthBase','strengthMax'],['技術','techBase','techMax'],['體魄','physBase','physMax'],['防護','defBase','defMax'],['速度','speedBase','speedMax']].map(([l,b,m]) => (
+                    <tr key={l} className="border-b border-wiki-border/40">
+                      <td className="py-2 text-wiki-text font-bold">{l}</td>
+                      <td className="py-2 text-right text-blue-300">{(p.attrs as any)?.[b] || '—'}</td>
+                      <td className="py-2 text-right text-yellow-400 font-bold">{(p.attrs as any)?.[m] || '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="flex gap-4 mt-2 text-xs text-wiki-text-muted">
+              <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 bg-blue-400"></span>初始值</span>
+              <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 bg-yellow-500"></span>滿級值</span>
+            </div>
+          </PreviewCard>
+
+          {/* Skills */}
+          {p.skills.length > 0 && (
+            <PreviewCard title="豪杰技能">
+              <div className="space-y-3">
+                {p.skills.map((sk, i) => (
+                  <div key={i} className="flex gap-3 bg-wiki-gray rounded p-3">
+                    {sk.icon
+                      ? <img src={sk.icon} alt={sk.name} className="w-10 h-10 object-contain rounded flex-shrink-0" />
+                      : <div className="w-10 h-10 bg-wiki-border rounded flex-shrink-0 flex items-center justify-center text-wiki-text-muted">⚔</div>}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                        <span className="font-bold text-wiki-text text-sm">{sk.name || '（未填名稱）'}</span>
+                        <span className={`px-2 py-0.5 text-xs rounded border ${sk.type === '帶隊生效' ? 'bg-blue-900/40 border-blue-500/40 text-blue-300' : 'bg-wiki-accent/10 border-wiki-accent/30 text-wiki-accent'}`}>{sk.type}</span>
+                      </div>
+                      <p className="text-xs text-wiki-text-muted">{sk.effect || '（未填效果）'}</p>
+                      {sk.multiplier && <p className="text-xs text-wiki-accent mt-0.5">升級倍率：{sk.multiplier}</p>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </PreviewCard>
+          )}
+
+          {/* Equipment */}
+          {(p.haojieEquip.weapon || p.haojieEquip.warbadge) && (
+            <PreviewCard title="裝備推薦">
+              <div className="grid grid-cols-2 gap-4">
+                {p.haojieEquip.weapon && (
+                  <div className="flex items-center gap-3 bg-wiki-gray rounded p-3">
+                    {p.haojieEquip.weaponIcon
+                      ? <img src={p.haojieEquip.weaponIcon} className="w-12 h-12 object-contain rounded border border-wiki-border flex-shrink-0 bg-wiki-gray-light" alt="weapon" />
+                      : <div className="w-12 h-12 rounded border border-wiki-border flex-shrink-0 bg-wiki-gray-light flex items-center justify-center text-2xl">⚔</div>}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-wiki-text text-sm truncate">{p.haojieEquip.weapon}</p>
+                      {p.haojieEquip.weaponDesc && <p className="text-xs text-wiki-text-muted mt-0.5 line-clamp-2">{p.haojieEquip.weaponDesc}</p>}
+                    </div>
+                  </div>
+                )}
+                {p.haojieEquip.warbadge && (
+                  <div className="flex items-center gap-3 bg-wiki-gray rounded p-3">
+                    {p.haojieEquip.warbadgeIcon
+                      ? <img src={p.haojieEquip.warbadgeIcon} className="w-12 h-12 object-contain rounded border border-wiki-border flex-shrink-0 bg-wiki-gray-light" alt="warbadge" />
+                      : <div className="w-12 h-12 rounded border border-wiki-border flex-shrink-0 bg-wiki-gray-light flex items-center justify-center text-2xl">🛡</div>}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-wiki-text text-sm truncate">{p.haojieEquip.warbadge}</p>
+                      {p.haojieEquip.warbadgeDesc && <p className="text-xs text-wiki-text-muted mt-0.5 line-clamp-2">{p.haojieEquip.warbadgeDesc}</p>}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </PreviewCard>
+          )}
+
+          {/* Team comps */}
+          {p.teamComps.length > 0 && (
+            <PreviewCard title="配隊推薦">
+              <div className="flex gap-2 mb-3 flex-wrap">
+                {p.teamComps.map((tc, i) => (
+                  <button key={i} type="button" onClick={() => setTeamTab(i)}
+                    className={`px-3 py-1 text-xs font-bold border rounded transition-colors ${teamTab === i ? 'border-wiki-accent text-wiki-accent bg-wiki-accent/10' : 'border-wiki-border text-wiki-text-muted'}`}>
+                    {tc.name || `配隊 ${i + 1}`}
+                  </button>
+                ))}
+              </div>
+              {p.teamComps[teamTab] && (
+                <>
+                  <div className="flex gap-3 flex-wrap mb-2">
+                    {p.teamComps[teamTab].memberIds.map(id => (
+                      <div key={id} className="flex flex-col items-center gap-1">
+                        <div className="w-10 h-10 rounded-full bg-wiki-gray border border-wiki-border flex items-center justify-center text-xs text-wiki-text-muted">?</div>
+                        <span className="text-xs text-wiki-text-muted">{memberName(id)}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {p.teamComps[teamTab].reason && <p className="text-sm text-wiki-text-muted">{p.teamComps[teamTab].reason}</p>}
+                </>
+              )}
+            </PreviewCard>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function AdminHaojieEditPage() {
@@ -159,6 +332,7 @@ export default function AdminHaojieEditPage() {
   const [allHaojie, setAllHaojie] = useState<CharacterOption[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
   const [activeSection, setActiveSection] = useState('basic')
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
@@ -193,7 +367,10 @@ export default function AdminHaojieEditPage() {
   const [skills, setSkills] = useState<SkillEntry[]>([])
 
   // Equipment（武器 + 戰徽各一件）
-  const [haojieEquip, setHaojieEquip] = useState<HaojieEquip>({ weapon: '', warbadge: '' })
+  const [haojieEquip, setHaojieEquip] = useState<HaojieEquip>({
+    weapon: '', weaponIcon: '', weaponDesc: '',
+    warbadge: '', warbadgeIcon: '', warbadgeDesc: '',
+  })
 
   // TeamComps
   const [teamComps, setTeamComps] = useState<TeamCompEntry[]>([])
@@ -239,7 +416,7 @@ export default function AdminHaojieEditPage() {
           setBannerPosition(d.bannerPosition || '50% 50%')
           setAttrs(tryParse(d.attributes, attrs))
           setSkills(tryParse(d.skills, []))
-          setHaojieEquip(tryParse(d.haojieEquip, { weapon: '', warbadge: '' }))
+          setHaojieEquip(tryParse(d.haojieEquip, { weapon: '', weaponIcon: '', weaponDesc: '', warbadge: '', warbadgeIcon: '', warbadgeDesc: '' }))
           setTeamComps(d.teamComps || [])
           setStory(d.story || '')
         }
@@ -327,9 +504,15 @@ export default function AdminHaojieEditPage() {
             </h1>
             <p className="text-wiki-text-muted text-sm mt-1">豪杰圖鑑詳細資料</p>
           </div>
-          <Link href="/admin/characters/haojie" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
-            返回列表
-          </Link>
+          <div className="flex gap-2">
+            <button type="button" onClick={() => setShowPreview(true)}
+              className="px-4 py-2 border border-wiki-accent text-wiki-accent font-bold text-sm hover:bg-wiki-accent hover:text-wiki-bg transition-colors">
+              預覽
+            </button>
+            <Link href="/admin/characters" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
+              返回列表
+            </Link>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -551,28 +734,52 @@ export default function AdminHaojieEditPage() {
                 <h3 className="text-lg font-bold text-wiki-accent mb-2">裝備推薦</h3>
                 <p className="text-xs text-wiki-text-muted mb-5">豪杰同時只能裝備一件武器和一件戰徽。後續武器/戰徽圖鑑上線後將改為下拉選擇。</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* 武器卡片 */}
                   <div className="bg-wiki-gray border border-wiki-border rounded p-4 space-y-3">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center gap-2">
                       <span className="text-sm font-bold text-wiki-accent">⚔ 武器</span>
                     </div>
                     <div>
                       <label className="block text-xs text-wiki-text-muted mb-1">武器名稱</label>
                       <input className="w-full bg-wiki-gray-light border border-wiki-border px-3 py-2 text-sm text-wiki-text focus:border-wiki-accent focus:outline-none"
-                        value={haojieEquip.weapon}
-                        placeholder="暫填武器名稱"
+                        value={haojieEquip.weapon} placeholder="武器名稱"
                         onChange={e => setHaojieEquip({ ...haojieEquip, weapon: e.target.value })} />
                     </div>
+                    <div>
+                      <label className="block text-xs text-wiki-text-muted mb-1">武器圖標</label>
+                      <SkillIconInput value={haojieEquip.weaponIcon ?? ''}
+                        onChange={url => setHaojieEquip({ ...haojieEquip, weaponIcon: url })} />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-wiki-text-muted mb-1">推薦原因 / 效果說明</label>
+                      <textarea rows={2}
+                        className="w-full bg-wiki-gray-light border border-wiki-border px-3 py-2 text-sm text-wiki-text focus:border-wiki-accent focus:outline-none resize-y"
+                        value={haojieEquip.weaponDesc ?? ''} placeholder="說明為何推薦此武器"
+                        onChange={e => setHaojieEquip({ ...haojieEquip, weaponDesc: e.target.value })} />
+                    </div>
                   </div>
+                  {/* 戰徽卡片 */}
                   <div className="bg-wiki-gray border border-wiki-border rounded p-4 space-y-3">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center gap-2">
                       <span className="text-sm font-bold text-wiki-accent">🛡 戰徽</span>
                     </div>
                     <div>
                       <label className="block text-xs text-wiki-text-muted mb-1">戰徽名稱</label>
                       <input className="w-full bg-wiki-gray-light border border-wiki-border px-3 py-2 text-sm text-wiki-text focus:border-wiki-accent focus:outline-none"
-                        value={haojieEquip.warbadge}
-                        placeholder="暫填戰徽名稱"
+                        value={haojieEquip.warbadge} placeholder="戰徽名稱"
                         onChange={e => setHaojieEquip({ ...haojieEquip, warbadge: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-wiki-text-muted mb-1">戰徽圖標</label>
+                      <SkillIconInput value={haojieEquip.warbadgeIcon ?? ''}
+                        onChange={url => setHaojieEquip({ ...haojieEquip, warbadgeIcon: url })} />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-wiki-text-muted mb-1">推薦原因 / 效果說明</label>
+                      <textarea rows={2}
+                        className="w-full bg-wiki-gray-light border border-wiki-border px-3 py-2 text-sm text-wiki-text focus:border-wiki-accent focus:outline-none resize-y"
+                        value={haojieEquip.warbadgeDesc ?? ''} placeholder="說明為何推薦此戰徽"
+                        onChange={e => setHaojieEquip({ ...haojieEquip, warbadgeDesc: e.target.value })} />
                     </div>
                   </div>
                 </div>
@@ -658,6 +865,17 @@ export default function AdminHaojieEditPage() {
         </form>
       </main>
       <WikiFooter />
+
+      {showPreview && (
+        <HaojiePreviewModal
+          name={name} rarity={rarity} traits={traits} troopType={troopType} acquisition={acquisition}
+          awakenHero={awakenHero} avatar={avatar} avatarPosition={avatarPosition}
+          banner={banner} bannerPosition={bannerPosition}
+          attrs={attrs} skills={skills} haojieEquip={haojieEquip}
+          teamComps={teamComps} allHaojie={allHaojie}
+          onClose={() => setShowPreview(false)}
+        />
+      )}
     </div>
   )
 }
