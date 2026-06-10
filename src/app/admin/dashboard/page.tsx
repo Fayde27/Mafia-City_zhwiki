@@ -45,6 +45,7 @@ const NAV_SECTIONS = [
     title: '站點管理',
     links: [
       { label: '側邊欄', href: '/admin/sidebar', icon: '📋', desc: '導航管理、分區管理' },
+      { label: '輪播 Banner', href: '/admin/banner-articles', icon: '🎠', desc: '選擇首頁輪播展示的文章' },
       { label: '站點配置', href: '/admin/site-config', icon: '⚙️', desc: '首頁 Banner、熱門標籤' },
     ],
   },
