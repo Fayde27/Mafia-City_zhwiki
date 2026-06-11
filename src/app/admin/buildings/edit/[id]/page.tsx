@@ -8,6 +8,7 @@ import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import ImageUploadInput from '@/components/ImageUploadInput'
 import RichTextEditor from '@/components/RichTextEditor'
+import BuildingPreviewModal from '@/components/BuildingPreviewModal'
 
 // ─── 類型 ──────────────────────────────────────────────────────────────────────
 
@@ -165,6 +166,7 @@ export default function AdminBuildingEditPage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [activeSection, setActiveSection] = useState('basic')
+  const [showPreview, setShowPreview] = useState(false)
 
   const [form, setForm] = useState({
     name: '',
@@ -325,6 +327,13 @@ export default function AdminBuildingEditPage() {
                 >
                   {saving ? '保存中...' : saved ? '✓ 已保存' : '保存'}
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setShowPreview(true)}
+                  className="w-full py-2.5 bg-wiki-gray border border-wiki-border text-wiki-text text-sm font-bold rounded hover:border-wiki-accent hover:text-wiki-accent transition-colors"
+                >
+                  👁 預覽效果
+                </button>
                 <Link
                   href="/admin/buildings"
                   className="block w-full py-2 text-center text-wiki-text-muted text-sm hover:text-wiki-accent transition-colors"
@@ -416,7 +425,7 @@ export default function AdminBuildingEditPage() {
                   position={form.iconPosition}
                   onChange={url => set('icon', url)}
                   onPositionChange={pos => set('iconPosition', pos)}
-                  previewHeight="h-32"
+                  compact
                 />
                 <ImageUploadInput
                   label="Banner 圖（寬幅大圖）"
@@ -508,6 +517,15 @@ export default function AdminBuildingEditPage() {
                 </div>
               </div>
             </section>
+
+            {/* 預覽 Modal */}
+            {showPreview && (
+              <BuildingPreviewModal
+                form={form}
+                categoryName={categories.find(c => c.id === form.categoryId)?.name}
+                onClose={() => setShowPreview(false)}
+              />
+            )}
 
             {/* 底部保存 */}
             <div className="flex gap-4 pb-16">

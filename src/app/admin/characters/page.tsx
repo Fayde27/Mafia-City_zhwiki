@@ -150,6 +150,20 @@ export default function AdminCharactersPage() {
   const newHeroLink = '/admin/characters/edit/new'
   const newHaojieLink = '/admin/characters/haojie/edit/new'
 
+  const handleFixCharTypes = async () => {
+    if (!confirm('將把所有「豪杰分類」下 characterType 不是 haojie 的角色批量修復，確定執行？')) return
+    try {
+      const res = await fetch('/api/admin/fix-character-types', { method: 'POST' })
+      const d = await res.json()
+      if (res.ok) {
+        alert(`${d.message}\n修復了 ${d.updated} 筆角色`)
+        if (d.updated > 0) refetchChars()
+      } else {
+        alert(`修復失敗：${d.error}`)
+      }
+    } catch { alert('網絡錯誤') }
+  }
+
   return (
     <div className="min-h-screen bg-wiki-bg">
       <WikiHeader />
@@ -158,6 +172,12 @@ export default function AdminCharactersPage() {
           <div>
             <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">角色圖鑑管理</h1>
             <p className="text-wiki-text-muted text-sm mt-1">管理英雄與豪杰的列表、分類及篩選設定</p>
+            <button
+              onClick={handleFixCharTypes}
+              className="mt-2 px-3 py-1 text-xs bg-wiki-gray border border-wiki-border text-wiki-text-muted rounded hover:border-wiki-accent hover:text-wiki-accent transition-colors"
+            >
+              🔧 修復豪杰 characterType
+            </button>
           </div>
           {activeTab === 'list' && filterCatSlug !== 'all' && (
             <div className="flex gap-2">

@@ -10,6 +10,8 @@ interface ImageUploadInputProps {
   onPositionChange: (pos: string) => void
   previewHeight?: string
   objectFit?: 'cover' | 'contain'
+  /** compact=true 時，預覽框縮為方形小圖，整體寬度限制在 ~160px（適合圖標） */
+  compact?: boolean
 }
 
 export default function ImageUploadInput({
@@ -20,6 +22,7 @@ export default function ImageUploadInput({
   onPositionChange,
   previewHeight = 'h-40',
   objectFit = 'cover',
+  compact = false,
 }: ImageUploadInputProps) {
   const [uploading, setUploading] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
@@ -141,14 +144,22 @@ export default function ImageUploadInput({
     }
   }, [])
 
+  // compact 模式：整體限寬，預覽用固定正方形
+  const previewCls = compact
+    ? 'relative w-36 h-36 rounded-lg overflow-hidden bg-wiki-gray mb-2 select-none focus:outline-none focus:ring-2 focus:ring-wiki-accent'
+    : `relative ${previewHeight} rounded-lg overflow-hidden bg-wiki-gray mb-2 select-none focus:outline-none focus:ring-2 focus:ring-wiki-accent`
+  const emptyPreviewCls = compact
+    ? 'w-36 h-36 rounded-lg border-2 border-dashed bg-wiki-gray mb-2 flex flex-col items-center justify-center text-wiki-text-muted text-sm gap-1 focus:outline-none transition-colors'
+    : `${previewHeight} rounded-lg border-2 border-dashed bg-wiki-gray mb-2 flex flex-col items-center justify-center text-wiki-text-muted text-sm gap-1 focus:outline-none transition-colors`
+
   return (
-    <div>
+    <div className={compact ? 'w-44' : undefined}>
       <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">{label}</label>
 
       {value ? (
         <div
           ref={containerRef}
-          className={`relative ${previewHeight} rounded-lg overflow-hidden bg-wiki-gray mb-2 select-none focus:outline-none focus:ring-2 focus:ring-wiki-accent ${isActive ? 'ring-2 ring-wiki-accent' : ''}`}
+          className={`${previewCls} ${isActive ? 'ring-2 ring-wiki-accent' : ''}`}
           style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
           onMouseDown={handleMouseDown}
           onPaste={handlePaste}
@@ -169,7 +180,7 @@ export default function ImageUploadInput({
         </div>
       ) : (
         <div
-          className={`${previewHeight} rounded-lg border-2 border-dashed bg-wiki-gray mb-2 flex flex-col items-center justify-center text-wiki-text-muted text-sm gap-1 focus:outline-none transition-colors ${isActive ? 'border-wiki-accent ring-2 ring-wiki-accent' : 'border-wiki-border'}`}
+          className={`${emptyPreviewCls} ${isActive ? 'border-wiki-accent ring-2 ring-wiki-accent' : 'border-wiki-border'}`}
           onPaste={handlePaste}
           onMouseEnter={() => { isActiveRef.current = true; setIsActive(true) }}
           onMouseLeave={() => { isActiveRef.current = false; setIsActive(false) }}
