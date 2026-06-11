@@ -2,348 +2,415 @@
 
 export const runtime = 'edge'
 
-
-import { useState, useEffect } from 'react'
-import WikiHeader from '@/components/WikiHeader'
-import WikiFooter from '@/components/WikiFooter'
-import Link from 'next/link'
+import { useState, useEffect, useRef } from 'react'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import ImageUploadInput from '@/components/ImageUploadInput'
 import RichTextEditor from '@/components/RichTextEditor'
 
-interface BuildingCategory {
-  id: string
-  name: string
-  slug: string
+// ─── 升級表格編輯器（與編輯頁共用同款）─────────────────────────────────────────
+
+interface UpgradeTable { columns: string[]; rows: string[][] }
+
+const DEFAULT_TABLE: UpgradeTable = {
+  columns: ['等級', '升級條件', '建造時間', '效果加成'],
+  rows: [],
 }
+
+function UpgradeTableEditor({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [table, setTable] = useState<UpgradeTable>(() => {
+    try { return JSON.parse(value) || DEFAULT_TABLE } catch { return DEFAULT_TABLE }
+  })
+
+  const update = (next: UpgradeTable) => { setTable(next); onChange(JSON.stringify(next)) }
+
+  const addCol    = () => update({ ...table, columns: [...table.columns, '新列'], rows: table.rows.map(r => [...r, '']) })
+  const delCol    = (ci: number) => update({ ...table, columns: table.columns.filter((_, i) => i !== ci), rows: table.rows.map(r => r.filter((_, i) => i !== ci)) })
+  const setColName = (ci: number, v: string) => { const cols = [...table.columns]; cols[ci] = v; update({ ...table, columns: cols }) }
+  const addRow    = () => update({ ...table, rows: [...table.rows, table.columns.map(() => '')] })
+  const delRow    = (ri: number) => update({ ...table, rows: table.rows.filter((_, i) => i !== ri) })
+  const setCell   = (ri: number, ci: number, v: string) => {
+    const rows = table.rows.map((r, i) => i === ri ? r.map((c, j) => j === ci ? v : c) : r)
+    update({ ...table, rows })
+  }
+
+  const cellCls = 'w-full bg-wiki-gray border border-wiki-border px-2 py-1.5 text-wiki-text text-sm focus:border-wiki-accent focus:outline-none'
+
+  return (
+    <div>
+      <p className="text-wiki-text-muted text-xs mb-3">可自由增刪列與行，表頭可重命名</p>
+      <div className="overflow-x-auto rounded border border-wiki-border">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-wiki-gray">
+              {table.columns.map((col, ci) => (
+                <th key={ci} className="border-r border-wiki-border px-2 py-2 min-w-[100px]">
+                  <div className="flex items-center gap-1">
+                    <input value={col} onChange={e => setColName(ci, e.target.value)}
+                      className="flex-1 bg-wiki-gray-light border border-wiki-border px-2 py-1 text-wiki-accent font-bold text-xs focus:border-wiki-accent focus:outline-none" />
+                    <button type="button" onClick={() => delCol(ci)}
+                      className="text-wiki-danger text-xs hover:opacity-70 flex-shrink-0">×</button>
+                  </div>
+                </th>
+              ))}
+              <th className="px-2 py-2 w-8">
+                <button type="button" onClick={addCol}
+                  className="text-wiki-accent text-lg leading-none hover:opacity-70">+</button>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {table.rows.length === 0 && (
+              <tr><td colSpan={table.columns.length + 1} className="px-4 py-6 text-center text-wiki-text-muted text-sm">
+                暫無數據，點擊下方「添加行」開始填寫
+              </td></tr>
+            )}
+            {table.rows.map((row, ri) => (
+              <tr key={ri} className="border-t border-wiki-border hover:bg-wiki-gray/30">
+                {row.map((cell, ci) => (
+                  <td key={ci} className="border-r border-wiki-border px-1 py-1">
+                    <input value={cell} onChange={e => setCell(ri, ci, e.target.value)} className={cellCls} />
+                  </td>
+                ))}
+                <td className="px-2 py-1 text-center">
+                  <button type="button" onClick={() => delRow(ri)}
+                    className="text-wiki-danger text-xs hover:opacity-70">×</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <button type="button" onClick={addRow}
+        className="mt-3 px-4 py-2 bg-wiki-accent/10 border border-wiki-accent/30 text-wiki-accent text-sm font-bold rounded hover:bg-wiki-accent/20 transition-colors">
+        + 添加行
+      </button>
+    </div>
+  )
+}
+
+// ─── 主頁面 ────────────────────────────────────────────────────────────────────
+
+const SECTIONS = [
+  { id: 'basic',       label: '基本信息' },
+  { id: 'images',      label: '圖片上傳' },
+  { id: 'attributes',  label: '建築屬性' },
+  { id: 'description', label: '建築詳細信息' },
+  { id: 'upgrade',     label: '建築升級詳情' },
+  { id: 'publish',     label: '發佈設置' },
+]
+
+interface BuildingCategory { id: string; name: string; slug: string }
+
+const cardCls  = 'bg-wiki-gray-light border border-wiki-border rounded-lg p-6'
+const inputCls = 'w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none'
+const labelCls = 'block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2'
 
 export default function AdminBuildingNewPage() {
   const router = useRouter()
   const { isAdmin, isLoaded } = useAdminAuth()
+
   const [categories, setCategories] = useState<BuildingCategory[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [formData, setFormData] = useState({
+  const [activeSection, setActiveSection] = useState('basic')
+
+  const [form, setForm] = useState({
     name: '',
     slug: '',
+    categoryId: '',
+    summary: '',
+    sortOrder: 0,
+    isFeatured: false,
     icon: '',
     iconPosition: '50% 50%',
     image: '',
     imagePosition: '50% 50%',
-    rarity: 3,
+    unlockCondition: '',
     type: '',
     function: '',
-    unlockCondition: '',
-    summary: '',
-    isFeatured: false,
+    description: '',
+    upgradeLevels: JSON.stringify(DEFAULT_TABLE),
+    isPublished: true,
+    publishedAt: '',
+    // 向後兼容字段
+    rarity: 3,
     level: 1,
-    maxLevel: 10,
+    maxLevel: 30,
     cost: '',
     production: '',
-    description: '',
     details: '',
     upgradeInfo: '',
-    upgradeLevels: JSON.stringify({ columns: ['等級', '升級條件', '建造時間', '效果加成'], rows: [] }),
-    publishedAt: '',
-    categoryId: '',
-    sortOrder: 0,
-    isPublished: true,
   })
+
+  const sectionRefs = useRef<Record<string, HTMLElement | null>>({})
 
   useEffect(() => {
     if (!isLoaded) return
-    if (!isAdmin) {
-      router.push('/admin/login')
-      return
-    }
+    if (!isAdmin) { router.push('/admin/login'); return }
     fetch('/api/admin/building-categories')
-      .then(res => res.json())
-      .then(data => {
-        setCategories(Array.isArray(data) ? data : [])
-        setLoading(false)
-      })
-      .catch(() => {
-        setLoading(false)
-      })
+      .then(r => r.json())
+      .then(d => { setCategories(Array.isArray(d) ? d : []); setLoading(false) })
+      .catch(() => setLoading(false))
   }, [isAdmin, isLoaded, router])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaving(true)
+  // Scroll-spy
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY
+      for (const sec of SECTIONS) {
+        const el = sectionRefs.current[sec.id]
+        if (el && el.offsetTop <= scrollY + 140) setActiveSection(sec.id)
+      }
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
+  const scrollTo = (id: string) => {
+    const el = sectionRefs.current[id]
+    if (el) window.scrollTo({ top: el.offsetTop - 90, behavior: 'smooth' })
+  }
+
+  const set = (key: string, val: any) => setForm(f => ({ ...f, [key]: val }))
+
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault()
+    if (!form.name.trim() || !form.slug.trim()) { alert('請填寫建築名稱和 Slug'); return }
+    setSaving(true)
     try {
+      const body = { ...form, publishedAt: form.publishedAt ? new Date(form.publishedAt).toISOString() : null }
       const res = await fetch('/api/admin/buildings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(body),
       })
-
       if (res.ok) {
-        alert('創建成功')
-        router.push('/admin/buildings')
-      } else {
         const data = await res.json()
-        alert(data.error || '保存失敗')
+        router.push(`/admin/buildings/edit/${data.id}`)
+      } else {
+        const d = await res.json(); alert(d.error || '保存失敗')
       }
-    } catch (err) {
-      alert('網絡錯誤')
-    } finally {
-      setSaving(false)
-    }
+    } catch { alert('網絡錯誤') }
+    finally { setSaving(false) }
   }
 
-  if (!isAdmin) return null
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-wiki-bg">
-        <WikiHeader />
-        <div className="text-center py-20 text-wiki-text-muted">載入中...</div>
-        <WikiFooter />
-      </div>
-    )
+  if (!isLoaded || loading) {
+    return <div className="min-h-screen bg-wiki-bg flex items-center justify-center text-wiki-text-muted">載入中...</div>
   }
 
   return (
     <div className="min-h-screen bg-wiki-bg">
-      <WikiHeader />
-
-      <main className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">
-              新增建築
-            </h1>
-            <p className="text-wiki-text-muted text-sm mt-1">填寫建築詳細信息</p>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex gap-8">
+          {/* ── 左側 Sticky 導航 ── */}
+          <div className="w-48 flex-shrink-0 hidden lg:block">
+            <div className="sticky top-8 space-y-1">
+              <div className="text-wiki-text-muted text-xs font-bold uppercase tracking-wider mb-3 px-3">
+                新增建築
+              </div>
+              {SECTIONS.map(sec => (
+                <button key={sec.id} type="button" onClick={() => scrollTo(sec.id)}
+                  className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
+                    activeSection === sec.id
+                      ? 'bg-wiki-accent/15 text-wiki-accent font-bold'
+                      : 'text-wiki-text-muted hover:text-wiki-text'
+                  }`}>
+                  {sec.label}
+                </button>
+              ))}
+              <div className="pt-4 space-y-2">
+                <button type="button" onClick={handleSubmit} disabled={saving}
+                  className="w-full py-2.5 bg-wiki-accent text-wiki-dark font-bold text-sm rounded hover:bg-wiki-accent/90 transition-colors disabled:opacity-50">
+                  {saving ? '保存中...' : '創建建築'}
+                </button>
+                <Link href="/admin/buildings"
+                  className="block w-full py-2 text-center text-wiki-text-muted text-sm hover:text-wiki-accent transition-colors">
+                  ← 返回列表
+                </Link>
+              </div>
+            </div>
           </div>
-          <Link href="/admin/buildings" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
-            返回列表
-          </Link>
-        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
-              <h3 className="text-lg font-bold text-wiki-accent mb-4">基本信息</h3>
+          {/* ── 右側表單 ── */}
+          <div className="flex-1 space-y-8 min-w-0">
+            {/* 移動端頂部欄 */}
+            <div className="flex items-center justify-between lg:hidden">
+              <h1 className="text-xl font-bold text-wiki-text">
+                <span className="text-wiki-accent mr-2">◆</span>新增建築
+              </h1>
+              <div className="flex gap-2">
+                <button onClick={handleSubmit} disabled={saving}
+                  className="px-4 py-2 bg-wiki-accent text-wiki-dark font-bold text-sm rounded disabled:opacity-50">
+                  {saving ? '保存中...' : '創建'}
+                </button>
+                <Link href="/admin/buildings" className="px-4 py-2 bg-wiki-gray text-wiki-text text-sm rounded">返回</Link>
+              </div>
+            </div>
+
+            {/* Section 1: 基本信息 */}
+            <section ref={el => { sectionRefs.current['basic'] = el }} className={cardCls}>
+              <h2 className="text-wiki-text font-bold text-base mb-5 flex items-center gap-2">
+                <span className="text-wiki-accent">◆</span>基本信息
+              </h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">建築名稱 *</label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                    required
-                  />
+                  <label className={labelCls}>建築名稱 *</label>
+                  <input value={form.name} onChange={e => set('name', e.target.value)}
+                    className={inputCls} placeholder="如：市政廳" required />
                 </div>
                 <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">URL Slug *</label>
-                  <input
-                    type="text"
-                    value={formData.slug}
-                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                    className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                    placeholder="英文小寫，如: town-hall"
-                    required
-                  />
+                  <label className={labelCls}>URL Slug *</label>
+                  <input value={form.slug} onChange={e => set('slug', e.target.value)}
+                    className={inputCls} placeholder="英文小寫，如：city-hall" required />
                 </div>
                 <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">所屬分類 *</label>
-                  <select
-                    value={formData.categoryId}
-                    onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                    className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none cursor-pointer"
-                    required
-                  >
+                  <label className={labelCls}>所屬分類</label>
+                  <select value={form.categoryId} onChange={e => set('categoryId', e.target.value)}
+                    className={inputCls + ' cursor-pointer'}>
                     <option value="">請選擇分類</option>
-                    {categories.map((cat) => (
+                    {categories.map(cat => (
                       <option key={cat.id} value={cat.id}>{cat.name}</option>
                     ))}
                   </select>
                 </div>
+                <div>
+                  <label className={labelCls}>簡短描述</label>
+                  <textarea value={form.summary} onChange={e => set('summary', e.target.value)}
+                    rows={2} className={inputCls + ' resize-none'} placeholder="用於列表頁卡片展示" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className={labelCls}>排序值</label>
+                    <input type="number" value={form.sortOrder}
+                      onChange={e => set('sortOrder', parseInt(e.target.value) || 0)}
+                      className={inputCls} />
+                  </div>
+                  <div className="flex items-end pb-1">
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                      <div onClick={() => set('isFeatured', !form.isFeatured)}
+                        className={`w-11 h-6 rounded-full transition-colors relative ${form.isFeatured ? 'bg-wiki-accent' : 'bg-wiki-border'}`}>
+                        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all ${form.isFeatured ? 'left-6' : 'left-1'}`} />
+                      </div>
+                      <span className="text-wiki-text text-sm font-bold">推薦展示</span>
+                    </label>
+                  </div>
+                </div>
               </div>
-            </div>
+            </section>
 
-            <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
-              <h3 className="text-lg font-bold text-wiki-accent mb-4">圖片上傳</h3>
+            {/* Section 2: 圖片上傳 */}
+            <section ref={el => { sectionRefs.current['images'] = el }} className={cardCls}>
+              <h2 className="text-wiki-text font-bold text-base mb-5 flex items-center gap-2">
+                <span className="text-wiki-accent">◆</span>圖片上傳
+              </h2>
               <div className="space-y-6">
                 <ImageUploadInput
-                  label="圖標"
-                  value={formData.icon}
-                  position={formData.iconPosition}
-                  onChange={(url) => setFormData({ ...formData, icon: url })}
-                  onPositionChange={(pos) => setFormData({ ...formData, iconPosition: pos })}
-                  previewHeight="h-32 aspect-square"
+                  label="圖標（方形小圖）"
+                  value={form.icon} position={form.iconPosition}
+                  onChange={url => set('icon', url)}
+                  onPositionChange={pos => set('iconPosition', pos)}
+                  previewHeight="h-32"
                 />
                 <ImageUploadInput
-                  label="圖片"
-                  value={formData.image}
-                  position={formData.imagePosition}
-                  onChange={(url) => setFormData({ ...formData, image: url })}
-                  onPositionChange={(pos) => setFormData({ ...formData, imagePosition: pos })}
-                  previewHeight="w-full aspect-[3/1]"
+                  label="Banner 圖（寬幅大圖）"
+                  value={form.image} position={form.imagePosition}
+                  onChange={url => set('image', url)}
+                  onPositionChange={pos => set('imagePosition', pos)}
+                  previewHeight="h-48"
                 />
               </div>
-            </div>
-          </div>
+            </section>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
-              <h3 className="text-lg font-bold text-wiki-accent mb-4">建築屬性</h3>
+            {/* Section 3: 建築屬性 */}
+            <section ref={el => { sectionRefs.current['attributes'] = el }} className={cardCls}>
+              <h2 className="text-wiki-text font-bold text-base mb-5 flex items-center gap-2">
+                <span className="text-wiki-accent">◆</span>建築屬性
+              </h2>
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">稀有度</label>
-                    <select
-                      value={formData.rarity}
-                      onChange={(e) => setFormData({ ...formData, rarity: parseInt(e.target.value) })}
-                      className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none cursor-pointer"
-                    >
-                      <option value={1}>★</option>
-                      <option value={2}>★★</option>
-                      <option value={3}>★★★</option>
-                      <option value={4}>★★★★</option>
-                      <option value={5}>★★★★★</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">建築類型</label>
-                    <input
-                      type="text"
-                      value={formData.type}
-                      onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                      className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                      placeholder="如: 資源建築"
-                    />
-                  </div>
-                </div>
                 <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">功能</label>
-                  <input
-                    type="text"
-                    value={formData.function}
-                    onChange={(e) => setFormData({ ...formData, function: e.target.value })}
-                    className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                    placeholder="如: 生產金幣"
-                  />
+                  <label className={labelCls}>開放條件</label>
+                  <input value={form.unlockCondition} onChange={e => set('unlockCondition', e.target.value)}
+                    className={inputCls} placeholder="如：總部等級達到 5 級" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">初始等級</label>
-                    <input
-                      type="number"
-                      value={formData.level}
-                      onChange={(e) => setFormData({ ...formData, level: parseInt(e.target.value) })}
-                      className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                    />
+                    <label className={labelCls}>建築類型</label>
+                    <input value={form.type} onChange={e => set('type', e.target.value)}
+                      className={inputCls} placeholder="如：資源建築" />
                   </div>
                   <div>
-                    <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">最大等級</label>
-                    <input
-                      type="number"
-                      value={formData.maxLevel}
-                      onChange={(e) => setFormData({ ...formData, maxLevel: parseInt(e.target.value) })}
-                      className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                    />
+                    <label className={labelCls}>建築核心功能</label>
+                    <input value={form.function} onChange={e => set('function', e.target.value)}
+                      className={inputCls} placeholder="如：生產金幣" />
                   </div>
                 </div>
-                <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">建造消耗</label>
-                  <input
-                    type="text"
-                    value={formData.cost}
-                    onChange={(e) => setFormData({ ...formData, cost: e.target.value })}
-                    className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                    placeholder="如: 1000金幣"
-                  />
-                </div>
-                <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">產出</label>
-                  <input
-                    type="text"
-                    value={formData.production}
-                    onChange={(e) => setFormData({ ...formData, production: e.target.value })}
-                    className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                    placeholder="如: 100金幣/小時"
-                  />
-                </div>
               </div>
-            </div>
+            </section>
 
-            <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
-              <h3 className="text-lg font-bold text-wiki-accent mb-4">發佈設置</h3>
+            {/* Section 4: 建築詳細信息 */}
+            <section ref={el => { sectionRefs.current['description'] = el }} className={cardCls}>
+              <h2 className="text-wiki-text font-bold text-base mb-5 flex items-center gap-2">
+                <span className="text-wiki-accent">◆</span>建築詳細信息
+              </h2>
+              <RichTextEditor
+                value={form.description}
+                onChange={html => set('description', html)}
+                minHeight="min-h-[200px]"
+              />
+            </section>
+
+            {/* Section 5: 建築升級詳情 */}
+            <section ref={el => { sectionRefs.current['upgrade'] = el }} className={cardCls}>
+              <h2 className="text-wiki-text font-bold text-base mb-5 flex items-center gap-2">
+                <span className="text-wiki-accent">◆</span>建築升級詳情
+              </h2>
+              <UpgradeTableEditor
+                value={form.upgradeLevels}
+                onChange={v => set('upgradeLevels', v)}
+              />
+            </section>
+
+            {/* Section 6: 發佈設置 */}
+            <section ref={el => { sectionRefs.current['publish'] = el }} className={cardCls}>
+              <h2 className="text-wiki-text font-bold text-base mb-5 flex items-center gap-2">
+                <span className="text-wiki-accent">◆</span>發佈設置
+              </h2>
               <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <label className="flex items-center gap-2 text-wiki-text cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={formData.isPublished}
-                      onChange={(e) => setFormData({ ...formData, isPublished: e.target.checked })}
-                      className="w-5 h-5 accent-wiki-accent cursor-pointer"
-                    />
-                    <span className="font-bold">立即發佈</span>
-                  </label>
-                </div>
+                <label className="flex items-center gap-3 cursor-pointer select-none">
+                  <div onClick={() => set('isPublished', !form.isPublished)}
+                    className={`w-11 h-6 rounded-full transition-colors relative ${form.isPublished ? 'bg-wiki-accent' : 'bg-wiki-border'}`}>
+                    <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all ${form.isPublished ? 'left-6' : 'left-1'}`} />
+                  </div>
+                  <span className="text-wiki-text font-bold">
+                    {form.isPublished ? '立即發佈（公開可見）' : '存為草稿（暫不公開）'}
+                  </span>
+                </label>
                 <div>
-                  <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">排序值</label>
-                  <input
-                    type="number"
-                    value={formData.sortOrder}
-                    onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value) })}
-                    className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
-                  />
+                  <label className={labelCls}>定時發佈時間（選填）</label>
+                  <input type="datetime-local" value={form.publishedAt}
+                    onChange={e => set('publishedAt', e.target.value)}
+                    className={inputCls} />
+                  <p className="text-wiki-text-muted text-xs mt-1">設置後，到達指定時間自動切換為已發佈狀態</p>
                 </div>
               </div>
+            </section>
+
+            {/* 底部按鈕 */}
+            <div className="flex gap-4 pb-16">
+              <button type="button" onClick={handleSubmit} disabled={saving}
+                className="px-8 py-3 bg-wiki-accent text-wiki-dark font-bold rounded-lg hover:bg-wiki-accent/90 transition-colors disabled:opacity-50">
+                {saving ? '保存中...' : '創建建築'}
+              </button>
+              <Link href="/admin/buildings"
+                className="px-8 py-3 bg-wiki-gray text-wiki-text font-bold rounded-lg hover:bg-wiki-border transition-colors">
+                取消
+              </Link>
             </div>
           </div>
-
-          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
-            <h3 className="text-lg font-bold text-wiki-accent mb-4">建築簡介 (Markdown)</h3>
-            <RichTextEditor
-              value={formData.description}
-              onChange={(html) => setFormData({ ...formData, description: html })}
-              minHeight="min-h-[160px]"
-            />
-          </div>
-
-          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
-            <h3 className="text-lg font-bold text-wiki-accent mb-4">詳細信息 (Markdown)</h3>
-            <RichTextEditor
-              value={formData.details}
-              onChange={(html) => setFormData({ ...formData, details: html })}
-              minHeight="min-h-[160px]"
-            />
-          </div>
-
-          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
-            <h3 className="text-lg font-bold text-wiki-accent mb-4">升級信息 (Markdown)</h3>
-            <RichTextEditor
-              value={formData.upgradeInfo}
-              onChange={(html) => setFormData({ ...formData, upgradeInfo: html })}
-              minHeight="min-h-[160px]"
-            />
-          </div>
-
-          <div className="flex gap-4 pt-4">
-            <button
-              type="submit"
-              disabled={saving}
-              className="btn-hard text-wiki-text disabled:opacity-50"
-            >
-              {saving ? '保存中...' : '保存'}
-            </button>
-            <Link
-              href="/admin/buildings"
-              className="px-6 py-3 bg-wiki-gray text-wiki-text font-bold uppercase tracking-wider"
-            >
-              取消
-            </Link>
-          </div>
-        </form>
-      </main>
-
-      <WikiFooter />
+        </div>
+      </div>
     </div>
   )
 }
