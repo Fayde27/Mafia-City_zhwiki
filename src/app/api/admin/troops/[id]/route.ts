@@ -29,27 +29,31 @@ export async function PUT(
     const { data: troop, error } = await supabaseAdmin.from('Troop').update({
         name: data.name,
         slug: data.slug,
+        summary: data.summary,
         icon: data.icon,
         iconPosition: data.iconPosition,
         image: data.image,
         imagePosition: data.imagePosition,
+        troopType: data.troopType,
         rarity: data.rarity,
-        type: data.type,
+        combatPower: data.combatPower,
         attack: data.attack,
         defense: data.defense,
         hp: data.hp,
         speed: data.speed,
+        load: data.load,
+        attackRange: data.attackRange,
+        cashCost: data.cashCost,
+        talent: data.talent,
         counter: data.counter,
         weakness: data.weakness,
         description: data.description,
-        stats: data.stats,
-        skills: data.skills,
-        training: data.training,
         categoryId: data.categoryId,
         sortOrder: data.sortOrder,
+        isFeatured: data.isFeatured,
         isPublished: data.isPublished,
       })
-      .eq('id', params.id )
+      .eq('id', params.id)
       .select()
       .single()
 
@@ -66,7 +70,7 @@ export async function DELETE(
 ) {
   try {
     const { error } = await supabaseAdmin.from('Troop').delete()
-      .eq('id', params.id )
+      .eq('id', params.id)
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error: '刪除兵種失敗' }, { status: 500 })

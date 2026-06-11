@@ -178,7 +178,10 @@ export default function AdminTroopsPage() {
                               <button onClick={() => handleTogglePublish(tr)} className={`px-2 py-1 text-xs font-bold ${tr.isPublished ? 'bg-green-500/20 text-green-400' : 'bg-wiki-danger/20 text-wiki-danger'}`}>{tr.isPublished ? '已發佈' : '草稿'}</button>
                             </td>
                             <td className="px-6 py-4">
-                              <button onClick={() => handleDelete(tr.id)} className="px-3 py-1 bg-wiki-danger/20 text-wiki-danger text-sm font-bold hover:bg-wiki-danger/30">刪除</button>
+                              <div className="flex gap-2">
+                                <Link href={`/admin/troops/edit/${tr.id}`} className="px-3 py-1 bg-wiki-accent/20 text-wiki-accent text-sm font-bold hover:bg-wiki-accent/30">編輯</Link>
+                                <button onClick={() => handleDelete(tr.id)} className="px-3 py-1 bg-wiki-danger/20 text-wiki-danger text-sm font-bold hover:bg-wiki-danger/30">刪除</button>
+                              </div>
                             </td>
                           </tr>
                         ))}

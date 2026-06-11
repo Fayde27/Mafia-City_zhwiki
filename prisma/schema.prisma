@@ -358,29 +358,39 @@ model TroopFilterOption {
 }
 
 model Troop {
-  id          String        @id @default(cuid())
-  name        String
-  slug        String        @unique
-  icon        String?
-  image       String?
-  rarity      Int           @default(3)
-  type        String?
-  attack      Int           @default(0)
-  defense     Int           @default(0)
-  hp          Int           @default(0)
-  speed       Int           @default(0)
-  counter     String?
-  weakness    String?
-  description String?
-  stats       String?
-  skills      String?
-  training    String?
-  categoryId  String
-  sortOrder   Int           @default(0)
-  isPublished Boolean       @default(false)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  category    TroopCategory @relation(fields: [categoryId], references: [id])
+  id            String        @id @default(cuid())
+  name          String
+  slug          String        @unique
+  summary       String?
+  icon          String?
+  iconPosition  String?       @default("50% 50%")
+  image         String?
+  imagePosition String?       @default("50% 50%")
+  troopType     String?
+  rarity        Int           @default(3)
+  combatPower   Int           @default(0)
+  attack        Int           @default(0)
+  defense       Int           @default(0)
+  hp            Int           @default(0)
+  speed         Int           @default(0)
+  load          Int           @default(0)
+  attackRange   Int           @default(0)
+  cashCost      Int           @default(0)
+  talent        String?
+  counter       String?
+  weakness      String?
+  description   String?
+  stats         String?
+  skills        String?
+  training      String?
+  type          String?
+  categoryId    String
+  sortOrder     Int           @default(0)
+  isFeatured    Boolean       @default(false)
+  isPublished   Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  category      TroopCategory @relation(fields: [categoryId], references: [id])
 }
 
 model SidebarNav {
