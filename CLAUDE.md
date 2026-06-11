@@ -38,8 +38,17 @@ const labelCls = 'block text-wiki-text text-sm font-bold uppercase tracking-wide
 ```
 
 **大型編輯頁佈局（標準範本）：**  
-左側 Sticky 導航 + 右側分區表單 + scroll-spy 高亮（`offsetTop <= scrollY + 120`）。  
-→ 參考：`src/app/admin/characters/edit/[id]/page.tsx`（英雄編輯頁，所有大型編輯頁的標準範本）
+左側 Sticky 導航 + 右側分區表單 + scroll-spy 高亮（`offsetTop <= scrollY + 140`）+ 左側「👁 預覽效果」按鈕。  
+→ 參考：`src/app/admin/buildings/edit/[id]/page.tsx`（所有大型編輯頁的標準範本）
+
+**預覽 Modal 規範：**  
+每個圖鑑有對應的 `XxxPreviewModal` 組件（`src/components/`），接收當前表單 state 實時渲染 Wiki 效果，ESC 關閉。  
+→ 已實現：`BuildingPreviewModal.tsx` · `ItemPreviewModal.tsx`
+
+**ImageUploadInput props：**
+- `compact` — 圖標用，限寬 176px、預覽 144×144px 正方形
+- `previewHeight` — Banner 用，如 `"h-48"`
+- `objectFit` — `'cover'`（默認）或 `'contain'`
 
 **顏色系統（Tailwind 自定義）：**
 - `wiki-accent` `#c4a35a` — 金色主色調
@@ -67,15 +76,17 @@ const labelCls = 'block text-wiki-text text-sm font-bold uppercase tracking-wide
 **英雄**：8 張關聯表（皮膚/羁绊/陣容/血盟/裝備/攻略）· 4 軸雷達圖（攻擊/防衛/魅帥/速度）  
 **豪杰**：全 JSON 字段 · 5 軸雷達圖（力量/技術/體魄/防護/速度，存 `attributes`）· 裝備存 `haojieEquip JSON({weapon,warbadge})` · `awakenHero` 布爾字段
 
-**常見坑：** 豪杰 `editLink` 判斷需同時檢查 `characterType==='haojie'` 和分類名含「豪」（舊數據 `characterType` 可能未正確設置）
+**常見坑：**
+- 豪杰 `editLink` 判斷需同時檢查 `characterType==='haojie'` 和分類名含「豪」（舊數據 `characterType` 可能未正確設置）
+- 修復工具：後台角色列表頁有「🔧 修復豪杰 characterType」按鈕，也可調用 `POST /api/admin/fix-character-types`
 
-### 4-2 建築圖鑑（`Building` 表）
+### 4-2 建築圖鑑（`Building` 表）✅ 完整
 
-**已實現字段：**
+**字段：**
 ```
-name / slug / categoryId / icon / iconPosition
-image（Banner圖）/ imagePosition
-type / function / unlockCondition / summary
+name / slug / categoryId / summary
+icon / iconPosition / image（Banner）/ imagePosition
+type / function / unlockCondition
 description（富文本）/ upgradeLevels（JSON升級表格）
 rarity / level / maxLevel / cost / production
 sortOrder / isFeatured / isPublished / publishedAt
@@ -86,19 +97,44 @@ sortOrder / isFeatured / isPublished / publishedAt
 { "columns": ["等級","升級條件","建造時間","效果加成"], "rows": [["1","總部Lv1","立即","容量500"]] }
 ```
 
-**後台編輯頁** `/admin/buildings/edit/[id]`：6 分區（基本信息/圖片/建築屬性/詳細信息/升級表格/發佈設置）  
+**後台編輯頁** `/admin/buildings/edit/[id]`：6 分區 + 左側預覽按鈕  
 **Wiki 詳情頁** 渲染升級表格為斑馬紋 HTML table，向後兼容舊 `upgradeInfo` 富文本
 
-### 4-3 其他圖鑑（裝備 / 道具 / 兵種）
+### 4-3 道具圖鑑（`Item` 表）✅ 完整
 
-結構與建築類似，各有 Category + FilterOption，API 在 `/api/admin/xxx` 和 `/api/wiki/xxx`
+**字段：**
+```
+name / slug / categoryId / summary（簡介，列表卡片用）
+icon / iconPosition / image（Banner，選填）/ imagePosition
+source（獲取途徑，富文本，支持鏈接）
+sortOrder / isFeatured / isPublished
+-- 舊字段保留兼容：rarity / type / quality / stackable / effect / description / usage / recipe
+```
 
-### 4-4 攻略文章（`Article` 表）
+**⚠️ 新字段需在 Supabase SQL Editor 執行（若尚未執行）：**
+```sql
+ALTER TABLE "Item" ADD COLUMN IF NOT EXISTS "summary" TEXT;
+ALTER TABLE "Item" ADD COLUMN IF NOT EXISTS "iconPosition" TEXT DEFAULT '50% 50%';
+ALTER TABLE "Item" ADD COLUMN IF NOT EXISTS "imagePosition" TEXT DEFAULT '50% 50%';
+ALTER TABLE "Item" ADD COLUMN IF NOT EXISTS "isFeatured" BOOLEAN DEFAULT false;
+```
+
+**後台編輯頁** `/admin/items/edit/[id]`：4 分區（基本信息/圖片/獲取途徑/發佈設置）+ 預覽按鈕  
+**Wiki 分類頁** `/wiki/items/[slug]`：方形圖標卡片網格，顯示圖片 + summary  
+**Wiki 詳情頁** `/wiki/items/[slug]/[itemSlug]`：Tabs 按有無內容動態顯示
+
+### 4-4 裝備圖鑑（`Equipment` 表）⚠️ 後台基礎，Wiki 待完善
+
+結構與道具類似，API 在 `/api/admin/equipment` 和 `/api/wiki/equipment`
+
+### 4-5 兵種圖鑑（`Troop` 表）⚠️ 後台基礎，Wiki 待完善
+
+### 4-6 攻略文章（`Article` 表）✅ 完整
 
 `isFeatured` · `isPinned` · `badges`（HOT/NEW 等逗號分隔）· `isPublished` · `sortOrder`  
 富文本用 TipTap，支持圖片嵌入
 
-### 4-5 首頁輪播 Banner
+### 4-7 首頁輪播 Banner ✅ 完整
 
 數據流：後台 `/admin/banner-articles` → 保存到 `SiteConfig.bannerArticleIds`（JSON ID 數組）  
 → `/api/wiki/banner-articles` 按序返回文章 → 首頁 `HomeBannerCarousel` 消費  
@@ -111,24 +147,26 @@ fallback：未配置時取 `isFeatured=true` 的文章
 ### 後台 `/admin/*`
 ```
 /admin/login · /admin/dashboard
-/admin/characters          ← 英雄+豪杰統一列表（三Tab）
+/admin/characters                     ← 英雄+豪杰統一列表（三Tab）
 /admin/characters/edit/[id]
 /admin/characters/haojie/edit/[id]
 /admin/buildings · /admin/buildings/new · /admin/buildings/edit/[id]
-/admin/equipment · /admin/items · /admin/troops · /admin/articles
+/admin/items · /admin/items/new · /admin/items/edit/[id]   ← 完整
+/admin/equipment · /admin/troops · /admin/articles
 /admin/announcements · /admin/categories · /admin/site-config
-/admin/banner-articles     ← 首頁輪播文章管理
+/admin/banner-articles                ← 首頁輪播文章管理
 /admin/sidebar-nav · /admin/sidebar-sections · /admin/wiki-categories
 /admin/character-filters · /admin/building-filters · /admin/equipment-filters
 ```
 
 ### 公開 Wiki `/wiki/*`
 ```
-/                          ← 首頁（搜索Banner + 輪播 + 熱門攻略 + 公告）
-/wiki                      ← 圖鑑總覽
-/wiki/article/[slug]       ← 文章詳情
-/wiki/characters/[slug]/[characterSlug]  ← 角色詳情
-/wiki/buildings/[slug]/[buildingSlug]    ← 建築詳情
+/                                     ← 首頁（搜索Banner + 輪播 + 熱門攻略 + 公告）
+/wiki                                 ← 圖鑑總覽
+/wiki/article/[slug]                  ← 文章詳情
+/wiki/characters/[slug]/[characterSlug]       ← 英雄詳情
+/wiki/buildings/[slug]/[buildingSlug]         ← 建築詳情
+/wiki/items/[slug]/[itemSlug]                 ← 道具詳情
 /wiki/equipment · /wiki/items · /wiki/troops  ← 其他圖鑑
 /wiki/search · /wiki/rankings · /wiki/events · /wiki/submit
 ```
@@ -144,7 +182,9 @@ fallback：未配置時取 `isFeatured=true` 的文章
 | `/api/admin/upload` | POST | 圖片上傳到 Supabase Storage |
 | `/api/admin/characters` | GET/POST | 角色（含 type 篩選） |
 | `/api/admin/haojie/[id]` | GET/PUT/DELETE | 豪杰 |
-| `/api/admin/buildings/[id]` | GET/PUT/DELETE | 建築（含新字段） |
+| `/api/admin/buildings/[id]` | GET/PUT/DELETE | 建築 |
+| `/api/admin/items/[id]` | GET/PUT/DELETE | 道具 |
+| `/api/admin/fix-character-types` | POST | 批量修復豪杰 characterType |
 | `/api/admin/site-config` | GET/PUT | 鍵值對，upsert by key |
 
 ### 公開 Wiki API
@@ -153,13 +193,30 @@ fallback：未配置時取 `isFeatured=true` 的文章
 | `/api/wiki/banner-articles` | 首頁輪播文章（從 SiteConfig 讀取順序） |
 | `/api/wiki/articles` | 文章列表（featured/limit/category 參數） |
 | `/api/wiki/buildings` | 建築列表（isPublished 過濾） |
+| `/api/wiki/items` | 道具列表（category/slug 參數） |
+| `/api/wiki/items/categories` | 道具分類列表 |
+| `/api/wiki/items/filter-options` | 道具篩選選項 |
 | `/api/wiki/characters/heroes` | 英雄列表 |
 | `/api/wiki/site-config` | 網站配置公開字段 |
 | `/api/wiki/like` · `/api/wiki/view` | POST，點贊/瀏覽計數 |
 
 ---
 
-## 七、部署
+## 七、共用組件說明
+
+| 組件 | 路徑 | 說明 |
+|------|------|------|
+| `ImageUploadInput` | `src/components/` | 圖片上傳+預覽+拖拽調位，支持 `compact` 模式（圖標用） |
+| `BuildingPreviewModal` | `src/components/` | 建築後台預覽 Modal，傳入 form state 實時渲染 |
+| `ItemPreviewModal` | `src/components/` | 道具後台預覽 Modal，同上 |
+| `RichTextEditor` | `src/components/` | TipTap 富文本，支持圖片嵌入 |
+| `MarkdownRenderer` | `src/components/` | Wiki 前台富文本渲染 |
+| `LikeButton` | `src/components/` | 點贊按鈕，傳 `entityType` + `entityId` |
+| `WikiHeader/Footer` | `src/components/` | 公開 Wiki 頭尾 |
+
+---
+
+## 八、部署
 
 ```bash
 npm run dev               # 本地開發 localhost:3000
@@ -180,7 +237,7 @@ JWT_SECRET / ADMIN_USERNAME / ADMIN_PASSWORD
 
 ---
 
-## 八、待辦事項
+## 九、待辦事項
 
 ### 前台 Wiki（高優先級）
 - [ ] 英雄 Wiki 列表頁 `/wiki/characters/heroes`
@@ -188,16 +245,18 @@ JWT_SECRET / ADMIN_USERNAME / ADMIN_PASSWORD
 - [ ] 豪杰 Wiki 詳情頁 `/wiki/characters/haojie/[slug]`
 - [ ] 公開豪杰 API `/api/wiki/haojie`
 
-### 圖鑑擴展（中優先級）
+### 圖鑑完善（中優先級）
+- [ ] 裝備圖鑑後台編輯頁 + Wiki 前台完整化
+- [ ] 兵種圖鑑後台編輯頁 + Wiki 前台完整化
 - [ ] 武器圖鑑（後續對接豪杰 `haojieEquip.weapon`）
 - [ ] 戰徽圖鑑（後續對接豪杰 `haojieEquip.warbadge`）
 - [ ] 各圖鑑跳轉 `href="#"` 補充真實路由
 
-### 數據修復 SQL（可選）
-```sql
--- 修復 characterType 未正確設置的豪杰角色
-UPDATE "Character"
-SET "characterType" = 'haojie'
-WHERE "categoryId" IN (SELECT id FROM "CharacterCategory" WHERE name LIKE '%豪%')
-AND "characterType" != 'haojie';
-```
+### 新增圖鑑 — 標準開發流程
+1. Supabase SQL Editor 建表 + 加字段
+2. 同步 `prisma/schema.prisma`
+3. 後台 API `route.ts`（GET/POST/PUT/DELETE）
+4. 後台列表頁（三Tab：列表/分類/篩選）
+5. 後台新增頁 + 編輯頁（sticky 側邊欄 + 分區 + 預覽 Modal）
+6. Wiki 分類總覽頁 → 分類列表頁 → 詳情頁
+7. Wiki API（公開，isPublished 過濾）
