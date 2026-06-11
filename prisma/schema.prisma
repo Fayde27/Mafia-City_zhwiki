@@ -310,26 +310,30 @@ model ItemFilterOption {
 }
 
 model Item {
-  id          String       @id @default(cuid())
-  name        String
-  slug        String       @unique
-  icon        String?
-  image       String?
-  rarity      Int          @default(3)
-  type        String?
-  quality     String?
-  stackable   Boolean      @default(true)
-  effect      String?
-  description String?
-  usage       String?
-  recipe      String?
-  source      String?
-  categoryId  String
-  sortOrder   Int          @default(0)
-  isPublished Boolean      @default(false)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  category    ItemCategory @relation(fields: [categoryId], references: [id])
+  id            String       @id @default(cuid())
+  name          String
+  slug          String       @unique
+  summary       String?
+  icon          String?
+  iconPosition  String?      @default("50% 50%")
+  image         String?
+  imagePosition String?      @default("50% 50%")
+  rarity        Int          @default(3)
+  type          String?
+  quality       String?
+  stackable     Boolean      @default(true)
+  effect        String?
+  description   String?
+  usage         String?
+  recipe        String?
+  source        String?
+  categoryId    String
+  sortOrder     Int          @default(0)
+  isFeatured    Boolean      @default(false)
+  isPublished   Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  category      ItemCategory @relation(fields: [categoryId], references: [id])
 }
 
 model TroopCategory {

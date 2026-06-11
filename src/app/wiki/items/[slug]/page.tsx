@@ -2,7 +2,6 @@
 
 export const runtime = 'edge'
 
-
 import { useState, useEffect } from 'react'
 import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
@@ -14,40 +13,26 @@ interface Item {
   id: string
   name: string
   slug: string
+  summary?: string
   icon: string
+  iconPosition?: string
   image: string
   imagePosition?: string
-  iconPosition?: string
-  rarity: number
-  type: string
-  quality: string
-  stackable: boolean
-  effect: string
-  description: string
-  category: {
-    name: string
-    slug: string
-  }
+  category: { name: string; slug: string }
 }
 
 interface ItemCategory {
-  id: string
-  name: string
-  slug: string
-  icon: string
+  id: string; name: string; slug: string; icon: string
 }
 
 interface ItemFilterOption {
-  id: string
-  type: string
-  value: string
-  sortOrder: number
+  id: string; type: string; value: string; sortOrder: number
 }
 
 export default function ItemListPage() {
   const params = useParams()
   const categorySlug = params?.slug as string
-  const { isAdmin, isLoaded } = useAdminAuth()
+  const { isAdmin } = useAdminAuth()
   const [items, setItems] = useState<Item[]>([])
   const [category, setCategory] = useState<ItemCategory | null>(null)
   const [loading, setLoading] = useState(true)
@@ -56,43 +41,33 @@ export default function ItemListPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch(`/api/wiki/items?category=${categorySlug}`).then(res => res.json()),
-      fetch('/api/wiki/items/categories').then(res => res.json()),
-      fetch(`/api/wiki/items/filter-options?categorySlug=${categorySlug}`).then(res => res.json()),
+      fetch(`/api/wiki/items?category=${categorySlug}`).then(r => r.json()),
+      fetch('/api/wiki/items/categories').then(r => r.json()),
+      fetch(`/api/wiki/items/filter-options?categorySlug=${categorySlug}`).then(r => r.json()),
     ]).then(([itemData, catData, filterData]) => {
-      const its = itemData?.items || []
-      setItems(its)
-      
-      const cat = catData?.find((c: ItemCategory) => c.slug === categorySlug)
-      setCategory(cat || null)
-      
-      const filters = Array.isArray(filterData) ? filterData : []
-      setFilterOptions(filters)
-      
+      setItems(itemData?.items || [])
+      setCategory((Array.isArray(catData) ? catData : []).find((c: ItemCategory) => c.slug === categorySlug) || null)
+      setFilterOptions(Array.isArray(filterData) ? filterData : [])
       setLoading(false)
-    }).catch(() => {
-      setLoading(false)
-    })
+    }).catch(() => setLoading(false))
   }, [categorySlug])
 
-  const filteredItems = items.filter(i => Object.entries(activeFilters).every(([type, value]) => {
-    if (!value || value === 'all') return true
-    if (type === 'rarity') return i.rarity === parseInt(value)
-    return Object.values(i as any).some(v => String(v) === value)
-  }))
-
-  const getRarityStars = (r: number) => '★'.repeat(r) + '☆'.repeat(5 - r)
   const filterTypes = Array.from(new Set(filterOptions.map(o => o.type)))
-  const groupedFilters: {[k: string]: typeof filterOptions} = {}
+  const groupedFilters: Record<string, ItemFilterOption[]> = {}
   filterTypes.forEach(type => {
     groupedFilters[type] = filterOptions.filter(o => o.type === type).sort((a, b) => a.sortOrder - b.sortOrder)
   })
 
+  const filteredItems = items.filter(i =>
+    Object.entries(activeFilters).every(([, value]) => !value || value === 'all')
+  )
+
   return (
     <div className="min-h-screen bg-wiki-bg">
       <WikiHeader />
-      
+
       <main className="container mx-auto px-4 py-6 md:py-8">
+        {/* 麵包屑 */}
         <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
           <Link href="/" className="hover:text-wiki-accent">首頁</Link>
           <span className="mx-2">/</span>
@@ -103,40 +78,45 @@ export default function ItemListPage() {
           <span className="text-wiki-text">{category?.name || '載入中...'}</span>
         </div>
 
+        {/* 頁頭 */}
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <span className="text-3xl">{category?.icon}</span>
+          <div className="flex items-center gap-3">
+            {category?.icon && <span className="text-3xl">{category.icon}</span>}
             <h1 className="text-3xl md:text-4xl font-heading font-bold text-wiki-accent heading-hard">
               {category?.name}
             </h1>
           </div>
           {isAdmin && (
-            <Link
-              href="/admin/items"
-              className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90"
-            >
+            <Link href="/admin/items"
+              className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90">
               管理道具
             </Link>
           )}
         </div>
 
+        {/* 篩選欄 */}
         {filterTypes.length > 0 && (
-          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-4 md:p-6 mb-6 space-y-4">
+          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-4 mb-6 space-y-3">
             {filterTypes.map(type => (
               <div key={type}>
-                <div className="text-sm font-bold text-wiki-accent uppercase tracking-wider mb-2">{type}</div>
+                <div className="text-xs font-bold text-wiki-accent uppercase tracking-wider mb-2">{type}</div>
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => setActiveFilters(prev => ({ ...prev, [type]: 'all' }))}
-                    className={(!activeFilters[type] || activeFilters[type] === 'all') ? 'px-3 py-1.5 text-xs font-bold bg-wiki-accent text-wiki-darker' : 'px-3 py-1.5 text-xs font-bold bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}
-                  >全部</button>
+                    className={`px-3 py-1.5 text-xs font-bold rounded transition-colors ${
+                      !activeFilters[type] || activeFilters[type] === 'all'
+                        ? 'bg-wiki-accent text-wiki-darker'
+                        : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
+                    }`}>全部</button>
                   {groupedFilters[type].map(opt => (
-                    <button
-                      key={opt.id}
+                    <button key={opt.id}
                       onClick={() => setActiveFilters(prev => ({ ...prev, [type]: opt.value }))}
-                      className={activeFilters[type] === opt.value ? 'px-3 py-1.5 text-xs font-bold bg-wiki-accent text-wiki-darker' : 'px-3 py-1.5 text-xs font-bold bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}
-                    >
-                      {type === 'rarity' && !isNaN(parseInt(opt.value)) ? getRarityStars(parseInt(opt.value)) : opt.value}
+                      className={`px-3 py-1.5 text-xs font-bold rounded transition-colors ${
+                        activeFilters[type] === opt.value
+                          ? 'bg-wiki-accent text-wiki-darker'
+                          : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
+                      }`}>
+                      {opt.value}
                     </button>
                   ))}
                 </div>
@@ -145,60 +125,43 @@ export default function ItemListPage() {
           </div>
         )}
 
+        {/* 道具列表 */}
         {loading ? (
           <div className="text-center py-12 text-wiki-text-muted">載入中...</div>
         ) : filteredItems.length === 0 ? (
-          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-8 md:p-12 text-center text-wiki-text-muted">
+          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-12 text-center text-wiki-text-muted">
             該分類下暫無道具
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-            {filteredItems.map((item) => (
-              <Link
-                key={item.id}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
+            {filteredItems.map(item => (
+              <Link key={item.id}
                 href={`/wiki/items/${categorySlug}/${item.slug}`}
-                className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg overflow-hidden group block hover:border-wiki-accent transition-all"
-              >
-                <div className="relative h-48 md:h-56 overflow-hidden bg-gradient-to-br from-wiki-gray to-wiki-darker">
+                className="bg-wiki-gray-light border border-wiki-border rounded-xl overflow-hidden group block hover:border-wiki-accent transition-all hover:shadow-md">
+                {/* 圖片區 */}
+                <div className="relative aspect-square bg-wiki-gray overflow-hidden">
                   {item.image ? (
-                    <img
-                      src={item.image}
-                      alt={item.name}
+                    <img src={item.image} alt={item.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      style={{ objectPosition: item.imagePosition || '50% 50%' }}
-                    />
+                      style={{ objectPosition: item.imagePosition || '50% 50%' }} />
                   ) : item.icon ? (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-6xl">{item.icon}</span>
-                    </div>
+                    <img src={item.icon} alt={item.name}
+                      className="w-full h-full object-contain p-3 group-hover:scale-105 transition-transform duration-300"
+                      style={{ objectPosition: item.iconPosition || '50% 50%' }} />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-6xl text-wiki-text-muted">{item.name[0]}</span>
-                    </div>
-                  )}
-                  <div className="absolute top-3 left-3 flex items-center gap-1">
-                    <span className="text-yellow-400 text-sm font-bold drop-shadow-lg">
-                      {getRarityStars(item.rarity)}
-                    </span>
-                  </div>
-                  {item.type && (
-                    <div className="absolute top-3 right-3">
-                      <span className="text-wiki-text text-xs font-bold drop-shadow-lg">
-                        {item.type}
-                      </span>
+                      <span className="text-4xl text-wiki-text-muted">{item.name[0]}</span>
                     </div>
                   )}
                 </div>
-                <div className="p-4 md:p-5">
-                  <h3 className="text-lg md:text-xl font-bold text-wiki-text mb-1 group-hover:text-wiki-accent transition-colors">
+                {/* 文字區 */}
+                <div className="p-3">
+                  <h3 className="text-sm font-bold text-wiki-text group-hover:text-wiki-accent transition-colors line-clamp-1">
                     {item.name}
                   </h3>
-                  {item.effect && (
-                    <p className="text-wiki-text-muted text-sm mb-2">{item.effect}</p>
-                  )}
-                  {item.description && (
-                    <p className="text-wiki-text-muted text-xs mt-2 line-clamp-2">
-                      {item.description}
+                  {item.summary && (
+                    <p className="text-wiki-text-muted text-xs mt-1 line-clamp-2 leading-relaxed">
+                      {item.summary}
                     </p>
                   )}
                 </div>

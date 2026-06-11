@@ -2,7 +2,6 @@
 
 export const runtime = 'edge'
 
-
 import { useState, useEffect } from 'react'
 import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
@@ -17,23 +16,16 @@ interface Item {
   likes?: number
   name: string
   slug: string
+  summary?: string
   icon: string
+  iconPosition?: string
   image: string
   imagePosition?: string
-  iconPosition?: string
-  rarity: number
-  type: string
-  quality: string
-  stackable: boolean
-  effect: string
-  description: string
-  usage: string
-  recipe: string
-  source: string
-  category: {
-    name: string
-    slug: string
-  }
+  source?: string
+  description?: string
+  usage?: string
+  recipe?: string
+  category: { name: string; slug: string }
 }
 
 export default function ItemDetailPage() {
@@ -47,27 +39,27 @@ export default function ItemDetailPage() {
 
   useEffect(() => {
     fetch(`/api/wiki/items?category=${categorySlug}&slug=${itemSlug}`)
-      .then(res => res.json())
+      .then(r => r.json())
       .then(data => {
-        if (data.items && data.items.length > 0) {
-          setItem(data.items[0])
-        }
+        if (data.items?.length > 0) setItem(data.items[0])
         setLoading(false)
       })
-      .catch(() => {
-        setLoading(false)
-      })
+      .catch(() => setLoading(false))
   }, [categorySlug, itemSlug])
 
-  const getRarityStars = (rarity: number) => {
-    return '★'.repeat(rarity) + '☆'.repeat(5 - rarity)
-  }
-
   const tabs = [
-    { id: 'description', label: '道具詳情' },
-    { id: 'usage', label: '使用方法' },
-    { id: 'recipe', label: '合成配方' },
-  ]
+    { id: 'description', label: '道具詳情', show: !!item?.description },
+    { id: 'source',      label: '獲取途徑',  show: !!item?.source },
+    { id: 'usage',       label: '使用方法', show: !!item?.usage },
+    { id: 'recipe',      label: '合成配方', show: !!item?.recipe },
+  ].filter(t => t.show)
+
+  // 選第一個有內容的 tab
+  useEffect(() => {
+    if (tabs.length > 0 && !tabs.find(t => t.id === activeTab)) {
+      setActiveTab(tabs[0].id)
+    }
+  }, [item])
 
   if (loading) {
     return (
@@ -84,9 +76,7 @@ export default function ItemDetailPage() {
       <div className="min-h-screen bg-wiki-bg">
         <WikiHeader />
         <main className="container mx-auto px-4 py-12">
-          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-12 text-center text-wiki-text-muted">
-            道具不存在
-          </div>
+          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-12 text-center text-wiki-text-muted">道具不存在</div>
         </main>
         <WikiFooter />
       </div>
@@ -96,8 +86,9 @@ export default function ItemDetailPage() {
   return (
     <div className="min-h-screen bg-wiki-bg">
       <WikiHeader />
-      
+
       <main className="container mx-auto px-4 py-6 md:py-8">
+        {/* 麵包屑 */}
         <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
           <Link href="/" className="hover:text-wiki-accent">首頁</Link>
           <span className="mx-2">/</span>
@@ -112,34 +103,25 @@ export default function ItemDetailPage() {
           <span className="text-wiki-text">{item.name}</span>
         </div>
 
+        {/* Banner 大圖 */}
         {item.image && (
-          <div className="relative w-full aspect-[3/1] rounded-lg overflow-hidden mb-6 md:mb-8">
-            <img
-              src={item.image}
-              alt={item.name}
+          <div className="relative w-full aspect-[3/1] rounded-xl overflow-hidden mb-6 md:mb-8">
+            <img src={item.image} alt={item.name}
               className="w-full h-full object-cover"
-              style={{ objectPosition: item.imagePosition || '50% 50%' }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-wiki-dark via-transparent to-transparent" />
-            <div className="absolute bottom-4 left-4 md:bottom-8 md:left-8">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-yellow-400 text-lg font-bold drop-shadow-lg">
-                  {getRarityStars(item.rarity)}
-                </span>
-              </div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-wiki-text heading-hard mb-2">
+              style={{ objectPosition: item.imagePosition || '50% 50%' }} />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+            <div className="absolute bottom-4 left-5 md:bottom-8 md:left-8">
+              <h1 className="text-3xl md:text-5xl font-heading font-bold text-white drop-shadow-xl mb-1">
                 {item.name}
               </h1>
-              {item.effect && (
-                <p className="text-wiki-text-muted text-lg md:text-xl">{item.effect}</p>
+              {item.summary && (
+                <p className="text-white/80 text-sm md:text-base">{item.summary}</p>
               )}
             </div>
             {isAdmin && (
-              <div className="absolute top-4 right-4 md:top-8 md:right-8">
-                <Link
-                  href={`/admin/items/edit/${item.id}`}
-                  className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90"
-                >
+              <div className="absolute top-4 right-4 md:top-6 md:right-6">
+                <Link href={`/admin/items/edit/${item.id}`}
+                  className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm rounded hover:opacity-90">
                   編輯道具
                 </Link>
               </div>
@@ -147,107 +129,83 @@ export default function ItemDetailPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-          <div className="lg:col-span-2">
-            <div className="flex items-center gap-4 mb-6">
-              {item.icon && (
-                <div className="w-24 h-24 md:w-32 md:h-32 rounded-lg overflow-hidden border-2 border-wiki-accent flex-shrink-0 bg-wiki-gray flex items-center justify-center">
-                  <span className="text-5xl">{item.icon}</span>
-                </div>
-              )}
-              <div>
-                <h2 className="text-2xl md:text-3xl font-bold text-wiki-text">{item.name}</h2>
-                {item.type && (
-                  <p className="text-wiki-text-muted mt-1">類型：{item.type}</p>
-                )}
+        {/* 無 Banner 時的標題區 */}
+        {!item.image && (
+          <div className="flex items-center gap-4 mb-6">
+            {item.icon && (
+              <div className="w-20 h-20 rounded-xl overflow-hidden border-2 border-wiki-accent bg-wiki-gray flex-shrink-0">
+                <img src={item.icon} alt={item.name}
+                  className="w-full h-full object-contain p-1"
+                  style={{ objectPosition: item.iconPosition || '50% 50%' }} />
               </div>
+            )}
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-wiki-text">{item.name}</h1>
+              {item.summary && <p className="text-wiki-text-muted mt-1 text-sm">{item.summary}</p>}
             </div>
+            {isAdmin && (
+              <Link href={`/admin/items/edit/${item.id}`}
+                className="ml-auto px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm rounded hover:opacity-90">
+                編輯道具
+              </Link>
+            )}
+          </div>
+        )}
 
-            <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`px-4 py-2 text-sm font-bold uppercase tracking-wider whitespace-nowrap ${
+        {/* 有 Banner 時，Banner 下方顯示圖標+簡介 */}
+        {item.image && (
+          <div className="flex items-center gap-4 mb-5">
+            {item.icon && (
+              <div className="w-14 h-14 rounded-lg overflow-hidden border border-wiki-border bg-wiki-gray flex-shrink-0">
+                <img src={item.icon} alt={item.name}
+                  className="w-full h-full object-contain p-1"
+                  style={{ objectPosition: item.iconPosition || '50% 50%' }} />
+              </div>
+            )}
+            {item.summary && !item.image && (
+              <p className="text-wiki-text-muted text-sm">{item.summary}</p>
+            )}
+          </div>
+        )}
+
+        {/* Tab 切換 + 內容 */}
+        {tabs.length > 0 && (
+          <>
+            <div className="flex items-center gap-2 mb-5 overflow-x-auto pb-1">
+              {tabs.map(tab => (
+                <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                  className={`px-4 py-2 text-sm font-bold whitespace-nowrap rounded transition-colors ${
                     activeTab === tab.id
                       ? 'bg-wiki-accent text-wiki-darker'
                       : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
-                  }`}
-                >
+                  }`}>
                   {tab.label}
                 </button>
               ))}
             </div>
 
-            <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6 md:p-8">
-              {activeTab === 'description' && (
-                <div>
-                  {item.description && (
-                    <MarkdownRenderer content={item.description} />
-                  )}
-                </div>
+            <div className="bg-wiki-gray-light border border-wiki-border rounded-xl p-5 md:p-7">
+              {activeTab === 'description' && item.description && (
+                <MarkdownRenderer content={item.description} />
               )}
-              {activeTab === 'usage' && (
-                <div>
-                  {item.usage && (
-                    <MarkdownRenderer content={item.usage} />
-                  )}
-                </div>
+              {activeTab === 'source' && item.source && (
+                <MarkdownRenderer content={item.source} />
               )}
-              {activeTab === 'recipe' && (
-                <div>
-                  {item.recipe && (
-                    <MarkdownRenderer content={item.recipe} />
-                  )}
-                </div>
+              {activeTab === 'usage' && item.usage && (
+                <MarkdownRenderer content={item.usage} />
+              )}
+              {activeTab === 'recipe' && item.recipe && (
+                <MarkdownRenderer content={item.recipe} />
               )}
             </div>
-          </div>
+          </>
+        )}
 
-          <div className="lg:col-span-1">
-            <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6 sticky top-4">
-              <h3 className="text-lg font-bold text-wiki-accent mb-4">道具信息</h3>
-              <div className="space-y-3 text-sm">
-                {item.rarity && (
-                  <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">稀有度</span>
-                    <span className="text-yellow-400 font-bold">{getRarityStars(item.rarity)}</span>
-                  </div>
-                )}
-                {item.type && (
-                  <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">類型</span>
-                    <span className="text-wiki-text font-bold">{item.type}</span>
-                  </div>
-                )}
-                {item.quality && (
-                  <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">品質</span>
-                    <span className="text-wiki-text">{item.quality}</span>
-                  </div>
-                )}
-                {item.stackable !== undefined && (
-                  <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">可堆疊</span>
-                    <span className="text-wiki-text">{item.stackable ? '是' : '否'}</span>
-                  </div>
-                )}
-                {item.source && (
-                  <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">來源</span>
-                    <span className="text-wiki-text">{item.source}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+        {/* 點贊 */}
+        <div className="mt-8 flex justify-center">
+          <LikeButton entityType="item" entityId={item.id} initialLikes={item.likes || 0} />
         </div>
       </main>
-
-
-      <div className="mt-8 flex justify-center">
-        <LikeButton entityType="item" entityId={item?.id || ''} initialLikes={item?.likes || 0} />
-      </div>
 
       <WikiFooter />
     </div>

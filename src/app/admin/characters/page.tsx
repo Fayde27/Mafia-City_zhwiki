@@ -172,12 +172,6 @@ export default function AdminCharactersPage() {
           <div>
             <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">角色圖鑑管理</h1>
             <p className="text-wiki-text-muted text-sm mt-1">管理英雄與豪杰的列表、分類及篩選設定</p>
-            <button
-              onClick={handleFixCharTypes}
-              className="mt-2 px-3 py-1 text-xs bg-wiki-gray border border-wiki-border text-wiki-text-muted rounded hover:border-wiki-accent hover:text-wiki-accent transition-colors"
-            >
-              🔧 修復豪杰 characterType
-            </button>
           </div>
           {activeTab === 'list' && filterCatSlug !== 'all' && (
             <div className="flex gap-2">

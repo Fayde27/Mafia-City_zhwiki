@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '20')
+    const limit = parseInt(searchParams.get('limit') || '200')
     const category = searchParams.get('category')
     const from = (page - 1) * limit
     const to = from + limit - 1
@@ -16,9 +16,7 @@ export async function GET(request: Request) {
       .from('Item')
       .select('*, ItemCategory(*)', { count: 'exact' })
 
-    if (category) {
-      query = query.eq('ItemCategory.slug', category)
-    }
+    if (category) query = query.eq('ItemCategory.slug', category)
 
     const draft = searchParams.get('draft')
     if (draft === 'true') query = query.eq('isPublished', false)
@@ -32,14 +30,9 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       items,
-      pagination: {
-        page,
-        limit,
-        total: total || 0,
-        totalPages: Math.ceil((total || 0) / limit),
-      },
+      pagination: { page, limit, total: total || 0, totalPages: Math.ceil((total || 0) / limit) },
     })
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: '獲取道具列表失敗' }, { status: 500 })
   }
 }
@@ -52,29 +45,32 @@ export async function POST(request: Request) {
       .insert({
         name: data.name,
         slug: data.slug,
-        icon: data.icon,
-        iconPosition: data.iconPosition,
-        image: data.image,
-        imagePosition: data.imagePosition,
-        rarity: data.rarity || 3,
-        type: data.type,
-        quality: data.quality,
-        stackable: data.stackable !== undefined ? data.stackable : true,
-        effect: data.effect,
-        description: data.description,
-        usage: data.usage,
-        recipe: data.recipe,
-        source: data.source,
+        summary: data.summary || null,
+        icon: data.icon || null,
+        iconPosition: data.iconPosition || '50% 50%',
+        image: data.image || null,
+        imagePosition: data.imagePosition || '50% 50%',
+        source: data.source || null,
         categoryId: data.categoryId,
         sortOrder: data.sortOrder || 0,
+        isFeatured: data.isFeatured || false,
         isPublished: data.isPublished || false,
+        // 保留舊字段向後兼容
+        rarity: data.rarity || 3,
+        type: data.type || null,
+        quality: data.quality || null,
+        stackable: data.stackable !== undefined ? data.stackable : true,
+        effect: data.effect || null,
+        description: data.description || null,
+        usage: data.usage || null,
+        recipe: data.recipe || null,
       })
       .select('*, ItemCategory(*)')
       .single()
 
     if (error) throw error
     return NextResponse.json(item, { status: 201 })
-  } catch (error) {
-    return NextResponse.json({ error: '創建道具失敗' }, { status: 500 })
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message || '創建道具失敗' }, { status: 500 })
   }
 }
