@@ -159,7 +159,7 @@ export default function AdminBuildingsPage() {
                   <div className="bg-wiki-gray-light border border-wiki-border rounded-lg overflow-hidden">
                     <table className="w-full">
                       <thead className="bg-wiki-gray">
-                        <tr>{["建築","稀有度","類型","功能","分類","狀態","操作"].map(h => <th key={h} className="text-left px-6 py-4 text-wiki-accent font-bold text-sm">{h}</th>)}</tr>
+                        <tr>{["建築","類型","功能","分類","狀態","操作"].map(h => <th key={h} className="text-left px-6 py-4 text-wiki-accent font-bold text-sm">{h}</th>)}</tr>
                       </thead>
                       <tbody>
                         {filtered.map(bld => (
@@ -178,7 +178,10 @@ export default function AdminBuildingsPage() {
                               <button onClick={() => handleTogglePublish(bld)} className={`px-2 py-1 text-xs font-bold ${bld.isPublished ? 'bg-green-500/20 text-green-400' : 'bg-wiki-danger/20 text-wiki-danger'}`}>{bld.isPublished ? '已發佈' : '草稿'}</button>
                             </td>
                             <td className="px-6 py-4">
-                              <button onClick={() => handleDelete(bld.id)} className="px-3 py-1 bg-wiki-danger/20 text-wiki-danger text-sm font-bold hover:bg-wiki-danger/30">刪除</button>
+                              <div className="flex gap-2">
+                                <Link href={`/admin/buildings/edit/${bld.id}`} className="px-3 py-1 bg-wiki-accent/20 text-wiki-accent text-sm font-bold hover:bg-wiki-accent/30">編輯</Link>
+                                <button onClick={() => handleDelete(bld.id)} className="px-3 py-1 bg-wiki-danger/20 text-wiki-danger text-sm font-bold hover:bg-wiki-danger/30">刪除</button>
+                              </div>
                             </td>
                           </tr>
                         ))}

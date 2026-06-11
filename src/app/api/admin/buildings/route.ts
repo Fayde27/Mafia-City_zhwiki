@@ -66,6 +66,12 @@ export async function POST(request: Request) {
         description: data.description,
         details: data.details,
         upgradeInfo: data.upgradeInfo,
+        // 新增字段
+        unlockCondition: data.unlockCondition,
+        summary: data.summary,
+        isFeatured: data.isFeatured || false,
+        publishedAt: data.publishedAt || null,
+        upgradeLevels: data.upgradeLevels,
         categoryId: data.categoryId,
         sortOrder: data.sortOrder || 0,
         isPublished: data.isPublished || false,

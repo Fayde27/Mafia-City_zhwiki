@@ -21,6 +21,8 @@ interface Building {
   rarity: number
   type: string
   function: string
+  summary?: string
+  unlockCondition?: string
   level: number
   maxLevel: number
   cost: string
@@ -196,12 +198,15 @@ export default function BuildingListPage() {
                     {building.name}
                   </h3>
                   {building.function && (
-                    <p className="text-wiki-text-muted text-sm mb-2">{building.function}</p>
+                    <p className="text-wiki-text-muted text-sm mb-1">{building.function}</p>
                   )}
-                  {building.description && (
-                    <p className="text-wiki-text-muted text-xs mt-2 line-clamp-2">
-                      {building.description}
+                  {(building.summary || building.description) && (
+                    <p className="text-wiki-text-muted text-xs mt-1 line-clamp-2">
+                      {building.summary || building.description?.replace(/<[^>]*>/g, '')}
                     </p>
+                  )}
+                  {building.unlockCondition && (
+                    <p className="text-wiki-accent text-xs mt-1.5">🔓 {building.unlockCondition}</p>
                   )}
                 </div>
               </Link>
