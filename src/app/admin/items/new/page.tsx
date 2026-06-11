@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import ImageUploadInput from '@/components/ImageUploadInput'
 import RichTextEditor from '@/components/RichTextEditor'
+import ItemPreviewModal from '@/components/ItemPreviewModal'
 
 const SECTIONS = [
   { id: 'basic',   label: '基本信息' },
@@ -29,6 +30,7 @@ export default function AdminItemNewPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [activeSection, setActiveSection] = useState('basic')
+  const [showPreview, setShowPreview] = useState(false)
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({})
 
   const [form, setForm] = useState({
@@ -118,6 +120,10 @@ export default function AdminItemNewPage() {
                 <button type="button" onClick={handleSubmit} disabled={saving}
                   className="w-full py-2.5 bg-wiki-accent text-wiki-dark font-bold text-sm rounded hover:bg-wiki-accent/90 transition-colors disabled:opacity-50">
                   {saving ? '保存中...' : '創建道具'}
+                </button>
+                <button type="button" onClick={() => setShowPreview(true)}
+                  className="w-full py-2.5 bg-wiki-gray border border-wiki-border text-wiki-text text-sm font-bold rounded hover:border-wiki-accent hover:text-wiki-accent transition-colors">
+                  👁 預覽效果
                 </button>
                 <Link href="/admin/items"
                   className="block w-full py-2 text-center text-wiki-text-muted text-sm hover:text-wiki-accent transition-colors">
@@ -246,6 +252,14 @@ export default function AdminItemNewPage() {
                 </div>
               </div>
             </section>
+
+            {showPreview && (
+              <ItemPreviewModal
+                form={form}
+                categoryName={categories.find(c => c.id === form.categoryId)?.name}
+                onClose={() => setShowPreview(false)}
+              />
+            )}
 
             {/* 底部按鈕 */}
             <div className="flex gap-4 pb-16">
