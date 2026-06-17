@@ -263,29 +263,54 @@ model EquipmentFilterOption {
 }
 
 model Equipment {
-  id          String            @id @default(cuid())
-  name        String
-  slug        String            @unique
-  icon        String?
-  image       String?
-  rarity      Int               @default(3)
-  type        String?
-  slot        String?
-  attack      Int               @default(0)
-  defense     Int               @default(0)
-  hp          Int               @default(0)
-  speed       Int               @default(0)
-  skill       String?
-  description String?
-  stats       String?
-  enhancement String?
-  acquisition String?
-  categoryId  String
-  sortOrder   Int               @default(0)
-  isPublished Boolean           @default(false)
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  category    EquipmentCategory @relation(fields: [categoryId], references: [id])
+  id            String             @id @default(cuid())
+  name          String
+  slug          String             @unique
+  summary       String?
+  equipType     String             @default("leader") // haojie_weapon | haojie_warbadge | leader | hero
+  icon          String?
+  iconPosition  String?            @default("50% 50%")
+  image         String?
+  imagePosition String?            @default("50% 50%")
+  rarity        Int                @default(3) // 品質：1白 2綠 3藍 4紫 5橙 6金
+  type          String? // 種類（武器種類/戰徽種類）
+  slot          String? // 部位（首領/英雄）
+  attrBias      String? // 屬性偏向（首領）
+  buffs         String? // 豪杰武器/戰徽：分類→細分 JSON
+  setId         String? // 套裝關聯（首領/英雄）
+  attack        Int                @default(0)
+  defense       Int                @default(0)
+  hp            Int                @default(0)
+  speed         Int                @default(0)
+  skill         String?
+  description   String?
+  stats         String? // 裝備屬性多行文本（首領/英雄）
+  enhancement   String?
+  acquisition   String?
+  categoryId    String?
+  sortOrder     Int                @default(0)
+  isFeatured    Boolean            @default(false)
+  isPublished   Boolean            @default(false)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  category      EquipmentCategory? @relation(fields: [categoryId], references: [id])
+  set           EquipmentSet?      @relation(fields: [setId], references: [id])
+}
+
+model EquipmentSet {
+  id            String      @id @default(cuid())
+  name          String
+  slug          String      @unique
+  equipType     String      @default("hero") // leader | hero
+  icon          String?
+  iconPosition  String?     @default("50% 50%")
+  setBonus      String? // 套裝屬性加成
+  description   String?
+  sortOrder     Int         @default(0)
+  isPublished   Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  pieces        Equipment[]
 }
 
 model ItemCategory {

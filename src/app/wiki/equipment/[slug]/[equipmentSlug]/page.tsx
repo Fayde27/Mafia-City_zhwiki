@@ -2,7 +2,6 @@
 
 export const runtime = 'edge'
 
-
 import { useState, useEffect } from 'react'
 import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
@@ -11,256 +10,206 @@ import { useParams } from 'next/navigation'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 import LikeButton from '@/components/LikeButton'
+import { EQUIP_TYPE_LABELS, rarityInfo, parseBuffs } from '@/lib/equipment'
 
+interface EquipSet { id: string; name: string; slug: string; setBonus?: string }
 interface Equipment {
-  id: string
-  likes?: number
-  name: string
-  slug: string
-  icon: string
-  image: string
-  imagePosition?: string
-  iconPosition?: string
-  rarity: number
-  type: string
-  slot: string
-  attack: number
-  defense: number
-  hp: number
-  speed: number
-  skill: string
-  description: string
-  stats: string
-  enhancement: string
-  acquisition: string
-  category: {
-    name: string
-    slug: string
-  }
+  id: string; likes?: number; name: string; slug: string; summary?: string
+  icon: string; image: string; imagePosition?: string; iconPosition?: string
+  rarity: number; type?: string; slot?: string; equipType: string
+  attrBias?: string; buffs?: string; stats?: string; acquisition?: string
+  setId?: string; set?: EquipSet
 }
+
+const isHaojie = (t: string) => t === 'haojie_weapon' || t === 'haojie_warbadge'
 
 export default function EquipmentDetailPage() {
   const params = useParams()
-  const categorySlug = params?.slug as string
+  const equipType = params?.slug as string
   const equipmentSlug = params?.equipmentSlug as string
   const { isAdmin } = useAdminAuth()
   const [equipment, setEquipment] = useState<Equipment | null>(null)
+  const [setPieces, setSetPieces] = useState<Equipment[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('stats')
 
   useEffect(() => {
-    fetch(`/api/wiki/equipment?category=${categorySlug}&slug=${equipmentSlug}`)
+    fetch(`/api/wiki/equipment?equipType=${equipType}&slug=${equipmentSlug}`)
       .then(res => res.json())
       .then(data => {
-        if (data.equipment && data.equipment.length > 0) {
-          setEquipment(data.equipment[0])
+        const eq = data.equipment?.[0] || null
+        setEquipment(eq)
+        setLoading(false)
+        if (eq?.set?.id) {
+          fetch(`/api/wiki/equipment?equipType=${equipType}`)
+            .then(r => r.json())
+            .then(d => setSetPieces((d.equipment || []).filter((p: Equipment) => p.set?.id === eq.set.id)))
+            .catch(() => {})
         }
-        setLoading(false)
       })
-      .catch(() => {
-        setLoading(false)
-      })
-  }, [categorySlug, equipmentSlug])
-
-  const getRarityStars = (rarity: number) => {
-    return '★'.repeat(rarity) + '☆'.repeat(5 - rarity)
-  }
-
-  const tabs = [
-    { id: 'stats', label: '屬性詳情' },
-    { id: 'enhancement', label: '強化信息' },
-  ]
+      .catch(() => setLoading(false))
+  }, [equipType, equipmentSlug])
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-wiki-bg">
-        <WikiHeader />
-        <div className="text-center py-20 text-wiki-text-muted">載入中...</div>
-        <WikiFooter />
+      <div className="min-h-screen bg-wiki-bg"><WikiHeader />
+        <div className="text-center py-20 text-wiki-text-muted">載入中...</div><WikiFooter />
+      </div>
+    )
+  }
+  if (!equipment) {
+    return (
+      <div className="min-h-screen bg-wiki-bg"><WikiHeader />
+        <main className="container mx-auto px-4 py-12">
+          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-12 text-center text-wiki-text-muted">裝備不存在</div>
+        </main><WikiFooter />
       </div>
     )
   }
 
-  if (!equipment) {
-    return (
-      <div className="min-h-screen bg-wiki-bg">
-        <WikiHeader />
-        <main className="container mx-auto px-4 py-12">
-          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-12 text-center text-wiki-text-muted">
-            裝備不存在
-          </div>
-        </main>
-        <WikiFooter />
-      </div>
-    )
-  }
+  const haojie = isHaojie(equipment.equipType)
+  const r = rarityInfo(equipment.rarity)
+  const typeLabel = EQUIP_TYPE_LABELS[equipment.equipType] || equipment.equipType
+  const buffs = parseBuffs(equipment.buffs).filter(g => g.items.some(i => i.name || i.value))
+  const hasStats = !!equipment.stats && equipment.stats.trim().length > 0
+  const hasAcq = !!equipment.acquisition && equipment.acquisition.replace(/<[^>]*>/g, '').trim().length > 0
 
   return (
     <div className="min-h-screen bg-wiki-bg">
       <WikiHeader />
-      
+
       <main className="container mx-auto px-4 py-6 md:py-8">
         <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
           <Link href="/" className="hover:text-wiki-accent">首頁</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki" className="hover:text-wiki-accent">圖鑑</Link>
-          <span className="mx-2">/</span>
           <Link href="/wiki/equipment" className="hover:text-wiki-accent">裝備圖鑑</Link>
           <span className="mx-2">/</span>
-          <Link href={`/wiki/equipment/${equipment.category.slug}`} className="hover:text-wiki-accent">
-            {equipment.category.name}
-          </Link>
+          <Link href={`/wiki/equipment/${equipment.equipType}`} className="hover:text-wiki-accent">{typeLabel}</Link>
           <span className="mx-2">/</span>
           <span className="text-wiki-text">{equipment.name}</span>
         </div>
 
-        {equipment.image && (
+        {/* 標題區 */}
+        {equipment.image ? (
           <div className="relative w-full aspect-[3/1] rounded-lg overflow-hidden mb-6 md:mb-8">
-            <img
-              src={equipment.image}
-              alt={equipment.name}
-              className="w-full h-full object-cover"
-              style={{ objectPosition: equipment.imagePosition || '50% 50%' }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-wiki-dark via-transparent to-transparent" />
+            <img src={equipment.image} alt={equipment.name} className="w-full h-full object-cover" style={{ objectPosition: equipment.imagePosition || '50% 50%' }} />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
             <div className="absolute bottom-4 left-4 md:bottom-8 md:left-8">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-yellow-400 text-lg font-bold drop-shadow-lg">
-                  {getRarityStars(equipment.rarity)}
-                </span>
-              </div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-wiki-text heading-hard mb-2">
-                {equipment.name}
-              </h1>
-              {equipment.skill && (
-                <p className="text-wiki-text-muted text-lg md:text-xl">{equipment.skill}</p>
-              )}
+              <span className="inline-block px-2 py-0.5 text-xs font-bold rounded text-white mb-2" style={{ backgroundColor: r.color }}>{r.label}</span>
+              <h1 className="text-4xl md:text-5xl font-heading font-bold text-white heading-hard">{equipment.name}</h1>
             </div>
             {isAdmin && (
-              <div className="absolute top-4 right-4 md:top-8 md:right-8">
-                <Link
-                  href={`/admin/equipment/edit/${equipment.id}`}
-                  className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90"
-                >
-                  編輯裝備
-                </Link>
-              </div>
+              <div className="absolute top-4 right-4"><Link href={`/admin/equipment/edit/${equipment.id}`} className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90">編輯裝備</Link></div>
             )}
+          </div>
+        ) : (
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              {equipment.icon && (
+                <div className="w-24 h-24 rounded-lg overflow-hidden border-2 flex-shrink-0" style={{ borderColor: r.color }}>
+                  <img src={equipment.icon} alt={equipment.name} className="w-full h-full object-cover" style={{ objectPosition: equipment.iconPosition || '50% 50%' }} />
+                </div>
+              )}
+              <div>
+                <span className="inline-block px-2 py-0.5 text-xs font-bold rounded text-white mb-1" style={{ backgroundColor: r.color }}>{r.label}</span>
+                <h1 className="text-3xl md:text-4xl font-heading font-bold text-wiki-accent heading-hard">{equipment.name}</h1>
+              </div>
+            </div>
+            {isAdmin && <Link href={`/admin/equipment/edit/${equipment.id}`} className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90">編輯裝備</Link>}
           </div>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-          <div className="lg:col-span-2">
-            <div className="flex items-center gap-4 mb-6">
-              {equipment.icon && (
-                <div className="w-24 h-24 md:w-32 md:h-32 rounded-lg overflow-hidden border-2 border-wiki-accent flex-shrink-0 bg-wiki-gray flex items-center justify-center">
-                  <span className="text-5xl">{equipment.icon}</span>
+          <div className="lg:col-span-2 space-y-6">
+            {equipment.summary && (
+              <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6"><p className="text-wiki-text">{equipment.summary}</p></div>
+            )}
+
+            {/* 豪杰武器/戰徽：屬性分類 → 細分 */}
+            {haojie && buffs.length > 0 && (
+              <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6">
+                <h3 className="text-lg font-bold text-wiki-accent mb-4">{equipment.equipType === 'haojie_weapon' ? '武器屬性' : '戰徽屬性'}</h3>
+                <div className="space-y-4">
+                  {buffs.map((g, gi) => (
+                    <div key={gi}>
+                      <div className="text-wiki-text font-bold text-sm mb-2 border-l-2 border-wiki-accent pl-2">{g.group}</div>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {g.items.filter(i => i.name || i.value).map((it, ii) => (
+                          <div key={ii} className="flex justify-between bg-wiki-gray rounded px-3 py-2 text-sm">
+                            <span className="text-wiki-text-muted">{it.name}</span>
+                            <span className="text-wiki-accent font-bold">{it.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              )}
-              <div>
-                <h2 className="text-2xl md:text-3xl font-bold text-wiki-text">{equipment.name}</h2>
-                {equipment.type && (
-                  <p className="text-wiki-text-muted mt-1">類型：{equipment.type}</p>
+              </div>
+            )}
+
+            {/* 首領/英雄：裝備屬性 */}
+            {!haojie && hasStats && (
+              <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6">
+                <h3 className="text-lg font-bold text-wiki-accent mb-3">裝備屬性</h3>
+                <p className="text-wiki-text whitespace-pre-line">{equipment.stats}</p>
+              </div>
+            )}
+
+            {/* 套裝 + 同套件數 */}
+            {!haojie && equipment.set && (
+              <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6">
+                <h3 className="text-lg font-bold text-wiki-accent mb-3">所屬套裝 · {equipment.set.name}</h3>
+                {equipment.set.setBonus && <p className="text-wiki-text-muted text-sm whitespace-pre-line mb-4">{equipment.set.setBonus}</p>}
+                {setPieces.length > 0 && (
+                  <div>
+                    <div className="text-wiki-text-muted text-xs mb-2">本套共 {setPieces.length} 件</div>
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                      {setPieces.map(p => {
+                        const pr = rarityInfo(p.rarity)
+                        return (
+                          <Link key={p.id} href={`/wiki/equipment/${equipment.equipType}/${p.slug}`}
+                            className={`rounded-lg overflow-hidden border-2 ${p.id === equipment.id ? 'ring-2 ring-wiki-accent' : ''}`} style={{ borderColor: pr.color }}>
+                            <div className="aspect-square bg-wiki-gray">
+                              {p.icon ? <img src={p.icon} alt={p.name} className="w-full h-full object-cover" style={{ objectPosition: p.iconPosition || '50% 50%' }} /> : <div className="w-full h-full flex items-center justify-center text-wiki-text-muted">{p.name[0]}</div>}
+                            </div>
+                            <div className="px-1 py-1 text-center text-[11px] text-wiki-text truncate">{p.slot || p.name}</div>
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  </div>
                 )}
               </div>
-            </div>
+            )}
 
-            <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`px-4 py-2 text-sm font-bold uppercase tracking-wider whitespace-nowrap ${
-                    activeTab === tab.id
-                      ? 'bg-wiki-accent text-wiki-darker'
-                      : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6 md:p-8">
-              {activeTab === 'stats' && (
-                <div>
-                  {equipment.description && (
-                    <MarkdownRenderer content={equipment.description} />
-                  )}
-                </div>
-              )}
-              {activeTab === 'enhancement' && (
-                <div>
-                  {equipment.enhancement && (
-                    <MarkdownRenderer content={equipment.enhancement} />
-                  )}
-                </div>
-              )}
-            </div>
+            {/* 獲取途徑 */}
+            {hasAcq && (
+              <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6">
+                <h3 className="text-lg font-bold text-wiki-accent mb-3">獲取途徑</h3>
+                <MarkdownRenderer content={equipment.acquisition!} />
+              </div>
+            )}
           </div>
 
+          {/* 側欄信息 */}
           <div className="lg:col-span-1">
-            <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6 sticky top-4">
+            <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6 sticky top-4">
               <h3 className="text-lg font-bold text-wiki-accent mb-4">裝備信息</h3>
               <div className="space-y-3 text-sm">
-                {equipment.rarity && (
-                  <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">稀有度</span>
-                    <span className="text-yellow-400 font-bold">{getRarityStars(equipment.rarity)}</span>
-                  </div>
-                )}
-                {equipment.type && (
-                  <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">類型</span>
-                    <span className="text-wiki-text font-bold">{equipment.type}</span>
-                  </div>
-                )}
-                {equipment.slot && (
-                  <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">部位</span>
-                    <span className="text-wiki-text">{equipment.slot}</span>
-                  </div>
-                )}
-                {equipment.attack > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">攻擊力</span>
-                    <span className="text-wiki-text font-bold">{equipment.attack}</span>
-                  </div>
-                )}
-                {equipment.defense > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">防禦力</span>
-                    <span className="text-wiki-text font-bold">{equipment.defense}</span>
-                  </div>
-                )}
-                {equipment.hp > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">生命值</span>
-                    <span className="text-wiki-text font-bold">{equipment.hp}</span>
-                  </div>
-                )}
-                {equipment.speed > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">速度</span>
-                    <span className="text-wiki-text font-bold">{equipment.speed}</span>
-                  </div>
-                )}
-                {equipment.acquisition && (
-                  <div className="flex justify-between">
-                    <span className="text-wiki-text-muted">獲取方式</span>
-                    <span className="text-wiki-text">{equipment.acquisition}</span>
-                  </div>
-                )}
+                <div className="flex justify-between"><span className="text-wiki-text-muted">類型</span><span className="text-wiki-text font-bold">{typeLabel}</span></div>
+                <div className="flex justify-between"><span className="text-wiki-text-muted">品質</span><span className="font-bold" style={{ color: r.color }}>{r.label}</span></div>
+                {equipment.type && <div className="flex justify-between"><span className="text-wiki-text-muted">種類</span><span className="text-wiki-text">{equipment.type}</span></div>}
+                {equipment.slot && <div className="flex justify-between"><span className="text-wiki-text-muted">部位</span><span className="text-wiki-text">{equipment.slot}</span></div>}
+                {equipment.attrBias && <div className="flex justify-between"><span className="text-wiki-text-muted">屬性偏向</span><span className="text-wiki-text">{equipment.attrBias}</span></div>}
+                {equipment.set && <div className="flex justify-between"><span className="text-wiki-text-muted">套裝</span><span className="text-wiki-text">{equipment.set.name}</span></div>}
               </div>
             </div>
           </div>
         </div>
+
+        <div className="mt-8 flex justify-center">
+          <LikeButton entityType="equipment" entityId={equipment.id} initialLikes={equipment.likes || 0} />
+        </div>
       </main>
-
-
-      <div className="mt-8 flex justify-center">
-        <LikeButton entityType="equipment" entityId={equipment?.id || ''} initialLikes={equipment?.likes || 0} />
-      </div>
 
       <WikiFooter />
     </div>

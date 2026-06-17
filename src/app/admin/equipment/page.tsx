@@ -11,10 +11,21 @@ import { useRouter } from 'next/navigation'
 
 type Tab = 'list' | 'categories' | 'filters'
 
+const EQUIP_TYPES = [
+  { value: 'all',             label: '全部' },
+  { value: 'haojie_weapon',   label: '豪杰武器' },
+  { value: 'haojie_warbadge', label: '豪杰戰徽' },
+  { value: 'leader',          label: '首領裝備' },
+  { value: 'hero',            label: '英雄裝備' },
+]
+const EQUIP_TYPE_LABELS: Record<string, string> = {
+  haojie_weapon: '豪杰武器', haojie_warbadge: '豪杰戰徽', leader: '首領裝備', hero: '英雄裝備',
+}
+
 interface EntityItem {
   id: string; name: string; slug: string; rarity: number
   isPublished: boolean; sortOrder: number
-  icon?: string; type?: string; slot?: string
+  icon?: string; type?: string; slot?: string; equipType?: string
   category?: { name: string; slug: string }
   EquipmentCategory?: { name: string; slug: string }
 }
@@ -31,6 +42,7 @@ export default function AdminEquipmentPage() {
   const [activeTab, setActiveTab] = useState<Tab>('list')
   const [loading, setLoading] = useState(true)
   const [items, setItems] = useState<EntityItem[]>([])
+  const [typeTab, setTypeTab] = useState('all')
   const [filterCatSlug, setFilterCatSlug] = useState('all')
   const [categories, setCategories] = useState<EntityCategory[]>([])
   const [showCatModal, setShowCatModal] = useState(false)
@@ -120,7 +132,9 @@ export default function AdminEquipmentPage() {
 
   if (!isAdmin) return null
 
-  const filtered = filterCatSlug === 'all' ? items : items.filter(eq => (eq.category?.slug || eq.EquipmentCategory?.slug) === filterCatSlug)
+  const filtered = items
+    .filter(eq => typeTab === 'all' || eq.equipType === typeTab)
+    .filter(eq => filterCatSlug === 'all' || (eq.category?.slug || eq.EquipmentCategory?.slug) === filterCatSlug)
   const currentOptions = filterOptions.filter(o => o.categoryId === selectedCatId)
   const existingTypes = Array.from(new Set(currentOptions.map(o => o.type))).sort()
   const groupedOptions = existingTypes.reduce((acc, type) => { acc[type] = currentOptions.filter(o => o.type === type).sort((a, b) => a.sortOrder - b.sortOrder); return acc }, {} as Record<string, FilterOption[]>)
@@ -137,8 +151,11 @@ export default function AdminEquipmentPage() {
             <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">裝備圖鑑管理</h1>
             <p className="text-wiki-text-muted text-sm mt-1">管理裝備列表、分類及篩選設定</p>
           </div>
-          {activeTab === 'list' && <Link href="/admin/equipment/new" className="btn-hard text-wiki-text text-sm">+ 新增裝備</Link>}
-          {activeTab === 'categories' && <button onClick={() => { setEditingCat(null); setCatForm({ name: '', slug: '', description: '', icon: '', sortOrder: 0 }); setShowCatModal(true) }} className="btn-hard text-wiki-text text-sm">+ 新增分類</button>}
+          <div className="flex gap-3">
+            <Link href="/admin/equipment-sets" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">套裝管理</Link>
+            {activeTab === 'list' && <Link href={`/admin/equipment/new${typeTab !== 'all' ? `?type=${typeTab}` : ''}`} className="btn-hard text-wiki-text text-sm">+ 新增裝備</Link>}
+            {activeTab === 'categories' && <button onClick={() => { setEditingCat(null); setCatForm({ name: '', slug: '', description: '', icon: '', sortOrder: 0 }); setShowCatModal(true) }} className="btn-hard text-wiki-text text-sm">+ 新增分類</button>}
+          </div>
         </div>
 
         <div className="border-b border-wiki-border mb-6 flex">
@@ -151,8 +168,11 @@ export default function AdminEquipmentPage() {
           <>
             {activeTab === 'list' && (
               <div>
+                <div className="flex gap-2 mb-4 overflow-x-auto pb-2 border-b border-wiki-border">
+                  {EQUIP_TYPES.map(t => <button key={t.value} onClick={() => setTypeTab(t.value)} className={`px-4 py-2 text-sm font-bold whitespace-nowrap ${typeTab === t.value ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>{t.label}</button>)}
+                </div>
                 <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-                  <button onClick={() => setFilterCatSlug('all')} className={`px-4 py-2 text-sm font-bold whitespace-nowrap ${filterCatSlug === 'all' ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>全部</button>
+                  <button onClick={() => setFilterCatSlug('all')} className={`px-4 py-2 text-sm font-bold whitespace-nowrap ${filterCatSlug === 'all' ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>全部分類</button>
                   {categories.map(cat => <button key={cat.id} onClick={() => setFilterCatSlug(cat.slug)} className={`px-4 py-2 text-sm font-bold whitespace-nowrap ${filterCatSlug === cat.slug ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>{cat.icon} {cat.name}</button>)}
                 </div>
                 {filtered.length === 0 ? <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-8 text-center text-wiki-text-muted">暫無裝備數據</div> : (
@@ -167,7 +187,10 @@ export default function AdminEquipmentPage() {
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-3">
                                 {eq.icon ? <img src={eq.icon} alt={eq.name} className="w-10 h-10 rounded object-cover" /> : <div className="w-10 h-10 rounded bg-wiki-gray flex items-center justify-center text-wiki-text-muted">{eq.name[0]}</div>}
-                                <div className="text-wiki-text font-bold">{eq.name}</div>
+                                <div>
+                                  <div className="text-wiki-text font-bold">{eq.name}</div>
+                                  {eq.equipType && <span className="text-wiki-accent text-xs">{EQUIP_TYPE_LABELS[eq.equipType] || eq.equipType}</span>}
+                                </div>
                               </div>
                             </td>
                             <td className="px-6 py-4 text-yellow-400 text-sm">{getRarityStars(eq.rarity)}</td>
@@ -178,7 +201,10 @@ export default function AdminEquipmentPage() {
                               <button onClick={() => handleTogglePublish(eq)} className={`px-2 py-1 text-xs font-bold ${eq.isPublished ? 'bg-green-500/20 text-green-400' : 'bg-wiki-danger/20 text-wiki-danger'}`}>{eq.isPublished ? '已發佈' : '草稿'}</button>
                             </td>
                             <td className="px-6 py-4">
-                              <button onClick={() => handleDelete(eq.id)} className="px-3 py-1 bg-wiki-danger/20 text-wiki-danger text-sm font-bold hover:bg-wiki-danger/30">刪除</button>
+                              <div className="flex gap-2">
+                                <Link href={`/admin/equipment/edit/${eq.id}`} className="px-3 py-1 bg-wiki-accent/20 text-wiki-accent text-sm font-bold hover:bg-wiki-accent/30">編輯</Link>
+                                <button onClick={() => handleDelete(eq.id)} className="px-3 py-1 bg-wiki-danger/20 text-wiki-danger text-sm font-bold hover:bg-wiki-danger/30">刪除</button>
+                              </div>
                             </td>
                           </tr>
                         ))}

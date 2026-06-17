@@ -123,9 +123,29 @@ ALTER TABLE "Item" ADD COLUMN IF NOT EXISTS "isFeatured" BOOLEAN DEFAULT false;
 **Wiki 分類頁** `/wiki/items/[slug]`：方形圖標卡片網格，顯示圖片 + summary  
 **Wiki 詳情頁** `/wiki/items/[slug]/[itemSlug]`：Tabs 按有無內容動態顯示
 
-### 4-4 裝備圖鑑（`Equipment` 表）⚠️ 後台基礎，Wiki 待完善
+### 4-4 裝備圖鑑（`Equipment` 表，`equipType` 區分）✅ 完整
 
-結構與道具類似，API 在 `/api/admin/equipment` 和 `/api/wiki/equipment`
+**一張表四子類型**（仿角色 hero/haojie 模式），`equipType` ∈：
+| 類型 | equipType | 專屬字段 |
+|------|----------|---------|
+| 豪杰武器 | `haojie_weapon` | type(種類) · buffs(分類→細分 JSON) |
+| 豪杰戰徽 | `haojie_warbadge` | type(種類) · buffs(分類→細分 JSON) |
+| 首領裝備 | `leader` | slot(部位) · attrBias(偏向) · stats(屬性文本) · setId |
+| 英雄裝備 | `hero` | slot(部位) · stats(屬性文本) · setId |
+
+**共用字段**：name/slug/summary/icon(+Position)/image(+Position)/rarity(品質,1白~6金，豪杰武器只開 3~6)/acquisition(富文本)/sortOrder/isFeatured/isPublished
+
+**品質→顏色**：1白 2綠 3藍 4紫 5橙 6金（常量在 `src/lib/equipment.ts`）
+**buffs JSON**：`[{ group:"加強暴徒", items:[{name,value}] }]`，分類桶固定（加強暴徒/飛車黨/槍手/改裝車輛/出征上限/豪杰），細分可增刪
+**部位選項**：首領＝枪械/武器/飾品/衣服/褲子/鞋子；英雄＝枪械/武器/頭部/衣服/鞋子/飾品
+
+**套裝**：獨立 `EquipmentSet` 表（`equipType` 區分 hero/leader），裝備經 `setId` 歸屬；後台 `/admin/equipment-sets` 管理；前台詳情頁聚合「同套 N 件 + 套裝加成」
+
+**後台**：統一列表 `/admin/equipment`（5 Tab：全部/豪杰武器/豪杰戰徽/首領/英雄）· 新增頁選類型+名稱後跳編輯 · 編輯頁 `/admin/equipment/edit/[id]` 按 equipType 條件渲染分區 + `EquipmentPreviewModal`
+**Wiki**：總覽 `/wiki/equipment`（4 類型卡）→ 列表 `/wiki/equipment/[equipType]`（品質色框方圖 + 篩選）→ 詳情 `/wiki/equipment/[equipType]/[slug]`
+**公開 API**：`/api/wiki/equipment?equipType=` · `/api/wiki/equipment/types`（各類型計數）
+
+> 武器圖鑑/戰徽圖鑑已併入此模塊；後續對接豪杰 `haojieEquip.weapon/.warbadge` 時直接引用對應 equipType 記錄。
 
 ### 4-5 兵種圖鑑（`Troop` 表）⚠️ 後台基礎，Wiki 待完善
 
@@ -246,10 +266,10 @@ JWT_SECRET / ADMIN_USERNAME / ADMIN_PASSWORD
 - [ ] 公開豪杰 API `/api/wiki/haojie`
 
 ### 圖鑑完善（中優先級）
-- [ ] 裝備圖鑑後台編輯頁 + Wiki 前台完整化
-- [ ] 兵種圖鑑後台編輯頁 + Wiki 前台完整化
-- [ ] 武器圖鑑（後續對接豪杰 `haojieEquip.weapon`）
-- [ ] 戰徽圖鑑（後續對接豪杰 `haojieEquip.warbadge`）
+- [x] 裝備圖鑑（含武器/戰徽/首領/英雄四子類型，equipType 區分）✅ 完整
+- [x] 兵種圖鑑後台編輯頁 ✅（Wiki 前台仍待完善）
+- [ ] 兵種圖鑑 Wiki 前台完整化
+- [ ] 後續對接豪杰 `haojieEquip.weapon/.warbadge` 引用裝備記錄
 - [ ] 各圖鑑跳轉 `href="#"` 補充真實路由
 
 ### 新增圖鑑 — 標準開發流程

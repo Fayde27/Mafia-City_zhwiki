@@ -2,99 +2,52 @@
 
 export const runtime = 'edge'
 
-
 import { useState, useEffect } from 'react'
 import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
+import { EQUIP_TYPE_LABELS, rarityInfo, RARITY_TIERS, rarityTiersFor } from '@/lib/equipment'
 
 interface Equipment {
-  id: string
-  name: string
-  slug: string
-  icon: string
-  image: string
-  imagePosition?: string
-  iconPosition?: string
-  rarity: number
-  type: string
-  slot: string
-  attack: number
-  defense: number
-  hp: number
-  speed: number
-  skill: string
-  description: string
-  category: {
-    name: string
-    slug: string
-  }
+  id: string; name: string; slug: string; summary?: string
+  icon: string; image: string; iconPosition?: string; imagePosition?: string
+  rarity: number; type?: string; slot?: string; equipType: string
 }
 
-interface EquipmentCategory {
-  id: string
-  name: string
-  slug: string
-  icon: string
-}
+const isHaojie = (t: string) => t === 'haojie_weapon' || t === 'haojie_warbadge'
 
-interface EquipmentFilterOption {
-  id: string
-  type: string
-  value: string
-  sortOrder: number
-}
-
-export default function EquipmentListPage() {
+export default function EquipmentTypeListPage() {
   const params = useParams()
-  const categorySlug = params?.slug as string
-  const { isAdmin, isLoaded } = useAdminAuth()
+  const equipType = params?.slug as string
+  const { isAdmin } = useAdminAuth()
   const [equipment, setEquipment] = useState<Equipment[]>([])
-  const [category, setCategory] = useState<EquipmentCategory | null>(null)
   const [loading, setLoading] = useState(true)
-  const [activeFilters, setActiveFilters] = useState<Record<string, string>>({})
-  const [filterOptions, setFilterOptions] = useState<EquipmentFilterOption[]>([])
+  const [rarityFilter, setRarityFilter] = useState(0) // 0 = 全部
+  const [kindFilter, setKindFilter] = useState('all')  // 種類/部位
 
   useEffect(() => {
-    Promise.all([
-      fetch(`/api/wiki/equipment?category=${categorySlug}`).then(res => res.json()),
-      fetch('/api/wiki/equipment/categories').then(res => res.json()),
-      fetch(`/api/wiki/equipment/filter-options?categorySlug=${categorySlug}`).then(res => res.json()),
-    ]).then(([equipData, catData, filterData]) => {
-      const equips = equipData?.equipment || []
-      setEquipment(equips)
-      
-      const cat = catData?.find((c: EquipmentCategory) => c.slug === categorySlug)
-      setCategory(cat || null)
-      
-      const filters = Array.isArray(filterData) ? filterData : []
-      setFilterOptions(filters)
-      
-      setLoading(false)
-    }).catch(() => {
-      setLoading(false)
-    })
-  }, [categorySlug])
+    fetch(`/api/wiki/equipment?equipType=${equipType}`)
+      .then(res => res.json())
+      .then(data => { setEquipment(data?.equipment || []); setLoading(false) })
+      .catch(() => setLoading(false))
+  }, [equipType])
 
-  const filteredEquipment = equipment.filter(e => Object.entries(activeFilters).every(([type, value]) => {
-    if (!value || value === 'all') return true
-    if (type === 'rarity') return e.rarity === parseInt(value)
-    return Object.values(e as any).some(v => String(v) === value)
-  }))
+  const typeLabel = EQUIP_TYPE_LABELS[equipType] || equipType
+  const haojie = isHaojie(equipType)
+  const kindKey = haojie ? 'type' : 'slot'
+  const kindLabel = haojie ? '種類' : '部位'
 
-  const getRarityStars = (r: number) => '★'.repeat(r) + '☆'.repeat(5 - r)
-  const filterTypes = Array.from(new Set(filterOptions.map(o => o.type)))
-  const groupedFilters: {[k: string]: typeof filterOptions} = {}
-  filterTypes.forEach(type => {
-    groupedFilters[type] = filterOptions.filter(o => o.type === type).sort((a, b) => a.sortOrder - b.sortOrder)
-  })
+  const kinds = Array.from(new Set(equipment.map(e => (e as any)[kindKey]).filter(Boolean)))
+  const filtered = equipment
+    .filter(e => rarityFilter === 0 || e.rarity === rarityFilter)
+    .filter(e => kindFilter === 'all' || (e as any)[kindKey] === kindFilter)
 
   return (
     <div className="min-h-screen bg-wiki-bg">
       <WikiHeader />
-      
+
       <main className="container mx-auto px-4 py-6 md:py-8">
         <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
           <Link href="/" className="hover:text-wiki-accent">首頁</Link>
@@ -103,110 +56,70 @@ export default function EquipmentListPage() {
           <span className="mx-2">/</span>
           <Link href="/wiki/equipment" className="hover:text-wiki-accent">裝備圖鑑</Link>
           <span className="mx-2">/</span>
-          <span className="text-wiki-text">{category?.name || '載入中...'}</span>
+          <span className="text-wiki-text">{typeLabel}</span>
         </div>
 
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <span className="text-3xl">{category?.icon}</span>
-            <h1 className="text-3xl md:text-4xl font-heading font-bold text-wiki-accent heading-hard">
-              {category?.name}
-            </h1>
-          </div>
+          <h1 className="text-3xl md:text-4xl font-heading font-bold text-wiki-accent heading-hard">{typeLabel}</h1>
           {isAdmin && (
-            <Link
-              href="/admin/equipment"
-              className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90"
-            >
-              管理裝備
-            </Link>
+            <Link href="/admin/equipment" className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90">管理裝備</Link>
           )}
         </div>
 
-        {filterTypes.length > 0 && (
-          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-4 md:p-6 mb-6 space-y-4">
-            {filterTypes.map(type => (
-              <div key={type}>
-                <div className="text-sm font-bold text-wiki-accent uppercase tracking-wider mb-2">{type}</div>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => setActiveFilters(prev => ({ ...prev, [type]: 'all' }))}
-                    className={(!activeFilters[type] || activeFilters[type] === 'all') ? 'px-3 py-1.5 text-xs font-bold bg-wiki-accent text-wiki-darker' : 'px-3 py-1.5 text-xs font-bold bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}
-                  >全部</button>
-                  {groupedFilters[type].map(opt => (
-                    <button
-                      key={opt.id}
-                      onClick={() => setActiveFilters(prev => ({ ...prev, [type]: opt.value }))}
-                      className={activeFilters[type] === opt.value ? 'px-3 py-1.5 text-xs font-bold bg-wiki-accent text-wiki-darker' : 'px-3 py-1.5 text-xs font-bold bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}
-                    >
-                      {type === 'rarity' && !isNaN(parseInt(opt.value)) ? getRarityStars(parseInt(opt.value)) : opt.value}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
+        {/* 篩選 */}
+        <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-4 md:p-6 mb-6 space-y-4">
+          <div>
+            <div className="text-sm font-bold text-wiki-accent uppercase tracking-wider mb-2">品質</div>
+            <div className="flex flex-wrap gap-2">
+              <button onClick={() => setRarityFilter(0)} className={`px-3 py-1.5 text-xs font-bold ${rarityFilter === 0 ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>全部</button>
+              {rarityTiersFor(equipType).map(t => (
+                <button key={t.value} onClick={() => setRarityFilter(t.value)}
+                  className={`px-3 py-1.5 text-xs font-bold ${rarityFilter === t.value ? 'text-white' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}
+                  style={rarityFilter === t.value ? { backgroundColor: t.color } : {}}>{t.label}</button>
+              ))}
+            </div>
           </div>
-        )}
+          {kinds.length > 0 && (
+            <div>
+              <div className="text-sm font-bold text-wiki-accent uppercase tracking-wider mb-2">{kindLabel}</div>
+              <div className="flex flex-wrap gap-2">
+                <button onClick={() => setKindFilter('all')} className={`px-3 py-1.5 text-xs font-bold ${kindFilter === 'all' ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>全部</button>
+                {kinds.map(k => (
+                  <button key={k} onClick={() => setKindFilter(k)} className={`px-3 py-1.5 text-xs font-bold ${kindFilter === k ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>{k}</button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
 
         {loading ? (
           <div className="text-center py-12 text-wiki-text-muted">載入中...</div>
-        ) : filteredEquipment.length === 0 ? (
-          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-8 md:p-12 text-center text-wiki-text-muted">
-            該分類下暫無裝備
-          </div>
+        ) : filtered.length === 0 ? (
+          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-8 md:p-12 text-center text-wiki-text-muted">暫無裝備</div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-            {filteredEquipment.map((item) => (
-              <Link
-                key={item.id}
-                href={`/wiki/equipment/${categorySlug}/${item.slug}`}
-                className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg overflow-hidden group block hover:border-wiki-accent transition-all"
-              >
-                <div className="relative h-48 md:h-56 overflow-hidden bg-gradient-to-br from-wiki-gray to-wiki-darker">
-                  {item.image ? (
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      style={{ objectPosition: item.imagePosition || '50% 50%' }}
-                    />
-                  ) : item.icon ? (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-6xl">{item.icon}</span>
-                    </div>
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-6xl text-wiki-text-muted">{item.name[0]}</span>
-                    </div>
-                  )}
-                  <div className="absolute top-3 left-3 flex items-center gap-1">
-                    <span className="text-yellow-400 text-sm font-bold drop-shadow-lg">
-                      {getRarityStars(item.rarity)}
-                    </span>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5">
+            {filtered.map((item) => {
+              const r = rarityInfo(item.rarity)
+              return (
+                <Link key={item.id} href={`/wiki/equipment/${equipType}/${item.slug}`}
+                  className="bg-wiki-gray-light border-2 rounded-lg overflow-hidden group block hover:shadow-lg transition-all"
+                  style={{ borderColor: r.color }}>
+                  <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-wiki-gray to-wiki-darker">
+                    {item.icon ? (
+                      <img src={item.icon} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" style={{ objectPosition: item.iconPosition || '50% 50%' }} />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center"><span className="text-5xl text-wiki-text-muted">{item.name[0]}</span></div>
+                    )}
+                    <span className="absolute top-2 left-2 px-1.5 py-0.5 text-[10px] font-bold rounded text-white" style={{ backgroundColor: r.color }}>{r.label}</span>
                   </div>
-                  {item.type && (
-                    <div className="absolute top-3 right-3">
-                      <span className="text-wiki-text text-xs font-bold drop-shadow-lg">
-                        {item.type}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div className="p-4 md:p-5">
-                  <h3 className="text-lg md:text-xl font-bold text-wiki-text mb-1 group-hover:text-wiki-accent transition-colors">
-                    {item.name}
-                  </h3>
-                  {item.slot && (
-                    <p className="text-wiki-text-muted text-sm mb-2">部位：{item.slot}</p>
-                  )}
-                  {item.description && (
-                    <p className="text-wiki-text-muted text-xs mt-2 line-clamp-2">
-                      {item.description}
-                    </p>
-                  )}
-                </div>
-              </Link>
-            ))}
+                  <div className="p-3">
+                    <h3 className="text-sm md:text-base font-bold text-wiki-text group-hover:text-wiki-accent transition-colors truncate">{item.name}</h3>
+                    {(item.type || item.slot) && <p className="text-wiki-text-muted text-xs mt-0.5">{item.type || item.slot}</p>}
+                    {item.summary && <p className="text-wiki-text-muted text-xs mt-1 line-clamp-2">{item.summary}</p>}
+                  </div>
+                </Link>
+              )
+            })}
           </div>
         )}
       </main>

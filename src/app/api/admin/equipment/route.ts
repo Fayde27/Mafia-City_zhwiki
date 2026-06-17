@@ -9,15 +9,19 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
     const category = searchParams.get('category')
+    const equipType = searchParams.get('equipType')
     const from = (page - 1) * limit
     const to = from + limit - 1
 
     let query = supabaseAdmin
       .from('Equipment')
-      .select('*, EquipmentCategory(*)', { count: 'exact' })
+      .select('*, EquipmentCategory(*), EquipmentSet(id, name, slug)', { count: 'exact' })
 
     if (category) {
       query = query.eq('EquipmentCategory.slug', category)
+    }
+    if (equipType) {
+      query = query.eq('equipType', equipType)
     }
 
     const draft = searchParams.get('draft')
@@ -52,27 +56,26 @@ export async function POST(request: Request) {
       .insert({
         name: data.name,
         slug: data.slug,
+        summary: data.summary,
+        equipType: data.equipType || 'leader',
         icon: data.icon,
-        iconPosition: data.iconPosition,
+        iconPosition: data.iconPosition || '50% 50%',
         image: data.image,
-        imagePosition: data.imagePosition,
+        imagePosition: data.imagePosition || '50% 50%',
         rarity: data.rarity || 3,
         type: data.type,
         slot: data.slot,
-        attack: data.attack || 0,
-        defense: data.defense || 0,
-        hp: data.hp || 0,
-        speed: data.speed || 0,
-        skill: data.skill,
-        description: data.description,
+        attrBias: data.attrBias,
+        buffs: data.buffs,
+        setId: data.setId || null,
         stats: data.stats,
-        enhancement: data.enhancement,
         acquisition: data.acquisition,
-        categoryId: data.categoryId,
+        categoryId: data.categoryId || null,
         sortOrder: data.sortOrder || 0,
+        isFeatured: data.isFeatured || false,
         isPublished: data.isPublished || false,
       })
-      .select('*, EquipmentCategory(*)')
+      .select('*, EquipmentCategory(*), EquipmentSet(id, name, slug)')
       .single()
 
     if (error) throw error

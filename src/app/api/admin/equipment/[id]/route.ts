@@ -29,6 +29,8 @@ export async function PUT(
     const { data: equip, error } = await supabaseAdmin.from('Equipment').update({
         name: data.name,
         slug: data.slug,
+        summary: data.summary,
+        equipType: data.equipType,
         icon: data.icon,
         iconPosition: data.iconPosition,
         image: data.image,
@@ -36,20 +38,17 @@ export async function PUT(
         rarity: data.rarity,
         type: data.type,
         slot: data.slot,
-        attack: data.attack,
-        defense: data.defense,
-        hp: data.hp,
-        speed: data.speed,
-        skill: data.skill,
-        description: data.description,
+        attrBias: data.attrBias,
+        buffs: data.buffs,
+        setId: data.setId || null,
         stats: data.stats,
-        enhancement: data.enhancement,
         acquisition: data.acquisition,
-        categoryId: data.categoryId,
+        categoryId: data.categoryId || null,
         sortOrder: data.sortOrder,
+        isFeatured: data.isFeatured,
         isPublished: data.isPublished,
       })
-      .eq('id', params.id )
+      .eq('id', params.id)
       .select()
       .single()
 
@@ -66,7 +65,7 @@ export async function DELETE(
 ) {
   try {
     const { error } = await supabaseAdmin.from('Equipment').delete()
-      .eq('id', params.id )
+      .eq('id', params.id)
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error: '刪除裝備失敗' }, { status: 500 })
