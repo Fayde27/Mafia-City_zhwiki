@@ -15,7 +15,7 @@ export async function GET(request: Request) {
 
     let query = supabaseAdmin
       .from('Equipment')
-      .select('*, EquipmentCategory(*), EquipmentSet(id, name, slug)', { count: 'exact' })
+      .select('*, EquipmentCategory(*)', { count: 'exact' })
 
     if (category) {
       query = query.eq('EquipmentCategory.slug', category)
@@ -75,12 +75,12 @@ export async function POST(request: Request) {
         isFeatured: data.isFeatured || false,
         isPublished: data.isPublished || false,
       })
-      .select('*, EquipmentCategory(*), EquipmentSet(id, name, slug)')
+      .select('*, EquipmentCategory(*)')
       .single()
 
     if (error) throw error
     return NextResponse.json(equip, { status: 201 })
-  } catch (error) {
-    return NextResponse.json({ error: '創建裝備失敗' }, { status: 500 })
+  } catch (error: any) {
+    return NextResponse.json({ error: '創建裝備失敗：' + (error?.message || '未知錯誤') }, { status: 500 })
   }
 }

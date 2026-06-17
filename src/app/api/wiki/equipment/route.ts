@@ -12,7 +12,7 @@ export async function GET(request: Request) {
 
     let query = supabaseAdmin
       .from('Equipment')
-      .select('*, EquipmentCategory(*), EquipmentSet(id, name, slug, setBonus, equipType)')
+      .select('*, EquipmentCategory(*)')
       .eq('isPublished', true)
 
     if (category) {
@@ -30,10 +30,21 @@ export async function GET(request: Request) {
 
     if (error) throw error
 
-    const mapped = (equipment || []).map(({ EquipmentCategory, EquipmentSet, ...rest }: any) => ({
+    // 單獨查詢套裝再拼接（不依賴外鍵內嵌）
+    const setIds = Array.from(new Set((equipment || []).map((e: any) => e.setId).filter(Boolean)))
+    let setsMap: Record<string, any> = {}
+    if (setIds.length > 0) {
+      const { data: sets } = await supabaseAdmin
+        .from('EquipmentSet')
+        .select('id, name, slug, setBonus, equipType')
+        .in('id', setIds)
+      setsMap = Object.fromEntries((sets || []).map((s: any) => [s.id, s]))
+    }
+
+    const mapped = (equipment || []).map(({ EquipmentCategory, ...rest }: any) => ({
       ...rest,
       category: EquipmentCategory,
-      set: EquipmentSet,
+      set: rest.setId ? setsMap[rest.setId] || null : null,
     }))
 
     return NextResponse.json({ equipment: mapped })

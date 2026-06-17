@@ -54,8 +54,8 @@ export async function PUT(
 
     if (error) throw error
     return NextResponse.json(equip)
-  } catch (error) {
-    return NextResponse.json({ error: '更新裝備失敗' }, { status: 500 })
+  } catch (error: any) {
+    return NextResponse.json({ error: '更新裝備失敗：' + (error?.message || '未知錯誤') }, { status: 500 })
   }
 }
 
