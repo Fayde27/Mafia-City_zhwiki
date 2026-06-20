@@ -31,7 +31,6 @@ interface Equipment { id: string; name: string; icon?: string; EquipmentCategory
 const SECTIONS = [
   { id: 'basic', label: '基本信息' },
   { id: 'images', label: '圖片上傳' },
-  { id: 'attributes', label: '豪杰屬性' },
   { id: 'skills', label: '豪杰技能' },
   { id: 'equipment', label: '裝備推薦' },
   { id: 'teamcomp', label: '配隊推薦' },
@@ -42,34 +41,6 @@ const RARITY_OPTIONS = ['金', '紫']
 const HAOJIE_STYLES = ['無畏風格', '迅捷風格', '智謀風格', '穩固風格']
 const TROOP_TYPES = ['暴徒', '槍手', '飛車黨', '改裝車輛']
 const SKILL_TYPES = ['帶隊生效', '被動生效']
-
-// ─── 5-axis Radar ─────────────────────────────────────────────────────────────
-
-function Radar5SVG({ attrs, size, r }: { attrs: any; size: number; r: number }) {
-  const cx = size / 2, cy = size / 2
-  const labels = ['力量', '技術', '體魄', '防護', '速度']
-  const angles = labels.map((_, i) => (Math.PI * 2 * i) / 5 - Math.PI / 2)
-  const toXY = (angle: number, radius: number) => ({ x: cx + radius * Math.cos(angle), y: cy + radius * Math.sin(angle) })
-  const baseVals = [attrs?.strengthBase, attrs?.techBase, attrs?.physBase, attrs?.defBase, attrs?.speedBase].map(Number)
-  const maxVals  = [attrs?.strengthMax,  attrs?.techMax,  attrs?.physMax,  attrs?.defMax,  attrs?.speedMax ].map(Number)
-  const globalMax = 100
-  const polyPoints = (vals: number[]) => vals.map((v, i) => { const p = toXY(angles[i], (v / globalMax) * r); return `${p.x},${p.y}` }).join(' ')
-  return (
-    <svg width={size} height={size}>
-      {[0.25, 0.5, 0.75, 1].map(f => (
-        <polygon key={f} points={angles.map(a => { const p = toXY(a, r * f); return `${p.x},${p.y}` }).join(' ')} fill="none" stroke="#4b5563" strokeWidth="1" />
-      ))}
-      {angles.map((a, i) => { const o = toXY(a, r); return <line key={i} x1={cx} y1={cy} x2={o.x} y2={o.y} stroke="#4b5563" strokeWidth="1" /> })}
-      {baseVals.some(v => v > 0) && <polygon points={polyPoints(baseVals)} fill="rgba(59,130,246,0.3)" stroke="#3b82f6" strokeWidth="1.5" />}
-      {maxVals.some(v => v > 0) && <polygon points={polyPoints(maxVals)} fill="rgba(212,175,55,0.25)" stroke="#d4af37" strokeWidth="1.5" />}
-      {labels.map((label, i) => { const p = toXY(angles[i], r + (size > 200 ? 20 : 15)); return <text key={i} x={p.x} y={p.y} textAnchor="middle" dominantBaseline="middle" fontSize={size > 200 ? 13 : 10} fill="#d1b27a" fontWeight="bold">{label}</text> })}
-    </svg>
-  )
-}
-
-function RadarPreview({ attrs }: { attrs: any }) {
-  return <div className="mx-auto w-fit"><Radar5SVG attrs={attrs} size={180} r={64} /></div>
-}
 
 // ─── Skill icon input ─────────────────────────────────────────────────────────
 
@@ -164,7 +135,7 @@ function PreviewCard({ title, children }: { title: string; children: React.React
 interface HaojiePreviewProps {
   name: string; rarity: string; traits: string[]; troopType: string; acquisition: string
   awakenHero: boolean; avatar: string; avatarPosition: string; banner: string; bannerPosition: string
-  attrs: any; skills: SkillEntry[]; haojieEquip: HaojieEquip
+  recommendedBuild: string; skills: SkillEntry[]; haojieEquip: HaojieEquip
   teamComps: TeamCompEntry[]; allHaojie: CharacterOption[]; allEquipments: Equipment[]
   onClose: () => void
 }
@@ -210,32 +181,12 @@ function HaojiePreviewModal(p: HaojiePreviewProps) {
             </div>
           </div>
 
-          {/* Attributes */}
-          <PreviewCard title="豪杰屬性">
-            <div className="flex gap-6 items-center flex-wrap">
-              <Radar5SVG attrs={p.attrs} size={200} r={72} />
-              <table className="flex-1 text-sm min-w-[180px]">
-                <thead><tr className="border-b border-wiki-border">
-                  <th className="text-left py-1.5 text-wiki-text-muted">屬性</th>
-                  <th className="text-right py-1.5 text-blue-400">初始</th>
-                  <th className="text-right py-1.5 text-yellow-500">滿級</th>
-                </tr></thead>
-                <tbody>
-                  {[['力量','strengthBase','strengthMax'],['技術','techBase','techMax'],['體魄','physBase','physMax'],['防護','defBase','defMax'],['速度','speedBase','speedMax']].map(([l,b,m]) => (
-                    <tr key={l} className="border-b border-wiki-border/40">
-                      <td className="py-2 text-wiki-text font-bold">{l}</td>
-                      <td className="py-2 text-right text-blue-300">{(p.attrs as any)?.[b] || '—'}</td>
-                      <td className="py-2 text-right text-yellow-400 font-bold">{(p.attrs as any)?.[m] || '—'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="flex gap-4 mt-2 text-xs text-wiki-text-muted">
-              <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 bg-blue-400"></span>初始值</span>
-              <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 bg-yellow-500"></span>滿級值</span>
-            </div>
-          </PreviewCard>
+          {/* 推薦加點 */}
+          {p.recommendedBuild && (
+            <PreviewCard title="推薦加點">
+              <p className="text-sm text-wiki-text whitespace-pre-line">{p.recommendedBuild}</p>
+            </PreviewCard>
+          )}
 
           {/* Skills */}
           {p.skills.length > 0 && (
@@ -358,14 +309,8 @@ export default function AdminHaojieEditPage() {
   const [banner, setBanner] = useState('')
   const [bannerPosition, setBannerPosition] = useState('50% 50%')
 
-  // 5-axis Attributes
-  const [attrs, setAttrs] = useState({
-    strengthBase: '', strengthMax: '',
-    techBase: '', techMax: '',
-    physBase: '', physMax: '',
-    defBase: '', defMax: '',
-    speedBase: '', speedMax: '',
-  })
+  // 推薦加點（數值不固定，改為文字建議；復用 attributes JSON 存 { recommend }）
+  const [recommendedBuild, setRecommendedBuild] = useState('')
 
   // Skills
   const [skills, setSkills] = useState<SkillEntry[]>([])
@@ -417,7 +362,7 @@ export default function AdminHaojieEditPage() {
           setAvatarPosition(d.avatarPosition || '50% 50%')
           setBanner(d.banner || '')
           setBannerPosition(d.bannerPosition || '50% 50%')
-          setAttrs(tryParse(d.attributes, attrs))
+          setRecommendedBuild(tryParse(d.attributes, {})?.recommend || '')
           setSkills(tryParse(d.skills, []))
           setHaojieEquip(tryParse(d.haojieEquip, { weaponId: '', warbadgeId: '' }))
           setTeamComps(d.teamComps || [])
@@ -464,7 +409,7 @@ export default function AdminHaojieEditPage() {
           story,
           categoryId, sortOrder, isPublished,
           avatar, avatarPosition, banner, bannerPosition,
-          attributes: JSON.stringify(attrs),
+          attributes: JSON.stringify({ recommend: recommendedBuild }),
           skills: JSON.stringify(skills),
           haojieEquip: JSON.stringify(haojieEquip),
           teamComps,
@@ -598,9 +543,9 @@ export default function AdminHaojieEditPage() {
                     <input type="number" className={inputCls} value={sortOrder}
                       onChange={e => setSortOrder(parseInt(e.target.value) || 0)} />
                   </div>
-                  <div className="md:col-span-2">
+                  <div>
                     <label className={labelCls}>豪杰風格</label>
-                    <div className="flex flex-wrap gap-3">
+                    <div className="flex flex-wrap gap-3 pt-2">
                       {HAOJIE_STYLES.map(t => (
                         <label key={t} className="flex items-center gap-1.5 cursor-pointer select-none">
                           <input type="checkbox" className="accent-wiki-accent"
@@ -610,6 +555,13 @@ export default function AdminHaojieEditPage() {
                         </label>
                       ))}
                     </div>
+                  </div>
+                  <div>
+                    <label className={labelCls}>推薦加點</label>
+                    <textarea className={inputCls + ' resize-y'} rows={3} value={recommendedBuild}
+                      onChange={e => setRecommendedBuild(e.target.value)}
+                      placeholder="如：優先力量，其次技術；速度點滿後轉防護" />
+                    <p className="text-xs text-wiki-text-muted mt-1">遊戲內數值受協同訓練投資影響不固定，此處填寫推薦加點方向即可</p>
                   </div>
                 </div>
               </div>
@@ -631,51 +583,7 @@ export default function AdminHaojieEditPage() {
                 </div>
               </div>
 
-              {/* §3 豪杰屬性（5軸雷達圖） */}
-              <div ref={el => { sectionRefs.current['attributes'] = el }} className={cardCls}>
-                <h3 className="text-lg font-bold text-wiki-accent mb-5">豪杰屬性</h3>
-                <div className="flex gap-8 items-start flex-wrap">
-                  <div className="flex-1 min-w-[280px] grid grid-cols-2 gap-4">
-                    {[
-                      { key: 'strength', label: '力量' },
-                      { key: 'tech', label: '技術' },
-                      { key: 'phys', label: '體魄' },
-                      { key: 'def', label: '防護' },
-                      { key: 'speed', label: '速度' },
-                    ].map(({ key, label }) => (
-                      <div key={key} className="space-y-2">
-                        <label className="block text-wiki-text-muted text-xs font-bold uppercase tracking-wider">{label}</label>
-                        <div className="flex gap-2">
-                          <div className="flex-1">
-                            <label className="block text-wiki-text-muted text-xs mb-1">初始值</label>
-                            <input type="number" className="w-full bg-wiki-gray border border-wiki-border px-3 py-2 text-sm text-wiki-text focus:border-wiki-accent focus:outline-none"
-                              value={(attrs as any)[`${key}Base`]}
-                              onChange={e => setAttrs({ ...attrs, [`${key}Base`]: e.target.value })} />
-                          </div>
-                          <div className="flex-1">
-                            <label className="block text-wiki-text-muted text-xs mb-1">滿級值</label>
-                            <input type="number" className="w-full bg-wiki-gray border border-wiki-border px-3 py-2 text-sm text-wiki-text focus:border-wiki-accent focus:outline-none"
-                              value={(attrs as any)[`${key}Max`]}
-                              onChange={e => setAttrs({ ...attrs, [`${key}Max`]: e.target.value })} />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="hidden md:block">
-                    <p className="text-xs text-wiki-text-muted text-center mb-2">預覽</p>
-                    <div className="bg-wiki-gray rounded p-2">
-                      <RadarPreview attrs={attrs} />
-                    </div>
-                    <div className="flex gap-4 justify-center mt-2 text-xs text-wiki-text-muted">
-                      <span className="flex items-center gap-1"><span className="inline-block w-3 h-0.5 bg-blue-400"></span>初始</span>
-                      <span className="flex items-center gap-1"><span className="inline-block w-3 h-0.5 bg-yellow-500"></span>滿級</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* §4 豪杰技能 */}
+              {/* §3 豪杰技能 */}
               <div ref={el => { sectionRefs.current['skills'] = el }} className={cardCls}>
                 <div className="flex items-center justify-between mb-5">
                   <h3 className="text-lg font-bold text-wiki-accent">豪杰技能</h3>
@@ -875,7 +783,7 @@ export default function AdminHaojieEditPage() {
           name={name} rarity={rarity} traits={traits} troopType={troopType} acquisition={acquisition}
           awakenHero={awakenHero} avatar={avatar} avatarPosition={avatarPosition}
           banner={banner} bannerPosition={bannerPosition}
-          attrs={attrs} skills={skills} haojieEquip={haojieEquip}
+          recommendedBuild={recommendedBuild} skills={skills} haojieEquip={haojieEquip}
           teamComps={teamComps} allHaojie={allHaojie} allEquipments={allEquipments}
           onClose={() => setShowPreview(false)}
         />
