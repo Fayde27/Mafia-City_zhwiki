@@ -9,11 +9,13 @@ import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
+import { BUILDING_TYPE_LABELS, BUILDING_TYPE_OPTIONS } from '@/lib/building'
 
 interface Building {
   id: string
   name: string
   slug: string
+  buildingType?: string
   icon: string
   image: string
   imagePosition?: string
@@ -57,6 +59,7 @@ export default function BuildingListPage() {
   const [loading, setLoading] = useState(true)
   const [activeFilters, setActiveFilters] = useState<Record<string, string>>({})
   const [filterOptions, setFilterOptions] = useState<BuildingFilterOption[]>([])
+  const [typeFilter, setTypeFilter] = useState('all')
 
   useEffect(() => {
     Promise.all([
@@ -79,11 +82,16 @@ export default function BuildingListPage() {
     })
   }, [categorySlug])
 
-  const filteredBuildings = buildings.filter(b => Object.entries(activeFilters).every(([type, value]) => {
-    if (!value || value === 'all') return true
-    if (type === 'rarity') return b.rarity === parseInt(value)
-    return Object.values(b as any).some(v => String(v) === value)
-  }))
+  const filteredBuildings = buildings
+    .filter(b => typeFilter === 'all' || (b.buildingType || 'inner') === typeFilter)
+    .filter(b => Object.entries(activeFilters).every(([type, value]) => {
+      if (!value || value === 'all') return true
+      if (type === 'rarity') return b.rarity === parseInt(value)
+      return Object.values(b as any).some(v => String(v) === value)
+    }))
+
+  // 僅顯示該分類下實際存在的建築類別 Tab
+  const availableTypes = BUILDING_TYPE_OPTIONS.filter(t => buildings.some(b => (b.buildingType || 'inner') === t))
 
   const getRarityStars = (r: number) => '★'.repeat(r) + '☆'.repeat(5 - r)
   const filterTypes = Array.from(new Set(filterOptions.map(o => o.type)))
@@ -123,6 +131,22 @@ export default function BuildingListPage() {
             </Link>
           )}
         </div>
+
+        {availableTypes.length > 1 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            <button
+              onClick={() => setTypeFilter('all')}
+              className={typeFilter === 'all' ? 'px-4 py-2 text-sm font-bold bg-wiki-accent text-wiki-darker' : 'px-4 py-2 text-sm font-bold bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}
+            >全部類別</button>
+            {availableTypes.map(t => (
+              <button
+                key={t}
+                onClick={() => setTypeFilter(t)}
+                className={typeFilter === t ? 'px-4 py-2 text-sm font-bold bg-wiki-accent text-wiki-darker' : 'px-4 py-2 text-sm font-bold bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}
+              >{BUILDING_TYPE_LABELS[t]}</button>
+            ))}
+          </div>
+        )}
 
         {filterTypes.length > 0 && (
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-4 md:p-6 mb-6 space-y-4">

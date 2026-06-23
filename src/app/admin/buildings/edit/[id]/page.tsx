@@ -9,6 +9,7 @@ import Link from 'next/link'
 import ImageUploadInput from '@/components/ImageUploadInput'
 import RichTextEditor from '@/components/RichTextEditor'
 import BuildingPreviewModal from '@/components/BuildingPreviewModal'
+import { BUILDING_TYPE_LABELS } from '@/lib/building'
 
 // ─── 類型 ──────────────────────────────────────────────────────────────────────
 
@@ -169,6 +170,7 @@ export default function AdminBuildingEditPage() {
   const [showPreview, setShowPreview] = useState(false)
 
   const [form, setForm] = useState({
+    buildingType: 'inner',
     name: '',
     slug: '',
     categoryId: '',
@@ -214,6 +216,7 @@ export default function AdminBuildingEditPage() {
       setCategories(Array.isArray(cats) ? cats : [])
       if (bld && !bld.error) {
         setForm({
+          buildingType: bld.buildingType || 'inner',
           name: bld.name || '',
           slug: bld.slug || '',
           categoryId: bld.categoryId || '',
@@ -302,6 +305,7 @@ export default function AdminBuildingEditPage() {
             <div className="sticky top-8 space-y-1">
               <div className="text-wiki-text-muted text-xs font-bold uppercase tracking-wider mb-3 px-3">
                 編輯建築
+                <span className="ml-1 text-wiki-accent">· {BUILDING_TYPE_LABELS[form.buildingType] || '內城建築'}</span>
               </div>
               {SECTIONS.map(sec => (
                 <button

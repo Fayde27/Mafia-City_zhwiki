@@ -12,12 +12,18 @@ export async function GET(request: Request) {
     const from = (page - 1) * limit
     const to = from + limit - 1
 
+    const buildingType = searchParams.get('buildingType')
+
     let query = supabaseAdmin
       .from('Building')
       .select('*, BuildingCategory(*)', { count: 'exact' })
 
     if (category) {
       query = query.eq('BuildingCategory.slug', category)
+    }
+
+    if (buildingType) {
+      query = query.eq('buildingType', buildingType)
     }
 
     const draft = searchParams.get('draft')
@@ -50,6 +56,7 @@ export async function POST(request: Request) {
     const { data: building, error } = await supabaseAdmin
       .from('Building')
       .insert({
+        buildingType: data.buildingType || 'inner',
         name: data.name,
         slug: data.slug,
         icon: data.icon,

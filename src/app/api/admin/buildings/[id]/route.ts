@@ -30,6 +30,7 @@ export async function PUT(
     const { data: building, error } = await supabaseAdmin
       .from('Building')
       .update({
+        buildingType: data.buildingType,
         name: data.name,
         slug: data.slug,
         icon: data.icon,

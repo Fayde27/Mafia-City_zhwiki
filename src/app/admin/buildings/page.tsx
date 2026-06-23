@@ -8,12 +8,13 @@ import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
 import { useRouter } from 'next/navigation'
+import { BUILDING_TYPE_LABELS, BUILDING_TYPE_OPTIONS } from '@/lib/building'
 
 type Tab = 'list' | 'categories' | 'filters'
 
 interface EntityItem {
   id: string; name: string; slug: string; rarity: number
-  isPublished: boolean; sortOrder: number
+  isPublished: boolean; sortOrder: number; buildingType?: string
   icon?: string; type?: string; func?: string
   category?: { name: string; slug: string }
   BuildingCategory?: { name: string; slug: string }
@@ -31,6 +32,7 @@ export default function AdminBuildingsPage() {
   const [activeTab, setActiveTab] = useState<Tab>('list')
   const [loading, setLoading] = useState(true)
   const [items, setItems] = useState<EntityItem[]>([])
+  const [filterType, setFilterType] = useState('all')
   const [filterCatSlug, setFilterCatSlug] = useState('all')
   const [categories, setCategories] = useState<EntityCategory[]>([])
   const [showCatModal, setShowCatModal] = useState(false)
@@ -120,12 +122,15 @@ export default function AdminBuildingsPage() {
 
   if (!isAdmin) return null
 
-  const filtered = filterCatSlug === 'all' ? items : items.filter(bld => (bld.category?.slug || bld.BuildingCategory?.slug) === filterCatSlug)
+  const filtered = items.filter(bld => {
+    const typeOk = filterType === 'all' || (bld.buildingType || 'inner') === filterType
+    const catOk = filterCatSlug === 'all' || (bld.category?.slug || bld.BuildingCategory?.slug) === filterCatSlug
+    return typeOk && catOk
+  })
   const currentOptions = filterOptions.filter(o => o.categoryId === selectedCatId)
   const existingTypes = Array.from(new Set(currentOptions.map(o => o.type))).sort()
   const groupedOptions = existingTypes.reduce((acc, type) => { acc[type] = currentOptions.filter(o => o.type === type).sort((a, b) => a.sortOrder - b.sortOrder); return acc }, {} as Record<string, FilterOption[]>)
   const allTypes = Array.from(new Set(filterOptions.map(o => o.type))).sort()
-  const getRarityStars = (r: number) => '★'.repeat(r) + '☆'.repeat(5 - r)
   const tabCls = (t: Tab) => `px-6 py-3 font-bold text-sm border-b-2 transition-colors ${activeTab === t ? 'border-wiki-accent text-wiki-accent' : 'border-transparent text-wiki-text-muted hover:text-wiki-text'}`
 
   return (
@@ -151,6 +156,10 @@ export default function AdminBuildingsPage() {
           <>
             {activeTab === 'list' && (
               <div>
+                <div className="flex gap-2 mb-3 overflow-x-auto pb-1">
+                  <button onClick={() => setFilterType('all')} className={`px-4 py-2 text-sm font-bold whitespace-nowrap ${filterType === 'all' ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>全部類型</button>
+                  {BUILDING_TYPE_OPTIONS.map(t => <button key={t} onClick={() => setFilterType(t)} className={`px-4 py-2 text-sm font-bold whitespace-nowrap ${filterType === t ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>{BUILDING_TYPE_LABELS[t]}</button>)}
+                </div>
                 <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
                   <button onClick={() => setFilterCatSlug('all')} className={`px-4 py-2 text-sm font-bold whitespace-nowrap ${filterCatSlug === 'all' ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>全部</button>
                   {categories.map(cat => <button key={cat.id} onClick={() => setFilterCatSlug(cat.slug)} className={`px-4 py-2 text-sm font-bold whitespace-nowrap ${filterCatSlug === cat.slug ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>{cat.icon} {cat.name}</button>)}
@@ -159,7 +168,7 @@ export default function AdminBuildingsPage() {
                   <div className="bg-wiki-gray-light border border-wiki-border rounded-lg overflow-hidden">
                     <table className="w-full">
                       <thead className="bg-wiki-gray">
-                        <tr>{["建築","類型","功能","分類","狀態","操作"].map(h => <th key={h} className="text-left px-6 py-4 text-wiki-accent font-bold text-sm">{h}</th>)}</tr>
+                        <tr>{["建築","建築類別","類型","功能","分類","狀態","操作"].map(h => <th key={h} className="text-left px-6 py-4 text-wiki-accent font-bold text-sm">{h}</th>)}</tr>
                       </thead>
                       <tbody>
                         {filtered.map(bld => (
@@ -170,7 +179,7 @@ export default function AdminBuildingsPage() {
                                 <div className="text-wiki-text font-bold">{bld.name}</div>
                               </div>
                             </td>
-                            <td className="px-6 py-4 text-yellow-400 text-sm">{getRarityStars(bld.rarity)}</td>
+                            <td className="px-6 py-4 text-wiki-accent text-sm font-bold whitespace-nowrap">{BUILDING_TYPE_LABELS[bld.buildingType || 'inner']}</td>
                             <td className="px-6 py-4 text-wiki-text text-sm">{bld.type || '-'}</td>
                             <td className="px-6 py-4 text-wiki-text text-sm">{(bld as any).function || '-'}</td>
                             <td className="px-6 py-4 text-wiki-text-muted text-sm">{bld.category?.name || bld.BuildingCategory?.name || '-'}</td>
