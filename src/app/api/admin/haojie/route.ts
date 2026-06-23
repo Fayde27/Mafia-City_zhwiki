@@ -36,7 +36,7 @@ export async function GET(request: Request) {
       },
     })
   } catch (error) {
-    return NextResponse.json({ error: '獲取豪杰列表失敗' }, { status: 500 })
+    return NextResponse.json({ error: '獲取豪傑列表失敗' }, { status: 500 })
   }
 }
 
@@ -73,6 +73,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(haojie, { status: 201 })
   } catch (error) {
-    return NextResponse.json({ error: '創建豪杰失敗' }, { status: 500 })
+    return NextResponse.json({ error: '創建豪傑失敗' }, { status: 500 })
   }
 }

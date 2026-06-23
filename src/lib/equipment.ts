@@ -3,8 +3,8 @@
 export type EquipType = 'haojie_weapon' | 'haojie_warbadge' | 'leader' | 'hero'
 
 export const EQUIP_TYPE_LABELS: Record<string, string> = {
-  haojie_weapon: '豪杰武器',
-  haojie_warbadge: '豪杰戰徽',
+  haojie_weapon: '豪傑武器',
+  haojie_warbadge: '豪傑戰徽',
   leader: '首領裝備',
   hero: '英雄裝備',
 }
@@ -19,7 +19,7 @@ export const RARITY_TIERS = [
   { value: 6, label: '金色', color: '#c4a35a' },
 ]
 
-// 豪杰武器只開放高 4 檔（藍紫橙金）；其餘 6 檔全開
+// 豪傑武器只開放高 4 檔（藍紫橙金）；其餘 6 檔全開
 export const rarityTiersFor = (equipType: string) =>
   equipType === 'haojie_weapon' ? RARITY_TIERS.filter(t => t.value >= 3) : RARITY_TIERS
 
@@ -31,8 +31,8 @@ export const SLOT_OPTIONS: Record<string, string[]> = {
   hero: ['枪械', '武器', '頭部', '衣服', '鞋子', '飾品'],
 }
 
-// 豪杰武器/戰徽：屬性分類桶（固定），桶內細分屬性可自由增刪
-export const BUFF_GROUPS = ['加強暴徒', '加強飛車黨', '加強槍手', '加強改裝車輛', '出征上限', '豪杰']
+// 豪傑武器/戰徽：屬性分類桶（固定），桶內細分屬性可自由增刪
+export const BUFF_GROUPS = ['加強暴徒', '加強飛車黨', '加強槍手', '加強改裝車輛', '出征上限', '豪傑']
 
 export interface BuffItem { name: string; value: string }
 export interface BuffGroup { group: string; items: BuffItem[] }
@@ -47,6 +47,6 @@ export const parseBuffs = (raw?: string | null): BuffGroup[] => {
 
 // 種類選項（後台下拉可自由輸入，這裡給常見預設）
 export const KIND_PRESETS: Record<string, string[]> = {
-  haojie_weapon: ['殺人蜂', '執法者', '荒野獵人', '蜂蛇', '豪杰專用'],
+  haojie_weapon: ['殺人蜂', '執法者', '荒野獵人', '蜂蛇', '豪傑專用'],
   haojie_warbadge: ['幸運戰徽', '動力戰徽', '預限戰徽', '將領戰徽', '災厄戰徽'],
 }

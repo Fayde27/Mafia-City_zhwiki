@@ -42,7 +42,7 @@ function RadarChart({ attrs }: { attrs: any }) {
   const cx = size / 2
   const cy = size / 2
   const r = 100
-  const labels = ['攻擊', '防衛', '魅帥', '速度']
+  const labels = ['攻擊', '防衛', '統帥', '速度']
   const angles = labels.map((_, i) => (Math.PI * 2 * i) / 4 - Math.PI / 2)
 
   const toXY = (angle: number, radius: number) => ({
@@ -274,7 +274,7 @@ export default function HeroDetailPage() {
                         {[
                           { label: '攻擊', base: attrs?.attackBase, max: attrs?.attackMax },
                           { label: '防衛', base: attrs?.defenseBase, max: attrs?.defenseMax },
-                          { label: '魅帥', base: attrs?.charismaBase, max: attrs?.charismaMax },
+                          { label: '統帥', base: attrs?.charismaBase, max: attrs?.charismaMax },
                           { label: '速度', base: attrs?.speedBase, max: attrs?.speedMax },
                         ].map(row => (
                           <tr key={row.label} className="border-b border-wiki-border/40">

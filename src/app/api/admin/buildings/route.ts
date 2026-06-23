@@ -81,7 +81,7 @@ export async function POST(request: Request) {
 
     if (error) throw error
     return NextResponse.json(building, { status: 201 })
-  } catch (error) {
-    return NextResponse.json({ error: '創建建築失敗' }, { status: 500 })
+  } catch (error: any) {
+    return NextResponse.json({ error: '創建建築失敗：' + (error?.message || '未知錯誤') }, { status: 500 })
   }
 }

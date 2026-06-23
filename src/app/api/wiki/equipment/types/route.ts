@@ -4,8 +4,8 @@ import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 
 const TYPES = [
-  { equipType: 'haojie_weapon',   label: '豪杰武器', icon: '🔫', description: '豪杰專用武器，按兵種分類加成' },
-  { equipType: 'haojie_warbadge', label: '豪杰戰徽', icon: '🎖️', description: '豪杰戰徽，提供多維屬性加成' },
+  { equipType: 'haojie_weapon',   label: '豪傑武器', icon: '🔫', description: '豪傑專用武器，按兵種分類加成' },
+  { equipType: 'haojie_warbadge', label: '豪傑戰徽', icon: '🎖️', description: '豪傑戰徽，提供多維屬性加成' },
   { equipType: 'leader',          label: '首領裝備', icon: '👑', description: '首領各部位裝備與套裝' },
   { equipType: 'hero',            label: '英雄裝備', icon: '🛡️', description: '英雄各部位裝備與套裝' },
 ]

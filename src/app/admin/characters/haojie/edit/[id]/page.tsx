@@ -31,7 +31,7 @@ interface Equipment { id: string; name: string; icon?: string; EquipmentCategory
 const SECTIONS = [
   { id: 'basic', label: '基本信息' },
   { id: 'images', label: '圖片上傳' },
-  { id: 'skills', label: '豪杰技能' },
+  { id: 'skills', label: '豪傑技能' },
   { id: 'equipment', label: '裝備推薦' },
   { id: 'teamcomp', label: '配隊推薦' },
   { id: 'story', label: '黑道傳聞' },
@@ -190,7 +190,7 @@ function HaojiePreviewModal(p: HaojiePreviewProps) {
 
           {/* Skills */}
           {p.skills.length > 0 && (
-            <PreviewCard title="豪杰技能">
+            <PreviewCard title="豪傑技能">
               <div className="space-y-3">
                 {p.skills.map((sk, i) => (
                   <div key={i} className="flex gap-3 bg-wiki-gray rounded p-3">
@@ -448,9 +448,9 @@ export default function AdminHaojieEditPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">
-              {haojieId ? '編輯豪杰' : '新增豪杰'}
+              {haojieId ? '編輯豪傑' : '新增豪傑'}
             </h1>
-            <p className="text-wiki-text-muted text-sm mt-1">豪杰圖鑑詳細資料</p>
+            <p className="text-wiki-text-muted text-sm mt-1">豪傑圖鑑詳細資料</p>
           </div>
           <div className="flex gap-2">
             <button type="button" onClick={() => setShowPreview(true)}
@@ -495,7 +495,7 @@ export default function AdminHaojieEditPage() {
                 <h3 className="text-lg font-bold text-wiki-accent mb-5">基本信息</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className={labelCls}>豪杰名稱 *</label>
+                    <label className={labelCls}>豪傑名稱 *</label>
                     <input className={inputCls} value={name} required onChange={e => setName(e.target.value)} />
                   </div>
                   <div>
@@ -530,7 +530,7 @@ export default function AdminHaojieEditPage() {
                     <label className="flex items-center gap-2 text-wiki-text cursor-pointer select-none">
                       <input type="checkbox" className="w-4 h-4 accent-wiki-accent"
                         checked={awakenHero} onChange={e => setAwakenHero(e.target.checked)} />
-                      <span className="text-sm font-bold">覺醒豪杰</span>
+                      <span className="text-sm font-bold">覺醒豪傑</span>
                     </label>
                     <label className="flex items-center gap-2 text-wiki-text cursor-pointer select-none">
                       <input type="checkbox" className="w-4 h-4 accent-wiki-accent"
@@ -544,7 +544,7 @@ export default function AdminHaojieEditPage() {
                       onChange={e => setSortOrder(parseInt(e.target.value) || 0)} />
                   </div>
                   <div>
-                    <label className={labelCls}>豪杰風格</label>
+                    <label className={labelCls}>豪傑風格</label>
                     <div className="flex flex-wrap gap-3 pt-2">
                       {HAOJIE_STYLES.map(t => (
                         <label key={t} className="flex items-center gap-1.5 cursor-pointer select-none">
@@ -583,10 +583,10 @@ export default function AdminHaojieEditPage() {
                 </div>
               </div>
 
-              {/* §3 豪杰技能 */}
+              {/* §3 豪傑技能 */}
               <div ref={el => { sectionRefs.current['skills'] = el }} className={cardCls}>
                 <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-lg font-bold text-wiki-accent">豪杰技能</h3>
+                  <h3 className="text-lg font-bold text-wiki-accent">豪傑技能</h3>
                   <button type="button"
                     onClick={() => setSkills([...skills, { icon: '', type: '帶隊生效', name: '', effect: '', multiplier: '' }])}
                     className="text-sm text-wiki-accent border border-wiki-accent px-3 py-1 hover:bg-wiki-accent hover:text-wiki-bg transition-colors">
@@ -729,7 +729,7 @@ export default function AdminHaojieEditPage() {
                           onChange={e => { const n = [...teamComps]; n[i] = { ...tc, reason: e.target.value }; setTeamComps(n) }} />
                       </div>
                       <div>
-                        <label className="block text-xs text-wiki-text-muted mb-2">成員豪杰</label>
+                        <label className="block text-xs text-wiki-text-muted mb-2">成員豪傑</label>
                         <div className="flex flex-wrap gap-2">
                           {allHaojie.filter(c => c.id !== haojieId).map(c => {
                             const sel = tc.memberIds.includes(c.id)
@@ -748,7 +748,7 @@ export default function AdminHaojieEditPage() {
                             )
                           })}
                           {allHaojie.filter(c => c.id !== haojieId).length === 0 && (
-                            <p className="text-wiki-text-muted text-xs">暫無其他豪杰可選</p>
+                            <p className="text-wiki-text-muted text-xs">暫無其他豪傑可選</p>
                           )}
                         </div>
                       </div>
@@ -768,7 +768,7 @@ export default function AdminHaojieEditPage() {
               <div className="lg:hidden">
                 <button type="submit" disabled={saving}
                   className="w-full btn-hard text-wiki-text disabled:opacity-50 py-3">
-                  {saving ? '保存中...' : '保存豪杰'}
+                  {saving ? '保存中...' : '保存豪傑'}
                 </button>
               </div>
 

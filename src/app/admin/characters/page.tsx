@@ -151,7 +151,7 @@ export default function AdminCharactersPage() {
   const newHaojieLink = '/admin/characters/haojie/edit/new'
 
   const handleFixCharTypes = async () => {
-    if (!confirm('將把所有「豪杰分類」下 characterType 不是 haojie 的角色批量修復，確定執行？')) return
+    if (!confirm('將把所有「豪傑分類」下 characterType 不是 haojie 的角色批量修復，確定執行？')) return
     try {
       const res = await fetch('/api/admin/fix-character-types', { method: 'POST' })
       const d = await res.json()
@@ -171,13 +171,13 @@ export default function AdminCharactersPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-heading font-bold text-wiki-accent heading-hard">角色圖鑑管理</h1>
-            <p className="text-wiki-text-muted text-sm mt-1">管理英雄與豪杰的列表、分類及篩選設定</p>
+            <p className="text-wiki-text-muted text-sm mt-1">管理英雄與豪傑的列表、分類及篩選設定</p>
           </div>
           {activeTab === 'list' && filterCatSlug !== 'all' && (
             <div className="flex gap-2">
               {(selectedCatName.includes('豪') || selectedCatName.toLowerCase().includes('haojie')) && (
                 <Link href={newHaojieLink} className="px-4 py-2 bg-wiki-gray border border-wiki-border text-wiki-text text-sm font-bold hover:border-wiki-accent transition-colors">
-                  + 新增豪杰
+                  + 新增豪傑
                 </Link>
               )}
               {(selectedCatName.includes('英雄') || selectedCatName.toLowerCase().includes('hero')) && (

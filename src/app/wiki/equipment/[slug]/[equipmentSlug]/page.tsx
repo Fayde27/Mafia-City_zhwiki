@@ -124,7 +124,7 @@ export default function EquipmentDetailPage() {
               <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6"><p className="text-wiki-text">{equipment.summary}</p></div>
             )}
 
-            {/* 豪杰武器/戰徽：屬性分類 → 細分 */}
+            {/* 豪傑武器/戰徽：屬性分類 → 細分 */}
             {haojie && buffs.length > 0 && (
               <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6">
                 <h3 className="text-lg font-bold text-wiki-accent mb-4">{equipment.equipType === 'haojie_weapon' ? '武器屬性' : '戰徽屬性'}</h3>

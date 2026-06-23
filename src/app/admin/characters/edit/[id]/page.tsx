@@ -48,7 +48,7 @@ const SECTIONS = [
   { id: 'articles', label: '關聯攻略' },
 ]
 
-const TRAIT_OPTIONS = ['攻擊型', '防禦型', '輔助型', '控制型', '速度型', '魅帥型']
+const TRAIT_OPTIONS = ['攻擊型', '防禦型', '輔助型', '控制型', '速度型', '統帥型']
 const RARITY_OPTIONS = ['金', '紫', '藍']
 const SKILL_TYPES = ['帶隊生效', '被動生效']
 
@@ -58,7 +58,7 @@ const SKILL_TYPES = ['帶隊生效', '被動生效']
 
 function RadarSVG({ attrs, size, r }: { attrs: any; size: number; r: number }) {
   const cx = size / 2, cy = size / 2
-  const labels = ['攻擊', '防衛', '魅帥', '速度']
+  const labels = ['攻擊', '防衛', '統帥', '速度']
   const angles = labels.map((_, i) => (Math.PI * 2 * i) / 4 - Math.PI / 2)
   const toXY = (angle: number, radius: number) => ({ x: cx + radius * Math.cos(angle), y: cy + radius * Math.sin(angle) })
   const baseVals = [attrs?.attackBase, attrs?.defenseBase, attrs?.charismaBase, attrs?.speedBase].map(Number)
@@ -142,7 +142,7 @@ function HeroPreviewModal(p: PreviewProps) {
                   <th className="text-right py-1.5 text-yellow-500">滿級</th>
                 </tr></thead>
                 <tbody>
-                  {[['攻擊','attackBase','attackMax'],['防衛','defenseBase','defenseMax'],['魅帥','charismaBase','charismaMax'],['速度','speedBase','speedMax']].map(([l,b,m]) => (
+                  {[['攻擊','attackBase','attackMax'],['防衛','defenseBase','defenseMax'],['統帥','charismaBase','charismaMax'],['速度','speedBase','speedMax']].map(([l,b,m]) => (
                     <tr key={l} className="border-b border-wiki-border/40">
                       <td className="py-2 text-wiki-text font-bold">{l}</td>
                       <td className="py-2 text-right text-blue-300">{(p.attrs as any)?.[b] || '—'}</td>
@@ -735,7 +735,7 @@ export default function AdminCharacterEditPage() {
                     {[
                       { key: 'attack', label: '攻擊' },
                       { key: 'defense', label: '防衛' },
-                      { key: 'charisma', label: '魅帥' },
+                      { key: 'charisma', label: '統帥' },
                       { key: 'speed', label: '速度' },
                     ].map(({ key, label }) => (
                       <div key={key} className="space-y-2">

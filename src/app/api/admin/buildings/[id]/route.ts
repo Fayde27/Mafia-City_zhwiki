@@ -62,8 +62,8 @@ export async function PUT(
 
     if (error) throw error
     return NextResponse.json(building)
-  } catch {
-    return NextResponse.json({ error: '更新建築失敗' }, { status: 500 })
+  } catch (error: any) {
+    return NextResponse.json({ error: '更新建築失敗：' + (error?.message || '未知錯誤') }, { status: 500 })
   }
 }
 

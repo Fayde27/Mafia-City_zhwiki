@@ -69,16 +69,16 @@ const labelCls = 'block text-wiki-text text-sm font-bold uppercase tracking-wide
 | 類型 | characterType | API | 編輯頁 |
 |------|--------------|-----|--------|
 | 英雄 | `hero` | `/api/admin/characters` | `/admin/characters/edit/[id]` |
-| 豪杰 | `haojie` | `/api/admin/haojie` | `/admin/characters/haojie/edit/[id]` |
+| 豪傑 | `haojie` | `/api/admin/haojie` | `/admin/characters/haojie/edit/[id]` |
 
-後台統一入口：`/admin/characters`（三 Tab：全部 / 英雄 / 豪杰），編輯按鈕智能路由。
+後台統一入口：`/admin/characters`（三 Tab：全部 / 英雄 / 豪傑），編輯按鈕智能路由。
 
 **英雄**：8 張關聯表（皮膚/羁绊/陣容/血盟/裝備/攻略）· 4 軸雷達圖（攻擊/防衛/魅帥/速度）  
-**豪杰**：全 JSON 字段 · 5 軸雷達圖（力量/技術/體魄/防護/速度，存 `attributes`）· 裝備存 `haojieEquip JSON({weapon,warbadge})` · `awakenHero` 布爾字段
+**豪傑**：全 JSON 字段 · 5 軸雷達圖（力量/技術/體魄/防護/速度，存 `attributes`）· 裝備存 `haojieEquip JSON({weapon,warbadge})` · `awakenHero` 布爾字段
 
 **常見坑：**
-- 豪杰 `editLink` 判斷需同時檢查 `characterType==='haojie'` 和分類名含「豪」（舊數據 `characterType` 可能未正確設置）
-- 修復工具：後台角色列表頁有「🔧 修復豪杰 characterType」按鈕，也可調用 `POST /api/admin/fix-character-types`
+- 豪傑 `editLink` 判斷需同時檢查 `characterType==='haojie'` 和分類名含「豪」（舊數據 `characterType` 可能未正確設置）
+- 修復工具：後台角色列表頁有「🔧 修復豪傑 characterType」按鈕，也可調用 `POST /api/admin/fix-character-types`
 
 ### 4-2 建築圖鑑（`Building` 表）✅ 完整
 
@@ -128,24 +128,24 @@ ALTER TABLE "Item" ADD COLUMN IF NOT EXISTS "isFeatured" BOOLEAN DEFAULT false;
 **一張表四子類型**（仿角色 hero/haojie 模式），`equipType` ∈：
 | 類型 | equipType | 專屬字段 |
 |------|----------|---------|
-| 豪杰武器 | `haojie_weapon` | type(種類) · buffs(分類→細分 JSON) |
-| 豪杰戰徽 | `haojie_warbadge` | type(種類) · buffs(分類→細分 JSON) |
+| 豪傑武器 | `haojie_weapon` | type(種類) · buffs(分類→細分 JSON) |
+| 豪傑戰徽 | `haojie_warbadge` | type(種類) · buffs(分類→細分 JSON) |
 | 首領裝備 | `leader` | slot(部位) · attrBias(偏向) · stats(屬性文本) · setId |
 | 英雄裝備 | `hero` | slot(部位) · stats(屬性文本) · setId |
 
-**共用字段**：name/slug/summary/icon(+Position)/image(+Position)/rarity(品質,1白~6金，豪杰武器只開 3~6)/acquisition(富文本)/sortOrder/isFeatured/isPublished
+**共用字段**：name/slug/summary/icon(+Position)/image(+Position)/rarity(品質,1白~6金，豪傑武器只開 3~6)/acquisition(富文本)/sortOrder/isFeatured/isPublished
 
 **品質→顏色**：1白 2綠 3藍 4紫 5橙 6金（常量在 `src/lib/equipment.ts`）
-**buffs JSON**：`[{ group:"加強暴徒", items:[{name,value}] }]`，分類桶固定（加強暴徒/飛車黨/槍手/改裝車輛/出征上限/豪杰），細分可增刪
+**buffs JSON**：`[{ group:"加強暴徒", items:[{name,value}] }]`，分類桶固定（加強暴徒/飛車黨/槍手/改裝車輛/出征上限/豪傑），細分可增刪
 **部位選項**：首領＝枪械/武器/飾品/衣服/褲子/鞋子；英雄＝枪械/武器/頭部/衣服/鞋子/飾品
 
 **套裝**：獨立 `EquipmentSet` 表（`equipType` 區分 hero/leader），裝備經 `setId` 歸屬；後台 `/admin/equipment-sets` 管理；前台詳情頁聚合「同套 N 件 + 套裝加成」
 
-**後台**：統一列表 `/admin/equipment`（5 Tab：全部/豪杰武器/豪杰戰徽/首領/英雄）· 新增頁選類型+名稱後跳編輯 · 編輯頁 `/admin/equipment/edit/[id]` 按 equipType 條件渲染分區 + `EquipmentPreviewModal`
+**後台**：統一列表 `/admin/equipment`（5 Tab：全部/豪傑武器/豪傑戰徽/首領/英雄）· 新增頁選類型+名稱後跳編輯 · 編輯頁 `/admin/equipment/edit/[id]` 按 equipType 條件渲染分區 + `EquipmentPreviewModal`
 **Wiki**：總覽 `/wiki/equipment`（4 類型卡）→ 列表 `/wiki/equipment/[equipType]`（品質色框方圖 + 篩選）→ 詳情 `/wiki/equipment/[equipType]/[slug]`
 **公開 API**：`/api/wiki/equipment?equipType=` · `/api/wiki/equipment/types`（各類型計數）
 
-> 武器圖鑑/戰徽圖鑑已併入此模塊；後續對接豪杰 `haojieEquip.weapon/.warbadge` 時直接引用對應 equipType 記錄。
+> 武器圖鑑/戰徽圖鑑已併入此模塊；後續對接豪傑 `haojieEquip.weapon/.warbadge` 時直接引用對應 equipType 記錄。
 
 ### 4-5 兵種圖鑑（`Troop` 表）⚠️ 後台基礎，Wiki 待完善
 
@@ -167,7 +167,7 @@ fallback：未配置時取 `isFeatured=true` 的文章
 ### 後台 `/admin/*`
 ```
 /admin/login · /admin/dashboard
-/admin/characters                     ← 英雄+豪杰統一列表（三Tab）
+/admin/characters                     ← 英雄+豪傑統一列表（三Tab）
 /admin/characters/edit/[id]
 /admin/characters/haojie/edit/[id]
 /admin/buildings · /admin/buildings/new · /admin/buildings/edit/[id]
@@ -201,10 +201,10 @@ fallback：未配置時取 `isFeatured=true` 的文章
 | `/api/admin/login` | POST | 登錄 |
 | `/api/admin/upload` | POST | 圖片上傳到 Supabase Storage |
 | `/api/admin/characters` | GET/POST | 角色（含 type 篩選） |
-| `/api/admin/haojie/[id]` | GET/PUT/DELETE | 豪杰 |
+| `/api/admin/haojie/[id]` | GET/PUT/DELETE | 豪傑 |
 | `/api/admin/buildings/[id]` | GET/PUT/DELETE | 建築 |
 | `/api/admin/items/[id]` | GET/PUT/DELETE | 道具 |
-| `/api/admin/fix-character-types` | POST | 批量修復豪杰 characterType |
+| `/api/admin/fix-character-types` | POST | 批量修復豪傑 characterType |
 | `/api/admin/site-config` | GET/PUT | 鍵值對，upsert by key |
 
 ### 公開 Wiki API
@@ -261,15 +261,15 @@ JWT_SECRET / ADMIN_USERNAME / ADMIN_PASSWORD
 
 ### 前台 Wiki（高優先級）
 - [ ] 英雄 Wiki 列表頁 `/wiki/characters/heroes`
-- [ ] 豪杰 Wiki 列表頁 `/wiki/characters/haojie`
-- [ ] 豪杰 Wiki 詳情頁 `/wiki/characters/haojie/[slug]`
-- [ ] 公開豪杰 API `/api/wiki/haojie`
+- [ ] 豪傑 Wiki 列表頁 `/wiki/characters/haojie`
+- [ ] 豪傑 Wiki 詳情頁 `/wiki/characters/haojie/[slug]`
+- [ ] 公開豪傑 API `/api/wiki/haojie`
 
 ### 圖鑑完善（中優先級）
 - [x] 裝備圖鑑（含武器/戰徽/首領/英雄四子類型，equipType 區分）✅ 完整
 - [x] 兵種圖鑑後台編輯頁 ✅（Wiki 前台仍待完善）
 - [ ] 兵種圖鑑 Wiki 前台完整化
-- [ ] 後續對接豪杰 `haojieEquip.weapon/.warbadge` 引用裝備記錄
+- [ ] 後續對接豪傑 `haojieEquip.weapon/.warbadge` 引用裝備記錄
 - [ ] 各圖鑑跳轉 `href="#"` 補充真實路由
 
 ### 新增圖鑑 — 標準開發流程

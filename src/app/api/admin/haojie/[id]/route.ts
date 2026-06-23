@@ -15,12 +15,12 @@ export async function GET(
       .single()
 
     if (error || !haojie) {
-      return NextResponse.json({ error: '豪杰不存在' }, { status: 404 })
+      return NextResponse.json({ error: '豪傑不存在' }, { status: 404 })
     }
 
     return NextResponse.json(haojie)
   } catch (error) {
-    return NextResponse.json({ error: '獲取豪杰失敗' }, { status: 500 })
+    return NextResponse.json({ error: '獲取豪傑失敗' }, { status: 500 })
   }
 }
 
@@ -60,7 +60,7 @@ export async function PUT(
 
     return NextResponse.json(haojie)
   } catch (error) {
-    return NextResponse.json({ error: '更新豪杰失敗' }, { status: 500 })
+    return NextResponse.json({ error: '更新豪傑失敗' }, { status: 500 })
   }
 }
 
@@ -77,6 +77,6 @@ export async function DELETE(
     if (error) throw error
     return NextResponse.json({ success: true })
   } catch (error) {
-    return NextResponse.json({ error: '刪除豪杰失敗' }, { status: 500 })
+    return NextResponse.json({ error: '刪除豪傑失敗' }, { status: 500 })
   }
 }

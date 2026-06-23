@@ -276,7 +276,7 @@ model Equipment {
   type          String? // 種類（武器種類/戰徽種類）
   slot          String? // 部位（首領/英雄）
   attrBias      String? // 屬性偏向（首領）
-  buffs         String? // 豪杰武器/戰徽：分類→細分 JSON
+  buffs         String? // 豪傑武器/戰徽：分類→細分 JSON
   setId         String? // 套裝關聯（首領/英雄）
   attack        Int                @default(0)
   defense       Int                @default(0)

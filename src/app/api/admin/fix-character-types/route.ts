@@ -40,7 +40,7 @@ export async function POST(req: Request) {
   if (queryErr) return NextResponse.json({ error: queryErr.message }, { status: 500 })
 
   if (!toFix || toFix.length === 0) {
-    return NextResponse.json({ message: '所有豪杰角色的 characterType 已正確，無需修復', updated: 0 })
+    return NextResponse.json({ message: '所有豪傑角色的 characterType 已正確，無需修復', updated: 0 })
   }
 
   const fixIds = toFix.map((c: any) => c.id)

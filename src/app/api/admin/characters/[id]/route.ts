@@ -91,8 +91,8 @@ export async function PUT(
     await saveRelations(params.id, data)
 
     return NextResponse.json(character)
-  } catch (error) {
-    return NextResponse.json({ error: '更新角色失敗' }, { status: 500 })
+  } catch (error: any) {
+    return NextResponse.json({ error: '更新角色失敗：' + (error?.message || '未知錯誤') }, { status: 500 })
   }
 }
 
@@ -113,11 +113,16 @@ export async function DELETE(
   }
 }
 
+// 包一層：任何 delete/insert 出錯都拋出，避免靜默失敗（外層 catch 會帶上真實訊息）
+function check({ error }: { error: any }, where: string) {
+  if (error) throw new Error(`${where}: ${error.message || error}`)
+}
+
 async function saveRelations(characterId: string, data: any) {
   if (Array.isArray(data.skins)) {
-    await supabaseAdmin.from('CharacterSkin').delete().eq('characterId', characterId)
+    check(await supabaseAdmin.from('CharacterSkin').delete().eq('characterId', characterId), '刪除舊皮膚')
     if (data.skins.length > 0) {
-      await supabaseAdmin.from('CharacterSkin').insert(
+      check(await supabaseAdmin.from('CharacterSkin').insert(
         data.skins.map((s: any, i: number) => ({
           characterId,
           name: s.name,
@@ -127,14 +132,14 @@ async function saveRelations(characterId: string, data: any) {
           acquisition: s.acquisition,
           sortOrder: i,
         }))
-      )
+      ), '保存皮膚')
     }
   }
 
   if (Array.isArray(data.skinBonds)) {
-    await supabaseAdmin.from('CharacterSkinBond').delete().eq('characterId', characterId)
+    check(await supabaseAdmin.from('CharacterSkinBond').delete().eq('characterId', characterId), '刪除舊皮膚羁绊')
     if (data.skinBonds.length > 0) {
-      await supabaseAdmin.from('CharacterSkinBond').insert(
+      check(await supabaseAdmin.from('CharacterSkinBond').insert(
         data.skinBonds.map((b: any, i: number) => ({
           characterId,
           name: b.name,
@@ -142,7 +147,7 @@ async function saveRelations(characterId: string, data: any) {
           bonuses: JSON.stringify(b.bonuses || []),
           sortOrder: i,
         }))
-      )
+      ), '保存皮膚羁绊')
     }
   }
 
@@ -152,20 +157,21 @@ async function saveRelations(characterId: string, data: any) {
       .select('id')
       .eq('characterId', characterId)
     if (oldComps && oldComps.length > 0) {
-      await supabaseAdmin.from('CharacterTeamCompMember').delete().in('teamCompId', oldComps.map((c: any) => c.id))
+      check(await supabaseAdmin.from('CharacterTeamCompMember').delete().in('teamCompId', oldComps.map((c: any) => c.id)), '刪除舊陣容成員')
     }
-    await supabaseAdmin.from('CharacterTeamComp').delete().eq('characterId', characterId)
+    check(await supabaseAdmin.from('CharacterTeamComp').delete().eq('characterId', characterId), '刪除舊陣容')
     for (let i = 0; i < data.teamComps.length; i++) {
       const tc = data.teamComps[i]
-      const { data: inserted } = await supabaseAdmin
+      const { data: inserted, error } = await supabaseAdmin
         .from('CharacterTeamComp')
         .insert({ characterId, name: tc.name, reason: tc.reason, sortOrder: i })
         .select('id')
         .single()
+      check({ error }, '保存陣容搭配')
       if (inserted && Array.isArray(tc.memberIds) && tc.memberIds.length > 0) {
-        await supabaseAdmin.from('CharacterTeamCompMember').insert(
+        check(await supabaseAdmin.from('CharacterTeamCompMember').insert(
           tc.memberIds.map((mid: string, j: number) => ({ teamCompId: inserted.id, memberId: mid, sortOrder: j }))
-        )
+        ), '保存陣容成員')
       }
     }
   }
@@ -176,39 +182,40 @@ async function saveRelations(characterId: string, data: any) {
       .select('id')
       .eq('characterId', characterId)
     if (oldBonds && oldBonds.length > 0) {
-      await supabaseAdmin.from('CharacterBloodBondMember').delete().in('bloodBondId', oldBonds.map((b: any) => b.id))
+      check(await supabaseAdmin.from('CharacterBloodBondMember').delete().in('bloodBondId', oldBonds.map((b: any) => b.id)), '刪除舊血盟成員')
     }
-    await supabaseAdmin.from('CharacterBloodBond').delete().eq('characterId', characterId)
+    check(await supabaseAdmin.from('CharacterBloodBond').delete().eq('characterId', characterId), '刪除舊血盟')
     for (let i = 0; i < data.bloodBonds.length; i++) {
       const bb = data.bloodBonds[i]
-      const { data: inserted } = await supabaseAdmin
+      const { data: inserted, error } = await supabaseAdmin
         .from('CharacterBloodBond')
         .insert({ characterId, requiredStars: bb.requiredStars || 0, bonuses: JSON.stringify(bb.bonuses || []), sortOrder: i })
         .select('id')
         .single()
+      check({ error }, '保存血盟')
       if (inserted && Array.isArray(bb.memberIds) && bb.memberIds.length > 0) {
-        await supabaseAdmin.from('CharacterBloodBondMember').insert(
+        check(await supabaseAdmin.from('CharacterBloodBondMember').insert(
           bb.memberIds.map((mid: string, j: number) => ({ bloodBondId: inserted.id, memberId: mid, sortOrder: j }))
-        )
+        ), '保存血盟成員')
       }
     }
   }
 
   if (Array.isArray(data.equipmentIds)) {
-    await supabaseAdmin.from('CharacterEquipment').delete().eq('characterId', characterId)
+    check(await supabaseAdmin.from('CharacterEquipment').delete().eq('characterId', characterId), '刪除舊裝備')
     if (data.equipmentIds.length > 0) {
-      await supabaseAdmin.from('CharacterEquipment').insert(
+      check(await supabaseAdmin.from('CharacterEquipment').insert(
         data.equipmentIds.map((eid: string, i: number) => ({ characterId, equipmentId: eid, sortOrder: i }))
-      )
+      ), '保存裝備')
     }
   }
 
   if (Array.isArray(data.articleIds)) {
-    await supabaseAdmin.from('CharacterArticle').delete().eq('characterId', characterId)
+    check(await supabaseAdmin.from('CharacterArticle').delete().eq('characterId', characterId), '刪除舊攻略')
     if (data.articleIds.length > 0) {
-      await supabaseAdmin.from('CharacterArticle').insert(
+      check(await supabaseAdmin.from('CharacterArticle').insert(
         data.articleIds.map((aid: string, i: number) => ({ characterId, articleId: aid, sortOrder: i }))
-      )
+      ), '保存攻略')
     }
   }
 }

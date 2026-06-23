@@ -13,13 +13,13 @@ type Tab = 'list' | 'categories' | 'filters'
 
 const EQUIP_TYPES = [
   { value: 'all',             label: '全部' },
-  { value: 'haojie_weapon',   label: '豪杰武器' },
-  { value: 'haojie_warbadge', label: '豪杰戰徽' },
+  { value: 'haojie_weapon',   label: '豪傑武器' },
+  { value: 'haojie_warbadge', label: '豪傑戰徽' },
   { value: 'leader',          label: '首領裝備' },
   { value: 'hero',            label: '英雄裝備' },
 ]
 const EQUIP_TYPE_LABELS: Record<string, string> = {
-  haojie_weapon: '豪杰武器', haojie_warbadge: '豪杰戰徽', leader: '首領裝備', hero: '英雄裝備',
+  haojie_weapon: '豪傑武器', haojie_warbadge: '豪傑戰徽', leader: '首領裝備', hero: '英雄裝備',
 }
 
 interface EntityItem {

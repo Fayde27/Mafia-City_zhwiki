@@ -62,11 +62,11 @@ async function main() {
     .upsert(heroCategoryData, { onConflict: 'slug' })
   if (heroCatError) console.error('创建英雄分类失败:', heroCatError)
 
-  const legendCategoryData = { name: '豪杰', slug: 'legends', description: '传奇豪杰角色', icon: '🌟', sortOrder: 2 }
+  const legendCategoryData = { name: '豪傑', slug: 'legends', description: '传奇豪傑角色', icon: '🌟', sortOrder: 2 }
   const { error: legendCatError } = await supabaseAdmin
     .from('CharacterCategory')
     .upsert(legendCategoryData, { onConflict: 'slug' })
-  if (legendCatError) console.error('创建豪杰分类失败:', legendCatError)
+  if (legendCatError) console.error('创建豪傑分类失败:', legendCatError)
 
   const { data: heroCategory } = await supabaseAdmin
     .from('CharacterCategory')

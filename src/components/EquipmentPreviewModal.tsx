@@ -98,7 +98,7 @@ export default function EquipmentPreviewModal({ form, setName, setBonus, onClose
             </div>
           )}
 
-          {/* 豪杰武器/戰徽：屬性分類 → 細分 */}
+          {/* 豪傑武器/戰徽：屬性分類 → 細分 */}
           {isHaojie(form.equipType) && buffs.length > 0 && (
             <div className="bg-wiki-gray-light border border-wiki-border rounded-xl p-5 mb-4">
               <h3 className="font-bold text-wiki-accent mb-3 text-sm uppercase tracking-wider">{form.equipType === 'haojie_weapon' ? '武器屬性' : '戰徽屬性'}</h3>
