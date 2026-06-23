@@ -53,7 +53,7 @@ export async function PUT(
         isFeatured: data.isFeatured,
         publishedAt: data.publishedAt || null,
         upgradeLevels: data.upgradeLevels,
-        categoryId: data.categoryId,
+        categoryId: data.categoryId || null,
         sortOrder: data.sortOrder,
         isPublished: data.isPublished,
       })

@@ -79,7 +79,7 @@ export async function POST(request: Request) {
         isFeatured: data.isFeatured || false,
         publishedAt: data.publishedAt || null,
         upgradeLevels: data.upgradeLevels,
-        categoryId: data.categoryId,
+        categoryId: data.categoryId || null,
         sortOrder: data.sortOrder || 0,
         isPublished: data.isPublished || false,
       })
