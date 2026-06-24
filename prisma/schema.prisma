@@ -231,6 +231,7 @@ model Building {
   type            String?
   function        String?
   unlockCondition String?
+  affiliation     String?          // 賽季/賽事建築的「所屬賽季/賽事」文本
   level           Int              @default(1)
   maxLevel        Int              @default(10)
   cost            String?

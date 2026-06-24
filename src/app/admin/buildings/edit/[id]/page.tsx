@@ -9,7 +9,7 @@ import Link from 'next/link'
 import ImageUploadInput from '@/components/ImageUploadInput'
 import RichTextEditor from '@/components/RichTextEditor'
 import BuildingPreviewModal from '@/components/BuildingPreviewModal'
-import { BUILDING_TYPE_LABELS } from '@/lib/building'
+import { BUILDING_TYPE_LABELS, BUILDING_AFFILIATION_LABELS, isSeasonalBuilding } from '@/lib/building'
 
 // ─── 類型 ──────────────────────────────────────────────────────────────────────
 
@@ -143,7 +143,7 @@ function UpgradeTableEditor({
 
 // ─── 主編輯頁 ──────────────────────────────────────────────────────────────────
 
-const SECTIONS = [
+const ALL_SECTIONS = [
   { id: 'basic',      label: '基本信息' },
   { id: 'images',     label: '圖片上傳' },
   { id: 'attributes', label: '建築屬性' },
@@ -151,6 +151,13 @@ const SECTIONS = [
   { id: 'upgrade',    label: '建築升級詳情' },
   { id: 'publish',    label: '發佈設置' },
 ]
+
+// 賽季/賽事建築取消「建築屬性」與「建築升級詳情」
+function sectionsFor(buildingType?: string) {
+  return isSeasonalBuilding(buildingType)
+    ? ALL_SECTIONS.filter(s => s.id !== 'attributes' && s.id !== 'upgrade')
+    : ALL_SECTIONS
+}
 
 const cardCls  = 'bg-wiki-gray-light border border-wiki-border rounded-lg p-6'
 const inputCls = 'w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none'
@@ -175,6 +182,7 @@ export default function AdminBuildingEditPage() {
     slug: '',
     categoryId: '',
     summary: '',
+    affiliation: '',
     sortOrder: 0,
     isFeatured: false,
     icon: '',
@@ -221,6 +229,7 @@ export default function AdminBuildingEditPage() {
           slug: bld.slug || '',
           categoryId: bld.categoryId || '',
           summary: bld.summary || '',
+          affiliation: bld.affiliation || '',
           sortOrder: bld.sortOrder || 0,
           isFeatured: bld.isFeatured || false,
           icon: bld.icon || '',
@@ -247,11 +256,14 @@ export default function AdminBuildingEditPage() {
     }).catch(() => setLoading(false))
   }, [id])
 
+  const seasonal = isSeasonalBuilding(form.buildingType)
+  const sections = sectionsFor(form.buildingType)
+
   // Scroll-spy
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY
-      for (const sec of SECTIONS) {
+      for (const sec of sections) {
         const el = sectionRefs.current[sec.id]
         if (el && el.offsetTop <= scrollY + 140) {
           setActiveSection(sec.id)
@@ -260,7 +272,7 @@ export default function AdminBuildingEditPage() {
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  }, [sections])
 
   const scrollTo = (id: string) => {
     const el = sectionRefs.current[id]
@@ -307,7 +319,7 @@ export default function AdminBuildingEditPage() {
                 編輯建築
                 <span className="ml-1 text-wiki-accent">· {BUILDING_TYPE_LABELS[form.buildingType] || '內城建築'}</span>
               </div>
-              {SECTIONS.map(sec => (
+              {sections.map(sec => (
                 <button
                   key={sec.id}
                   type="button"
@@ -390,6 +402,14 @@ export default function AdminBuildingEditPage() {
                     ))}
                   </select>
                 </div>
+                {seasonal && (
+                  <div>
+                    <label className={labelCls}>{BUILDING_AFFILIATION_LABELS[form.buildingType]}</label>
+                    <input value={form.affiliation} onChange={e => set('affiliation', e.target.value)}
+                      className={inputCls}
+                      placeholder={form.buildingType === 'season' ? '如：第 5 賽季' : '如：跨服爭霸賽事'} />
+                  </div>
+                )}
                 <div>
                   <label className={labelCls}>簡短描述</label>
                   <textarea value={form.summary} onChange={e => set('summary', e.target.value)}
@@ -442,7 +462,8 @@ export default function AdminBuildingEditPage() {
               </div>
             </section>
 
-            {/* ─ Section 3: 建築屬性 ─ */}
+            {/* ─ Section 3: 建築屬性（賽季/賽事建築取消） ─ */}
+            {!seasonal && (
             <section ref={el => { sectionRefs.current['attributes'] = el }} className={cardCls}>
               <h2 className="text-wiki-text font-bold text-base mb-5 flex items-center gap-2">
                 <span className="text-wiki-accent">◆</span>建築屬性
@@ -467,6 +488,7 @@ export default function AdminBuildingEditPage() {
                 </div>
               </div>
             </section>
+            )}
 
             {/* ─ Section 4: 建築詳細信息 ─ */}
             <section ref={el => { sectionRefs.current['description'] = el }} className={cardCls}>
@@ -480,7 +502,8 @@ export default function AdminBuildingEditPage() {
               />
             </section>
 
-            {/* ─ Section 5: 建築升級詳情 ─ */}
+            {/* ─ Section 5: 建築升級詳情（賽季/賽事建築取消） ─ */}
+            {!seasonal && (
             <section ref={el => { sectionRefs.current['upgrade'] = el }} className={cardCls}>
               <h2 className="text-wiki-text font-bold text-base mb-5 flex items-center gap-2">
                 <span className="text-wiki-accent">◆</span>建築升級詳情
@@ -490,6 +513,7 @@ export default function AdminBuildingEditPage() {
                 onChange={v => set('upgradeLevels', v)}
               />
             </section>
+            )}
 
             {/* ─ Section 6: 發佈設置 ─ */}
             <section ref={el => { sectionRefs.current['publish'] = el }} className={cardCls}>

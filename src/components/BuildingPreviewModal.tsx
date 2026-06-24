@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
+import { BUILDING_AFFILIATION_LABELS, isSeasonalBuilding } from '@/lib/building'
 
 interface UpgradeTable { columns: string[]; rows: string[][] }
 
@@ -16,6 +17,8 @@ function parseUpgradeTable(raw?: string): UpgradeTable | null {
 
 interface BuildingPreviewForm {
   name: string
+  buildingType?: string
+  affiliation?: string
   summary?: string
   icon: string
   iconPosition: string
@@ -43,8 +46,9 @@ export default function BuildingPreviewModal({ form, categoryName, onClose }: Pr
     return () => document.removeEventListener('keydown', handler)
   }, [onClose])
 
+  const seasonal = isSeasonalBuilding(form.buildingType)
   const upgradeTable = parseUpgradeTable(form.upgradeLevels)
-  const hasUpgrade = upgradeTable && upgradeTable.rows.length > 0
+  const hasUpgrade = !seasonal && upgradeTable && upgradeTable.rows.length > 0
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 backdrop-blur-sm overflow-y-auto py-6 px-4">
@@ -178,27 +182,33 @@ export default function BuildingPreviewModal({ form, categoryName, onClose }: Pr
             {/* 側邊欄：屬性卡片 */}
             <div className="space-y-4">
               <div className="bg-wiki-gray-light border border-wiki-border rounded-xl p-4">
-                <h3 className="font-bold text-wiki-text mb-3 text-sm uppercase tracking-wider">建築屬性</h3>
+                <h3 className="font-bold text-wiki-text mb-3 text-sm uppercase tracking-wider">{seasonal ? '建築信息' : '建築屬性'}</h3>
                 <div className="space-y-2 text-sm">
-                  {form.type && (
+                  {seasonal && (
+                    <div className="flex justify-between gap-2">
+                      <span className="text-wiki-text-muted shrink-0">{BUILDING_AFFILIATION_LABELS[form.buildingType || 'season']}</span>
+                      <span className="text-wiki-text font-medium text-right">{form.affiliation || '（未填寫）'}</span>
+                    </div>
+                  )}
+                  {!seasonal && form.type && (
                     <div className="flex justify-between">
                       <span className="text-wiki-text-muted">類型</span>
                       <span className="text-wiki-text font-medium">{form.type}</span>
                     </div>
                   )}
-                  {form.function && (
+                  {!seasonal && form.function && (
                     <div className="flex justify-between">
                       <span className="text-wiki-text-muted">功能</span>
                       <span className="text-wiki-text font-medium">{form.function}</span>
                     </div>
                   )}
-                  {form.unlockCondition && (
+                  {!seasonal && form.unlockCondition && (
                     <div className="flex justify-between gap-2">
                       <span className="text-wiki-text-muted shrink-0">開放條件</span>
                       <span className="text-wiki-text font-medium text-right">{form.unlockCondition}</span>
                     </div>
                   )}
-                  {!form.type && !form.function && !form.unlockCondition && (
+                  {!seasonal && !form.type && !form.function && !form.unlockCondition && (
                     <p className="text-wiki-text-muted text-xs">（未填寫屬性）</p>
                   )}
                 </div>

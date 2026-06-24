@@ -76,6 +76,7 @@ export async function POST(request: Request) {
         // 新增字段
         unlockCondition: data.unlockCondition,
         summary: data.summary,
+        affiliation: data.affiliation,
         isFeatured: data.isFeatured || false,
         publishedAt: data.publishedAt || null,
         upgradeLevels: data.upgradeLevels,

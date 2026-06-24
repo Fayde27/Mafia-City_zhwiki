@@ -10,11 +10,14 @@ import { useParams } from 'next/navigation'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 import LikeButton from '@/components/LikeButton'
+import { BUILDING_AFFILIATION_LABELS, isSeasonalBuilding } from '@/lib/building'
 
 interface Building {
   id: string
   likes?: number
   name: string
+  buildingType?: string
+  affiliation?: string
   slug: string
   icon: string
   image: string
@@ -75,8 +78,9 @@ export default function BuildingDetailPage() {
 
   const getRarityStars = (rarity: number) => '★'.repeat(rarity) + '☆'.repeat(5 - rarity)
 
+  const seasonal = isSeasonalBuilding(building?.buildingType)
   const upgradeTable = parseUpgradeTable(building?.upgradeLevels)
-  const hasUpgrade = (upgradeTable && upgradeTable.rows.length > 0) || !!building?.upgradeInfo
+  const hasUpgrade = !seasonal && ((upgradeTable && upgradeTable.rows.length > 0) || !!building?.upgradeInfo)
 
   const tabs = [
     { id: 'details', label: '建築詳情' },
@@ -138,7 +142,7 @@ export default function BuildingDetailPage() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
             <div className="absolute bottom-4 left-5 md:bottom-8 md:left-8">
-              {building.rarity > 0 && (
+              {!seasonal && building.rarity > 0 && (
                 <div className="text-yellow-400 text-base font-bold drop-shadow-lg mb-1">
                   {getRarityStars(building.rarity)}
                 </div>
@@ -284,37 +288,43 @@ export default function BuildingDetailPage() {
                     <span className="text-wiki-text font-bold text-right">{building.category.name}</span>
                   </div>
                 )}
-                {building.type && (
+                {seasonal && building.affiliation && (
+                  <div className="flex justify-between gap-2">
+                    <span className="text-wiki-text-muted flex-shrink-0">{BUILDING_AFFILIATION_LABELS[building.buildingType || 'season']}</span>
+                    <span className="text-wiki-text font-bold text-right">{building.affiliation}</span>
+                  </div>
+                )}
+                {!seasonal && building.type && (
                   <div className="flex justify-between gap-2">
                     <span className="text-wiki-text-muted flex-shrink-0">建築類型</span>
                     <span className="text-wiki-text font-bold text-right">{building.type}</span>
                   </div>
                 )}
-                {building.function && (
+                {!seasonal && building.function && (
                   <div className="flex justify-between gap-2">
                     <span className="text-wiki-text-muted flex-shrink-0">核心功能</span>
                     <span className="text-wiki-text text-right">{building.function}</span>
                   </div>
                 )}
-                {building.unlockCondition && (
+                {!seasonal && building.unlockCondition && (
                   <div className="flex justify-between gap-2">
                     <span className="text-wiki-text-muted flex-shrink-0">開放條件</span>
                     <span className="text-wiki-text text-right">{building.unlockCondition}</span>
                   </div>
                 )}
-                {building.rarity > 0 && (
+                {!seasonal && building.rarity > 0 && (
                   <div className="flex justify-between gap-2">
                     <span className="text-wiki-text-muted flex-shrink-0">稀有度</span>
                     <span className="text-yellow-400 font-bold">{getRarityStars(building.rarity)}</span>
                   </div>
                 )}
-                {building.cost && (
+                {!seasonal && building.cost && (
                   <div className="flex justify-between gap-2">
                     <span className="text-wiki-text-muted flex-shrink-0">建造成本</span>
                     <span className="text-wiki-text text-right">{building.cost}</span>
                   </div>
                 )}
-                {building.production && (
+                {!seasonal && building.production && (
                   <div className="flex justify-between gap-2">
                     <span className="text-wiki-text-muted flex-shrink-0">產出</span>
                     <span className="text-wiki-text text-right">{building.production}</span>

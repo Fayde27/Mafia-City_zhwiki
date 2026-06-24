@@ -50,6 +50,7 @@ export async function PUT(
         // 新增字段
         unlockCondition: data.unlockCondition,
         summary: data.summary,
+        affiliation: data.affiliation,
         isFeatured: data.isFeatured,
         publishedAt: data.publishedAt || null,
         upgradeLevels: data.upgradeLevels,
