@@ -10,6 +10,7 @@ import { useParams } from 'next/navigation'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 import LikeButton from '@/components/LikeButton'
 import { EQUIP_TYPE_LABELS, rarityInfo, parseBuffs } from '@/lib/equipment'
+import EquipmentBuffsList from '@/components/EquipmentBuffsList'
 
 interface EquipSet { id: string; name: string; slug: string; setBonus?: string }
 interface Equipment {
@@ -118,26 +119,12 @@ export default function EquipmentDetailPage() {
               <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6"><p className="text-wiki-text">{equipment.summary}</p></div>
             )}
 
-            {/* 豪傑武器/戰徽：屬性分類 → 細分 */}
+            {/* 豪傑武器/戰徽：屬性列表（篩選 + 折疊展開） */}
             {haojie && buffs.length > 0 && (
-              <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6">
-                <h3 className="text-lg font-bold text-wiki-accent mb-4">{equipment.equipType === 'haojie_weapon' ? '武器屬性' : '戰徽屬性'}</h3>
-                <div className="space-y-4">
-                  {buffs.map((g, gi) => (
-                    <div key={gi}>
-                      <div className="text-wiki-text font-bold text-sm mb-2 border-l-2 border-wiki-accent pl-2">{g.group}</div>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        {g.items.filter(i => i.name || i.value).map((it, ii) => (
-                          <div key={ii} className="flex justify-between bg-wiki-gray rounded px-3 py-2 text-sm">
-                            <span className="text-wiki-text-muted">{it.name}</span>
-                            <span className="text-wiki-accent font-bold">{it.value}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <EquipmentBuffsList
+                buffs={buffs}
+                title={equipment.equipType === 'haojie_weapon' ? '武器屬性' : '戰徽屬性'}
+              />
             )}
 
             {/* 首領/英雄：裝備屬性 */}
