@@ -361,6 +361,8 @@ model Item {
   usage         String?
   recipe        String?
   source        String?
+  isExchange      Boolean    @default(false) // 是否為兌換道具（寶箱/兌換券）
+  exchangeContent String?    // 兌換內容 JSON：{ intro, items: [{ icon, name, quantity }] }
   categoryId    String
   sortOrder     Int          @default(0)
   isFeatured    Boolean      @default(false)

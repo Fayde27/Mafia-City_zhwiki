@@ -51,6 +51,8 @@ export async function POST(request: Request) {
         image: data.image || null,
         imagePosition: data.imagePosition || '50% 50%',
         source: data.source || null,
+        isExchange: data.isExchange || false,
+        exchangeContent: data.exchangeContent || null,
         categoryId: data.categoryId,
         sortOrder: data.sortOrder || 0,
         isFeatured: data.isFeatured || false,

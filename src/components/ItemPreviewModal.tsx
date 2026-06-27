@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
+import ItemExchangeContent, { parseExchangeContent } from '@/components/ItemExchangeContent'
 
 interface ItemPreviewForm {
   name: string
@@ -11,6 +12,8 @@ interface ItemPreviewForm {
   image: string
   imagePosition: string
   source?: string
+  isExchange?: boolean
+  exchangeContent?: string
   isPublished: boolean
   categoryId?: string
 }
@@ -29,6 +32,7 @@ export default function ItemPreviewModal({ form, categoryName, onClose }: Props)
   }, [onClose])
 
   const hasSource = !!form.source && form.source.replace(/<[^>]*>/g, '').trim().length > 0
+  const hasExchange = !!form.isExchange && !!parseExchangeContent(form.exchangeContent)
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 backdrop-blur-sm overflow-y-auto py-6 px-4">
@@ -103,10 +107,21 @@ export default function ItemPreviewModal({ form, categoryName, onClose }: Props)
           {/* Tab 區（靜態展示） */}
           <div className="flex items-center gap-2 mb-4">
             <div className="px-4 py-2 text-sm font-bold rounded bg-wiki-accent text-wiki-darker">道具詳情</div>
+            {hasExchange && (
+              <div className="px-4 py-2 text-sm font-bold rounded bg-wiki-gray text-wiki-text-muted">兌換內容</div>
+            )}
             {hasSource && (
               <div className="px-4 py-2 text-sm font-bold rounded bg-wiki-gray text-wiki-text-muted">獲取途徑</div>
             )}
           </div>
+
+          {/* 兌換內容 */}
+          {hasExchange && (
+            <div className="bg-wiki-gray-light border border-wiki-border rounded-xl p-5 mb-4">
+              <h3 className="font-bold text-wiki-accent mb-3 text-sm uppercase tracking-wider">兌換內容</h3>
+              <ItemExchangeContent raw={form.exchangeContent} />
+            </div>
+          )}
 
           {/* 獲取途徑內容 */}
           {hasSource && (

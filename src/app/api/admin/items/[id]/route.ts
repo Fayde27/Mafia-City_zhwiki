@@ -31,6 +31,8 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         image: data.image || null,
         imagePosition: data.imagePosition || '50% 50%',
         source: data.source || null,
+        isExchange: data.isExchange || false,
+        exchangeContent: data.exchangeContent || null,
         categoryId: data.categoryId,
         sortOrder: data.sortOrder,
         isFeatured: data.isFeatured,

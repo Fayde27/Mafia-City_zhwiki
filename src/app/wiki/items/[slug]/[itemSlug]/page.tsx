@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 import LikeButton from '@/components/LikeButton'
+import ItemExchangeContent, { parseExchangeContent } from '@/components/ItemExchangeContent'
 
 interface Item {
   id: string
@@ -21,6 +22,8 @@ interface Item {
   image: string
   imagePosition?: string
   source?: string
+  isExchange?: boolean
+  exchangeContent?: string
   description?: string
   usage?: string
   recipe?: string
@@ -46,6 +49,7 @@ export default function ItemDetailPage() {
   }, [categorySlug, itemSlug])
 
   const tabs = [
+    { id: 'exchange',    label: '兌換內容', show: !!item?.isExchange && !!parseExchangeContent(item?.exchangeContent) },
     { id: 'description', label: '道具詳情', show: !!item?.description },
     { id: 'source',      label: '獲取途徑',  show: !!item?.source },
     { id: 'usage',       label: '使用方法', show: !!item?.usage },
@@ -169,6 +173,9 @@ export default function ItemDetailPage() {
             </div>
 
             <div className="bg-wiki-gray-light border border-wiki-border rounded-xl p-5 md:p-7">
+              {activeTab === 'exchange' && (
+                <ItemExchangeContent raw={item.exchangeContent} />
+              )}
               {activeTab === 'description' && item.description && (
                 <MarkdownRenderer content={item.description} />
               )}

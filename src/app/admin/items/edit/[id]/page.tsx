@@ -10,18 +10,91 @@ import ImageUploadInput from '@/components/ImageUploadInput'
 import RichTextEditor from '@/components/RichTextEditor'
 import ItemPreviewModal from '@/components/ItemPreviewModal'
 
-const SECTIONS = [
-  { id: 'basic',   label: '基本信息' },
-  { id: 'images',  label: '圖片上傳' },
-  { id: 'source',  label: '獲取途徑' },
-  { id: 'publish', label: '發佈設置' },
+const ALL_SECTIONS = [
+  { id: 'basic',    label: '基本信息' },
+  { id: 'images',   label: '圖片上傳' },
+  { id: 'exchange', label: '兌換內容' },
+  { id: 'source',   label: '獲取途徑' },
+  { id: 'publish',  label: '發佈設置' },
 ]
 
+// 兌換道具關閉時不顯示「兌換內容」分區
+function sectionsFor(isExchange: boolean) {
+  return isExchange ? ALL_SECTIONS : ALL_SECTIONS.filter(s => s.id !== 'exchange')
+}
+
 interface ItemCategory { id: string; name: string; slug: string }
+
+// 兌換內容結構
+interface ExchangeItem { icon: string; name: string; quantity: string }
+interface ExchangeContent { intro: string; items: ExchangeItem[] }
+const DEFAULT_EXCHANGE: ExchangeContent = { intro: '將隨機獲得以下其中一項物品', items: [] }
 
 const cardCls  = 'bg-wiki-gray-light border border-wiki-border rounded-lg p-6'
 const inputCls = 'w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none'
 const labelCls = 'block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2'
+
+// ─── 兌換內容編輯器 ──────────────────────────────────────────────
+function ExchangeContentEditor({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  let parsed: ExchangeContent
+  try { parsed = { ...DEFAULT_EXCHANGE, ...(JSON.parse(value) || {}) } } catch { parsed = DEFAULT_EXCHANGE }
+  const data: ExchangeContent = { intro: parsed.intro ?? '', items: Array.isArray(parsed.items) ? parsed.items : [] }
+
+  const update = (next: ExchangeContent) => onChange(JSON.stringify(next))
+  const addItem = () => update({ ...data, items: [...data.items, { icon: '', name: '', quantity: '1' }] })
+  const delItem = (i: number) => update({ ...data, items: data.items.filter((_, idx) => idx !== i) })
+  const setItem = (i: number, key: keyof ExchangeItem, val: string) =>
+    update({ ...data, items: data.items.map((it, idx) => idx === i ? { ...it, [key]: val } : it) })
+
+  const rowInput = 'w-full bg-wiki-gray border border-wiki-border px-3 py-2 text-wiki-text text-sm focus:border-wiki-accent focus:outline-none'
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <label className={labelCls}>說明文字</label>
+        <input value={data.intro} onChange={e => update({ ...data, intro: e.target.value })}
+          className={inputCls} placeholder="如：將隨機獲得以下其中一項物品" />
+      </div>
+
+      <div>
+        <label className={labelCls}>可獲得物品列表</label>
+        <p className="text-wiki-text-muted text-xs mb-3">每項為一個可獲得/兌換的物品，可上傳圖標、填寫名稱與數量</p>
+        <div className="space-y-3">
+          {data.items.length === 0 && (
+            <p className="text-wiki-text-muted text-sm py-4 text-center border border-dashed border-wiki-border rounded-lg">
+              暫無物品，點擊下方「+ 添加物品」開始填寫
+            </p>
+          )}
+          {data.items.map((it, i) => (
+            <div key={i} className="flex gap-4 items-start bg-wiki-gray rounded-lg p-3 border border-wiki-border">
+              <div className="flex-shrink-0">
+                <ImageUploadInput
+                  label=""
+                  value={it.icon}
+                  onChange={url => setItem(i, 'icon', url)}
+                  onPositionChange={() => {}}
+                  compact
+                />
+              </div>
+              <div className="flex-1 space-y-2 min-w-0">
+                <input value={it.name} onChange={e => setItem(i, 'name', e.target.value)}
+                  className={rowInput} placeholder="物品名稱，如：6級紫寶石項鍊" />
+                <input value={it.quantity} onChange={e => setItem(i, 'quantity', e.target.value)}
+                  className={rowInput} placeholder="數量，如：1" />
+              </div>
+              <button type="button" onClick={() => delItem(i)}
+                className="flex-shrink-0 text-wiki-danger text-sm hover:opacity-70 px-2 py-1" title="刪除此物品">×</button>
+            </div>
+          ))}
+        </div>
+        <button type="button" onClick={addItem}
+          className="mt-3 px-4 py-2 bg-wiki-accent/10 border border-wiki-accent/30 text-wiki-accent text-sm font-bold rounded hover:bg-wiki-accent/20 transition-colors">
+          + 添加物品
+        </button>
+      </div>
+    </div>
+  )
+}
 
 export default function AdminItemEditPage() {
   const router = useRouter()
@@ -47,6 +120,8 @@ export default function AdminItemEditPage() {
     image: '',
     imagePosition: '50% 50%',
     source: '',
+    isExchange: false,
+    exchangeContent: JSON.stringify(DEFAULT_EXCHANGE),
     sortOrder: 0,
     isFeatured: false,
     isPublished: false,
@@ -84,6 +159,8 @@ export default function AdminItemEditPage() {
           image: item.image || '',
           imagePosition: item.imagePosition || '50% 50%',
           source: item.source || '',
+          isExchange: item.isExchange || false,
+          exchangeContent: item.exchangeContent || JSON.stringify(DEFAULT_EXCHANGE),
           sortOrder: item.sortOrder || 0,
           isFeatured: item.isFeatured || false,
           isPublished: item.isPublished || false,
@@ -101,17 +178,19 @@ export default function AdminItemEditPage() {
     }).catch(() => setLoading(false))
   }, [id])
 
+  const sections = sectionsFor(form.isExchange)
+
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY
-      for (const sec of SECTIONS) {
+      for (const sec of sections) {
         const el = sectionRefs.current[sec.id]
         if (el && el.offsetTop <= scrollY + 140) setActiveSection(sec.id)
       }
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  }, [sections])
 
   const scrollTo = (sid: string) => {
     const el = sectionRefs.current[sid]
@@ -151,7 +230,7 @@ export default function AdminItemEditPage() {
           <div className="w-48 flex-shrink-0 hidden lg:block">
             <div className="sticky top-8 space-y-1">
               <div className="text-wiki-text-muted text-xs font-bold uppercase tracking-wider mb-3 px-3">編輯道具</div>
-              {SECTIONS.map(sec => (
+              {sections.map(sec => (
                 <button key={sec.id} type="button" onClick={() => scrollTo(sec.id)}
                   className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
                     activeSection === sec.id ? 'bg-wiki-accent/15 text-wiki-accent font-bold' : 'text-wiki-text-muted hover:text-wiki-text'
@@ -220,6 +299,17 @@ export default function AdminItemEditPage() {
                     rows={2} className={inputCls + ' resize-none'}
                     placeholder="用於列表頁卡片展示的一句話描述" />
                 </div>
+                {/* 是否為兌換道具 */}
+                <div className="pt-1">
+                  <label className="flex items-center gap-3 cursor-pointer select-none">
+                    <div onClick={() => set('isExchange', !form.isExchange)}
+                      className={`w-11 h-6 rounded-full transition-colors relative ${form.isExchange ? 'bg-wiki-accent' : 'bg-wiki-border'}`}>
+                      <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all ${form.isExchange ? 'left-6' : 'left-1'}`} />
+                    </div>
+                    <span className="text-wiki-text font-bold text-sm">是否為兌換道具（寶箱／兌換券）</span>
+                  </label>
+                  <p className="text-wiki-text-muted text-xs mt-1.5">開啟後將出現「兌換內容」分區，可編輯可獲得/兌換的物品列表</p>
+                </div>
               </div>
             </section>
 
@@ -245,6 +335,19 @@ export default function AdminItemEditPage() {
                 />
               </div>
             </section>
+
+            {/* Section: 兌換內容（僅兌換道具顯示） */}
+            {form.isExchange && (
+            <section ref={el => { sectionRefs.current['exchange'] = el }} className={cardCls}>
+              <h2 className="text-wiki-text font-bold text-base mb-5 flex items-center gap-2">
+                <span className="text-wiki-accent">◆</span>兌換內容
+              </h2>
+              <ExchangeContentEditor
+                value={form.exchangeContent}
+                onChange={v => set('exchangeContent', v)}
+              />
+            </section>
+            )}
 
             {/* Section 3: 獲取途徑 */}
             <section ref={el => { sectionRefs.current['source'] = el }} className={cardCls}>
