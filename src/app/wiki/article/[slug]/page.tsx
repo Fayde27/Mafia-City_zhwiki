@@ -9,7 +9,6 @@ import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
-import { useAdminAuth } from '@/hooks/useAdminAuth'
 import ArticleActionBar from '@/components/ArticleActionBar'
 import ImageLightbox from '@/components/ImageLightbox'
 import ArticleBackground from '@/components/ArticleBackground'
@@ -38,7 +37,6 @@ interface Article {
 export default function ArticleDetailPage() {
   const params = useParams()
   const slug = params?.slug as string
-  const { isAdmin } = useAdminAuth()
   const [article, setArticle] = useState<Article | null>(null)
   const [loading, setLoading] = useState(true)
   const [lightboxImages, setLightboxImages] = useState<string[]>([])
@@ -143,11 +141,6 @@ export default function ArticleDetailPage() {
                       </div>
                     )}
                   </div>
-                  {isAdmin && (
-                    <Link href={`/admin/articles/edit/${article.id}`} className="btn-hard text-wiki-text text-sm flex-shrink-0">
-                      編輯文章
-                    </Link>
-                  )}
                 </div>
               </header>
 

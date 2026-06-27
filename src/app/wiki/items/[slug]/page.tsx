@@ -7,7 +7,6 @@ import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useAdminAuth } from '@/hooks/useAdminAuth'
 
 interface Item {
   id: string
@@ -32,7 +31,6 @@ interface ItemFilterOption {
 export default function ItemListPage() {
   const params = useParams()
   const categorySlug = params?.slug as string
-  const { isAdmin } = useAdminAuth()
   const [items, setItems] = useState<Item[]>([])
   const [category, setCategory] = useState<ItemCategory | null>(null)
   const [loading, setLoading] = useState(true)
@@ -86,12 +84,6 @@ export default function ItemListPage() {
               {category?.name}
             </h1>
           </div>
-          {isAdmin && (
-            <Link href="/admin/items"
-              className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90">
-              管理道具
-            </Link>
-          )}
         </div>
 
         {/* 篩選欄 */}

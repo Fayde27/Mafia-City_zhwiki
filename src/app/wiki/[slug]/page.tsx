@@ -8,7 +8,6 @@ import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useAdminAuth } from '@/hooks/useAdminAuth'
 
 interface Article {
   id: string
@@ -32,7 +31,6 @@ interface Article {
 export default function WikiCategoryPage() {
   const params = useParams()
   const categorySlug = params?.slug as string
-  const { isAdmin } = useAdminAuth()
   const [articles, setArticles] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)
   const [categoryName, setCategoryName] = useState('')
@@ -54,16 +52,6 @@ export default function WikiCategoryPage() {
       })
   }, [categorySlug])
 
-  const handleDeleteArticle = async (id: string) => {
-    if (!confirm('確定要刪除這篇文章嗎？')) return
-    try {
-      await fetch(`/api/admin/articles/${id}`, { method: 'DELETE' })
-      setArticles(articles.filter(a => a.id !== id))
-    } catch (err) {
-      alert('刪除失敗')
-    }
-  }
-
   return (
     <div className="min-h-screen bg-wiki-bg">
       <WikiHeader />
@@ -79,11 +67,6 @@ export default function WikiCategoryPage() {
           <h1 className="text-2xl md:text-4xl font-heading font-bold text-wiki-accent heading-hard">
             {categoryName}
           </h1>
-          {isAdmin && (
-            <Link href={`/admin/articles/new?category=${categorySlug}`} className="btn-hard text-wiki-text text-sm">
-              + 新增文章
-            </Link>
-          )}
         </div>
 
         {loading ? (
@@ -141,16 +124,6 @@ export default function WikiCategoryPage() {
                     </div>
                   </div>
                 </Link>
-                {isAdmin && (
-                  <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                    <Link href={`/admin/articles/edit/${article.id}`} className="px-2 py-1 bg-wiki-accent/20 text-wiki-accent text-xs font-bold hover:bg-wiki-accent/30">
-                      編輯
-                    </Link>
-                    <button onClick={() => handleDeleteArticle(article.id)} className="px-2 py-1 bg-wiki-danger/20 text-wiki-danger text-xs font-bold hover:bg-wiki-danger/30">
-                      刪除
-                    </button>
-                  </div>
-                )}
                 {!article.isPublished && (
                   <div className="absolute top-3 left-3 px-2 py-1 bg-wiki-danger/80 text-wiki-text text-xs font-bold z-10">
                     草稿

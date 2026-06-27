@@ -7,7 +7,6 @@ import { useState, useEffect } from 'react'
 import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
-import { useAdminAuth } from '@/hooks/useAdminAuth'
 
 interface ItemCategory {
   id: string
@@ -21,7 +20,6 @@ interface ItemCategory {
 }
 
 export default function ItemsWikiPage() {
-  const { isAdmin, isLoaded } = useAdminAuth()
   const [categories, setCategories] = useState<ItemCategory[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -57,14 +55,6 @@ export default function ItemsWikiPage() {
             </h1>
             <p className="text-wiki-text-muted text-sm mt-2">選擇道具分類，查看詳細信息</p>
           </div>
-          {isAdmin && (
-            <Link
-              href="/admin/items"
-              className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90"
-            >
-              管理道具
-            </Link>
-          )}
         </div>
 
         {loading ? (

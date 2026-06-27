@@ -8,7 +8,6 @@ import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useAdminAuth } from '@/hooks/useAdminAuth'
 
 interface Article {
   id: string
@@ -41,7 +40,6 @@ interface Category {
 export default function GuideCategoryPage() {
   const params = useParams()
   const categorySlug = params?.slug as string
-  const { isAdmin, isLoaded } = useAdminAuth()
   const [articles, setArticles] = useState<Article[]>([])
   const [category, setCategory] = useState<Category | null>(null)
   const [loading, setLoading] = useState(true)
@@ -88,14 +86,6 @@ export default function GuideCategoryPage() {
               )}
             </div>
           </div>
-          {isAdmin && (
-            <Link
-              href="/admin/articles/new"
-              className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90"
-            >
-              + 新增文章
-            </Link>
-          )}
         </div>
 
         {loading ? (

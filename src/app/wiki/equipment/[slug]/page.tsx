@@ -7,7 +7,6 @@ import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useAdminAuth } from '@/hooks/useAdminAuth'
 import { EQUIP_TYPE_LABELS, rarityInfo, RARITY_TIERS, rarityTiersFor } from '@/lib/equipment'
 
 interface Equipment {
@@ -21,7 +20,6 @@ const isHaojie = (t: string) => t === 'haojie_weapon' || t === 'haojie_warbadge'
 export default function EquipmentTypeListPage() {
   const params = useParams()
   const equipType = params?.slug as string
-  const { isAdmin } = useAdminAuth()
   const [equipment, setEquipment] = useState<Equipment[]>([])
   const [loading, setLoading] = useState(true)
   const [rarityFilter, setRarityFilter] = useState(0) // 0 = 全部
@@ -61,9 +59,6 @@ export default function EquipmentTypeListPage() {
 
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl md:text-4xl font-heading font-bold text-wiki-accent heading-hard">{typeLabel}</h1>
-          {isAdmin && (
-            <Link href="/admin/equipment" className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90">管理裝備</Link>
-          )}
         </div>
 
         {/* 篩選 */}

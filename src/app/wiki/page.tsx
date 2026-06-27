@@ -75,7 +75,7 @@ const wikiCategories: WikiCategory[] = [
 
 export default function WikiIndexPage() {
   const [loading, setLoading] = useState(true)
-  const { isAdmin, isLoaded } = useAdminAuth()
+  const { isLoaded } = useAdminAuth()
 
   useEffect(() => {
     fetch('/api/wiki/characters/categories')
@@ -117,14 +117,6 @@ export default function WikiIndexPage() {
             </h1>
             <p className="text-wiki-text-muted text-sm mt-2">選擇圖鑑類型，瀏覽遊戲內容</p>
           </div>
-          {isAdmin && (
-            <Link
-              href="/admin/wiki-categories"
-              className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90"
-            >
-              管理分類
-            </Link>
-          )}
         </div>
 
         {loading ? (

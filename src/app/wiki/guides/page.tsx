@@ -7,7 +7,6 @@ import { useState, useEffect } from 'react'
 import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
-import { useAdminAuth } from '@/hooks/useAdminAuth'
 
 interface GuideCategory {
   id: string
@@ -21,7 +20,6 @@ interface GuideCategory {
 }
 
 export default function GuidesPage() {
-  const { isAdmin, isLoaded } = useAdminAuth()
   const [categories, setCategories] = useState<GuideCategory[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -55,14 +53,6 @@ export default function GuidesPage() {
             </h1>
             <p className="text-wiki-text-muted text-sm mt-2">選擇攻略分類，查看詳細內容</p>
           </div>
-          {isAdmin && (
-            <Link
-              href="/admin/categories"
-              className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90"
-            >
-              管理分類
-            </Link>
-          )}
         </div>
 
         {loading ? (

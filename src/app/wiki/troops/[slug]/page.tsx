@@ -8,7 +8,6 @@ import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useAdminAuth } from '@/hooks/useAdminAuth'
 
 interface Troop {
   id: string
@@ -50,7 +49,6 @@ interface TroopFilterOption {
 export default function TroopListPage() {
   const params = useParams()
   const categorySlug = params?.slug as string
-  const { isAdmin, isLoaded } = useAdminAuth()
   const [troops, setTroops] = useState<Troop[]>([])
   const [category, setCategory] = useState<TroopCategory | null>(null)
   const [loading, setLoading] = useState(true)
@@ -113,14 +111,6 @@ export default function TroopListPage() {
               {category?.name}
             </h1>
           </div>
-          {isAdmin && (
-            <Link
-              href="/admin/troops"
-              className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90"
-            >
-              管理兵種
-            </Link>
-          )}
         </div>
 
         {filterTypes.length > 0 && (

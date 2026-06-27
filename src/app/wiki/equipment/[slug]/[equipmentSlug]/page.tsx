@@ -7,7 +7,6 @@ import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useAdminAuth } from '@/hooks/useAdminAuth'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 import LikeButton from '@/components/LikeButton'
 import { EQUIP_TYPE_LABELS, rarityInfo, parseBuffs } from '@/lib/equipment'
@@ -27,7 +26,6 @@ export default function EquipmentDetailPage() {
   const params = useParams()
   const equipType = params?.slug as string
   const equipmentSlug = params?.equipmentSlug as string
-  const { isAdmin } = useAdminAuth()
   const [equipment, setEquipment] = useState<Equipment | null>(null)
   const [setPieces, setSetPieces] = useState<Equipment[]>([])
   const [loading, setLoading] = useState(true)
@@ -97,9 +95,6 @@ export default function EquipmentDetailPage() {
               <span className="inline-block px-2 py-0.5 text-xs font-bold rounded text-white mb-2" style={{ backgroundColor: r.color }}>{r.label}</span>
               <h1 className="text-4xl md:text-5xl font-heading font-bold text-white heading-hard">{equipment.name}</h1>
             </div>
-            {isAdmin && (
-              <div className="absolute top-4 right-4"><Link href={`/admin/equipment/edit/${equipment.id}`} className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90">編輯裝備</Link></div>
-            )}
           </div>
         ) : (
           <div className="flex items-center justify-between mb-6">
@@ -114,7 +109,6 @@ export default function EquipmentDetailPage() {
                 <h1 className="text-3xl md:text-4xl font-heading font-bold text-wiki-accent heading-hard">{equipment.name}</h1>
               </div>
             </div>
-            {isAdmin && <Link href={`/admin/equipment/edit/${equipment.id}`} className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90">編輯裝備</Link>}
           </div>
         )}
 

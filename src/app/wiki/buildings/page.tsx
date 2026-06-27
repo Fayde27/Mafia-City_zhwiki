@@ -7,7 +7,6 @@ import { useState, useEffect } from 'react'
 import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
-import { useAdminAuth } from '@/hooks/useAdminAuth'
 
 interface BuildingCategory {
   id: string
@@ -21,7 +20,6 @@ interface BuildingCategory {
 }
 
 export default function BuildingsWikiPage() {
-  const { isAdmin, isLoaded } = useAdminAuth()
   const [categories, setCategories] = useState<BuildingCategory[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -57,14 +55,6 @@ export default function BuildingsWikiPage() {
             </h1>
             <p className="text-wiki-text-muted text-sm mt-2">選擇建築分類，查看詳細信息</p>
           </div>
-          {isAdmin && (
-            <Link
-              href="/admin/buildings"
-              className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90"
-            >
-              管理建築
-            </Link>
-          )}
         </div>
 
         {loading ? (

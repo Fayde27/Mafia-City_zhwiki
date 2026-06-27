@@ -5,7 +5,6 @@ import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { supabaseAdmin as supabase } from '@/lib/supabase'
 import { notFound } from 'next/navigation'
-import AdminEditButton from './AdminEditButton'
 import LikeButton from '@/components/LikeButton'
 
 interface Announcement {
@@ -133,7 +132,6 @@ export default async function AnnouncementPage({ params }: { params: { id: strin
                     {new Date(announcement.createdAt).toLocaleDateString('zh-TW')}
                   </span>
                 </div>
-                <AdminEditButton announcementId={announcement.id} />
               </div>
 
               <h1 className="text-2xl font-bold text-wiki-text mb-6">

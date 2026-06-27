@@ -8,7 +8,6 @@ import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useAdminAuth } from '@/hooks/useAdminAuth'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 import LikeButton from '@/components/LikeButton'
 
@@ -43,7 +42,6 @@ export default function CharacterDetailPage() {
   const params = useParams()
   const categorySlug = params?.slug as string
   const characterSlug = params?.characterSlug as string
-  const { isAdmin } = useAdminAuth()
   const [character, setCharacter] = useState<Character | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('attributes')
@@ -139,16 +137,6 @@ export default function CharacterDetailPage() {
                 <p className="text-wiki-text-muted text-lg md:text-xl">{character.title}</p>
               )}
             </div>
-            {isAdmin && (
-              <div className="absolute top-4 right-4 md:top-8 md:right-8">
-                <Link
-                  href={`/admin/characters/edit/${character.id}`}
-                  className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90"
-                >
-                  編輯角色
-                </Link>
-              </div>
-            )}
           </div>
         )}
 
@@ -289,13 +277,6 @@ export default function CharacterDetailPage() {
           </div>
         </div>
 
-        {isAdmin && (
-          <div className="mt-8 flex justify-end">
-            <Link href={`/admin/characters/edit/${character.id}`} className="btn-hard text-wiki-text text-sm">
-              編輯角色
-            </Link>
-          </div>
-        )}
       </main>
 
 

@@ -8,7 +8,6 @@ import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useAdminAuth } from '@/hooks/useAdminAuth'
 import { BUILDING_TYPE_LABELS, BUILDING_TYPE_OPTIONS } from '@/lib/building'
 
 interface Building {
@@ -53,7 +52,6 @@ interface BuildingFilterOption {
 export default function BuildingListPage() {
   const params = useParams()
   const categorySlug = params?.slug as string
-  const { isAdmin, isLoaded } = useAdminAuth()
   const [buildings, setBuildings] = useState<Building[]>([])
   const [category, setCategory] = useState<BuildingCategory | null>(null)
   const [loading, setLoading] = useState(true)
@@ -122,14 +120,6 @@ export default function BuildingListPage() {
               {category?.name}
             </h1>
           </div>
-          {isAdmin && (
-            <Link
-              href="/admin/buildings"
-              className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90"
-            >
-              管理建築
-            </Link>
-          )}
         </div>
 
         {availableTypes.length > 1 && (

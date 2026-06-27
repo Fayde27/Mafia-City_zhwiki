@@ -8,7 +8,6 @@ import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useAdminAuth } from '@/hooks/useAdminAuth'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 import LikeButton from '@/components/LikeButton'
 
@@ -43,7 +42,6 @@ export default function TroopDetailPage() {
   const params = useParams()
   const categorySlug = params?.slug as string
   const troopSlug = params?.troopSlug as string
-  const { isAdmin } = useAdminAuth()
   const [troop, setTroop] = useState<Troop | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('description')
@@ -137,16 +135,6 @@ export default function TroopDetailPage() {
                 <p className="text-wiki-text-muted text-lg md:text-xl">類型：{troop.type}</p>
               )}
             </div>
-            {isAdmin && (
-              <div className="absolute top-4 right-4 md:top-8 md:right-8">
-                <Link
-                  href={`/admin/troops/edit/${troop.id}`}
-                  className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90"
-                >
-                  編輯兵種
-                </Link>
-              </div>
-            )}
           </div>
         )}
 

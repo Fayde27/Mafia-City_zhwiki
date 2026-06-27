@@ -6,7 +6,6 @@ import { useState, useEffect } from 'react'
 import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
-import { useAdminAuth } from '@/hooks/useAdminAuth'
 
 interface EquipType {
   equipType: string
@@ -17,7 +16,6 @@ interface EquipType {
 }
 
 export default function EquipmentWikiPage() {
-  const { isAdmin } = useAdminAuth()
   const [types, setTypes] = useState<EquipType[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -46,9 +44,6 @@ export default function EquipmentWikiPage() {
             <h1 className="text-3xl md:text-4xl font-heading font-bold text-wiki-accent heading-hard">裝備圖鑑</h1>
             <p className="text-wiki-text-muted text-sm mt-2">選擇裝備類型，查看詳細信息</p>
           </div>
-          {isAdmin && (
-            <Link href="/admin/equipment" className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90">管理裝備</Link>
-          )}
         </div>
 
         {loading ? (

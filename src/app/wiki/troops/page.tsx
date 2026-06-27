@@ -7,7 +7,6 @@ import { useState, useEffect } from 'react'
 import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
-import { useAdminAuth } from '@/hooks/useAdminAuth'
 
 interface TroopCategory {
   id: string
@@ -21,7 +20,6 @@ interface TroopCategory {
 }
 
 export default function TroopsWikiPage() {
-  const { isAdmin, isLoaded } = useAdminAuth()
   const [categories, setCategories] = useState<TroopCategory[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -57,14 +55,6 @@ export default function TroopsWikiPage() {
             </h1>
             <p className="text-wiki-text-muted text-sm mt-2">選擇兵種分類，查看詳細信息</p>
           </div>
-          {isAdmin && (
-            <Link
-              href="/admin/troops"
-              className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm hover:opacity-90"
-            >
-              管理兵種
-            </Link>
-          )}
         </div>
 
         {loading ? (

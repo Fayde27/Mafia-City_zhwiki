@@ -7,7 +7,6 @@ import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useAdminAuth } from '@/hooks/useAdminAuth'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 import LikeButton from '@/components/LikeButton'
 
@@ -32,7 +31,6 @@ export default function ItemDetailPage() {
   const params = useParams()
   const categorySlug = params?.slug as string
   const itemSlug = params?.itemSlug as string
-  const { isAdmin } = useAdminAuth()
   const [item, setItem] = useState<Item | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('description')
@@ -118,14 +116,6 @@ export default function ItemDetailPage() {
                 <p className="text-white/80 text-sm md:text-base">{item.summary}</p>
               )}
             </div>
-            {isAdmin && (
-              <div className="absolute top-4 right-4 md:top-6 md:right-6">
-                <Link href={`/admin/items/edit/${item.id}`}
-                  className="px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm rounded hover:opacity-90">
-                  編輯道具
-                </Link>
-              </div>
-            )}
           </div>
         )}
 
@@ -143,12 +133,6 @@ export default function ItemDetailPage() {
               <h1 className="text-2xl md:text-3xl font-bold text-wiki-text">{item.name}</h1>
               {item.summary && <p className="text-wiki-text-muted mt-1 text-sm">{item.summary}</p>}
             </div>
-            {isAdmin && (
-              <Link href={`/admin/items/edit/${item.id}`}
-                className="ml-auto px-4 py-2 bg-wiki-accent text-wiki-darker font-bold text-sm rounded hover:opacity-90">
-                編輯道具
-              </Link>
-            )}
           </div>
         )}
 
