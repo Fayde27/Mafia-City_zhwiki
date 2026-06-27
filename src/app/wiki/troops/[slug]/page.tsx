@@ -82,7 +82,7 @@ export default function TroopListPage() {
     return Object.values(t as any).some(v => String(v) === value)
   }))
 
-  const getRarityStars = (r: number) => '★'.repeat(r) + '☆'.repeat(5 - r)
+  const getRarityStars = (r: number) => '★'.repeat(Math.max(0, r)) + '☆'.repeat(Math.max(0, 5 - r))
   const filterTypes = Array.from(new Set(filterOptions.map(o => o.type)))
   const groupedFilters: {[k: string]: typeof filterOptions} = {}
   filterTypes.forEach(type => {

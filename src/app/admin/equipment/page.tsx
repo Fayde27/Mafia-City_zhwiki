@@ -139,7 +139,7 @@ export default function AdminEquipmentPage() {
   const existingTypes = Array.from(new Set(currentOptions.map(o => o.type))).sort()
   const groupedOptions = existingTypes.reduce((acc, type) => { acc[type] = currentOptions.filter(o => o.type === type).sort((a, b) => a.sortOrder - b.sortOrder); return acc }, {} as Record<string, FilterOption[]>)
   const allTypes = Array.from(new Set(filterOptions.map(o => o.type))).sort()
-  const getRarityStars = (r: number) => '★'.repeat(r) + '☆'.repeat(5 - r)
+  const getRarityStars = (r: number) => '★'.repeat(Math.max(0, r)) + '☆'.repeat(Math.max(0, 5 - r))
   const tabCls = (t: Tab) => `px-6 py-3 font-bold text-sm border-b-2 transition-colors ${activeTab === t ? 'border-wiki-accent text-wiki-accent' : 'border-transparent text-wiki-text-muted hover:text-wiki-text'}`
 
   return (

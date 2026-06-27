@@ -74,7 +74,7 @@ export default function BuildingDetailPage() {
       .catch(() => setLoading(false))
   }, [categorySlug, buildingSlug])
 
-  const getRarityStars = (rarity: number) => '★'.repeat(rarity) + '☆'.repeat(5 - rarity)
+  const getRarityStars = (rarity: number) => '★'.repeat(Math.max(0, rarity)) + '☆'.repeat(Math.max(0, 5 - rarity))
 
   const seasonal = isSeasonalBuilding(building?.buildingType)
   const upgradeTable = parseUpgradeTable(building?.upgradeLevels)

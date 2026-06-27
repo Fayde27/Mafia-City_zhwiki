@@ -85,7 +85,7 @@ export default function CharacterListPage() {
     })
   })
 
-  const getRarityStars = (rarity: number) => '★'.repeat(rarity) + '☆'.repeat(5 - rarity)
+  const getRarityStars = (rarity: number) => '★'.repeat(Math.max(0, rarity)) + '☆'.repeat(Math.max(0, 5 - rarity))
 
   // 動態分組
   const filterTypes = Array.from(new Set(filterOptions.map(o => o.type)))

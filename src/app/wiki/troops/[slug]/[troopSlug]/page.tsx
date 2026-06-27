@@ -61,7 +61,7 @@ export default function TroopDetailPage() {
   }, [categorySlug, troopSlug])
 
   const getRarityStars = (rarity: number) => {
-    return '★'.repeat(rarity) + '☆'.repeat(5 - rarity)
+    return '★'.repeat(Math.max(0, rarity)) + '☆'.repeat(Math.max(0, 5 - rarity))
   }
 
   const tabs = [

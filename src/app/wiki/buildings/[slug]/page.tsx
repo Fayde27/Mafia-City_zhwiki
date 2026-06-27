@@ -91,7 +91,7 @@ export default function BuildingListPage() {
   // 僅顯示該分類下實際存在的建築類別 Tab
   const availableTypes = BUILDING_TYPE_OPTIONS.filter(t => buildings.some(b => (b.buildingType || 'inner') === t))
 
-  const getRarityStars = (r: number) => '★'.repeat(r) + '☆'.repeat(5 - r)
+  const getRarityStars = (r: number) => '★'.repeat(Math.max(0, r)) + '☆'.repeat(Math.max(0, 5 - r))
   const filterTypes = Array.from(new Set(filterOptions.map(o => o.type)))
   const groupedFilters: {[k: string]: typeof filterOptions} = {}
   filterTypes.forEach(type => {
