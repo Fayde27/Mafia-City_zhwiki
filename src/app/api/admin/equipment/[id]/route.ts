@@ -40,6 +40,7 @@ export async function PUT(
         slot: data.slot,
         attrBias: data.attrBias,
         buffs: data.buffs,
+        mainAttr: data.mainAttr,
         setId: data.setId || null,
         stats: data.stats,
         acquisition: data.acquisition,

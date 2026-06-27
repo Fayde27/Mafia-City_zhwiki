@@ -9,7 +9,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 import LikeButton from '@/components/LikeButton'
-import { EQUIP_TYPE_LABELS, rarityInfo, parseBuffs } from '@/lib/equipment'
+import { EQUIP_TYPE_LABELS, rarityInfo, parseBuffs, parseMainAttr } from '@/lib/equipment'
 import EquipmentBuffsList from '@/components/EquipmentBuffsList'
 
 interface EquipSet { id: string; name: string; slug: string; setBonus?: string }
@@ -17,7 +17,7 @@ interface Equipment {
   id: string; likes?: number; name: string; slug: string; summary?: string
   icon: string; image: string; imagePosition?: string; iconPosition?: string
   rarity: number; type?: string; slot?: string; equipType: string
-  attrBias?: string; buffs?: string; stats?: string; acquisition?: string
+  attrBias?: string; buffs?: string; mainAttr?: string; stats?: string; acquisition?: string
   setId?: string; set?: EquipSet
 }
 
@@ -69,6 +69,8 @@ export default function EquipmentDetailPage() {
   const r = rarityInfo(equipment.rarity)
   const typeLabel = EQUIP_TYPE_LABELS[equipment.equipType] || equipment.equipType
   const buffs = parseBuffs(equipment.buffs).filter(g => g.items.some(i => i.name || i.value))
+  const mainAttr = parseMainAttr(equipment.mainAttr)
+  const mainItems = mainAttr.items.filter(i => i.name || i.value)
   const hasStats = !!equipment.stats && equipment.stats.trim().length > 0
   const hasAcq = !!equipment.acquisition && equipment.acquisition.replace(/<[^>]*>/g, '').trim().length > 0
 
@@ -117,6 +119,22 @@ export default function EquipmentDetailPage() {
           <div className="lg:col-span-2 space-y-6">
             {equipment.summary && (
               <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6"><p className="text-wiki-text">{equipment.summary}</p></div>
+            )}
+
+            {/* 豪傑武器/戰徽：主屬性（推薦詞條） */}
+            {haojie && mainItems.length > 0 && (
+              <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6">
+                <h3 className="text-lg font-bold text-wiki-accent mb-1">主屬性（推薦）</h3>
+                {mainAttr.note && <p className="text-wiki-text-muted text-sm mb-4">{mainAttr.note}</p>}
+                <div className="flex flex-wrap gap-2">
+                  {mainItems.map((it, i) => (
+                    <span key={i} className="inline-flex items-center gap-2 bg-wiki-gray border border-wiki-border rounded-lg px-3 py-2 text-sm">
+                      <span className="text-wiki-text">{it.name}</span>
+                      {it.value && <span className="text-wiki-accent font-bold">{it.value}</span>}
+                    </span>
+                  ))}
+                </div>
+              </div>
             )}
 
             {/* 豪傑武器/戰徽：屬性列表（篩選 + 折疊展開） */}

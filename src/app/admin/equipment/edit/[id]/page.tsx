@@ -11,7 +11,7 @@ import RichTextEditor from '@/components/RichTextEditor'
 import EquipmentPreviewModal from '@/components/EquipmentPreviewModal'
 import {
   EQUIP_TYPE_LABELS, rarityTiersFor, SLOT_OPTIONS, BUFF_GROUPS, KIND_PRESETS,
-  parseBuffs, BuffGroup,
+  parseBuffs, BuffGroup, parseMainAttr, MainAttr, DEFAULT_MAIN_ATTR,
 } from '@/lib/equipment'
 
 interface EquipmentCategory { id: string; name: string; slug: string }
@@ -45,6 +45,7 @@ export default function AdminEquipmentEditPage() {
     acquisition: '', sortOrder: 0, isFeatured: false, isPublished: false,
   })
   const [buffsData, setBuffsData] = useState<BuffGroup[]>([])
+  const [mainAttr, setMainAttr] = useState<MainAttr>({ ...DEFAULT_MAIN_ATTR, items: [] })
 
   useEffect(() => {
     if (!isLoaded) return
@@ -73,6 +74,7 @@ export default function AdminEquipmentEditPage() {
           isFeatured: eq.isFeatured || false, isPublished: eq.isPublished || false,
         })
         setBuffsData(parseBuffs(eq.buffs))
+        setMainAttr(parseMainAttr(eq.mainAttr))
       }
       setLoading(false)
     }).catch(() => setLoading(false))
@@ -83,6 +85,7 @@ export default function AdminEquipmentEditPage() {
     { id: 'basic',   label: '基本信息' },
     { id: 'images',  label: '圖片上傳' },
     { id: 'quality', label: '品質' },
+    ...(isHaojie(form.equipType) ? [{ id: 'mainAttr', label: '主屬性（推薦）' }] : []),
     { id: 'attrs',   label: isHaojie(form.equipType) ? (form.equipType === 'haojie_weapon' ? '武器屬性' : '戰徽屬性') : '裝備屬性' },
     ...(!isHaojie(form.equipType) ? [{ id: 'set', label: '所屬套裝' }] : []),
     { id: 'source',  label: '獲取途徑' },
@@ -122,12 +125,23 @@ export default function AdminEquipmentEditPage() {
   }
   const removeBuffItem = (g: string, idx: number) => { const grp = getGroup(g); updateGroup(g, grp.items.filter((_, i) => i !== idx)) }
 
+  // 主屬性編輯輔助
+  const addMainItem = () => setMainAttr(m => ({ ...m, items: [...m.items, { name: '', value: '' }] }))
+  const setMainItem = (idx: number, key: 'name' | 'value', val: string) =>
+    setMainAttr(m => ({ ...m, items: m.items.map((it, i) => i === idx ? { ...it, [key]: val } : it) }))
+  const removeMainItem = (idx: number) => setMainAttr(m => ({ ...m, items: m.items.filter((_, i) => i !== idx) }))
+
   const handleSave = async () => {
     if (!form.name.trim() || !form.slug.trim()) { alert('請填寫名稱和 Slug'); return }
     setSaving(true); setSaved(false)
     try {
       const cleanBuffs = buffsData.filter(b => b.items.some(i => i.name || i.value))
-      const payload = { ...form, buffs: isHaojie(form.equipType) ? JSON.stringify(cleanBuffs) : null }
+      const cleanMain = { note: mainAttr.note, items: mainAttr.items.filter(i => i.name || i.value) }
+      const payload = {
+        ...form,
+        buffs: isHaojie(form.equipType) ? JSON.stringify(cleanBuffs) : null,
+        mainAttr: isHaojie(form.equipType) ? JSON.stringify(cleanMain) : null,
+      }
       const res = await fetch(`/api/admin/equipment/${id}`, {
         method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
       })
@@ -252,6 +266,40 @@ export default function AdminEquipmentEditPage() {
               </div>
             </section>
 
+            {/* 主屬性（豪傑武器/戰徽，隨機生成，展示推薦詞條） */}
+            {haojie && (
+              <section ref={el => { sectionRefs.current['mainAttr'] = el }} className={cardCls}>
+                <h2 className="text-wiki-text font-bold text-base mb-2 flex items-center gap-2"><span className="text-wiki-accent">◆</span>主屬性（推薦）</h2>
+                <p className="text-wiki-text-muted text-xs mb-4">主屬性為遊戲內隨機生成，此處維護「推薦詞條」供玩家參考（名稱 + 數值）。</p>
+                <div className="space-y-4">
+                  <div>
+                    <label className={labelCls}>說明文字</label>
+                    <input value={mainAttr.note} onChange={e => setMainAttr(m => ({ ...m, note: e.target.value }))}
+                      className={inputCls} placeholder="如：主屬性為隨機生成，以下為推薦詞條" />
+                  </div>
+                  <div className="border border-wiki-border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-wiki-text font-bold text-sm">推薦詞條</span>
+                      <button type="button" onClick={addMainItem} className="px-3 py-1 bg-wiki-accent/20 text-wiki-accent text-xs font-bold rounded hover:bg-wiki-accent/30">+ 添加詞條</button>
+                    </div>
+                    {mainAttr.items.length === 0 ? (
+                      <p className="text-wiki-text-muted text-xs">暫無推薦詞條</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {mainAttr.items.map((it, idx) => (
+                          <div key={idx} className="flex gap-2 items-center">
+                            <input value={it.name} onChange={e => setMainItem(idx, 'name', e.target.value)} className="flex-1 bg-wiki-gray border border-wiki-border px-3 py-2 text-wiki-text text-sm focus:border-wiki-accent focus:outline-none" placeholder="主屬性名（如：暴擊率）" />
+                            <input value={it.value} onChange={e => setMainItem(idx, 'value', e.target.value)} className="w-32 bg-wiki-gray border border-wiki-border px-3 py-2 text-wiki-text text-sm focus:border-wiki-accent focus:outline-none" placeholder="數值（如：+15%）" />
+                            <button type="button" onClick={() => removeMainItem(idx)} className="text-wiki-danger text-sm px-2 hover:opacity-70">刪除</button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </section>
+            )}
+
             {/* 屬性 */}
             <section ref={el => { sectionRefs.current['attrs'] = el }} className={cardCls}>
               <h2 className="text-wiki-text font-bold text-base mb-5 flex items-center gap-2">
@@ -355,7 +403,7 @@ export default function AdminEquipmentEditPage() {
 
             {showPreview && (
               <EquipmentPreviewModal
-                form={{ ...form, buffs: JSON.stringify(buffsData) }}
+                form={{ ...form, buffs: JSON.stringify(buffsData), mainAttr: JSON.stringify(mainAttr) }}
                 setName={currentSet?.name}
                 setBonus={currentSet?.setBonus}
                 onClose={() => setShowPreview(false)}

@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 import {
-  EQUIP_TYPE_LABELS, rarityInfo, parseBuffs,
+  EQUIP_TYPE_LABELS, rarityInfo, parseBuffs, parseMainAttr,
 } from '@/lib/equipment'
 
 interface EquipPreviewForm {
@@ -19,6 +19,7 @@ interface EquipPreviewForm {
   slot?: string        // 部位
   attrBias?: string    // 屬性偏向
   buffs?: string       // JSON
+  mainAttr?: string    // 主屬性推薦詞條 JSON
   stats?: string       // 裝備屬性多行文本
   acquisition?: string // 富文本
   isPublished: boolean
@@ -42,6 +43,8 @@ export default function EquipmentPreviewModal({ form, setName, setBonus, onClose
 
   const rarity = rarityInfo(form.rarity)
   const buffs = parseBuffs(form.buffs).filter(g => g.items.some(i => i.name || i.value))
+  const mainAttr = parseMainAttr(form.mainAttr)
+  const mainItems = mainAttr.items.filter(i => i.name || i.value)
   const hasStats = !!form.stats && form.stats.trim().length > 0
   const hasAcq = !!form.acquisition && form.acquisition.replace(/<[^>]*>/g, '').trim().length > 0
   const typeLabel = EQUIP_TYPE_LABELS[form.equipType] || form.equipType
@@ -94,6 +97,22 @@ export default function EquipmentPreviewModal({ form, setName, setBonus, onClose
                   {form.slot && <span className="px-2 py-0.5 bg-wiki-gray text-wiki-text-muted text-xs font-bold rounded">{form.slot}</span>}
                 </div>
                 {form.summary && <p className="text-wiki-text-muted mt-1 text-sm">{form.summary}</p>}
+              </div>
+            </div>
+          )}
+
+          {/* 豪傑武器/戰徽：主屬性（推薦詞條） */}
+          {isHaojie(form.equipType) && mainItems.length > 0 && (
+            <div className="bg-wiki-gray-light border border-wiki-border rounded-xl p-5 mb-4">
+              <h3 className="font-bold text-wiki-accent mb-1 text-sm uppercase tracking-wider">主屬性（推薦）</h3>
+              {mainAttr.note && <p className="text-wiki-text-muted text-xs mb-3">{mainAttr.note}</p>}
+              <div className="flex flex-wrap gap-2">
+                {mainItems.map((it, i) => (
+                  <span key={i} className="inline-flex items-center gap-1 bg-wiki-gray rounded px-3 py-1.5 text-sm">
+                    <span className="text-wiki-text-muted">{it.name}</span>
+                    <span className="text-wiki-accent font-bold">{it.value}</span>
+                  </span>
+                ))}
               </div>
             </div>
           )}

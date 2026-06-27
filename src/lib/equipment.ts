@@ -45,6 +45,18 @@ export const parseBuffs = (raw?: string | null): BuffGroup[] => {
   } catch { return [] }
 }
 
+// 豪傑武器/戰徽「主屬性」：遊戲內隨機生成，Wiki 展示推薦詞條
+export interface MainAttr { note: string; items: BuffItem[] }
+export const DEFAULT_MAIN_ATTR: MainAttr = { note: '主屬性為遊戲內隨機生成，以下為推薦詞條', items: [] }
+
+export const parseMainAttr = (raw?: string | null): MainAttr => {
+  if (!raw) return { ...DEFAULT_MAIN_ATTR, items: [] }
+  try {
+    const v = JSON.parse(raw)
+    return { note: typeof v?.note === 'string' ? v.note : '', items: Array.isArray(v?.items) ? v.items : [] }
+  } catch { return { ...DEFAULT_MAIN_ATTR, items: [] } }
+}
+
 // 種類選項（後台下拉可自由輸入，這裡給常見預設）
 export const KIND_PRESETS: Record<string, string[]> = {
   haojie_weapon: ['殺人蜂', '執法者', '荒野獵人', '蜂蛇', '豪傑專用'],

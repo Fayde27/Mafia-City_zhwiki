@@ -67,6 +67,7 @@ export async function POST(request: Request) {
         slot: data.slot,
         attrBias: data.attrBias,
         buffs: data.buffs,
+        mainAttr: data.mainAttr,
         setId: data.setId || null,
         stats: data.stats,
         acquisition: data.acquisition,
