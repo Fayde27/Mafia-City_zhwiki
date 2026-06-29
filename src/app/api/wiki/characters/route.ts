@@ -2,13 +2,14 @@ export const runtime = 'edge'
 
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { sanitizeSearch } from '@/lib/sanitize'
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const category = searchParams.get('category')
     const slug = searchParams.get('slug')
-    const search = searchParams.get('search')
+    const search = sanitizeSearch(searchParams.get('search'))
 
     const selectStr = category ? '*, CharacterCategory!inner(*)' : '*, CharacterCategory(*)'
 

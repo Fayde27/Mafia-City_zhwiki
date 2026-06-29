@@ -2,15 +2,16 @@ export const runtime = 'edge'
 
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { sanitizeSearch, clampLimit } from '@/lib/sanitize'
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '10')
+    const limit = clampLimit(searchParams.get('limit'), 10, 50)
     const category = searchParams.get('category')
     const slug = searchParams.get('slug')
-    const search = searchParams.get('search')
+    const search = sanitizeSearch(searchParams.get('search'))
     const featured = searchParams.get('featured')
     const from = (page - 1) * limit
     const to = from + limit - 1
