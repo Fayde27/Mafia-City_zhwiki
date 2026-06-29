@@ -140,19 +140,26 @@ export default function ItemDetailPage() {
           </div>
         )}
 
-        {/* 有 Banner 時，Banner 下方顯示圖標+簡介 */}
-        {item.image && (
+        {/* 有 Banner 時，Banner 下方顯示圖標 */}
+        {item.image && item.icon && (
           <div className="flex items-center gap-4 mb-5">
-            {item.icon && (
-              <div className="w-14 h-14 rounded-lg overflow-hidden border border-wiki-border bg-wiki-gray flex-shrink-0">
-                <img src={item.icon} alt={item.name}
-                  className="w-full h-full object-contain p-1"
-                  style={{ objectPosition: item.iconPosition || '50% 50%' }} />
-              </div>
-            )}
-            {item.summary && !item.image && (
-              <p className="text-wiki-text-muted text-sm">{item.summary}</p>
-            )}
+            <div className="w-14 h-14 rounded-lg overflow-hidden border border-wiki-border bg-wiki-gray flex-shrink-0">
+              <img src={item.icon} alt={item.name}
+                className="w-full h-full object-contain p-1"
+                style={{ objectPosition: item.iconPosition || '50% 50%' }} />
+            </div>
+          </div>
+        )}
+
+        {/* 道具簡介 — 獨立模塊，富文本渲染 */}
+        {item.summary && (
+          <div className="bg-wiki-gray-light border border-wiki-border rounded-xl mb-5">
+            <div className="px-5 py-3 border-b border-wiki-border">
+              <h2 className="text-sm font-bold text-wiki-accent uppercase tracking-wider">道具簡介</h2>
+            </div>
+            <div className="px-5 py-4">
+              <MarkdownRenderer content={item.summary} />
+            </div>
           </div>
         )}
 
