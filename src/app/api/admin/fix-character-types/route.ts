@@ -6,7 +6,7 @@ import { verifyToken } from '@/lib/auth'
 
 async function isAdmin(req: Request) {
   const cookie = req.headers.get('cookie') || ''
-  const match = cookie.match(/admin_token=([^;]+)/)
+  const match = cookie.match(/admin-token=([^;]+)/)
   if (!match) return false
   const payload = await verifyToken(match[1])
   return payload?.role === 'admin'
@@ -23,7 +23,10 @@ export async function POST(req: Request) {
     .select('id, name')
     .ilike('name', '%豪%')
 
-  if (catErr) return NextResponse.json({ error: catErr.message }, { status: 500 })
+  if (catErr) {
+    console.error('fix-character-types category query error:', catErr)
+    return NextResponse.json({ error: '操作失敗，請稍後重試' }, { status: 500 })
+  }
 
   const catIds = (cats || []).map((c: any) => c.id)
   if (!catIds.length) {
@@ -37,7 +40,10 @@ export async function POST(req: Request) {
     .in('categoryId', catIds)
     .neq('characterType', 'haojie')
 
-  if (queryErr) return NextResponse.json({ error: queryErr.message }, { status: 500 })
+  if (queryErr) {
+    console.error('fix-character-types character query error:', queryErr)
+    return NextResponse.json({ error: '操作失敗，請稍後重試' }, { status: 500 })
+  }
 
   if (!toFix || toFix.length === 0) {
     return NextResponse.json({ message: '所有豪傑角色的 characterType 已正確，無需修復', updated: 0 })
@@ -51,7 +57,10 @@ export async function POST(req: Request) {
     .update({ characterType: 'haojie' })
     .in('id', fixIds)
 
-  if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 })
+  if (updateErr) {
+    console.error('fix-character-types update error:', updateErr)
+    return NextResponse.json({ error: '操作失敗，請稍後重試' }, { status: 500 })
+  }
 
   return NextResponse.json({
     message: `修復完成`,

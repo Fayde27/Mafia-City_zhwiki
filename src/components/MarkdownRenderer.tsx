@@ -2,6 +2,19 @@ interface MarkdownRendererProps {
   content: string
 }
 
+// 只允許 http(s)、相對路徑、錨點；攔截 javascript:/data:/vbscript: 等危險協議
+function safeUrl(url: string): string {
+  const trimmed = (url || '').trim()
+  // 相對路徑、根路徑、錨點視為安全
+  if (/^(\/|\.\/|\.\.\/|#|\?)/.test(trimmed)) return trimmed
+  // 顯式 http(s) 協議放行
+  if (/^https?:\/\//i.test(trimmed)) return trimmed
+  // 含有協議分隔符但不是 http(s) 的一律攔截（如 javascript:、data:、vbscript:）
+  if (/^[a-z][a-z0-9+.-]*:/i.test(trimmed)) return '#'
+  // 其餘（無協議的相對路徑如 foo/bar）放行
+  return trimmed
+}
+
 export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
   const renderMarkdown = (text: string) => {
     const lines = text.split('\n')
@@ -84,7 +97,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
             remaining = remaining.slice(firstMatch.index + firstMatch.match![0].length)
             break
           case 'link':
-            parts.push(<a key={keyIndex++} href={firstMatch.match![2]} className="text-wiki-accent underline hover:text-wiki-accent-light">{firstMatch.match![1]}</a>)
+            parts.push(<a key={keyIndex++} href={safeUrl(firstMatch.match![2])} className="text-wiki-accent underline hover:text-wiki-accent-light">{firstMatch.match![1]}</a>)
             remaining = remaining.slice(firstMatch.index + firstMatch.match![0].length)
             break
         }
@@ -157,7 +170,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
         const match = line.match(/!\[(.+?)\]\((.+?)\)/)
         if (match) {
           elements.push(
-            <img key={index} src={match[2]} alt={match[1]} className="max-w-full rounded my-4 border border-wiki-border" />
+            <img key={index} src={safeUrl(match[2])} alt={match[1]} className="max-w-full rounded my-4 border border-wiki-border" />
           )
         }
       } else if (line.startsWith('[')) {
@@ -166,7 +179,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
         if (match) {
           elements.push(
             <p key={index} className="mb-4">
-              <a href={match[2]} className="text-wiki-accent underline hover:text-wiki-accent-light">{processInline(match[1])}</a>
+              <a href={safeUrl(match[2])} className="text-wiki-accent underline hover:text-wiki-accent-light">{processInline(match[1])}</a>
             </p>
           )
         }

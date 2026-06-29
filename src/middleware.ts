@@ -7,14 +7,17 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  const isApiRoute = request.nextUrl.pathname.startsWith('/api/')
   const token = request.cookies.get('admin-token')?.value
 
   if (!token) {
+    if (isApiRoute) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     return NextResponse.redirect(new URL('/admin/login', request.url))
   }
 
   const payload = await verifyToken(token)
-  if (!payload) {
+  if (!payload || payload.role !== 'admin') {
+    if (isApiRoute) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     return NextResponse.redirect(new URL('/admin/login', request.url))
   }
 
@@ -22,5 +25,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/api/admin/:path*'],
 }

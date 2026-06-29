@@ -7,7 +7,7 @@ import { verifyToken } from '@/lib/auth'
 export async function GET() {
   try {
     const cookieStore = cookies()
-    const token = cookieStore.get('admin_token')?.value
+    const token = cookieStore.get('admin-token')?.value
 
     if (!token) {
       return NextResponse.json({ isAdmin: false })

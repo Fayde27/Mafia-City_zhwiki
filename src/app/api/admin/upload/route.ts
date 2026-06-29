@@ -12,6 +12,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '沒有文件上傳' }, { status: 400 })
     }
 
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml']
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return NextResponse.json({ error: '不支持的文件類型，僅允許 JPG、PNG、GIF、WebP、SVG' }, { status: 400 })
+    }
+
     // 檢查檔案大小（Supabase Free 方案上限 50MB，Edge Runtime 記憶體約 128MB）
     if (file.size > 50 * 1024 * 1024) {
       return NextResponse.json({
@@ -42,8 +47,8 @@ export async function POST(request: Request) {
       })
 
     if (error) {
-      const msg = error.message || String(error)
-      return NextResponse.json({ error: `Supabase 上傳失敗：${msg}` }, { status: 500 })
+      console.error('Supabase upload error:', error)
+      return NextResponse.json({ error: '上傳失敗，請稍後重試' }, { status: 500 })
     }
 
     const { data: { publicUrl } } = supabaseAdmin.storage
@@ -55,8 +60,7 @@ export async function POST(request: Request) {
       name: file.name,
     })
   } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error)
     console.error('Upload error:', error)
-    return NextResponse.json({ error: `上傳失敗：${msg}` }, { status: 500 })
+    return NextResponse.json({ error: '上傳失敗，請稍後重試' }, { status: 500 })
   }
 }
