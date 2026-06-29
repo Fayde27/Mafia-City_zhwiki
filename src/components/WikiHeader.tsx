@@ -13,7 +13,6 @@ interface WikiSection {
 const navSections: WikiSection[] = [
   { label: '首頁', href: '/' },
   { label: '遊戲圖鑑', href: '/wiki' },
-  { label: '排行榜', href: '/wiki/rankings' },
   { label: '玩法攻略', href: '/wiki/guides' },
   { label: '活動一覽', href: '/wiki/events' },
   { label: '遊戲工具', href: '/wiki/tools' },
