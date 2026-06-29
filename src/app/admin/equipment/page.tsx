@@ -71,7 +71,7 @@ export default function AdminEquipmentPage() {
   const [filterSaving, setFilterSaving] = useState(false)
   // Sets
   const [sets, setSets] = useState<EquipmentSet[]>([])
-  const [setTypeTab, setSetTypeTab] = useState('all')
+  const [setsTypeTab, setSetsTypeTab] = useState('all')
   const [showSetModal, setShowSetModal] = useState(false)
   const [editingSet, setEditingSet] = useState<EquipmentSet | null>(null)
   const [setForm, setSetForm] = useState(emptySetForm)
@@ -340,14 +340,14 @@ export default function AdminEquipmentPage() {
               <div>
                 <div className="flex gap-2 mb-6">
                   {SET_TYPE_TABS.map(t => (
-                    <button key={t.value} onClick={() => setSetTypeTab(t.value)}
-                      className={`px-4 py-2 text-sm font-bold ${setTypeTab === t.value ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>
+                    <button key={t.value} onClick={() => setSetsTypeTab(t.value)}
+                      className={`px-4 py-2 text-sm font-bold ${setsTypeTab === t.value ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>
                       {t.label}
                     </button>
                   ))}
                 </div>
                 {(() => {
-                  const filteredSets = setTypeTab === 'all' ? sets : sets.filter(s => s.equipType === setTypeTab)
+                  const filteredSets = setsTypeTab === 'all' ? sets : sets.filter(s => s.equipType === setsTypeTab)
                   return filteredSets.length === 0 ? (
                     <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-8 text-center text-wiki-text-muted">暫無套裝</div>
                   ) : (
