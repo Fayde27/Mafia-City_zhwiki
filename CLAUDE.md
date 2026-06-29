@@ -1,6 +1,6 @@
 # 黑道風雲 Wiki 攻略站 — 項目參考文檔
 
-> 最後更新：2026-06-11
+> 最後更新：2026-06-29
 
 ---
 
@@ -43,7 +43,7 @@ const labelCls = 'block text-wiki-text text-sm font-bold uppercase tracking-wide
 
 **預覽 Modal 規範：**  
 每個圖鑑有對應的 `XxxPreviewModal` 組件（`src/components/`），接收當前表單 state 實時渲染 Wiki 效果，ESC 關閉。  
-→ 已實現：`BuildingPreviewModal.tsx` · `ItemPreviewModal.tsx`
+→ 已實現：`BuildingPreviewModal.tsx` · `ItemPreviewModal.tsx` · `TroopPreviewModal.tsx` · `EquipmentPreviewModal.tsx`
 
 **ImageUploadInput props：**
 - `compact` — 圖標用，限寬 176px、預覽 144×144px 正方形
@@ -75,6 +75,11 @@ const labelCls = 'block text-wiki-text text-sm font-bold uppercase tracking-wide
 
 **英雄**：8 張關聯表（皮膚/羁绊/陣容/血盟/裝備/攻略）· 4 軸雷達圖（攻擊/防衛/魅帥/速度）  
 **豪傑**：全 JSON 字段 · 5 軸雷達圖（力量/技術/體魄/防護/速度，存 `attributes`）· 裝備存 `haojieEquip JSON({weapon,warbadge})` · `awakenHero` 布爾字段
+
+**豪傑裝備推薦 UI**：使用 `EquipPickerField` 組件（搜索框 + 可滾動列表），按 `equipType` 過濾（`haojie_weapon` / `haojie_warbadge`），不用 grid checkbox。
+
+**Wiki 角色卡片樣式**：`aspect-[3/4]` 立繪鋪滿，左側 4px 稀有度色條，底部黑色漸層 + 名字 + 星數，`objectPosition: '50% 20%'` 臉部居中。  
+→ 參考：`src/app/wiki/characters/[slug]/page.tsx`
 
 **常見坑：**
 - 豪傑 `editLink` 判斷需同時檢查 `characterType==='haojie'` 和分類名含「豪」（舊數據 `characterType` 可能未正確設置）
@@ -121,7 +126,7 @@ ALTER TABLE "Item" ADD COLUMN IF NOT EXISTS "isFeatured" BOOLEAN DEFAULT false;
 
 **後台編輯頁** `/admin/items/edit/[id]`：4 分區（基本信息/圖片/獲取途徑/發佈設置）+ 預覽按鈕  
 **Wiki 分類頁** `/wiki/items/[slug]`：方形圖標卡片網格，顯示圖片 + summary  
-**Wiki 詳情頁** `/wiki/items/[slug]/[itemSlug]`：Tabs 按有無內容動態顯示
+**Wiki 詳情頁** `/wiki/items/[slug]/[itemSlug]`：`summary` 在 Tabs 上方獨立顯示為「道具簡介」富文本模塊；Tabs 按有無內容動態顯示（兌換內容/道具詳情/獲取途徑/使用方法/合成配方）
 
 ### 4-4 裝備圖鑑（`Equipment` 表，`equipType` 區分）✅ 完整
 
@@ -139,15 +144,23 @@ ALTER TABLE "Item" ADD COLUMN IF NOT EXISTS "isFeatured" BOOLEAN DEFAULT false;
 **buffs JSON**：`[{ group:"加強暴徒", items:[{name,value}] }]`，分類桶固定（加強暴徒/飛車黨/槍手/改裝車輛/出征上限/豪傑），細分可增刪
 **部位選項**：首領＝枪械/武器/飾品/衣服/褲子/鞋子；英雄＝枪械/武器/頭部/衣服/鞋子/飾品
 
-**套裝**：獨立 `EquipmentSet` 表（`equipType` 區分 hero/leader），裝備經 `setId` 歸屬；後台 `/admin/equipment-sets` 管理；前台詳情頁聚合「同套 N 件 + 套裝加成」
+**套裝**：獨立 `EquipmentSet` 表（`equipType` 區分 hero/leader），裝備經 `setId` 歸屬；套裝管理已整合進 `/admin/equipment` 第 4 Tab；前台詳情頁聚合「同套 N 件 + 套裝加成」
 
-**後台**：統一列表 `/admin/equipment`（5 Tab：全部/豪傑武器/豪傑戰徽/首領/英雄）· 新增頁選類型+名稱後跳編輯 · 編輯頁 `/admin/equipment/edit/[id]` 按 equipType 條件渲染分區 + `EquipmentPreviewModal`
+**後台**：統一列表 `/admin/equipment`（**4 主 Tab**：裝備列表/分類管理/篩選設定/套裝管理）· 裝備列表 Tab 內含 5 類型子篩選（全部/豪傑武器/豪傑戰徽/首領/英雄）· 新增頁選類型+名稱後跳編輯 · 編輯頁 `/admin/equipment/edit/[id]` 按 equipType 條件渲染分區 + `EquipmentPreviewModal`
 **Wiki**：總覽 `/wiki/equipment`（4 類型卡）→ 列表 `/wiki/equipment/[equipType]`（品質色框方圖 + 篩選）→ 詳情 `/wiki/equipment/[equipType]/[slug]`
 **公開 API**：`/api/wiki/equipment?equipType=` · `/api/wiki/equipment/types`（各類型計數）
 
 > 武器圖鑑/戰徽圖鑑已併入此模塊；後續對接豪傑 `haojieEquip.weapon/.warbadge` 時直接引用對應 equipType 記錄。
 
-### 4-5 兵種圖鑑（`Troop` 表）⚠️ 後台基礎，Wiki 待完善
+### 4-5 兵種圖鑑（`Troop` 表）✅ 後台完整，Wiki 主列表已完成
+
+**天賦字段格式**：`talent` 存 JSON 數組 `[{ icon: string; content: string }]`（icon 為圖片 URL，content 為富文本 HTML）。舊數據為 HTML 字串，讀取時用 `tryParseArr()` 做向後兼容（fallback 為 `[{ icon: '', content: html }]`）。
+
+**後台編輯頁** `/admin/troops/edit/[id]`：天賦區為多行列表，每行含圖標上傳（點擊正方形觸發上傳）+ 富文本框 + 刪除按鈕，支持新增行。保存時將 `talents[]` 序列化為 `JSON.stringify(talents)` 寫入 `talent` 字段。
+
+**Wiki 前台** `/wiki/troops`：單層主頁，雙層篩選（第一層：兵種類型 mobster/gunman/biker/vehicle；第二層：細分分類，只在多於 1 個時顯示）。原 `/wiki/troops/[slug]` 分類中間層已移除，訪問時重定向回 `/wiki/troops`。詳情頁路由不變：`/wiki/troops/[catSlug]/[troopSlug]`。
+
+**troopType 值**：`mobster`(暴徒) · `gunman`(槍手) · `biker`(飛車黨) · `vehicle`(改裝車輛)
 
 ### 4-6 攻略文章（`Article` 表）✅ 完整
 
@@ -172,7 +185,8 @@ fallback：未配置時取 `isFeatured=true` 的文章
 /admin/characters/haojie/edit/[id]
 /admin/buildings · /admin/buildings/new · /admin/buildings/edit/[id]
 /admin/items · /admin/items/new · /admin/items/edit/[id]   ← 完整
-/admin/equipment · /admin/troops · /admin/articles
+/admin/equipment                      ← 4 Tab：裝備列表/分類管理/篩選設定/套裝管理
+/admin/troops · /admin/articles
 /admin/announcements · /admin/categories · /admin/site-config
 /admin/banner-articles                ← 首頁輪播文章管理
 /admin/sidebar-nav · /admin/sidebar-sections · /admin/wiki-categories
@@ -187,7 +201,9 @@ fallback：未配置時取 `isFeatured=true` 的文章
 /wiki/characters/[slug]/[characterSlug]       ← 英雄詳情
 /wiki/buildings/[slug]/[buildingSlug]         ← 建築詳情
 /wiki/items/[slug]/[itemSlug]                 ← 道具詳情
-/wiki/equipment · /wiki/items · /wiki/troops  ← 其他圖鑑
+/wiki/equipment · /wiki/items                 ← 其他圖鑑
+/wiki/troops                                  ← 兵種主列表（雙層篩選）
+/wiki/troops/[catSlug]/[troopSlug]            ← 兵種詳情
 /wiki/search · /wiki/rankings · /wiki/events · /wiki/submit
 ```
 
@@ -229,6 +245,8 @@ fallback：未配置時取 `isFeatured=true` 的文章
 | `ImageUploadInput` | `src/components/` | 圖片上傳+預覽+拖拽調位，支持 `compact` 模式（圖標用） |
 | `BuildingPreviewModal` | `src/components/` | 建築後台預覽 Modal，傳入 form state 實時渲染 |
 | `ItemPreviewModal` | `src/components/` | 道具後台預覽 Modal，同上 |
+| `TroopPreviewModal` | `src/components/` | 兵種後台預覽 Modal，支持多行天賦（JSON/舊HTML 均可） |
+| `EquipmentPreviewModal` | `src/components/` | 裝備後台預覽 Modal，按 equipType 條件渲染 |
 | `RichTextEditor` | `src/components/` | TipTap 富文本，支持圖片嵌入 |
 | `MarkdownRenderer` | `src/components/` | Wiki 前台富文本渲染 |
 | `LikeButton` | `src/components/` | 點贊按鈕，傳 `entityType` + `entityId` |
@@ -267,8 +285,9 @@ JWT_SECRET / ADMIN_USERNAME / ADMIN_PASSWORD
 
 ### 圖鑑完善（中優先級）
 - [x] 裝備圖鑑（含武器/戰徽/首領/英雄四子類型，equipType 區分）✅ 完整
-- [x] 兵種圖鑑後台編輯頁 ✅（Wiki 前台仍待完善）
-- [ ] 兵種圖鑑 Wiki 前台完整化
+- [x] 兵種圖鑑後台編輯頁 ✅
+- [x] 兵種圖鑑 Wiki 前台主列表 ✅（雙層篩選，單頁架構）
+- [ ] 兵種圖鑑 Wiki 詳情頁完整化（`/wiki/troops/[catSlug]/[troopSlug]`）
 - [ ] 後續對接豪傑 `haojieEquip.weapon/.warbadge` 引用裝備記錄
 - [ ] 各圖鑑跳轉 `href="#"` 補充真實路由
 
