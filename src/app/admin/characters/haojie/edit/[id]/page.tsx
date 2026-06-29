@@ -26,7 +26,7 @@ interface HaojieEquip {
   weaponId: string
   warbadgeId: string
 }
-interface Equipment { id: string; name: string; icon?: string; EquipmentCategory?: { name: string } }
+interface Equipment { id: string; name: string; icon?: string; equipType?: string; EquipmentCategory?: { name: string } }
 
 const SECTIONS = [
   { id: 'basic', label: '基本信息' },
@@ -41,6 +41,76 @@ const RARITY_OPTIONS = ['金', '紫']
 const HAOJIE_STYLES = ['無畏風格', '迅捷風格', '智謀風格', '穩固風格']
 const TROOP_TYPES = ['暴徒', '槍手', '飛車黨', '改裝車輛']
 const SKILL_TYPES = ['帶隊生效', '被動生效']
+
+// ─── Equipment picker ─────────────────────────────────────────────────────────
+
+function EquipPickerField({
+  label, placeholder, pool, selectedId, selectedEq, onSelect, onClear,
+}: {
+  label: string; placeholder: string
+  pool: Equipment[]; selectedId: string; selectedEq: Equipment | undefined
+  onSelect: (id: string) => void; onClear: () => void
+}) {
+  const [search, setSearch] = useState('')
+  const filtered = pool.filter(e => !search || e.name.toLowerCase().includes(search.toLowerCase()))
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm font-bold text-wiki-accent">{label}</span>
+        {selectedId && (
+          <button type="button" onClick={onClear} className="text-xs text-red-400 hover:text-red-300">× 取消選擇</button>
+        )}
+      </div>
+
+      {/* 已選中預覽 */}
+      {selectedEq && (
+        <div className="flex items-center gap-3 mb-3 px-3 py-2 bg-wiki-accent/10 border border-wiki-accent/40 rounded text-sm">
+          {selectedEq.icon
+            ? <img src={selectedEq.icon} alt={selectedEq.name} className="w-8 h-8 object-contain flex-shrink-0" />
+            : <div className="w-8 h-8 bg-wiki-gray rounded flex-shrink-0" />}
+          <span className="text-wiki-accent font-bold">{selectedEq.name}</span>
+        </div>
+      )}
+
+      {/* 搜索框 */}
+      <input
+        className="w-full bg-wiki-gray border border-wiki-border px-3 py-2 text-sm text-wiki-text focus:border-wiki-accent focus:outline-none mb-2"
+        placeholder={placeholder}
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+      />
+
+      {/* 列表 */}
+      <div className="border border-wiki-border rounded overflow-hidden max-h-52 overflow-y-auto">
+        {filtered.length === 0 ? (
+          <p className="text-wiki-text-muted text-sm text-center py-6">
+            {pool.length === 0 ? '裝備庫尚無此類型裝備' : '無符合結果'}
+          </p>
+        ) : (
+          filtered.map(eq => {
+            const sel = eq.id === selectedId
+            return (
+              <button
+                key={eq.id}
+                type="button"
+                onClick={() => onSelect(sel ? '' : eq.id)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm text-left transition-colors border-b border-wiki-border/40 last:border-0
+                  ${sel ? 'bg-wiki-accent/10 text-wiki-accent' : 'bg-wiki-gray-light hover:bg-wiki-gray text-wiki-text'}`}
+              >
+                {eq.icon
+                  ? <img src={eq.icon} alt={eq.name} className="w-7 h-7 object-contain flex-shrink-0" />
+                  : <div className="w-7 h-7 bg-wiki-gray rounded flex-shrink-0" />}
+                <span className="truncate">{eq.name}</span>
+                {sel && <span className="ml-auto text-wiki-accent text-xs flex-shrink-0">✓ 已選</span>}
+              </button>
+            )
+          })
+        )}
+      </div>
+    </div>
+  )
+}
 
 // ─── Skill icon input ─────────────────────────────────────────────────────────
 
@@ -640,58 +710,28 @@ export default function AdminHaojieEditPage() {
                 </div>
               </div>
 
-              {/* §5 裝備推薦（從圖鑑庫選擇，各一件） */}
+              {/* §5 裝備推薦 */}
               <div ref={el => { sectionRefs.current['equipment'] = el }} className={cardCls}>
-                <h3 className="text-lg font-bold text-wiki-accent mb-2">裝備推薦</h3>
-                <p className="text-xs text-wiki-text-muted mb-5">從裝備圖鑑庫中各選一件武器與戰徽，點擊選中，再次點擊取消。</p>
+                <h3 className="text-lg font-bold text-wiki-accent mb-5">裝備推薦</h3>
                 <div className="space-y-6">
-                  {(['weaponId', 'warbadgeId'] as const).map(field => {
-                    const isWeapon = field === 'weaponId'
-                    const label = isWeapon ? '⚔ 推薦武器' : '🛡 推薦戰徽'
+                  {([
+                    { field: 'weaponId' as const, label: '⚔ 推薦武器', type: 'haojie_weapon', placeholder: '搜尋武器名稱…' },
+                    { field: 'warbadgeId' as const, label: '🛡 推薦戰徽', type: 'haojie_warbadge', placeholder: '搜尋戰徽名稱…' },
+                  ]).map(({ field, label, type, placeholder }) => {
                     const selectedId = haojieEquip[field]
+                    const selectedEq = allEquipments.find(e => e.id === selectedId)
+                    const pool = allEquipments.filter(e => e.equipType === type)
                     return (
-                      <div key={field}>
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="text-sm font-bold text-wiki-accent">{label}</span>
-                          {selectedId && (
-                            <button type="button" onClick={() => setHaojieEquip({ ...haojieEquip, [field]: '' })}
-                              className="text-xs text-red-400 hover:text-red-300">× 取消選擇</button>
-                          )}
-                        </div>
-                        {selectedId && (() => {
-                          const eq = allEquipments.find(e => e.id === selectedId)
-                          return eq ? (
-                            <div className="flex items-center gap-3 mb-3 px-3 py-2 bg-wiki-accent/10 border border-wiki-accent/40 rounded text-sm">
-                              {eq.icon
-                                ? <img src={eq.icon} alt={eq.name} className="w-8 h-8 object-contain flex-shrink-0" />
-                                : <div className="w-8 h-8 bg-wiki-gray rounded flex-shrink-0 flex items-center justify-center text-wiki-text-muted text-xs">{isWeapon ? '⚔' : '🛡'}</div>}
-                              <span className="text-wiki-accent font-bold">{eq.name}</span>
-                              {eq.EquipmentCategory && <span className="text-wiki-text-muted text-xs">（{eq.EquipmentCategory.name}）</span>}
-                            </div>
-                          ) : null
-                        })()}
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                          {allEquipments.map(eq => {
-                            const sel = haojieEquip[field] === eq.id
-                            return (
-                              <label key={eq.id}
-                                className={`flex items-center gap-2 p-2.5 border cursor-pointer transition-colors rounded
-                                  ${sel ? 'border-wiki-accent bg-wiki-accent/10 text-wiki-accent' : 'border-wiki-border text-wiki-text-muted hover:border-wiki-accent/50 hover:text-wiki-text'}`}>
-                                <input type="radio" className="hidden"
-                                  checked={sel}
-                                  onChange={() => setHaojieEquip({ ...haojieEquip, [field]: sel ? '' : eq.id })} />
-                                {eq.icon
-                                  ? <img src={eq.icon} alt={eq.name} className="w-7 h-7 object-contain flex-shrink-0" />
-                                  : <div className="w-7 h-7 bg-wiki-gray rounded flex-shrink-0" />}
-                                <span className="text-xs truncate">{eq.name}</span>
-                              </label>
-                            )
-                          })}
-                          {allEquipments.length === 0 && (
-                            <p className="col-span-3 text-wiki-text-muted text-sm text-center py-4">裝備庫為空，請先至裝備圖鑑新增裝備</p>
-                          )}
-                        </div>
-                      </div>
+                      <EquipPickerField
+                        key={field}
+                        label={label}
+                        placeholder={placeholder}
+                        pool={pool}
+                        selectedId={selectedId}
+                        selectedEq={selectedEq}
+                        onSelect={id => setHaojieEquip({ ...haojieEquip, [field]: id })}
+                        onClear={() => setHaojieEquip({ ...haojieEquip, [field]: '' })}
+                      />
                     )
                   })}
                 </div>

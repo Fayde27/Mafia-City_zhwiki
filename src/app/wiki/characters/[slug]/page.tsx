@@ -162,67 +162,51 @@ export default function CharacterListPage() {
             該分類下暫無角色
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
             {filteredCharacters.map((character) => (
               <Link
                 key={character.id}
                 href={`/wiki/characters/${categorySlug}/${character.slug}`}
-                className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg overflow-hidden group block hover:border-wiki-accent transition-all"
+                className="relative rounded-xl overflow-hidden group block aspect-[3/4] bg-wiki-darker border border-wiki-border hover:border-wiki-accent transition-all hover:shadow-lg hover:shadow-wiki-accent/20"
               >
-                <div className="relative h-48 md:h-56 overflow-hidden bg-gradient-to-br from-wiki-gray to-wiki-darker">
-                  {character.avatar ? (
-                    <img
-                      src={character.avatar}
-                      alt={character.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      style={{ objectPosition: character.avatarPosition || '50% 50%' }}
-                    />
-                  ) : character.banner ? (
-                    <img
-                      src={character.banner}
-                      alt={character.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      style={{ objectPosition: character.bannerPosition || '50% 50%' }}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-6xl text-wiki-text-muted">{character.name[0]}</span>
-                    </div>
-                  )}
-                  <div className="absolute top-3 left-3 flex items-center gap-1">
-                    <span className="text-yellow-400 text-sm font-bold drop-shadow-lg">
-                      {getRarityStars(character.rarity)}
-                    </span>
+                {/* 立绘 */}
+                {character.avatar ? (
+                  <img
+                    src={character.avatar}
+                    alt={character.name}
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    style={{ objectPosition: character.avatarPosition || '50% 20%' }}
+                  />
+                ) : character.banner ? (
+                  <img
+                    src={character.banner}
+                    alt={character.name}
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    style={{ objectPosition: character.bannerPosition || '50% 20%' }}
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-wiki-gray to-wiki-darker">
+                    <span className="text-5xl text-wiki-text-muted">{character.name[0]}</span>
                   </div>
-                  <div className="absolute top-3 right-3">
-                    <span className="text-wiki-text text-xs font-bold drop-shadow-lg">
-                      {character.role}
-                    </span>
-                  </div>
-                </div>
-                <div className="p-4 md:p-5">
-                  <h3 className="text-lg md:text-xl font-bold text-wiki-text mb-1 group-hover:text-wiki-accent transition-colors">
+                )}
+
+                {/* 稀有度色条 — 顶部左侧竖条 */}
+                <div className={`absolute top-0 left-0 w-1 h-full ${
+                  character.rarity >= 5 ? 'bg-yellow-400' :
+                  character.rarity >= 4 ? 'bg-orange-400' :
+                  character.rarity >= 3 ? 'bg-purple-400' :
+                  character.rarity >= 2 ? 'bg-blue-400' : 'bg-gray-400'
+                }`} />
+
+                {/* 渐变遮罩 + 底部名字 */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 px-3 py-2.5">
+                  <p className="text-white font-bold text-sm leading-tight drop-shadow-lg truncate">
                     {character.name}
-                  </h3>
-                  {character.title && (
-                    <p className="text-wiki-text-muted text-sm mb-2">{character.title}</p>
-                  )}
-                  <div className="flex items-center gap-2 text-xs text-wiki-text-muted">
-                    {character.role && (
-                      <span>{character.role}</span>
-                    )}
-                    {character.weapon && (
-                      <span>· {character.weapon}</span>
-                    )}
-                  </div>
-                  {character.coreBonus && (
-                    <p className="text-wiki-text-muted text-xs mt-1">
-                      核心加成：{character.coreBonus}
-                    </p>
-                  )}
-                  {character.description && (
-                    <p className="text-wiki-text-muted text-xs mt-2 line-clamp-2">
-                      {character.description.replace(/<[^>]*>/g, '').trim()}
+                  </p>
+                  {character.rarity > 0 && (
+                    <p className="text-yellow-400 text-xs leading-tight mt-0.5 drop-shadow">
+                      {'★'.repeat(Math.max(0, character.rarity))}
                     </p>
                   )}
                 </div>
