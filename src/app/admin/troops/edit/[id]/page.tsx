@@ -26,6 +26,56 @@ const TROOP_TYPES = [
 ]
 
 interface TroopCategory { id: string; name: string; slug: string }
+interface TalentEntry { icon: string; content: string }
+
+function TalentIconInput({ value, onChange }: { value: string; onChange: (url: string) => void }) {
+  const [uploading, setUploading] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
+  const upload = async (file: File) => {
+    setUploading(true)
+    try {
+      const fd = new FormData(); fd.append('file', file)
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (res.ok) onChange(data.url)
+      else alert(data.error || '上傳失敗')
+    } catch { alert('網絡錯誤') }
+    setUploading(false)
+  }
+  return (
+    <div className="flex flex-col items-center gap-2 flex-shrink-0">
+      <div className="w-12 h-12 rounded border border-wiki-border bg-wiki-gray overflow-hidden flex items-center justify-center cursor-pointer"
+        onClick={() => fileRef.current?.click()}>
+        {value
+          ? <img src={value} alt="icon" className="w-full h-full object-contain" />
+          : <span className="text-wiki-text-muted text-xl">{uploading ? '…' : '+'}</span>}
+      </div>
+      <button type="button" disabled={uploading}
+        onClick={() => fileRef.current?.click()}
+        className="text-xs text-wiki-text-muted hover:text-wiki-accent transition-colors">
+        {uploading ? '上傳…' : '上傳圖標'}
+      </button>
+      {value && (
+        <button type="button" onClick={() => onChange('')}
+          className="text-xs text-red-400 hover:text-red-300">清除</button>
+      )}
+      <input ref={fileRef} type="file" accept="image/*" className="hidden"
+        onChange={e => { const f = e.target.files?.[0]; if (f) upload(f); e.target.value = '' }} />
+    </div>
+  )
+}
+
+function tryParseArr(val: any): TalentEntry[] {
+  if (!val) return []
+  if (typeof val === 'object' && Array.isArray(val)) return val
+  try {
+    const parsed = JSON.parse(val)
+    if (Array.isArray(parsed)) return parsed
+    return [{ icon: '', content: val }]
+  } catch {
+    return typeof val === 'string' && val.trim() ? [{ icon: '', content: val }] : []
+  }
+}
 
 const cardCls  = 'bg-wiki-gray-light border border-wiki-border rounded-lg p-6'
 const inputCls = 'w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none'
@@ -63,11 +113,11 @@ export default function AdminTroopEditPage() {
     load: 0,
     attackRange: 0,
     cashCost: 0,
-    talent: '',
     sortOrder: 0,
     isFeatured: false,
     isPublished: false,
   })
+  const [talents, setTalents] = useState<TalentEntry[]>([])
 
   useEffect(() => {
     if (!isLoaded) return
@@ -100,11 +150,11 @@ export default function AdminTroopEditPage() {
           load: troop.load || 0,
           attackRange: troop.attackRange || 0,
           cashCost: troop.cashCost || 0,
-          talent: troop.talent || '',
           sortOrder: troop.sortOrder || 0,
           isFeatured: troop.isFeatured || false,
           isPublished: troop.isPublished || false,
         })
+        setTalents(tryParseArr(troop.talent))
       }
       setLoading(false)
     }).catch(() => setLoading(false))
@@ -136,7 +186,7 @@ export default function AdminTroopEditPage() {
       const res = await fetch(`/api/admin/troops/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, talent: JSON.stringify(talents) }),
       })
       if (!res.ok) { const d = await res.json(); throw new Error(d.error || '保存失敗') }
       setSaved(true)
@@ -286,15 +336,41 @@ export default function AdminTroopEditPage() {
 
             {/* Section 4: 兵種天賦 */}
             <section ref={el => { sectionRefs.current['talent'] = el }} className={cardCls}>
-              <h2 className="text-wiki-text font-bold text-base mb-5 flex items-center gap-2">
-                <span className="text-wiki-accent">◆</span>兵種天賦
-              </h2>
-              <p className="text-wiki-text-muted text-xs mb-3">描述兵種的特殊天賦技能，支持富文本</p>
-              <RichTextEditor
-                value={form.talent}
-                onChange={html => set('talent', html)}
-                minHeight="min-h-[160px]"
-              />
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-wiki-text font-bold text-base flex items-center gap-2">
+                  <span className="text-wiki-accent">◆</span>兵種天賦
+                </h2>
+                <button type="button"
+                  onClick={() => setTalents(t => [...t, { icon: '', content: '' }])}
+                  className="text-sm text-wiki-accent border border-wiki-accent px-3 py-1 hover:bg-wiki-accent hover:text-wiki-bg transition-colors rounded">
+                  + 新增天賦
+                </button>
+              </div>
+              <div className="space-y-4">
+                {talents.map((entry, i) => (
+                  <div key={i} className="bg-wiki-gray border border-wiki-border rounded-lg p-4 flex gap-4 items-start">
+                    <TalentIconInput
+                      value={entry.icon}
+                      onChange={url => setTalents(t => t.map((e, j) => j === i ? { ...e, icon: url } : e))}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <RichTextEditor
+                        value={entry.content}
+                        onChange={html => setTalents(t => t.map((e, j) => j === i ? { ...e, content: html } : e))}
+                        minHeight="min-h-[100px]"
+                      />
+                    </div>
+                    <button type="button"
+                      onClick={() => setTalents(t => t.filter((_, j) => j !== i))}
+                      className="text-red-400 hover:text-red-300 text-lg leading-none flex-shrink-0 mt-1">×</button>
+                  </div>
+                ))}
+                {talents.length === 0 && (
+                  <p className="text-wiki-text-muted text-sm text-center py-6 border border-dashed border-wiki-border rounded-lg">
+                    尚無天賦，點擊右上角「+ 新增天賦」
+                  </p>
+                )}
+              </div>
             </section>
 
             {/* Section 5: 發佈設置 */}
@@ -334,7 +410,7 @@ export default function AdminTroopEditPage() {
 
             {showPreview && (
               <TroopPreviewModal
-                form={form}
+                form={{ ...form, talent: JSON.stringify(talents) }}
                 categoryName={categories.find(c => c.id === form.categoryId)?.name}
                 onClose={() => setShowPreview(false)}
               />

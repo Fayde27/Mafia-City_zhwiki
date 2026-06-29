@@ -55,7 +55,18 @@ export default function TroopPreviewModal({ form, categoryName, onClose }: Props
     return () => document.removeEventListener('keydown', handler)
   }, [onClose])
 
-  const hasTalent = !!form.talent && form.talent.replace(/<[^>]*>/g, '').trim().length > 0
+  const parseTalents = (val?: string) => {
+    if (!val) return []
+    try {
+      const parsed = JSON.parse(val)
+      if (Array.isArray(parsed)) return parsed as { icon: string; content: string }[]
+      return [{ icon: '', content: val }]
+    } catch {
+      return val.trim() ? [{ icon: '', content: val }] : []
+    }
+  }
+  const talents = parseTalents(form.talent)
+  const hasTalent = talents.some(t => t.content.replace(/<[^>]*>/g, '').trim().length > 0)
   const hasStats = STAT_ITEMS.some(s => (form[s.key] || 0) > 0)
 
   return (
@@ -158,7 +169,20 @@ export default function TroopPreviewModal({ form, categoryName, onClose }: Props
           {hasTalent && (
             <div className="bg-wiki-gray-light border border-wiki-border rounded-xl p-5 mb-4">
               <h3 className="font-bold text-wiki-accent mb-3 text-sm uppercase tracking-wider">兵種天賦</h3>
-              <MarkdownRenderer content={form.talent!} />
+              <div className="space-y-4">
+                {talents.map((t, i) => (
+                  <div key={i} className="bg-wiki-gray rounded-lg p-4 flex gap-4 items-start">
+                    {t.icon ? (
+                      <img src={t.icon} alt="" className="w-12 h-12 object-contain rounded flex-shrink-0" />
+                    ) : (
+                      <div className="w-12 h-12 bg-wiki-border rounded flex-shrink-0 flex items-center justify-center text-wiki-text-muted text-xl">✦</div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <MarkdownRenderer content={t.content} />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
