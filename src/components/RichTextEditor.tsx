@@ -120,7 +120,8 @@ export default function RichTextEditor({
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      // StarterKit 新版已內含 link / underline，停用以避免與下方自訂版本重複
+      StarterKit.configure({ link: false, underline: false } as any),
       Underline,
       TextStyle,
       Color,
