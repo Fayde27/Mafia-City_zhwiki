@@ -124,6 +124,7 @@ async function saveRelations(characterId: string, data: any) {
     if (data.skins.length > 0) {
       check(await supabaseAdmin.from('CharacterSkin').insert(
         data.skins.map((s: any, i: number) => ({
+          id: crypto.randomUUID(),
           characterId,
           name: s.name,
           art: s.art,
@@ -141,6 +142,7 @@ async function saveRelations(characterId: string, data: any) {
     if (data.skinBonds.length > 0) {
       check(await supabaseAdmin.from('CharacterSkinBond').insert(
         data.skinBonds.map((b: any, i: number) => ({
+          id: crypto.randomUUID(),
           characterId,
           name: b.name,
           skinIds: JSON.stringify(b.skinIds || []),
@@ -164,13 +166,13 @@ async function saveRelations(characterId: string, data: any) {
       const tc = data.teamComps[i]
       const { data: inserted, error } = await supabaseAdmin
         .from('CharacterTeamComp')
-        .insert({ characterId, name: tc.name, reason: tc.reason, sortOrder: i })
+        .insert({ id: crypto.randomUUID(), characterId, name: tc.name, reason: tc.reason, sortOrder: i })
         .select('id')
         .single()
       check({ error }, '保存陣容搭配')
       if (inserted && Array.isArray(tc.memberIds) && tc.memberIds.length > 0) {
         check(await supabaseAdmin.from('CharacterTeamCompMember').insert(
-          tc.memberIds.map((mid: string, j: number) => ({ teamCompId: inserted.id, memberId: mid, sortOrder: j }))
+          tc.memberIds.map((mid: string, j: number) => ({ id: crypto.randomUUID(), teamCompId: inserted.id, memberId: mid, sortOrder: j }))
         ), '保存陣容成員')
       }
     }
@@ -189,13 +191,13 @@ async function saveRelations(characterId: string, data: any) {
       const bb = data.bloodBonds[i]
       const { data: inserted, error } = await supabaseAdmin
         .from('CharacterBloodBond')
-        .insert({ characterId, requiredStars: bb.requiredStars || 0, bonuses: JSON.stringify(bb.bonuses || []), sortOrder: i })
+        .insert({ id: crypto.randomUUID(), characterId, requiredStars: bb.requiredStars || 0, bonuses: JSON.stringify(bb.bonuses || []), sortOrder: i })
         .select('id')
         .single()
       check({ error }, '保存血盟')
       if (inserted && Array.isArray(bb.memberIds) && bb.memberIds.length > 0) {
         check(await supabaseAdmin.from('CharacterBloodBondMember').insert(
-          bb.memberIds.map((mid: string, j: number) => ({ bloodBondId: inserted.id, memberId: mid, sortOrder: j }))
+          bb.memberIds.map((mid: string, j: number) => ({ id: crypto.randomUUID(), bloodBondId: inserted.id, memberId: mid, sortOrder: j }))
         ), '保存血盟成員')
       }
     }
@@ -205,7 +207,7 @@ async function saveRelations(characterId: string, data: any) {
     check(await supabaseAdmin.from('CharacterEquipment').delete().eq('characterId', characterId), '刪除舊裝備')
     if (data.equipmentIds.length > 0) {
       check(await supabaseAdmin.from('CharacterEquipment').insert(
-        data.equipmentIds.map((eid: string, i: number) => ({ characterId, equipmentId: eid, sortOrder: i }))
+        data.equipmentIds.map((eid: string, i: number) => ({ id: crypto.randomUUID(), characterId, equipmentId: eid, sortOrder: i }))
       ), '保存裝備')
     }
   }

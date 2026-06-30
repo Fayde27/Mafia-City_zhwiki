@@ -98,6 +98,7 @@ async function saveRelations(characterId: string, data: any) {
     if (data.skins.length > 0) {
       await supabaseAdmin.from('CharacterSkin').insert(
         data.skins.map((s: any, i: number) => ({
+          id: crypto.randomUUID(),
           characterId,
           name: s.name,
           art: s.art,
@@ -116,6 +117,7 @@ async function saveRelations(characterId: string, data: any) {
     if (data.skinBonds.length > 0) {
       await supabaseAdmin.from('CharacterSkinBond').insert(
         data.skinBonds.map((b: any, i: number) => ({
+          id: crypto.randomUUID(),
           characterId,
           name: b.name,
           skinIds: JSON.stringify(b.skinIds || []),
@@ -142,11 +144,12 @@ async function saveRelations(characterId: string, data: any) {
       const tc = data.teamComps[i]
       const { data: inserted } = await supabaseAdmin
         .from('CharacterTeamComp')
-        .insert({ characterId, name: tc.name, reason: tc.reason, sortOrder: i })
+        .insert({ id: crypto.randomUUID(), characterId, name: tc.name, reason: tc.reason, sortOrder: i })
         .select('id')
         .single()
       if (inserted && Array.isArray(tc.memberIds)) {
         const members = tc.memberIds.map((mid: string, j: number) => ({
+          id: crypto.randomUUID(),
           teamCompId: inserted.id,
           memberId: mid,
           sortOrder: j,
@@ -174,6 +177,7 @@ async function saveRelations(characterId: string, data: any) {
       const { data: inserted } = await supabaseAdmin
         .from('CharacterBloodBond')
         .insert({
+          id: crypto.randomUUID(),
           characterId,
           requiredStars: bb.requiredStars || 0,
           bonuses: JSON.stringify(bb.bonuses || []),
@@ -183,6 +187,7 @@ async function saveRelations(characterId: string, data: any) {
         .single()
       if (inserted && Array.isArray(bb.memberIds)) {
         const members = bb.memberIds.map((mid: string, j: number) => ({
+          id: crypto.randomUUID(),
           bloodBondId: inserted.id,
           memberId: mid,
           sortOrder: j,
@@ -200,6 +205,7 @@ async function saveRelations(characterId: string, data: any) {
     if (data.equipmentIds.length > 0) {
       await supabaseAdmin.from('CharacterEquipment').insert(
         data.equipmentIds.map((eid: string, i: number) => ({
+          id: crypto.randomUUID(),
           characterId,
           equipmentId: eid,
           sortOrder: i,
@@ -214,6 +220,7 @@ async function saveRelations(characterId: string, data: any) {
     if (data.articleIds.length > 0) {
       await supabaseAdmin.from('CharacterArticle').insert(
         data.articleIds.map((aid: string, i: number) => ({
+          id: crypto.randomUUID(),
           characterId,
           articleId: aid,
           sortOrder: i,
