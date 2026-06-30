@@ -87,13 +87,13 @@ export default function CharacterListPage() {
 
   const getRarityStars = (rarity: number) => '★'.repeat(Math.max(0, rarity)) + '☆'.repeat(Math.max(0, 5 - rarity))
 
-  // 稀有度漸變條（class 為完整字串字面量，確保 Tailwind 不被裁剪）
-  const rarityGradient = (rarity: number) =>
-    rarity >= 5 ? 'from-yellow-500 via-amber-300 to-yellow-500' :
-    rarity >= 4 ? 'from-orange-500 via-orange-300 to-orange-500' :
-    rarity >= 3 ? 'from-purple-500 via-fuchsia-400 to-purple-500' :
-    rarity >= 2 ? 'from-blue-500 via-sky-400 to-blue-500' :
-                  'from-gray-500 via-gray-300 to-gray-500'
+  // 稀有度色（底部最濃、向上漸弱）— class 為完整字面量，避免 Tailwind 裁剪
+  const rarityFade = (rarity: number) =>
+    rarity >= 5 ? 'from-yellow-500' :
+    rarity >= 4 ? 'from-orange-500' :
+    rarity >= 3 ? 'from-purple-500' :
+    rarity >= 2 ? 'from-blue-500' :
+                  'from-gray-500'
 
   // 動態分組
   const filterTypes = Array.from(new Set(filterOptions.map(o => o.type)))
@@ -198,15 +198,11 @@ export default function CharacterListPage() {
                   </div>
                 )}
 
-                {/* 底部：稀有度漸變條 + 黑框白字名字 */}
+                {/* 底部：稀有度色（向上漸弱）+ 黑框白字名字 */}
                 <div className="absolute bottom-0 left-0 right-0">
-                  {/* 與立繪銜接的柔和暗化 */}
-                  <div className="h-10 bg-gradient-to-t from-black/70 to-transparent" />
-                  {/* 稀有度漸變條 */}
-                  <div className={`h-1.5 w-full bg-gradient-to-r ${rarityGradient(character.rarity)}`} />
-                  {/* 黑框白字名字 */}
-                  <div className="bg-black/85 px-2 py-1.5">
-                    <p className="text-white font-bold text-sm leading-tight text-center truncate drop-shadow">
+                  <div className={`h-[25px] bg-gradient-to-t ${rarityFade(character.rarity)} to-transparent pointer-events-none`} />
+                  <div className="bg-black/90 px-2 py-1.5 -mt-px">
+                    <p className="text-white font-bold text-sm leading-tight text-center truncate">
                       {character.name}
                     </p>
                   </div>
