@@ -73,7 +73,7 @@ const labelCls = 'block text-wiki-text text-sm font-bold uppercase tracking-wide
 
 後台統一入口：`/admin/characters`（三 Tab：全部 / 英雄 / 豪傑），編輯按鈕智能路由。
 
-**英雄**：8 張關聯表（皮膚/羁绊/陣容/血盟/裝備/攻略）· 4 軸雷達圖（攻擊/防衛/魅帥/速度）  
+**英雄**：8 張關聯表（皮膚/羁绊/陣容/血盟/裝備/攻略）· 4 軸雷達圖（攻擊/防衛/統帥/速度）  
 **豪傑**：全 JSON 字段 · 5 軸雷達圖（力量/技術/體魄/防護/速度，存 `attributes`）· 裝備存 `haojieEquip JSON({weapon,warbadge})` · `awakenHero` 布爾字段
 
 **豪傑裝備推薦 UI**：使用 `EquipPickerField` 組件（搜索框 + 可滾動列表），按 `equipType` 過濾（`haojie_weapon` / `haojie_warbadge`），不用 grid checkbox。
