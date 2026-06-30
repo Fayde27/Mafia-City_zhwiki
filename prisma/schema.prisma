@@ -373,6 +373,41 @@ model Item {
   category      ItemCategory @relation(fields: [categoryId], references: [id])
 }
 
+model EventCategory {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  icon        String?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  events      Event[]
+}
+
+model Event {
+  id            String        @id @default(cuid())
+  name          String
+  slug          String        @unique
+  summary       String?
+  icon          String?
+  iconPosition  String?       @default("50% 50%")
+  image         String?
+  imagePosition String?       @default("50% 50%")
+  condition     String?       // 參與條件（富文本）
+  gameplay      String?       // 活動玩法（富文本）
+  rewards       String?       // 活動獎勵（富文本）
+  relatedGuides String?       // 相關攻略（富文本）
+  likes         Int           @default(0)
+  categoryId    String
+  sortOrder     Int           @default(0)
+  isFeatured    Boolean       @default(false)
+  isPublished   Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  category      EventCategory @relation(fields: [categoryId], references: [id])
+}
+
 model TroopCategory {
   id          String   @id @default(cuid())
   name        String

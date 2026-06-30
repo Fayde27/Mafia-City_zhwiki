@@ -11,6 +11,7 @@ const TABLE_MAP: Record<string, string> = {
   item:         'Item',
   troop:        'Troop',
   announcement: 'Announcement',
+  event:        'Event',
 }
 
 export async function POST(request: Request) {

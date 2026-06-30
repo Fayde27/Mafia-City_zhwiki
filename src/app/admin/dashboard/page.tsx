@@ -39,6 +39,7 @@ const NAV_SECTIONS = [
       { label: '道具圖鑑', href: '/admin/items', icon: '🎒', desc: '列表、分類、篩選設定' },
       { label: '兵種圖鑑', href: '/admin/troops', icon: '🛡️', desc: '列表、分類、篩選設定' },
       { label: '建築圖鑑', href: '/admin/buildings', icon: '🏛️', desc: '列表、分類、篩選設定' },
+      { label: '活動一覽', href: '/admin/events', icon: '🎉', desc: '活動列表、分類管理' },
     ],
   },
   {

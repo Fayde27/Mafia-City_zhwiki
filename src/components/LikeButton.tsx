@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 
 interface LikeButtonProps {
-  entityType: 'article' | 'character' | 'building' | 'equipment' | 'item' | 'troop' | 'announcement'
+  entityType: 'article' | 'character' | 'building' | 'equipment' | 'item' | 'troop' | 'announcement' | 'event'
   entityId: string
   initialLikes?: number
 }
