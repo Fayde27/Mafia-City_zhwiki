@@ -360,7 +360,7 @@ export default function HomePage() {
       <main className="container mx-auto px-4 py-6">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* 側邊欄 */}
-          <div className="lg:w-72 flex-shrink-0 order-2 lg:order-1">
+          <div className="hidden lg:block lg:w-72 flex-shrink-0 order-2 lg:order-1">
             <div className="lg:sticky lg:top-20 space-y-6">
               {/* 動態 SidebarSection */}
               {sidebarSections.length > 0 ? sidebarSections.map(section => {
