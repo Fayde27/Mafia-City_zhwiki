@@ -18,7 +18,7 @@ interface Character {
   banner: string
   avatarPosition?: string
   bannerPosition?: string
-  rarity: number
+  rarity: string
   role: string
   weapon: string
   coreBonus: string
@@ -77,7 +77,7 @@ export default function CharacterListPage() {
   const filteredCharacters = characters.filter(c => {
     return Object.entries(activeFilters).every(([type, value]) => {
       if (!value || value === 'all') return true
-      if (type === 'rarity') return c.rarity === parseInt(value)
+      if (type === 'rarity') return String(c.rarity) === value
       if (type === 'role') return c.role === value
       if (type === 'weapon') return c.weapon === value
       // 自定義類型：嘗試匹配角色所有字段
@@ -87,13 +87,12 @@ export default function CharacterListPage() {
 
   const getRarityStars = (rarity: number) => '★'.repeat(Math.max(0, rarity)) + '☆'.repeat(Math.max(0, 5 - rarity))
 
-  // 稀有度色（底部最濃、向上漸弱）— class 為完整字面量，避免 Tailwind 裁剪
-  const rarityFade = (rarity: number) =>
-    rarity >= 5 ? 'from-yellow-500' :
-    rarity >= 4 ? 'from-orange-500' :
-    rarity >= 3 ? 'from-purple-500' :
-    rarity >= 2 ? 'from-blue-500' :
-                  'from-gray-500'
+  // 稀有度色（底部最濃、向上漸弱）— rarity 為字串 金/紫/藍；class 為完整字面量避免 Tailwind 裁剪
+  const rarityFade = (rarity: string) =>
+    rarity === '金' ? 'from-yellow-500' :
+    rarity === '紫' ? 'from-purple-500' :
+    rarity === '藍' ? 'from-blue-500' :
+                      'from-gray-500'
 
   // 動態分組
   const filterTypes = Array.from(new Set(filterOptions.map(o => o.type)))
