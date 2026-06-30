@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 import LikeButton from '@/components/LikeButton'
+import SectionCard from '@/components/SectionCard'
 import { BUILDING_AFFILIATION_LABELS, isSeasonalBuilding } from '@/lib/building'
 
 interface Building {
@@ -62,7 +63,6 @@ export default function BuildingDetailPage() {
   const buildingSlug = params?.buildingSlug as string
   const [building, setBuilding] = useState<Building | null>(null)
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('details')
 
   useEffect(() => {
     fetch(`/api/wiki/buildings?category=${categorySlug}&slug=${buildingSlug}`)
@@ -79,11 +79,6 @@ export default function BuildingDetailPage() {
   const seasonal = isSeasonalBuilding(building?.buildingType)
   const upgradeTable = parseUpgradeTable(building?.upgradeLevels)
   const hasUpgrade = !seasonal && ((upgradeTable && upgradeTable.rows.length > 0) || !!building?.upgradeInfo)
-
-  const tabs = [
-    { id: 'details', label: '建築詳情' },
-    ...(hasUpgrade ? [{ id: 'upgrade', label: '升級詳情' }] : []),
-  ]
 
   if (loading) {
     return (
@@ -189,74 +184,51 @@ export default function BuildingDetailPage() {
               <p className="text-wiki-text-muted text-sm mb-5 leading-relaxed">{building.summary}</p>
             )}
 
-            {/* Tab 切換 */}
-            <div className="flex items-center gap-2 mb-5 overflow-x-auto pb-1">
-              {tabs.map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`px-4 py-2 text-sm font-bold whitespace-nowrap rounded transition-colors ${
-                    activeTab === tab.id
-                      ? 'bg-wiki-accent text-wiki-darker'
-                      : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
+            {/* 建築詳情 */}
+            <SectionCard title="建築詳情">
+              {building.description
+                ? <MarkdownRenderer content={building.description} />
+                : <p className="text-wiki-text-muted text-sm">暫無建築詳情</p>
+              }
+            </SectionCard>
 
-            {/* Tab 內容 */}
-            <div className="bg-wiki-gray-light border border-wiki-border rounded-xl p-5 md:p-7">
-              {activeTab === 'details' && (
-                <div>
-                  {building.description
-                    ? <MarkdownRenderer content={building.description} />
-                    : <p className="text-wiki-text-muted text-sm">暫無建築詳情</p>
-                  }
-                </div>
-              )}
-
-              {activeTab === 'upgrade' && (
-                <div>
-                  {/* 結構化升級表格 */}
-                  {upgradeTable && upgradeTable.rows.length > 0 && (
-                    <div className="overflow-x-auto mb-6">
-                      <table className="w-full min-w-[520px] text-sm border-collapse">
-                        <thead>
-                          <tr>
-                            {upgradeTable.columns.map((col, ci) => (
-                              <th key={ci}
-                                className="text-left px-4 py-2.5 bg-wiki-gray text-wiki-accent font-bold border border-wiki-border whitespace-nowrap">
-                                {col}
-                              </th>
+            {/* 升級詳情 */}
+            {hasUpgrade && (
+              <SectionCard title="升級詳情">
+                {/* 結構化升級表格 */}
+                {upgradeTable && upgradeTable.rows.length > 0 && (
+                  <div className="overflow-x-auto mb-6">
+                    <table className="w-full min-w-[520px] text-sm border-collapse">
+                      <thead>
+                        <tr>
+                          {upgradeTable.columns.map((col, ci) => (
+                            <th key={ci}
+                              className="text-left px-4 py-2.5 bg-wiki-gray text-wiki-accent font-bold border border-wiki-border whitespace-nowrap">
+                              {col}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {upgradeTable.rows.map((row, ri) => (
+                          <tr key={ri} className={ri % 2 === 0 ? 'bg-wiki-card' : 'bg-wiki-gray/30'}>
+                            {row.map((cell, ci) => (
+                              <td key={ci} className="px-4 py-2.5 text-wiki-text border border-wiki-border">
+                                {cell}
+                              </td>
                             ))}
                           </tr>
-                        </thead>
-                        <tbody>
-                          {upgradeTable.rows.map((row, ri) => (
-                            <tr key={ri} className={ri % 2 === 0 ? 'bg-wiki-card' : 'bg-wiki-gray/30'}>
-                              {row.map((cell, ci) => (
-                                <td key={ci} className="px-4 py-2.5 text-wiki-text border border-wiki-border">
-                                  {cell}
-                                </td>
-                              ))}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                  {/* 舊版富文本升級信息兼容 */}
-                  {building.upgradeInfo && (
-                    <MarkdownRenderer content={building.upgradeInfo} />
-                  )}
-                  {!upgradeTable?.rows.length && !building.upgradeInfo && (
-                    <p className="text-wiki-text-muted text-sm">暫無升級詳情</p>
-                  )}
-                </div>
-              )}
-            </div>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+                {/* 舊版富文本升級信息兼容 */}
+                {building.upgradeInfo && (
+                  <MarkdownRenderer content={building.upgradeInfo} />
+                )}
+              </SectionCard>
+            )}
           </div>
 
           {/* 右側信息欄 */}

@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 import LikeButton from '@/components/LikeButton'
+import SectionCard from '@/components/SectionCard'
 
 interface Character {
   id: string
@@ -44,7 +45,6 @@ export default function CharacterDetailPage() {
   const characterSlug = params?.characterSlug as string
   const [character, setCharacter] = useState<Character | null>(null)
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('attributes')
 
   useEffect(() => {
     fetch(`/api/wiki/characters?category=${categorySlug}&slug=${characterSlug}`)
@@ -63,14 +63,6 @@ export default function CharacterDetailPage() {
   const getRarityStars = (rarity: number) => {
     return '★'.repeat(Math.max(0, rarity)) + '☆'.repeat(Math.max(0, 5 - rarity))
   }
-
-  const tabs = [
-    { id: 'attributes', label: '角色屬性' },
-    { id: 'skills', label: '技能詳情' },
-    { id: 'rumors', label: '黑道傳聞' },
-    { id: 'teamComp', label: '陣容搭配' },
-    { id: 'troopRec', label: '配兵推薦' },
-  ]
 
   if (loading) {
     return (
@@ -181,61 +173,24 @@ export default function CharacterDetailPage() {
               </div>
             )}
 
-            <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-              {tabs.filter(tab => {
-                if (tab.id === 'attributes' && !character.attributes) return false
-                if (tab.id === 'skills' && !character.skills) return false
-                if (tab.id === 'rumors' && !character.rumors) return false
-                if (tab.id === 'teamComp' && !character.teamComp) return false
-                if (tab.id === 'troopRec' && !character.troopRec) return false
-                return true
-              }).map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`px-4 py-2 text-sm font-bold uppercase tracking-wider whitespace-nowrap transition-colors ${
-                    activeTab === tab.id
-                      ? 'bg-wiki-accent text-wiki-darker'
-                      : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-6">
-              {activeTab === 'attributes' && character.attributes && (
-                <MarkdownRenderer content={character.attributes} />
-              )}
-              {activeTab === 'skills' && character.skills && (
-                <MarkdownRenderer content={character.skills} />
-              )}
-              {activeTab === 'rumors' && character.rumors && (
-                <MarkdownRenderer content={character.rumors} />
-              )}
-              {activeTab === 'teamComp' && character.teamComp && (
-                <MarkdownRenderer content={character.teamComp} />
-              )}
-              {activeTab === 'troopRec' && character.troopRec && (
-                <MarkdownRenderer content={character.troopRec} />
-              )}
-              {activeTab === 'attributes' && !character.attributes && (
-                <p className="text-wiki-text-muted text-center py-8">暫無角色屬性</p>
-              )}
-              {activeTab === 'skills' && !character.skills && (
-                <p className="text-wiki-text-muted text-center py-8">暫無技能詳情</p>
-              )}
-              {activeTab === 'rumors' && !character.rumors && (
-                <p className="text-wiki-text-muted text-center py-8">暫無黑道傳聞</p>
-              )}
-              {activeTab === 'teamComp' && !character.teamComp && (
-                <p className="text-wiki-text-muted text-center py-8">暫無陣容搭配</p>
-              )}
-              {activeTab === 'troopRec' && !character.troopRec && (
-                <p className="text-wiki-text-muted text-center py-8">暫無配兵推薦</p>
-              )}
-            </div>
+            {character.attributes && (
+              <SectionCard title="角色屬性"><MarkdownRenderer content={character.attributes} /></SectionCard>
+            )}
+            {character.skills && (
+              <SectionCard title="技能詳情"><MarkdownRenderer content={character.skills} /></SectionCard>
+            )}
+            {character.rumors && (
+              <SectionCard title="黑道傳聞"><MarkdownRenderer content={character.rumors} /></SectionCard>
+            )}
+            {character.teamComp && (
+              <SectionCard title="陣容搭配"><MarkdownRenderer content={character.teamComp} /></SectionCard>
+            )}
+            {character.troopRec && (
+              <SectionCard title="配兵推薦"><MarkdownRenderer content={character.troopRec} /></SectionCard>
+            )}
+            {!character.attributes && !character.skills && !character.rumors && !character.teamComp && !character.troopRec && (
+              <div className="bg-wiki-gray-light border border-wiki-border rounded-xl p-8 text-center text-wiki-text-muted">暫無角色詳情</div>
+            )}
           </div>
 
           <div className="lg:col-span-1">

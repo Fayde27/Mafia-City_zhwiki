@@ -10,6 +10,7 @@ import { useParams } from 'next/navigation'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 import LikeButton from '@/components/LikeButton'
 import ItemExchangeContent, { parseExchangeContent } from '@/components/ItemExchangeContent'
+import SectionCard from '@/components/SectionCard'
 
 interface Item {
   id: string
@@ -36,7 +37,6 @@ export default function ItemDetailPage() {
   const itemSlug = params?.itemSlug as string
   const [item, setItem] = useState<Item | null>(null)
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('description')
 
   useEffect(() => {
     fetch(`/api/wiki/items?category=${categorySlug}&slug=${itemSlug}`)
@@ -47,21 +47,6 @@ export default function ItemDetailPage() {
       })
       .catch(() => setLoading(false))
   }, [categorySlug, itemSlug])
-
-  const tabs = [
-    { id: 'exchange',    label: '兌換內容', show: !!item?.isExchange && !!parseExchangeContent(item?.exchangeContent) },
-    { id: 'description', label: '道具詳情', show: !!item?.description },
-    { id: 'source',      label: '獲取途徑',  show: !!item?.source },
-    { id: 'usage',       label: '使用方法', show: !!item?.usage },
-    { id: 'recipe',      label: '合成配方', show: !!item?.recipe },
-  ].filter(t => t.show)
-
-  // 選第一個有內容的 tab
-  useEffect(() => {
-    if (tabs.length > 0 && !tabs.find(t => t.id === activeTab)) {
-      setActiveTab(tabs[0].id)
-    }
-  }, [item])
 
   if (loading) {
     return (
@@ -151,52 +136,36 @@ export default function ItemDetailPage() {
           </div>
         )}
 
-        {/* 道具簡介 — 獨立模塊，富文本渲染 */}
+        {/* 各內容模塊 — 統一標題卡片格式 */}
         {item.summary && (
-          <div className="bg-wiki-gray-light border border-wiki-border rounded-xl mb-5">
-            <div className="px-5 py-3 border-b border-wiki-border">
-              <h2 className="text-sm font-bold text-wiki-accent uppercase tracking-wider">道具簡介</h2>
-            </div>
-            <div className="px-5 py-4">
-              <MarkdownRenderer content={item.summary} />
-            </div>
-          </div>
+          <SectionCard title="道具簡介">
+            <MarkdownRenderer content={item.summary} />
+          </SectionCard>
         )}
-
-        {/* Tab 切換 + 內容 */}
-        {tabs.length > 0 && (
-          <>
-            <div className="flex items-center gap-2 mb-5 overflow-x-auto pb-1">
-              {tabs.map(tab => (
-                <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                  className={`px-4 py-2 text-sm font-bold whitespace-nowrap rounded transition-colors ${
-                    activeTab === tab.id
-                      ? 'bg-wiki-accent text-wiki-darker'
-                      : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
-                  }`}>
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="bg-wiki-gray-light border border-wiki-border rounded-xl p-5 md:p-7">
-              {activeTab === 'exchange' && (
-                <ItemExchangeContent raw={item.exchangeContent} />
-              )}
-              {activeTab === 'description' && item.description && (
-                <MarkdownRenderer content={item.description} />
-              )}
-              {activeTab === 'source' && item.source && (
-                <MarkdownRenderer content={item.source} />
-              )}
-              {activeTab === 'usage' && item.usage && (
-                <MarkdownRenderer content={item.usage} />
-              )}
-              {activeTab === 'recipe' && item.recipe && (
-                <MarkdownRenderer content={item.recipe} />
-              )}
-            </div>
-          </>
+        {item.isExchange && parseExchangeContent(item.exchangeContent) && (
+          <SectionCard title="兌換內容">
+            <ItemExchangeContent raw={item.exchangeContent} />
+          </SectionCard>
+        )}
+        {item.description && (
+          <SectionCard title="道具詳情">
+            <MarkdownRenderer content={item.description} />
+          </SectionCard>
+        )}
+        {item.source && (
+          <SectionCard title="獲取途徑">
+            <MarkdownRenderer content={item.source} />
+          </SectionCard>
+        )}
+        {item.usage && (
+          <SectionCard title="使用方法">
+            <MarkdownRenderer content={item.usage} />
+          </SectionCard>
+        )}
+        {item.recipe && (
+          <SectionCard title="合成配方">
+            <MarkdownRenderer content={item.recipe} />
+          </SectionCard>
         )}
 
         {/* 點贊 */}
