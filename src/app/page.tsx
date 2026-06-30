@@ -130,8 +130,7 @@ function HomeBannerCarousel({ articles }: { articles: Article[] }) {
   return (
     <section className="mb-6">
       <div
-        className="relative overflow-hidden rounded-xl bg-black"
-        style={{ aspectRatio: '16/5', minHeight: 120 }}
+        className="relative overflow-hidden rounded-xl bg-black aspect-[16/7] sm:aspect-[16/5] min-h-[120px]"
         onMouseEnter={() => { pausedRef.current = true }}
         onMouseLeave={() => { pausedRef.current = false }}
       >
@@ -362,7 +361,7 @@ export default function HomePage() {
         <div className="flex flex-col lg:flex-row gap-6">
           {/* 側邊欄 */}
           <div className="lg:w-72 flex-shrink-0 order-2 lg:order-1">
-            <div className="sticky top-20 space-y-6">
+            <div className="lg:sticky lg:top-20 space-y-6">
               {/* 動態 SidebarSection */}
               {sidebarSections.length > 0 ? sidebarSections.map(section => {
                 const sectionItems = sidebarNavItems.filter(item => item.section === section.slug)

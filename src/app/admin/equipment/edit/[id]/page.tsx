@@ -343,8 +343,8 @@ export default function AdminEquipmentEditPage() {
                     </div>
                   )}
                   <div>
-                    <label className={labelCls}>裝備屬性（多行文本）</label>
-                    <textarea value={form.stats} onChange={e => set('stats', e.target.value)} rows={6} className={inputCls} placeholder="每行一條屬性，如：&#10;攻擊 +120&#10;生命 +800" />
+                    <label className={labelCls}>裝備屬性</label>
+                    <RichTextEditor value={form.stats} onChange={html => set('stats', html)} minHeight="min-h-[120px]" placeholder="每行一條屬性，如：攻擊 +120 / 生命 +800（可加內鏈）" />
                   </div>
                 </div>
               )}

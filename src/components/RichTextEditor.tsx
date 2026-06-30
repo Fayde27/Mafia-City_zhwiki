@@ -10,6 +10,7 @@ import { TextStyle } from '@tiptap/extension-text-style'
 import Color from '@tiptap/extension-color'
 import Image from '@tiptap/extension-image'
 import ImageNodeView from './ImageNode'
+import LinkPickerModal from './LinkPickerModal'
 import { useEffect, useRef, useState } from 'react'
 
 // 自訂 FontSize extension（inline，僅作用於選取的文字）
@@ -81,6 +82,8 @@ interface RichTextEditorProps {
   onChange: (html: string) => void
   placeholder?: string
   minHeight?: string
+  /** 精簡內聯模式：單行高度，工具欄僅保留 粗體 / 連結，適合短字段加內鏈 */
+  inline?: boolean
 }
 
 const PRESET_COLORS = [
@@ -110,9 +113,12 @@ export default function RichTextEditor({
   value,
   onChange,
   placeholder = '請輸入內容...',
-  minHeight = 'min-h-[200px]',
+  minHeight,
+  inline = false,
 }: RichTextEditorProps) {
+  const editorMinHeight = minHeight ?? (inline ? 'min-h-[40px]' : 'min-h-[200px]')
   const [showColorPicker, setShowColorPicker] = useState(false)
+  const [showLinkModal, setShowLinkModal] = useState(false)
   const [uploading, setUploading] = useState(false)
   const colorPickerRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -136,7 +142,7 @@ export default function RichTextEditor({
     },
     editorProps: {
       attributes: {
-        class: `focus:outline-none ${minHeight} px-4 py-3`,
+        class: `focus:outline-none ${editorMinHeight} ${inline ? 'px-3 py-2' : 'px-4 py-3'}`,
         'data-placeholder': placeholder,
       },
       handlePaste: (_view, event) => {
@@ -211,6 +217,21 @@ export default function RichTextEditor({
     }
   }
 
+  // 插入連結（共用：完整與內聯工具欄）→ 彈出條目選擇 Modal
+  const handleSetLink = () => setShowLinkModal(true)
+
+  // Modal 確認：選取了文字則套用連結；未選取則插入條目名稱為連結文本
+  const applyLink = (url: string, label?: string) => {
+    setShowLinkModal(false)
+    if (!url || !editor) return
+    if (editor.state.selection.empty && label) {
+      const safe = url.replace(/"/g, '&quot;')
+      editor.chain().focus().insertContent(`<a href="${safe}">${label}</a>`).run()
+    } else {
+      editor.chain().focus().setLink({ href: url }).run()
+    }
+  }
+
   if (!editor) return null
 
   const btn = (active: boolean) =>
@@ -218,7 +239,25 @@ export default function RichTextEditor({
 
   const currentColor = editor.getAttributes('textStyle').color || '#e8e0d0'
 
+  // 內聯精簡工具欄：僅 粗體 / 連結 / 移除連結
+  if (inline) {
+    return (
+      <>
+      <div className="border-2 border-wiki-border rounded-lg overflow-hidden focus-within:border-wiki-accent" style={{ background: '#f5f5f0' }}>
+        <div className="flex items-center gap-1 px-2 py-1 border-b border-wiki-border" style={{ background: '#e8e0d0' }}>
+          <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={btn(editor.isActive('bold'))} title="粗體"><strong>B</strong></button>
+          <button type="button" onClick={handleSetLink} className={btn(editor.isActive('link'))} title="插入連結">🔗</button>
+          <button type="button" onClick={() => editor.chain().focus().unsetLink().run()} className={btn(false)} title="移除連結">✕連結</button>
+        </div>
+        <EditorContent editor={editor} />
+      </div>
+      <LinkPickerModal open={showLinkModal} onClose={() => setShowLinkModal(false)} onConfirm={applyLink} />
+      </>
+    )
+  }
+
   return (
+    <>
     <div className="border-2 border-wiki-border rounded-lg overflow-hidden focus-within:border-wiki-accent" style={{ background: '#f5f5f0' }}>
       {/* 工具欄 */}
       <div className="flex flex-wrap gap-1 px-3 py-2 border-b border-wiki-border" style={{ background: '#e8e0d0' }}>
@@ -322,10 +361,7 @@ export default function RichTextEditor({
         {/* 連結 */}
         <button
           type="button"
-          onClick={() => {
-            const url = prompt('輸入連結 URL:')
-            if (url) editor.chain().focus().setLink({ href: url }).run()
-          }}
+          onClick={handleSetLink}
           className={btn(editor.isActive('link'))}
           title="插入連結"
         >🔗</button>
@@ -369,5 +405,7 @@ export default function RichTextEditor({
       {/* 編輯區域 */}
       <EditorContent editor={editor} />
     </div>
+    <LinkPickerModal open={showLinkModal} onClose={() => setShowLinkModal(false)} onConfirm={applyLink} />
+    </>
   )
 }

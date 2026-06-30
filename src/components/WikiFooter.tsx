@@ -111,7 +111,7 @@ export default function WikiFooter() {
                 href="https://mafiacitytw.go.link/htiPF"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-wiki-gray border border-wiki-border rounded-md px-2.5 py-1.5 w-32 hover:border-wiki-accent/50 transition-colors group"
+                className="flex items-center gap-2 bg-wiki-gray border border-wiki-border rounded-md px-2.5 py-1.5 w-full max-w-[8rem] hover:border-wiki-accent/50 transition-colors group"
               >
                 <span className="text-wiki-text-muted group-hover:text-white transition-colors flex-shrink-0"><AppleIcon /></span>
                 <div className="min-w-0">
@@ -123,7 +123,7 @@ export default function WikiFooter() {
                 href="https://mafiacitytw.go.link/htiPF"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-wiki-gray border border-wiki-border rounded-md px-2.5 py-1.5 w-32 hover:border-wiki-accent/50 transition-colors group"
+                className="flex items-center gap-2 bg-wiki-gray border border-wiki-border rounded-md px-2.5 py-1.5 w-full max-w-[8rem] hover:border-wiki-accent/50 transition-colors group"
               >
                 <span className="text-wiki-text-muted group-hover:text-white transition-colors flex-shrink-0"><GooglePlayIcon /></span>
                 <div className="min-w-0">

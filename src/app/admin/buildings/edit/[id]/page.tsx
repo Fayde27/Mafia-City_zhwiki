@@ -405,8 +405,7 @@ export default function AdminBuildingEditPage() {
                 {seasonal && (
                   <div>
                     <label className={labelCls}>{BUILDING_AFFILIATION_LABELS[form.buildingType]}</label>
-                    <input value={form.affiliation} onChange={e => set('affiliation', e.target.value)}
-                      className={inputCls}
+                    <RichTextEditor inline value={form.affiliation} onChange={html => set('affiliation', html)}
                       placeholder={form.buildingType === 'season' ? '如：第 5 賽季' : '如：跨服爭霸賽事'} />
                   </div>
                 )}
@@ -471,19 +470,19 @@ export default function AdminBuildingEditPage() {
               <div className="space-y-4">
                 <div>
                   <label className={labelCls}>開放條件</label>
-                  <input value={form.unlockCondition} onChange={e => set('unlockCondition', e.target.value)}
-                    className={inputCls} placeholder="如：總部等級達到 5 級" />
+                  <RichTextEditor inline value={form.unlockCondition} onChange={html => set('unlockCondition', html)}
+                    placeholder="如：總部等級達到 5 級" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className={labelCls}>建築類型</label>
-                    <input value={form.type} onChange={e => set('type', e.target.value)}
-                      className={inputCls} placeholder="如：資源建築" />
+                    <RichTextEditor inline value={form.type} onChange={html => set('type', html)}
+                      placeholder="如：資源建築" />
                   </div>
                   <div>
                     <label className={labelCls}>建築核心功能</label>
-                    <input value={form.function} onChange={e => set('function', e.target.value)}
-                      className={inputCls} placeholder="如：生產金幣" />
+                    <RichTextEditor inline value={form.function} onChange={html => set('function', html)}
+                      placeholder="如：生產金幣" />
                   </div>
                 </div>
               </div>

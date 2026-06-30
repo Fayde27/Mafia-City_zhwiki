@@ -149,7 +149,7 @@ export default function EquipmentDetailPage() {
             {!haojie && hasStats && (
               <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6">
                 <h3 className="text-lg font-bold text-wiki-accent mb-3">裝備屬性</h3>
-                <p className="text-wiki-text whitespace-pre-line">{equipment.stats}</p>
+                <MarkdownRenderer content={equipment.stats!} />
               </div>
             )}
 
@@ -191,7 +191,7 @@ export default function EquipmentDetailPage() {
 
           {/* 側欄信息 */}
           <div className="lg:col-span-1">
-            <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6 sticky top-4">
+            <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6 lg:sticky lg:top-4">
               <h3 className="text-lg font-bold text-wiki-accent mb-4">裝備信息</h3>
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between"><span className="text-wiki-text-muted">類型</span><span className="text-wiki-text font-bold">{typeLabel}</span></div>

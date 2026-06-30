@@ -77,8 +77,8 @@ function ExchangeContentEditor({ value, onChange }: { value: string; onChange: (
                 />
               </div>
               <div className="flex-1 space-y-2 min-w-0">
-                <input value={it.name} onChange={e => setItem(i, 'name', e.target.value)}
-                  className={rowInput} placeholder="物品名稱，如：6級紫寶石項鍊" />
+                <RichTextEditor inline value={it.name} onChange={html => setItem(i, 'name', html)}
+                  placeholder="物品名稱，如：6級紫寶石項鍊（可加內鏈）" />
                 <input value={it.quantity} onChange={e => setItem(i, 'quantity', e.target.value)}
                   className={rowInput} placeholder="數量，如：1" />
               </div>

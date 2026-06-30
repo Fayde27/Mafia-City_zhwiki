@@ -222,7 +222,7 @@ export default function BuildingDetailPage() {
                   {/* 結構化升級表格 */}
                   {upgradeTable && upgradeTable.rows.length > 0 && (
                     <div className="overflow-x-auto mb-6">
-                      <table className="w-full text-sm border-collapse">
+                      <table className="w-full min-w-[520px] text-sm border-collapse">
                         <thead>
                           <tr>
                             {upgradeTable.columns.map((col, ci) => (
@@ -261,7 +261,7 @@ export default function BuildingDetailPage() {
 
           {/* 右側信息欄 */}
           <div className="lg:col-span-1">
-            <div className="bg-wiki-gray-light border border-wiki-border rounded-xl p-5 sticky top-4">
+            <div className="bg-wiki-gray-light border border-wiki-border rounded-xl p-5 lg:sticky lg:top-4">
               <h3 className="text-base font-bold text-wiki-accent mb-4">建築信息</h3>
               <div className="space-y-3 text-sm">
                 {building.category && (
@@ -273,25 +273,25 @@ export default function BuildingDetailPage() {
                 {seasonal && building.affiliation && (
                   <div className="flex justify-between gap-2">
                     <span className="text-wiki-text-muted flex-shrink-0">{BUILDING_AFFILIATION_LABELS[building.buildingType || 'season']}</span>
-                    <span className="text-wiki-text font-bold text-right">{building.affiliation}</span>
+                    <div className="text-wiki-text font-bold text-right [&_*]:inline [&_p]:m-0"><MarkdownRenderer content={building.affiliation} /></div>
                   </div>
                 )}
                 {!seasonal && building.type && (
                   <div className="flex justify-between gap-2">
                     <span className="text-wiki-text-muted flex-shrink-0">建築類型</span>
-                    <span className="text-wiki-text font-bold text-right">{building.type}</span>
+                    <div className="text-wiki-text font-bold text-right [&_*]:inline [&_p]:m-0"><MarkdownRenderer content={building.type} /></div>
                   </div>
                 )}
                 {!seasonal && building.function && (
                   <div className="flex justify-between gap-2">
                     <span className="text-wiki-text-muted flex-shrink-0">核心功能</span>
-                    <span className="text-wiki-text text-right">{building.function}</span>
+                    <div className="text-wiki-text text-right [&_*]:inline [&_p]:m-0"><MarkdownRenderer content={building.function} /></div>
                   </div>
                 )}
                 {!seasonal && building.unlockCondition && (
                   <div className="flex justify-between gap-2">
                     <span className="text-wiki-text-muted flex-shrink-0">開放條件</span>
-                    <span className="text-wiki-text text-right">{building.unlockCondition}</span>
+                    <div className="text-wiki-text text-right [&_*]:inline [&_p]:m-0"><MarkdownRenderer content={building.unlockCondition} /></div>
                   </div>
                 )}
                 {!seasonal && building.rarity > 0 && (

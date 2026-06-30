@@ -1,5 +1,7 @@
 'use client'
 
+import MarkdownRenderer from './MarkdownRenderer'
+
 interface ExchangeItem { icon: string; name: string; quantity: string }
 interface ExchangeContent { intro: string; items: ExchangeItem[] }
 
@@ -32,7 +34,9 @@ export default function ItemExchangeContent({ raw }: { raw?: string }) {
                 ? <img src={it.icon} alt={it.name} className="w-full h-full object-contain p-0.5" />
                 : <span className="text-wiki-text-muted text-[10px]">無圖</span>}
             </div>
-            <span className="flex-1 text-wiki-text text-sm font-medium min-w-0 break-words">{it.name || '（未命名）'}</span>
+            <div className="flex-1 text-wiki-text text-sm font-medium min-w-0 break-words [&_*]:inline [&_p]:m-0">
+              {it.name ? <MarkdownRenderer content={it.name} /> : '（未命名）'}
+            </div>
             {it.quantity && (
               <span className="text-wiki-accent text-sm font-bold flex-shrink-0">× {it.quantity}</span>
             )}
