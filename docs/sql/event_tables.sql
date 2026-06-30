@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS "Event" (
   "condition"     TEXT,
   "gameplay"      TEXT,
   "rewards"       TEXT,
-  "relatedGuides" TEXT,
+  "relatedArticleIds" TEXT,
   "likes"         INTEGER NOT NULL DEFAULT 0,
   "categoryId"    TEXT NOT NULL REFERENCES "EventCategory"("id"),
   "sortOrder"     INTEGER NOT NULL DEFAULT 0,

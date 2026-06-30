@@ -43,8 +43,6 @@ export default function EventsWikiPage() {
         <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
           <Link href="/" className="hover:text-wiki-accent">首頁</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki" className="hover:text-wiki-accent">圖鑑</Link>
-          <span className="mx-2">/</span>
           <span className="text-wiki-text">活動一覽</span>
         </div>
 

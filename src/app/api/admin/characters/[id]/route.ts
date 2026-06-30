@@ -214,7 +214,7 @@ async function saveRelations(characterId: string, data: any) {
     check(await supabaseAdmin.from('CharacterArticle').delete().eq('characterId', characterId), '刪除舊攻略')
     if (data.articleIds.length > 0) {
       check(await supabaseAdmin.from('CharacterArticle').insert(
-        data.articleIds.map((aid: string, i: number) => ({ characterId, articleId: aid, sortOrder: i }))
+        data.articleIds.map((aid: string, i: number) => ({ id: crypto.randomUUID(), characterId, articleId: aid, sortOrder: i }))
       ), '保存攻略')
     }
   }

@@ -13,7 +13,6 @@ interface EventPreviewForm {
   condition?: string
   gameplay?: string
   rewards?: string
-  relatedGuides?: string
   isPublished: boolean
   categoryId?: string
 }
@@ -21,12 +20,13 @@ interface EventPreviewForm {
 interface Props {
   form: EventPreviewForm
   categoryName?: string
+  relatedArticleTitles?: string[]
   onClose: () => void
 }
 
 const hasContent = (v?: string) => !!v && v.replace(/<[^>]*>/g, '').trim().length > 0
 
-export default function EventPreviewModal({ form, categoryName, onClose }: Props) {
+export default function EventPreviewModal({ form, categoryName, relatedArticleTitles = [], onClose }: Props) {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', handler)
@@ -38,7 +38,6 @@ export default function EventPreviewModal({ form, categoryName, onClose }: Props
     { title: '參與條件', content: form.condition },
     { title: '活動玩法', content: form.gameplay },
     { title: '活動獎勵', content: form.rewards },
-    { title: '相關攻略', content: form.relatedGuides },
   ].filter(s => hasContent(s.content))
 
   return (
@@ -58,7 +57,7 @@ export default function EventPreviewModal({ form, categoryName, onClose }: Props
         <div className="p-5 md:p-7">
           {/* 麵包屑 */}
           <div className="text-sm text-wiki-text-muted mb-4">
-            <span className="opacity-50">首頁 / 圖鑑 / 活動一覽</span>
+            <span className="opacity-50">首頁 / 活動一覽</span>
             {categoryName && <><span className="mx-2">/</span><span className="opacity-50">{categoryName}</span></>}
             <span className="mx-2">/</span>
             <span className="text-wiki-text">{form.name || '（未填寫名稱）'}</span>
@@ -98,7 +97,7 @@ export default function EventPreviewModal({ form, categoryName, onClose }: Props
             </div>
           )}
 
-          {sections.length === 0 && (
+          {sections.length === 0 && relatedArticleTitles.length === 0 && (
             <div className="bg-wiki-gray-light border border-wiki-border rounded-xl p-5 mb-4">
               <p className="text-wiki-text-muted text-sm">暫無活動詳情</p>
             </div>
@@ -113,6 +112,20 @@ export default function EventPreviewModal({ form, categoryName, onClose }: Props
               </div>
             </div>
           ))}
+          {relatedArticleTitles.length > 0 && (
+            <div className="bg-wiki-gray-light border border-wiki-border rounded-xl mb-4">
+              <div className="px-5 py-3 border-b border-wiki-border">
+                <h2 className="text-sm font-bold text-wiki-accent uppercase tracking-wider">相關攻略</h2>
+              </div>
+              <ul className="px-5 py-4 space-y-2">
+                {relatedArticleTitles.map((t, i) => (
+                  <li key={i} className="flex items-center gap-2 text-wiki-text text-sm">
+                    <span className="text-wiki-accent">📄</span>{t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div className={`rounded-xl p-3 text-xs font-bold text-center mt-4 ${
             form.isPublished

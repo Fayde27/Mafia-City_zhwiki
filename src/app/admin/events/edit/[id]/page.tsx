@@ -21,6 +21,7 @@ const SECTIONS = [
 ]
 
 interface EventCategory { id: string; name: string; slug: string }
+interface ArticleOption { id: string; title: string }
 
 const cardCls  = 'bg-wiki-gray-light border border-wiki-border rounded-lg p-6'
 const inputCls = 'w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none'
@@ -33,6 +34,8 @@ export default function AdminEventEditPage() {
   const { isAdmin, isLoaded } = useAdminAuth()
 
   const [categories, setCategories] = useState<EventCategory[]>([])
+  const [allArticles, setAllArticles] = useState<ArticleOption[]>([])
+  const [articleSearch, setArticleSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -52,7 +55,7 @@ export default function AdminEventEditPage() {
     condition: '',
     gameplay: '',
     rewards: '',
-    relatedGuides: '',
+    relatedArticleIds: [] as string[],
     sortOrder: 0,
     isFeatured: false,
     isPublished: false,
@@ -68,9 +71,13 @@ export default function AdminEventEditPage() {
     Promise.all([
       fetch(`/api/admin/events/${id}`).then(r => r.json()),
       fetch('/api/admin/event-categories').then(r => r.json()),
-    ]).then(([event, cats]) => {
+      fetch('/api/admin/articles?limit=200').then(r => r.json()),
+    ]).then(([event, cats, arts]) => {
       setCategories(Array.isArray(cats) ? cats : [])
+      setAllArticles(arts?.articles || [])
       if (event && !event.error) {
+        let articleIds: string[] = []
+        try { articleIds = JSON.parse(event.relatedArticleIds || '[]') } catch { articleIds = [] }
         setForm({
           name: event.name || '',
           slug: event.slug || '',
@@ -83,7 +90,7 @@ export default function AdminEventEditPage() {
           condition: event.condition || '',
           gameplay: event.gameplay || '',
           rewards: event.rewards || '',
-          relatedGuides: event.relatedGuides || '',
+          relatedArticleIds: Array.isArray(articleIds) ? articleIds : [],
           sortOrder: event.sortOrder || 0,
           isFeatured: event.isFeatured || false,
           isPublished: event.isPublished || false,
@@ -262,13 +269,39 @@ export default function AdminEventEditPage() {
               <RichTextEditor value={form.rewards} onChange={html => set('rewards', html)} minHeight="min-h-[120px]" placeholder="獎勵一覽" />
             </section>
 
-            {/* Section 6: 相關攻略 */}
+            {/* Section 6: 相關攻略（關聯文章） */}
             <section ref={el => { sectionRefs.current['guides'] = el }} className={cardCls}>
               <h2 className="text-wiki-text font-bold text-base mb-5 flex items-center gap-2">
                 <span className="text-wiki-accent">◆</span>相關攻略
               </h2>
-              <p className="text-wiki-text-muted text-xs mb-3">可貼入相關攻略文章鏈接（選中文字後點 🔗 插入連結）</p>
-              <RichTextEditor value={form.relatedGuides} onChange={html => set('relatedGuides', html)} minHeight="min-h-[120px]" placeholder="相關攻略鏈接與說明" />
+              <p className="text-wiki-text-muted text-xs mb-3">從文章庫勾選關聯攻略，詳情頁將展示為文章鏈接</p>
+              <input
+                className="w-full bg-wiki-gray border border-wiki-border px-3 py-2 text-sm text-wiki-text focus:border-wiki-accent focus:outline-none mb-3"
+                placeholder="搜尋文章標題..."
+                value={articleSearch}
+                onChange={e => setArticleSearch(e.target.value)}
+              />
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {allArticles
+                  .filter(art => !articleSearch || art.title.toLowerCase().includes(articleSearch.toLowerCase()))
+                  .map(art => {
+                    const sel = form.relatedArticleIds.includes(art.id)
+                    return (
+                      <label key={art.id}
+                        className={`flex items-center gap-2 p-3 border cursor-pointer transition-colors rounded
+                          ${sel ? 'border-wiki-accent bg-wiki-accent/10' : 'border-wiki-border bg-wiki-gray hover:border-wiki-accent/50'}`}>
+                        <input type="checkbox" className="accent-wiki-accent"
+                          checked={sel}
+                          onChange={e => set('relatedArticleIds', e.target.checked ? [...form.relatedArticleIds, art.id] : form.relatedArticleIds.filter(id => id !== art.id))} />
+                        <span className="text-sm text-wiki-text truncate">{art.title}</span>
+                      </label>
+                    )
+                  })}
+                {allArticles.length === 0 && <p className="text-wiki-text-muted text-sm text-center py-4">文章庫為空</p>}
+              </div>
+              {form.relatedArticleIds.length > 0 && (
+                <p className="text-xs text-wiki-text-muted mt-2">已選 {form.relatedArticleIds.length} 篇</p>
+              )}
             </section>
 
             {/* Section 7: 發佈設置 */}
@@ -310,6 +343,7 @@ export default function AdminEventEditPage() {
               <EventPreviewModal
                 form={form}
                 categoryName={categories.find(c => c.id === form.categoryId)?.name}
+                relatedArticleTitles={allArticles.filter(a => form.relatedArticleIds.includes(a.id)).map(a => a.title)}
                 onClose={() => setShowPreview(false)}
               />
             )}

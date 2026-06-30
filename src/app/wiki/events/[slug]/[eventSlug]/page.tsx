@@ -24,7 +24,7 @@ interface EventItem {
   condition?: string
   gameplay?: string
   rewards?: string
-  relatedGuides?: string
+  relatedArticles?: { id: string; title: string; slug: string }[]
   category: { name: string; slug: string }
 }
 
@@ -75,8 +75,6 @@ export default function EventDetailPage() {
         {/* 麵包屑 */}
         <div className="text-sm text-wiki-text-muted mb-4 md:mb-6 flex flex-wrap items-center gap-y-1">
           <Link href="/" className="hover:text-wiki-accent">首頁</Link>
-          <span className="mx-2">/</span>
-          <Link href="/wiki" className="hover:text-wiki-accent">圖鑑</Link>
           <span className="mx-2">/</span>
           <Link href="/wiki/events" className="hover:text-wiki-accent">活動一覽</Link>
           <span className="mx-2">/</span>
@@ -139,8 +137,20 @@ export default function EventDetailPage() {
         {event.rewards && (
           <SectionCard title="活動獎勵"><MarkdownRenderer content={event.rewards} /></SectionCard>
         )}
-        {event.relatedGuides && (
-          <SectionCard title="相關攻略"><MarkdownRenderer content={event.relatedGuides} /></SectionCard>
+        {event.relatedArticles && event.relatedArticles.length > 0 && (
+          <SectionCard title="相關攻略">
+            <ul className="space-y-2">
+              {event.relatedArticles.map(art => (
+                <li key={art.id}>
+                  <Link href={`/wiki/article/${art.slug}`}
+                    className="flex items-center gap-2 text-wiki-text hover:text-wiki-accent transition-colors group">
+                    <span className="text-wiki-accent">📄</span>
+                    <span className="group-hover:underline">{art.title}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </SectionCard>
         )}
 
         {/* 點贊 */}

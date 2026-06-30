@@ -605,7 +605,7 @@ export default function AdminCharacterEditPage() {
           <div className="flex items-center gap-3">
             <button type="button"
               onClick={() => setPreviewOpen(true)}
-              className="px-4 py-2 border border-wiki-accent text-wiki-accent font-bold text-sm hover:bg-wiki-accent hover:text-wiki-bg transition-colors">
+              className="lg:hidden px-4 py-2 border border-wiki-accent text-wiki-accent font-bold text-sm hover:bg-wiki-accent hover:text-wiki-bg transition-colors">
               預覽
             </button>
             <Link href="/admin/characters" className="px-4 py-2 bg-wiki-gray text-wiki-text font-bold text-sm hover:text-wiki-accent">
@@ -629,10 +629,14 @@ export default function AdminCharacterEditPage() {
                     </button>
                   ))}
                 </nav>
-                <div className="mt-4 pt-4 border-t border-wiki-border">
+                <div className="mt-4 pt-4 border-t border-wiki-border space-y-2">
                   <button type="submit" disabled={saving}
                     className="w-full btn-hard text-wiki-text text-sm disabled:opacity-50">
                     {saving ? '保存中...' : '保存'}
+                  </button>
+                  <button type="button" onClick={() => setPreviewOpen(true)}
+                    className="w-full py-2.5 bg-wiki-gray border border-wiki-border text-wiki-text text-sm font-bold rounded hover:border-wiki-accent hover:text-wiki-accent transition-colors">
+                    👁 預覽效果
                   </button>
                 </div>
               </div>

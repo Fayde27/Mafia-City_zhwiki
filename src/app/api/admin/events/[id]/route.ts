@@ -33,7 +33,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         condition: data.condition || null,
         gameplay: data.gameplay || null,
         rewards: data.rewards || null,
-        relatedGuides: data.relatedGuides || null,
+        relatedArticleIds: JSON.stringify(Array.isArray(data.relatedArticleIds) ? data.relatedArticleIds : []),
         categoryId: data.categoryId,
         sortOrder: data.sortOrder,
         isFeatured: data.isFeatured,
