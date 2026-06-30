@@ -87,6 +87,14 @@ export default function CharacterListPage() {
 
   const getRarityStars = (rarity: number) => '★'.repeat(Math.max(0, rarity)) + '☆'.repeat(Math.max(0, 5 - rarity))
 
+  // 稀有度漸變條（class 為完整字串字面量，確保 Tailwind 不被裁剪）
+  const rarityGradient = (rarity: number) =>
+    rarity >= 5 ? 'from-yellow-500 via-amber-300 to-yellow-500' :
+    rarity >= 4 ? 'from-orange-500 via-orange-300 to-orange-500' :
+    rarity >= 3 ? 'from-purple-500 via-fuchsia-400 to-purple-500' :
+    rarity >= 2 ? 'from-blue-500 via-sky-400 to-blue-500' :
+                  'from-gray-500 via-gray-300 to-gray-500'
+
   // 動態分組
   const filterTypes = Array.from(new Set(filterOptions.map(o => o.type)))
   const groupedFilters = filterTypes.reduce((acc, type) => {
@@ -190,25 +198,18 @@ export default function CharacterListPage() {
                   </div>
                 )}
 
-                {/* 稀有度色条 — 顶部左侧竖条 */}
-                <div className={`absolute top-0 left-0 w-1 h-full ${
-                  character.rarity >= 5 ? 'bg-yellow-400' :
-                  character.rarity >= 4 ? 'bg-orange-400' :
-                  character.rarity >= 3 ? 'bg-purple-400' :
-                  character.rarity >= 2 ? 'bg-blue-400' : 'bg-gray-400'
-                }`} />
-
-                {/* 渐变遮罩 + 底部名字 */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 px-3 py-2.5">
-                  <p className="text-white font-bold text-sm leading-tight drop-shadow-lg truncate">
-                    {character.name}
-                  </p>
-                  {character.rarity > 0 && (
-                    <p className="text-yellow-400 text-xs leading-tight mt-0.5 drop-shadow">
-                      {'★'.repeat(Math.max(0, character.rarity))}
+                {/* 底部：稀有度漸變條 + 黑框白字名字 */}
+                <div className="absolute bottom-0 left-0 right-0">
+                  {/* 與立繪銜接的柔和暗化 */}
+                  <div className="h-10 bg-gradient-to-t from-black/70 to-transparent" />
+                  {/* 稀有度漸變條 */}
+                  <div className={`h-1.5 w-full bg-gradient-to-r ${rarityGradient(character.rarity)}`} />
+                  {/* 黑框白字名字 */}
+                  <div className="bg-black/85 px-2 py-1.5">
+                    <p className="text-white font-bold text-sm leading-tight text-center truncate drop-shadow">
+                      {character.name}
                     </p>
-                  )}
+                  </div>
                 </div>
               </Link>
             ))}
