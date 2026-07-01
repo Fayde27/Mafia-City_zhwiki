@@ -90,7 +90,13 @@ export async function PUT(
 
     await saveRelations(params.id, data)
 
-    return NextResponse.json(character)
+    // 診斷：回查實際存入的裝備關聯數
+    const { count: savedEquipCount } = await supabaseAdmin
+      .from('CharacterEquipment')
+      .select('*', { count: 'exact', head: true })
+      .eq('characterId', params.id)
+
+    return NextResponse.json({ ...character, _savedEquipCount: savedEquipCount ?? -1 })
   } catch (error: any) {
     return NextResponse.json({ error: '更新角色失敗：' + (error?.message || '未知錯誤') }, { status: 500 })
   }

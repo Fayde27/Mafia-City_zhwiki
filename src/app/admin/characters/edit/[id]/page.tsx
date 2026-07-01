@@ -567,7 +567,11 @@ export default function AdminCharacterEditPage() {
         }),
       })
       if (res.ok) {
-        alert(characterId ? '更新成功' : '創建成功')
+        const d = await res.json().catch(() => ({}))
+        const diag = typeof d?._savedEquipCount === 'number'
+          ? `\n（前端勾選 ${equipmentIds.length} 件；服務端實際存入 ${d._savedEquipCount} 件）`
+          : ''
+        alert((characterId ? '更新成功' : '創建成功') + diag)
         router.push('/admin/characters')
       } else {
         const d = await res.json()
