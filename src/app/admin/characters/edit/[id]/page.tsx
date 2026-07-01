@@ -567,11 +567,7 @@ export default function AdminCharacterEditPage() {
         }),
       })
       if (res.ok) {
-        const d = await res.json().catch(() => ({}))
-        const diag = typeof d?._savedEquipCount === 'number'
-          ? `\n（前端勾選 ${equipmentIds.length} 件；服務端實際存入 ${d._savedEquipCount} 件）`
-          : ''
-        alert((characterId ? '更新成功' : '創建成功') + diag)
+        alert(characterId ? '更新成功' : '創建成功')
         router.push('/admin/characters')
       } else {
         const d = await res.json()
@@ -841,12 +837,6 @@ export default function AdminCharacterEditPage() {
               {/* §5 推薦裝備 */}
               <div ref={el => { sectionRefs.current['equipment'] = el }} className={cardCls}>
                 <h3 className="text-lg font-bold text-wiki-accent mb-5">推薦裝備 <span className="text-sm font-normal text-wiki-text-muted">（最多6件）</span></h3>
-                {/* 臨時調試：對比已存 id 與裝備庫 id */}
-                <div className="mb-4 p-3 bg-black/5 border border-dashed border-wiki-border rounded text-xs text-wiki-text-muted break-all space-y-1">
-                  <div>已存 equipmentIds（{equipmentIds.length}）：{JSON.stringify(equipmentIds)}</div>
-                  <div>裝備庫 ids（{allEquipments.length}）：{JSON.stringify(allEquipments.map(e => e.id))}</div>
-                  <div>命中：{JSON.stringify(equipmentIds.filter(id => allEquipments.some(e => e.id === id)))}</div>
-                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {allEquipments.map(eq => {
                     const sel = equipmentIds.includes(eq.id)

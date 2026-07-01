@@ -23,38 +23,58 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: '角色不存在' }, { status: 404 })
     }
 
+    // 關聯表為手動建表、未定義外鍵，PostgREST 無法用嵌套 embed，全部改平鋪查詢
     const [
       { data: skins },
       { data: skinBonds },
       { data: teamComps },
       { data: bloodBonds },
-      { data: equipments },
-      { data: articles },
+      { data: eqLinks },
+      { data: artLinks },
+      { data: teamMembers },
+      { data: bloodMembers },
     ] = await Promise.all([
       supabaseAdmin.from('CharacterSkin').select('*').eq('characterId', character.id).order('sortOrder'),
       supabaseAdmin.from('CharacterSkinBond').select('*').eq('characterId', character.id).order('sortOrder'),
-      supabaseAdmin.from('CharacterTeamComp').select('*, CharacterTeamCompMember(memberId,sortOrder)').eq('characterId', character.id).order('sortOrder'),
-      supabaseAdmin.from('CharacterBloodBond').select('*, CharacterBloodBondMember(memberId,sortOrder)').eq('characterId', character.id).order('sortOrder'),
-      supabaseAdmin.from('CharacterEquipment').select('equipmentId, sortOrder, Equipment(id,name,slug,icon,rarity,slot)').eq('characterId', character.id).order('sortOrder'),
-      supabaseAdmin.from('CharacterArticle').select('articleId, sortOrder, Article(id,title,slug,coverImage)').eq('characterId', character.id).order('sortOrder'),
+      supabaseAdmin.from('CharacterTeamComp').select('*').eq('characterId', character.id).order('sortOrder'),
+      supabaseAdmin.from('CharacterBloodBond').select('*').eq('characterId', character.id).order('sortOrder'),
+      supabaseAdmin.from('CharacterEquipment').select('*').eq('characterId', character.id).order('sortOrder'),
+      supabaseAdmin.from('CharacterArticle').select('*').eq('characterId', character.id).order('sortOrder'),
+      supabaseAdmin.from('CharacterTeamCompMember').select('*'),
+      supabaseAdmin.from('CharacterBloodBondMember').select('*'),
     ])
 
-    // resolve member character info for teamComps and bloodBonds
+    // 成員角色信息
+    const membersOf = (links: any[], parentId: string, key: string) =>
+      (links || []).filter((m: any) => m[key] === parentId).sort((a: any, b: any) => a.sortOrder - b.sortOrder)
     const allMemberIds = [
-      ...(teamComps || []).flatMap((tc: any) => (tc.CharacterTeamCompMember || []).map((m: any) => m.memberId)),
-      ...(bloodBonds || []).flatMap((bb: any) => (bb.CharacterBloodBondMember || []).map((m: any) => m.memberId)),
+      ...(teamMembers || []).map((m: any) => m.memberId),
+      ...(bloodMembers || []).map((m: any) => m.memberId),
     ]
     const uniqueIds = Array.from(new Set(allMemberIds))
-
     let memberMap: Record<string, any> = {}
     if (uniqueIds.length > 0) {
       const { data: members } = await supabaseAdmin
         .from('Character')
         .select('id,name,slug,avatar,rarity')
         .in('id', uniqueIds)
-      if (members) {
-        members.forEach((m: any) => { memberMap[m.id] = m })
-      }
+      if (members) members.forEach((m: any) => { memberMap[m.id] = m })
+    }
+
+    // 裝備 / 相關攻略詳情
+    const equipmentIds = (eqLinks || []).map((e: any) => e.equipmentId)
+    const articleIds = (artLinks || []).map((a: any) => a.articleId)
+    let equipments: any[] = []
+    let relatedArticles: any[] = []
+    if (equipmentIds.length > 0) {
+      const { data } = await supabaseAdmin.from('Equipment').select('id,name,slug,icon,rarity,slot').in('id', equipmentIds)
+      const byId = new Map((data || []).map((e: any) => [e.id, e]))
+      equipments = equipmentIds.map(id => byId.get(id)).filter(Boolean)
+    }
+    if (articleIds.length > 0) {
+      const { data } = await supabaseAdmin.from('Article').select('id,title,slug,coverImage').in('id', articleIds)
+      const byId = new Map((data || []).map((a: any) => [a.id, a]))
+      relatedArticles = articleIds.map(id => byId.get(id)).filter(Boolean)
     }
 
     const { CharacterCategory, ...charRest } = character as any
@@ -72,22 +92,18 @@ export async function GET(request: Request) {
         id: tc.id,
         name: tc.name,
         reason: tc.reason,
-        members: (tc.CharacterTeamCompMember || [])
-          .sort((a: any, b: any) => a.sortOrder - b.sortOrder)
-          .map((m: any) => memberMap[m.memberId])
-          .filter(Boolean),
+        members: membersOf(teamMembers as any[], tc.id, 'teamCompId')
+          .map((m: any) => memberMap[m.memberId]).filter(Boolean),
       })),
       bloodBonds: (bloodBonds || []).map((bb: any) => ({
         id: bb.id,
         requiredStars: bb.requiredStars,
         bonuses: tryParse(bb.bonuses, []),
-        members: (bb.CharacterBloodBondMember || [])
-          .sort((a: any, b: any) => a.sortOrder - b.sortOrder)
-          .map((m: any) => memberMap[m.memberId])
-          .filter(Boolean),
+        members: membersOf(bloodMembers as any[], bb.id, 'bloodBondId')
+          .map((m: any) => memberMap[m.memberId]).filter(Boolean),
       })),
-      equipments: (equipments || []).map((e: any) => e.Equipment).filter(Boolean),
-      relatedArticles: (articles || []).map((a: any) => a.Article).filter(Boolean),
+      equipments,
+      relatedArticles,
     })
   } catch (error) {
     return NextResponse.json({ error: '獲取角色失敗' }, { status: 500 })
