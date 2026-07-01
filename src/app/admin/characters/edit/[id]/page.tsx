@@ -472,7 +472,7 @@ export default function AdminCharacterEditPage() {
         fetch('/api/admin/characters?limit=200'),
         fetch('/api/admin/equipment?limit=200'),
         fetch('/api/admin/articles?limit=200'),
-        characterId ? fetch(`/api/admin/characters/${characterId}`) : Promise.resolve(null),
+        characterId ? fetch(`/api/admin/characters/${characterId}`, { cache: 'no-store' }) : Promise.resolve(null),
       ])
 
       setCategories(await catRes.json().then(d => Array.isArray(d) ? d : []))
