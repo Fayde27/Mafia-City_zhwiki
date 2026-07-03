@@ -7,6 +7,7 @@ import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 
 const TOOLS = [
+  { slug: 'building-upgrade', icon: '🏗️', name: '建築升級資源計算器', desc: '填入各建築當前與目標等級，計算所需資源與資源豪享禮包數量' },
   { slug: 'godfather-coin', icon: '🪙', name: '教父金幣計算器', desc: '輸入現有金幣與目標裝備，算出還需金幣與尊貴教父禮包數量' },
   { slug: 'luxury-car', icon: '🏎️', name: '豪車點數計算器', desc: '輸入現有點數與目標豪車，算出還需點數與豪車禮包數量' },
 ]
