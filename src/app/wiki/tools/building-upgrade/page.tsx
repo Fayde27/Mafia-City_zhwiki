@@ -2,12 +2,18 @@
 
 export const runtime = 'edge'
 
+import { useState } from 'react'
 import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import BuildingUpgradeCalculator from '@/components/calculators/BuildingUpgradeCalculator'
+import Villa3036Calculator from '@/components/calculators/Villa3036Calculator'
+
+type Tab = 'base' | 'v3036'
 
 export default function BuildingUpgradePage() {
+  const [tab, setTab] = useState<Tab>('base')
+
   return (
     <div className="min-h-screen bg-wiki-bg">
       <WikiHeader />
@@ -24,12 +30,24 @@ export default function BuildingUpgradePage() {
           <span className="text-4xl">🏗️</span>
           <div>
             <h1 className="text-2xl md:text-3xl font-heading font-bold text-wiki-accent heading-hard">建築升級資源計算器</h1>
-            <p className="text-wiki-text-muted text-sm mt-1">填入各建築當前與目標等級，計算所需資源與資源豪享禮包數量</p>
+            <p className="text-wiki-text-muted text-sm mt-1">填入建築當前與目標等級，計算所需資源與禮包數量</p>
           </div>
         </div>
 
+        {/* 頂層分表切換 */}
+        <div className="flex gap-2 mb-5 overflow-x-auto pb-1">
+          {([['base', '升級資源（30級前）'], ['v3036', '別墅 30-36 級（教父圖紙）']] as [Tab, string][]).map(([t, label]) => (
+            <button key={t} type="button" onClick={() => setTab(t)}
+              className={`px-4 py-2 text-sm font-bold whitespace-nowrap rounded transition-colors ${
+                tab === t ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
+              }`}>
+              {label}
+            </button>
+          ))}
+        </div>
+
         <div className="bg-wiki-card border border-wiki-border rounded-xl p-5 md:p-7">
-          <BuildingUpgradeCalculator />
+          {tab === 'base' ? <BuildingUpgradeCalculator /> : <Villa3036Calculator />}
         </div>
       </main>
       <WikiFooter />
