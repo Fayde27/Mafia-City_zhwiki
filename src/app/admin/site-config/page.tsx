@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
 import { useRouter } from 'next/navigation'
 import ImageUploadInput from '@/components/ImageUploadInput'
+import { GATEABLE_SECTIONS, parseSectionVisibility, isSectionPublic } from '@/lib/sections'
 
 export default function SiteConfigPage() {
   const { isAdmin, isLoaded } = useAdminAuth()
@@ -27,6 +28,9 @@ export default function SiteConfigPage() {
   const [bgRightScale, setBgRightScale] = useState(1)
   const [bgRightOffsetY, setBgRightOffsetY] = useState(0)
   const [bgRightFlip, setBgRightFlip] = useState(false)
+
+  // 板塊對外可見性
+  const [sectionVis, setSectionVis] = useState<Record<string, boolean>>({})
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -54,6 +58,11 @@ export default function SiteConfigPage() {
         setBgRightScale(parseFloat(config.articleBgRightScale || '1'))
         setBgRightOffsetY(parseInt(config.articleBgRightOffsetY || '0'))
         setBgRightFlip(config.articleBgRightFlip === '1')
+        // 板塊可見性：合併配置與各板塊 default
+        const vis = parseSectionVisibility(config.sectionVisibility)
+        const merged: Record<string, boolean> = {}
+        GATEABLE_SECTIONS.forEach(s => { merged[s.key] = isSectionPublic(s.key, vis) })
+        setSectionVis(merged)
         setLoading(false)
       })
       .catch(() => setLoading(false))
@@ -81,6 +90,7 @@ export default function SiteConfigPage() {
           articleBgRightScale: String(bgRightScale),
           articleBgRightOffsetY: String(bgRightOffsetY),
           articleBgRightFlip: bgRightFlip ? '1' : '0',
+          sectionVisibility: JSON.stringify(sectionVis),
         }),
       })
       setSaved(true)
@@ -254,6 +264,33 @@ export default function SiteConfigPage() {
                 <p className="text-wiki-text-muted text-xs">立繪僅在超寬屏（xl, 1280px+）顯示，不影響手機和平板佈局。</p>
               </div>
             )}
+          </div>
+
+          {/* 板塊對外可見性 */}
+          <div className="bg-wiki-card border border-wiki-border rounded-xl p-6">
+            <h2 className="text-wiki-text font-bold mb-1 flex items-center gap-2">
+              <span className="text-wiki-accent text-sm">◆</span>板塊對外可見性
+            </h2>
+            <p className="text-wiki-text-muted text-xs mb-4">關閉後該板塊對公眾隱藏（導航不顯示、頁面顯示「敬請期待」）；管理員登入後始終可正常查看，方便調整好再對外開放。</p>
+            <div className="space-y-3">
+              {GATEABLE_SECTIONS.map(s => (
+                <div key={s.key} className="flex items-center justify-between border border-wiki-border rounded-lg px-4 py-3">
+                  <div>
+                    <div className="text-wiki-text font-bold text-sm">{s.label}</div>
+                    <div className="text-wiki-text-muted text-xs">{s.href}</div>
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <span className="text-wiki-text-muted text-sm">{sectionVis[s.key] ? '已對外' : '未對外'}</span>
+                    <div
+                      onClick={() => setSectionVis(v => ({ ...v, [s.key]: !v[s.key] }))}
+                      className={`w-11 h-6 rounded-full transition-colors relative ${sectionVis[s.key] ? 'bg-wiki-accent' : 'bg-wiki-border'}`}
+                    >
+                      <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all ${sectionVis[s.key] ? 'left-6' : 'left-1'}`} />
+                    </div>
+                  </label>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* 保存按鈕 */}

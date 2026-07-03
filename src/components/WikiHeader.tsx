@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
+import { GATEABLE_SECTIONS, parseSectionVisibility, isSectionPublic } from '@/lib/sections'
 
 interface WikiSection {
   label: string
@@ -24,7 +25,22 @@ export default function WikiHeader() {
   const { isAdmin, logout } = useAdminAuth()
   const [searchQuery, setSearchQuery] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [sectionVis, setSectionVis] = useState<Record<string, boolean>>({})
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    fetch('/api/wiki/site-config')
+      .then(r => r.json())
+      .then(cfg => setSectionVis(parseSectionVisibility(cfg?.sectionVisibility)))
+      .catch(() => {})
+  }, [])
+
+  // 管理員看全部；公眾隱藏未對外的板塊
+  const visibleSections = navSections.filter(sec => {
+    const g = GATEABLE_SECTIONS.find(x => x.href === sec.href)
+    if (!g) return true
+    return isAdmin || isSectionPublic(g.key, sectionVis)
+  })
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -65,7 +81,7 @@ export default function WikiHeader() {
             </Link>
 
             <nav className="hidden md:flex items-center gap-1 overflow-visible">
-              {navSections.map(section => (
+              {visibleSections.map(section => (
                 <Link
                   key={section.href}
                   href={section.href}
@@ -116,7 +132,7 @@ export default function WikiHeader() {
       {mobileMenuOpen && (
         <div className="md:hidden bg-wiki-dark border-b border-wiki-border/20">
           <div className="container mx-auto px-4 py-3 space-y-1">
-            {navSections.map(section => (
+            {visibleSections.map(section => (
               <Link
                 key={section.href}
                 href={section.href}
