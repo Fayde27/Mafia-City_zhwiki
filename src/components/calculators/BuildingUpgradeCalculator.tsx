@@ -1,7 +1,24 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { BUILDINGS, PACK_CONTENT, LIMITED_5, RESOURCE_LABELS } from '@/data/calculators/building-upgrade'
+import { BUILDINGS, PACK_CONTENT, LIMITED_5, RESOURCE_LABELS, VILLA_PREREQ } from '@/data/calculators/building-upgrade'
+
+type Mode = 'all' | 'villa'
+
+// 「只升別墅」場景：前置建築封頂到里程碑，返回計入的等級上限
+function villaUpperBound(name: string, cur: number, target: number): number {
+  const th = VILLA_PREREQ[name]
+  if (!th) return target // 別墅/圍牆等不封頂
+  let inc = 0
+  if (th.length === 2) {
+    const [t1, t2] = th
+    inc = target < t1 ? 0 : target < t2 ? t1 - cur : t2 - cur
+  } else {
+    const [t1, t2, t3] = th
+    inc = target < t1 ? 0 : target < t2 ? t1 - cur : target < t3 ? t2 - cur : t3 - cur
+  }
+  return cur + inc
+}
 
 type ResKey = 'wu' | 'cash' | 'arm' | 'alloy'
 const RES_KEYS: ResKey[] = ['wu', 'cash', 'arm', 'alloy']
@@ -12,6 +29,7 @@ export default function BuildingUpgradeCalculator() {
   // 每個建築的 當前/目標 等級，預設 1/1（不升級）
   const [levels, setLevels] = useState(() => BUILDINGS.map(() => ({ cur: 1, tgt: 1 })))
   const [buyLimited, setBuyLimited] = useState(false)
+  const [mode, setMode] = useState<Mode>('all')
 
   const set = (i: number, key: 'cur' | 'tgt', v: number) => {
     const val = Math.min(MAXLV, Math.max(1, v || 1))
@@ -22,9 +40,10 @@ export default function BuildingUpgradeCalculator() {
     const totals = { wu: 0, cash: 0, arm: 0, alloy: 0 }
     BUILDINGS.forEach((b, i) => {
       const { cur, tgt } = levels[i]
-      if (tgt <= cur) return
+      const upper = mode === 'villa' ? villaUpperBound(b.name, cur, tgt) : tgt
+      if (upper <= cur) return
       b.rows.forEach(([lvl, wu, cash, arm, alloy]) => {
-        if (lvl > cur && lvl <= tgt) {
+        if (lvl > cur && lvl <= upper) {
           totals.wu += wu; totals.cash += cash; totals.arm += arm; totals.alloy += alloy
         }
       })
@@ -36,12 +55,29 @@ export default function BuildingUpgradeCalculator() {
     })
     const packs = Math.max(0, Math.ceil(Math.max(...fractions)))
     return { totals, fractions, packs }
-  }, [levels, buyLimited])
+  }, [levels, buyLimited, mode])
 
   const inputCls = 'w-16 bg-wiki-gray border border-wiki-border rounded px-2 py-1.5 text-center text-wiki-text text-sm focus:border-wiki-accent focus:outline-none'
 
   return (
     <div className="space-y-6">
+      {/* 場景切換 */}
+      <div className="flex gap-2">
+        {([['all', '升級全部建築'], ['villa', '只升別墅（含前置）']] as [Mode, string][]).map(([m, label]) => (
+          <button key={m} type="button" onClick={() => setMode(m)}
+            className={`px-4 py-2 text-sm font-bold rounded transition-colors ${
+              mode === m ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
+            }`}>
+            {label}
+          </button>
+        ))}
+      </div>
+      {mode === 'villa' && (
+        <p className="text-wiki-text-muted text-xs -mt-3">
+          只計算別墅、圍牆全程升級 + 各前置建築升到解鎖別墅所需的里程碑等級（超出目標的前置不計）。
+        </p>
+      )}
+
       {/* 結果區 */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {RES_KEYS.map(k => (
