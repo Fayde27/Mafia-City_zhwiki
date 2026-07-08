@@ -47,7 +47,33 @@ export default function NewArticlePage() {
   useEffect(() => {
     if (!isLoaded) return
     if (!isAdmin) { router.push('/admin/login'); return }
-    fetch('/api/admin/categories').then(res => res.json()).then(data => setCategories(data))
+
+    // 從投稿「轉為文章」帶來的預填參數
+    const sp = new URLSearchParams(window.location.search)
+    const preTitle = sp.get('title') || ''
+    const preContent = sp.get('content') || ''
+    const preCategory = sp.get('category') || ''
+    const hasPrefill = !!(preTitle || preContent)
+
+    fetch('/api/admin/categories').then(res => res.json()).then((data: Category[]) => {
+      setCategories(data)
+      // 依分類名稱嘗試匹配對應 categoryId
+      if (preCategory) {
+        const matched = data.find(c => c.name === preCategory)
+        if (matched) setFormData(prev => ({ ...prev, categoryId: matched.id }))
+      }
+    })
+
+    if (hasPrefill) {
+      // 純文字投稿內容轉為段落 HTML
+      const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      const contentHtml = preContent
+        ? preContent.split(/\n{2,}/).map(p => `<p>${esc(p).replace(/\n/g, '<br>')}</p>`).join('')
+        : ''
+      setFormData(prev => ({ ...prev, title: preTitle, content: contentHtml }))
+      setDraftReady(true)
+      return
+    }
 
     // 檢查是否有未儲存的草稿
     const draft = getDraft()

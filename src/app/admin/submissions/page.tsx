@@ -18,6 +18,16 @@ interface Submission {
   updatedAt: string
 }
 
+// 帶著投稿的標題/內容/分類跳到新增文章頁預填
+function toArticleHref(s: Submission) {
+  const params = new URLSearchParams({
+    title: s.title || '',
+    content: s.content || '',
+    category: s.category || '',
+  })
+  return `/admin/articles/new?${params.toString()}`
+}
+
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   pending:  { label: '待審核', color: 'text-wiki-accent bg-wiki-accent/10' },
   reviewed: { label: '已查看', color: 'text-blue-400 bg-blue-400/10' },
@@ -157,17 +167,13 @@ export default function SubmissionsAdminPage() {
                     <p className="text-wiki-text-muted text-xs line-clamp-1">{s.content}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    {s.gameId && (
-                      <a
-                        href={`/wiki/article/${s.gameId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={e => e.stopPropagation()}
-                        className="text-wiki-accent text-xs font-bold hover:underline block"
-                      >
-                        查看文章 ↗
-                      </a>
-                    )}
+                    <a
+                      href={toArticleHref(s)}
+                      onClick={e => e.stopPropagation()}
+                      className="text-wiki-accent text-xs font-bold hover:underline block"
+                    >
+                      轉為文章 ↗
+                    </a>
                     <p className="text-wiki-text-muted text-xs mt-1">{new Date(s.createdAt).toLocaleDateString('zh-CN')}</p>
                   </div>
                 </div>
@@ -231,6 +237,12 @@ export default function SubmissionsAdminPage() {
               </div>
 
               <div className="flex gap-3">
+                <a
+                  href={toArticleHref(selected)}
+                  className="px-5 py-2.5 bg-wiki-accent/10 text-wiki-accent text-sm font-bold rounded-lg hover:bg-wiki-accent/20 flex items-center"
+                >
+                  轉為文章 ↗
+                </a>
                 <button
                   onClick={handleSave}
                   disabled={saving}
