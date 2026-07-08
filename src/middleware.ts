@@ -3,7 +3,10 @@ import type { NextRequest } from 'next/server'
 import { verifyToken } from '@/lib/auth'
 
 export async function middleware(request: NextRequest) {
-  if (request.nextUrl.pathname === '/admin/login') {
+  if (
+    request.nextUrl.pathname === '/admin/login' ||
+    request.nextUrl.pathname === '/api/admin/login'
+  ) {
     return NextResponse.next()
   }
 
