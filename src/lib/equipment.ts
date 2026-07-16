@@ -57,6 +57,17 @@ export const parseMainAttr = (raw?: string | null): MainAttr => {
   } catch { return { ...DEFAULT_MAIN_ATTR, items: [] } }
 }
 
+// 可篩選字段（後台篩選設定的預置下拉），按 equipType 決定可選字段
+export interface FilterField { field: string; label: string }
+export const FILTER_FIELDS: Record<string, FilterField[]> = {
+  haojie_weapon:   [{ field: 'rarity', label: '品質' }, { field: 'type', label: '種類' }],
+  haojie_warbadge: [{ field: 'rarity', label: '品質' }, { field: 'type', label: '種類' }],
+  leader:          [{ field: 'rarity', label: '品質' }, { field: 'slot', label: '部位' }, { field: 'attrBias', label: '偏向' }],
+  hero:            [{ field: 'rarity', label: '品質' }, { field: 'slot', label: '部位' }],
+}
+export const fieldLabel = (equipType: string, field: string) =>
+  (FILTER_FIELDS[equipType] || []).find(f => f.field === field)?.label || field
+
 // 種類選項（後台下拉可自由輸入，這裡給常見預設）
 export const KIND_PRESETS: Record<string, string[]> = {
   haojie_weapon: ['殺人蜂', '執法者', '荒野獵人', '蜂蛇', '豪傑專用'],

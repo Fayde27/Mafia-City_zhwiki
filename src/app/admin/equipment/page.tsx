@@ -9,8 +9,16 @@ import Link from 'next/link'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
 import { useRouter } from 'next/navigation'
 import ImageUploadInput from '@/components/ImageUploadInput'
+import { FILTER_FIELDS, fieldLabel, rarityInfo, rarityTiersFor } from '@/lib/equipment'
 
 type Tab = 'list' | 'categories' | 'filters' | 'sets'
+
+const FILTER_EQUIP_TYPES = [
+  { value: 'haojie_weapon',   label: '豪傑武器' },
+  { value: 'haojie_warbadge', label: '豪傑戰徽' },
+  { value: 'leader',          label: '首領裝備' },
+  { value: 'hero',            label: '英雄裝備' },
+]
 
 const EQUIP_TYPES = [
   { value: 'all',             label: '全部' },
@@ -35,7 +43,7 @@ interface EntityCategory {
   icon: string; sortOrder: number
   _count: { equipment: number }
 }
-interface FilterOption { id: string; type: string; value: string; sortOrder: number; categoryId: string }
+interface FilterOption { id: string; type: string; value: string; field?: string; equipType?: string; sortOrder: number; categoryId?: string }
 
 interface EquipmentSet {
   id: string; name: string; slug: string; equipType: string
@@ -66,6 +74,8 @@ export default function AdminEquipmentPage() {
   const [catForm, setCatForm] = useState({ name: '', slug: '', description: '', icon: '', sortOrder: 0 })
   const [filterOptions, setFilterOptions] = useState<FilterOption[]>([])
   const [selectedCatId, setSelectedCatId] = useState('')
+  const [filterEquipType, setFilterEquipType] = useState('haojie_weapon')
+  const [newField, setNewField] = useState('rarity')
   const [newType, setNewType] = useState('')
   const [newValue, setNewValue] = useState('')
   const [filterSaving, setFilterSaving] = useState(false)
@@ -141,10 +151,11 @@ export default function AdminEquipmentPage() {
   }
 
   const handleFilterAdd = async () => {
-    if (!newValue.trim() || !newType.trim() || !selectedCatId) return
+    if (!newValue.trim() || !newField || !filterEquipType) return
+    const label = newType.trim() || fieldLabel(filterEquipType, newField)
     setFilterSaving(true)
     try {
-      const res = await fetch('/api/admin/equipment-filters', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: newType.trim(), value: newValue.trim(), categoryId: selectedCatId }) })
+      const res = await fetch('/api/admin/equipment-filters', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: label, value: newValue.trim(), field: newField, equipType: filterEquipType }) })
       if (res.ok) { setNewValue(''); refetchFilters() }
     } finally { setFilterSaving(false) }
   }
@@ -180,10 +191,16 @@ export default function AdminEquipmentPage() {
   const filtered = items
     .filter(eq => typeTab === 'all' || eq.equipType === typeTab)
     .filter(eq => filterCatSlug === 'all' || (eq.category?.slug || eq.EquipmentCategory?.slug) === filterCatSlug)
-  const currentOptions = filterOptions.filter(o => o.categoryId === selectedCatId)
-  const existingTypes = Array.from(new Set(currentOptions.map(o => o.type))).sort()
-  const groupedOptions = existingTypes.reduce((acc, type) => { acc[type] = currentOptions.filter(o => o.type === type).sort((a, b) => a.sortOrder - b.sortOrder); return acc }, {} as Record<string, FilterOption[]>)
-  const allTypes = Array.from(new Set(filterOptions.map(o => o.type))).sort()
+  // 篩選設定：按當前 equipType 過濾，再按 field 分組
+  const availableFields = FILTER_FIELDS[filterEquipType] || []
+  const currentOptions = filterOptions.filter(o => o.equipType === filterEquipType)
+  const existingFields = availableFields.map(f => f.field).filter(fld => currentOptions.some(o => o.field === fld))
+  const groupedOptions = existingFields.reduce((acc, fld) => { acc[fld] = currentOptions.filter(o => o.field === fld).sort((a, b) => a.sortOrder - b.sortOrder); return acc }, {} as Record<string, FilterOption[]>)
+  // 「選項值」候選：rarity 用檔位，其餘取該 equipType 真實數據裡出現過的值
+  const valueCandidates: { value: string; label: string }[] = newField === 'rarity'
+    ? rarityTiersFor(filterEquipType).map(t => ({ value: String(t.value), label: t.label }))
+    : Array.from(new Set(items.filter(e => e.equipType === filterEquipType).map(e => (e as any)[newField]).filter(Boolean)))
+        .map(v => ({ value: String(v), label: String(v) }))
   const getRarityStars = (r: number) => '★'.repeat(Math.max(0, r)) + '☆'.repeat(Math.max(0, 5 - r))
   const tabCls = (t: Tab) => `px-6 py-3 font-bold text-sm border-b-2 transition-colors ${activeTab === t ? 'border-wiki-accent text-wiki-accent' : 'border-transparent text-wiki-text-muted hover:text-wiki-text'}`
 
@@ -294,38 +311,47 @@ export default function AdminEquipmentPage() {
             {activeTab === 'filters' && (
               <div>
                 <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-4 mb-6 flex items-center gap-4">
-                  <span className="text-wiki-text font-bold text-sm flex-shrink-0">當前分類：</span>
+                  <span className="text-wiki-text font-bold text-sm flex-shrink-0">裝備類型：</span>
                   <div className="flex flex-wrap gap-2">
-                    {categories.map(cat => <button key={cat.id} onClick={() => setSelectedCatId(cat.id)} className={`px-4 py-1.5 text-sm font-bold transition-colors ${selectedCatId === cat.id ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>{cat.name}</button>)}
+                    {FILTER_EQUIP_TYPES.map(t => <button key={t.value} onClick={() => { setFilterEquipType(t.value); setNewField((FILTER_FIELDS[t.value]?.[0]?.field) || 'rarity'); setNewValue(''); setNewType('') }} className={`px-4 py-1.5 text-sm font-bold transition-colors ${filterEquipType === t.value ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>{t.label}</button>)}
                   </div>
                 </div>
                 <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6 mb-6">
-                  <h3 className="text-lg font-bold text-wiki-accent mb-4">添加篩選選項（到「{categories.find(c => c.id === selectedCatId)?.name ?? '...'}」）</h3>
-                  <div className="flex gap-4 items-end">
+                  <h3 className="text-lg font-bold text-wiki-accent mb-4">添加篩選選項（到「{EQUIP_TYPE_LABELS[filterEquipType]}」）</h3>
+                  <div className="flex gap-4 items-end flex-wrap">
                     <div className="flex-shrink-0">
-                      <label className="block text-wiki-text-muted text-xs mb-1">篩選大類</label>
-                      <input type="text" value={newType} onChange={ev => setNewType(ev.target.value)} list="types-equipment" className="w-40 bg-wiki-gray border-2 border-wiki-border px-3 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none" placeholder="如：稀有度" />
-                      <datalist id="types-equipment">{allTypes.map(t => <option key={t} value={t} />)}</datalist>
+                      <label className="block text-wiki-text-muted text-xs mb-1">篩選字段</label>
+                      <select value={newField} onChange={ev => { setNewField(ev.target.value); setNewValue(''); setNewType('') }} className="w-40 bg-wiki-gray border-2 border-wiki-border px-3 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none cursor-pointer">
+                        {availableFields.map(f => <option key={f.field} value={f.field}>{f.label}</option>)}
+                      </select>
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-shrink-0">
+                      <label className="block text-wiki-text-muted text-xs mb-1">顯示名（可留空取字段名）</label>
+                      <input type="text" value={newType} onChange={ev => setNewType(ev.target.value)} className="w-40 bg-wiki-gray border-2 border-wiki-border px-3 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none" placeholder={fieldLabel(filterEquipType, newField)} />
+                    </div>
+                    <div className="flex-1 min-w-[200px]">
                       <label className="block text-wiki-text-muted text-xs mb-1">選項值</label>
-                      <input type="text" value={newValue} onChange={ev => setNewValue(ev.target.value)} onKeyDown={ev => ev.key === 'Enter' && handleFilterAdd()} className="w-full bg-wiki-gray border-2 border-wiki-border px-3 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none" placeholder="如：★★★★★" />
+                      <select value={newValue} onChange={ev => setNewValue(ev.target.value)} className="w-full bg-wiki-gray border-2 border-wiki-border px-3 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none cursor-pointer">
+                        <option value="">— 選擇值 —</option>
+                        {valueCandidates.map(v => <option key={v.value} value={v.value}>{v.label}</option>)}
+                      </select>
                     </div>
-                    <button onClick={handleFilterAdd} disabled={filterSaving || !newValue.trim() || !newType.trim() || !selectedCatId} className="btn-hard text-wiki-text disabled:opacity-50 px-6 py-2">添加</button>
+                    <button onClick={handleFilterAdd} disabled={filterSaving || !newValue.trim() || !newField} className="btn-hard text-wiki-text disabled:opacity-50 px-6 py-2">添加</button>
                   </div>
+                  <p className="text-wiki-text-muted text-xs mt-3">選項值來自該類型裝備的真實數據，點選後前台按此字段過濾。品質欄顯示為檔位名。</p>
                 </div>
-                {existingTypes.length === 0 ? (
-                  <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-8 text-center text-wiki-text-muted">該分類暫無篩選選項</div>
+                {existingFields.length === 0 ? (
+                  <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-8 text-center text-wiki-text-muted">該類型暫無篩選選項</div>
                 ) : (
                   <div className="space-y-4">
-                    {existingTypes.map(type => (
-                      <div key={type} className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6">
-                        <h3 className="text-lg font-bold text-wiki-accent mb-4">{type}</h3>
+                    {existingFields.map(fld => (
+                      <div key={fld} className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6">
+                        <h3 className="text-lg font-bold text-wiki-accent mb-4">{groupedOptions[fld][0]?.type || fieldLabel(filterEquipType, fld)}</h3>
                         <div className="space-y-2">
-                          {groupedOptions[type].map(opt => (
+                          {groupedOptions[fld].map(opt => (
                             <div key={opt.id} className="flex items-center gap-4 bg-wiki-gray rounded-lg p-3">
                               <input type="number" value={opt.sortOrder} onChange={ev => handleFilterSort(opt.id, parseInt(ev.target.value) || 0)} className="w-16 bg-wiki-carder border border-wiki-border px-2 py-1 text-wiki-text text-center" />
-                              <span className="text-wiki-text flex-1">{opt.value}</span>
+                              <span className="text-wiki-text flex-1">{fld === 'rarity' ? (rarityInfo(parseInt(opt.value))?.label || opt.value) : opt.value}</span>
                               <button onClick={() => handleFilterDelete(opt.id)} className="text-wiki-danger text-sm hover:opacity-70">刪除</button>
                             </div>
                           ))}
