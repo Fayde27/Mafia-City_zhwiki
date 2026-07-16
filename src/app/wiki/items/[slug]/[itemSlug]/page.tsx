@@ -153,7 +153,7 @@ export default function ItemDetailPage() {
           </SectionCard>
         )}
         {item.source && (
-          <SectionCard title="獲取途徑">
+          <SectionCard title="獲得途徑">
             <MarkdownRenderer content={item.source} />
           </SectionCard>
         )}

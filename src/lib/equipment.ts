@@ -19,9 +19,9 @@ export const RARITY_TIERS = [
   { value: 6, label: '金色', color: '#c4a35a' },
 ]
 
-// 豪傑武器只開放高 4 檔（藍紫橙金）；其餘 6 檔全開
+// 豪傑武器/戰徽只開放高 4 檔（藍紫橙金）；其餘 6 檔全開
 export const rarityTiersFor = (equipType: string) =>
-  equipType === 'haojie_weapon' ? RARITY_TIERS.filter(t => t.value >= 3) : RARITY_TIERS
+  equipType.startsWith('haojie_') ? RARITY_TIERS.filter(t => t.value >= 3) : RARITY_TIERS
 
 export const rarityInfo = (v: number) => RARITY_TIERS.find(t => t.value === v) || RARITY_TIERS[2]
 

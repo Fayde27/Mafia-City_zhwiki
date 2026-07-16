@@ -122,8 +122,10 @@ export default function HeroDetailPage() {
   }, [slug])
 
   const attrs = hero ? tryParse(hero.attributes, {}) : {}
-  const skills: SkillEntry[] = hero ? tryParse(hero.skills, []) : []
-  const traits: string[] = hero ? tryParse(hero.traits, []) : []
+  const skillsRaw = hero ? tryParse(hero.skills, []) : []
+  const skills: SkillEntry[] = Array.isArray(skillsRaw) ? skillsRaw : []
+  const traitsRaw = hero ? tryParse(hero.traits, []) : []
+  const traits: string[] = Array.isArray(traitsRaw) ? traitsRaw : []
 
   // visible sections
   const sections = [
@@ -131,7 +133,7 @@ export default function HeroDetailPage() {
     { id: 'skills', label: '英雄技能', show: skills.length > 0 },
     { id: 'equipment', label: '推薦裝備', show: (hero?.equipments?.length ?? 0) > 0 },
     { id: 'teamcomp', label: '陣容搭配', show: (hero?.teamComps?.length ?? 0) > 0 },
-    { id: 'skins', label: '英雄皮膚', show: (hero?.skins?.length ?? 0) > 0 },
+    { id: 'skins', label: '英雄造型', show: (hero?.skins?.length ?? 0) > 0 },
     { id: 'bloodbond', label: '血盟', show: (hero?.bloodBonds?.length ?? 0) > 0 },
   ]
 
@@ -215,7 +217,7 @@ export default function HeroDetailPage() {
                       <span className="px-2 py-0.5 text-xs bg-white/10 text-white/80 border border-white/20 rounded">{hero.troopType}</span>
                     )}
                     {hero.acquisition && (
-                      <span className="text-xs text-white/60">獲取：{hero.acquisition}</span>
+                      <span className="text-xs text-white/60">獲得：{hero.acquisition}</span>
                     )}
                   </div>
                 </div>
@@ -379,17 +381,17 @@ export default function HeroDetailPage() {
               </div>
             )}
 
-            {/* 英雄皮膚 */}
+            {/* 英雄造型 */}
             {(hero.skins?.length ?? 0) > 0 && (
               <div ref={el => { sectionRefs.current['skins'] = el }}>
-                <Section title="英雄皮膚">
+                <Section title="英雄造型">
                   <div className="flex gap-2 mb-4 flex-wrap">
                     {hero.skins.map((sk, i) => (
                       <button key={i}
                         onClick={() => setActiveSkinTab(i)}
                         className={`px-4 py-1.5 text-sm font-bold border transition-colors rounded
                           ${activeSkinTab === i ? 'border-wiki-accent text-wiki-accent bg-wiki-accent/10' : 'border-wiki-border text-wiki-text-muted hover:text-wiki-text'}`}>
-                        {sk.name || `皮膚 ${i + 1}`}
+                        {sk.name || `造型 ${i + 1}`}
                       </button>
                     ))}
                   </div>
@@ -406,7 +408,7 @@ export default function HeroDetailPage() {
                       <div className="flex-1">
                         <h4 className="font-bold text-wiki-text mb-3">{hero.skins[activeSkinTab].name}</h4>
                         {hero.skins[activeSkinTab].acquisition && (
-                          <p className="text-sm text-wiki-text-muted mb-4">獲取途徑：<span className="text-wiki-accent">{hero.skins[activeSkinTab].acquisition}</span></p>
+                          <p className="text-sm text-wiki-text-muted mb-4">獲得途徑：<span className="text-wiki-accent">{hero.skins[activeSkinTab].acquisition}</span></p>
                         )}
                         {(hero.skins[activeSkinTab].bonuses?.length ?? 0) > 0 && (
                           <div>
@@ -425,10 +427,10 @@ export default function HeroDetailPage() {
                     </div>
                   )}
 
-                  {/* 皮膚羁绊 */}
+                  {/* 造型羁绊 */}
                   {(hero.skinBonds?.length ?? 0) > 0 && (
                     <div className="mt-6 pt-6 border-t border-wiki-border">
-                      <h4 className="font-bold text-wiki-text mb-4">皮膚羁绊</h4>
+                      <h4 className="font-bold text-wiki-text mb-4">造型羁绊</h4>
                       <div className="space-y-3">
                         {hero.skinBonds.map((sb, i) => (
                           <div key={i} className="bg-wiki-gray rounded p-4">

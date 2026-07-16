@@ -164,10 +164,10 @@ export default function EquipmentPreviewModal({ form, setName, setBonus, onClose
             </div>
           )}
 
-          {/* 獲取途徑 */}
+          {/* 獲得途徑 */}
           {hasAcq && (
             <div className="bg-wiki-gray-light border border-wiki-border rounded-xl p-5 mb-4">
-              <h3 className="font-bold text-wiki-accent mb-3 text-sm uppercase tracking-wider">獲取途徑</h3>
+              <h3 className="font-bold text-wiki-accent mb-3 text-sm uppercase tracking-wider">獲得途徑</h3>
               <MarkdownRenderer content={form.acquisition!} />
             </div>
           )}

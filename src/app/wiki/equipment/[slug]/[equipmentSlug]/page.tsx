@@ -180,10 +180,10 @@ export default function EquipmentDetailPage() {
               </div>
             )}
 
-            {/* 獲取途徑 */}
+            {/* 獲得途徑 */}
             {hasAcq && (
               <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6">
-                <h3 className="text-lg font-bold text-wiki-accent mb-3">獲取途徑</h3>
+                <h3 className="text-lg font-bold text-wiki-accent mb-3">獲得途徑</h3>
                 <MarkdownRenderer content={equipment.acquisition!} />
               </div>
             )}

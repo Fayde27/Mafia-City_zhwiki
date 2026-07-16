@@ -42,8 +42,8 @@ const SECTIONS = [
   { id: 'skills', label: '英雄技能' },
   { id: 'equipment', label: '推薦裝備' },
   { id: 'teamcomp', label: '陣容搭配' },
-  { id: 'skins', label: '英雄皮膚' },
-  { id: 'skinbonds', label: '皮膚羁绊' },
+  { id: 'skins', label: '英雄造型' },
+  { id: 'skinbonds', label: '造型羁绊' },
   { id: 'bloodbond', label: '血盟' },
   { id: 'articles', label: '關聯攻略' },
 ]
@@ -125,7 +125,7 @@ function HeroPreviewModal(p: PreviewProps) {
                   <span className={`font-bold ${rarityColor}`}>{p.rarity}</span>
                   {p.traits.map(t => <span key={t} className="px-2 py-0.5 text-xs bg-wiki-accent/20 text-wiki-accent border border-wiki-accent/40 rounded">{t}</span>)}
                   {p.troopType && <span className="px-2 py-0.5 text-xs bg-white/10 text-white/80 border border-white/20 rounded">{p.troopType}</span>}
-                  {p.acquisition && <span className="text-xs text-white/60">獲取：{p.acquisition}</span>}
+                  {p.acquisition && <span className="text-xs text-white/60">獲得：{p.acquisition}</span>}
                 </div>
               </div>
             </div>
@@ -210,12 +210,12 @@ function HeroPreviewModal(p: PreviewProps) {
 
           {/* Skins */}
           {p.skins.length > 0 && (
-            <PreviewCard title="英雄皮膚">
+            <PreviewCard title="英雄造型">
               <div className="flex gap-2 mb-3 flex-wrap">
                 {p.skins.map((sk, i) => (
                   <button key={i} type="button" onClick={() => setSkinTab(i)}
                     className={`px-3 py-1 text-xs font-bold border rounded transition-colors ${skinTab === i ? 'border-wiki-accent text-wiki-accent bg-wiki-accent/10' : 'border-wiki-border text-wiki-text-muted'}`}>
-                    {sk.name || `皮膚 ${i+1}`}
+                    {sk.name || `造型 ${i+1}`}
                   </button>
                 ))}
               </div>
@@ -226,7 +226,7 @@ function HeroPreviewModal(p: PreviewProps) {
                     : <div className="flex-shrink-0 w-28 h-48 bg-wiki-gray rounded flex items-center justify-center text-wiki-text-muted text-sm">無立繪</div>}
                   <div className="flex-1">
                     <p className="font-bold text-wiki-text mb-2">{p.skins[skinTab].name}</p>
-                    {p.skins[skinTab].acquisition && <p className="text-xs text-wiki-text-muted mb-2">獲取：<span className="text-wiki-accent">{p.skins[skinTab].acquisition}</span></p>}
+                    {p.skins[skinTab].acquisition && <p className="text-xs text-wiki-text-muted mb-2">獲得：<span className="text-wiki-accent">{p.skins[skinTab].acquisition}</span></p>}
                     {p.skins[skinTab].bonuses.length > 0 && p.skins[skinTab].bonuses.map((b, bi) => (
                       <div key={bi} className="flex justify-between text-sm"><span className="text-wiki-text-muted">{b.label}</span><span className="text-wiki-accent font-bold">{b.value}</span></div>
                     ))}
@@ -235,7 +235,7 @@ function HeroPreviewModal(p: PreviewProps) {
               )}
               {p.skinBonds.length > 0 && (
                 <div className="mt-4 pt-4 border-t border-wiki-border">
-                  <p className="font-bold text-wiki-text text-sm mb-2">皮膚羁绊</p>
+                  <p className="font-bold text-wiki-text text-sm mb-2">造型羁绊</p>
                   {p.skinBonds.map((sb, i) => (
                     <div key={i} className="bg-wiki-gray rounded p-3 mb-2">
                       <p className="font-bold text-wiki-accent text-sm mb-1">{sb.name}</p>
@@ -469,7 +469,7 @@ export default function AdminCharacterEditPage() {
     try {
       const [catRes, charListRes, eqRes, artRes, charRes] = await Promise.all([
         fetch('/api/admin/character-categories'),
-        fetch('/api/admin/characters?limit=200'),
+        fetch('/api/admin/characters?type=hero&limit=200'),
         fetch('/api/admin/equipment?limit=200'),
         fetch('/api/admin/articles?limit=200'),
         characterId ? fetch(`/api/admin/characters/${characterId}`, { cache: 'no-store' }) : Promise.resolve(null),
@@ -671,7 +671,7 @@ export default function AdminCharacterEditPage() {
                       onChange={e => setTroopType(e.target.value)} />
                   </div>
                   <div>
-                    <label className={labelCls}>獲取方式</label>
+                    <label className={labelCls}>獲得方式</label>
                     <input className={inputCls} value={acquisition}
                       onChange={e => setAcquisition(e.target.value)} />
                   </div>
@@ -917,33 +917,33 @@ export default function AdminCharacterEditPage() {
                 </div>
               </div>
 
-              {/* §7 英雄皮膚 */}
+              {/* §7 英雄造型 */}
               <div ref={el => { sectionRefs.current['skins'] = el }} className={cardCls}>
                 <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-lg font-bold text-wiki-accent">英雄皮膚</h3>
+                  <h3 className="text-lg font-bold text-wiki-accent">英雄造型</h3>
                   <button type="button"
                     onClick={() => setSkins([...skins, { name: '', art: '', icon: '', bonuses: [], acquisition: '' }])}
                     className="text-sm text-wiki-accent border border-wiki-accent px-3 py-1 hover:bg-wiki-accent hover:text-wiki-bg transition-colors">
-                    + 新增皮膚
+                    + 新增造型
                   </button>
                 </div>
                 <div className="space-y-4">
                   {skins.map((sk, i) => (
                     <div key={i} className="bg-wiki-gray border border-wiki-border p-4 rounded space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-bold text-wiki-text-muted">皮膚 {i + 1}</span>
+                        <span className="text-sm font-bold text-wiki-text-muted">造型 {i + 1}</span>
                         <button type="button" onClick={() => setSkins(skins.filter((_, j) => j !== i))}
                           className="text-red-400 hover:text-red-300 text-sm">刪除</button>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-xs text-wiki-text-muted mb-1">皮膚名稱</label>
+                          <label className="block text-xs text-wiki-text-muted mb-1">造型名稱</label>
                           <input className="w-full bg-wiki-gray-light border border-wiki-border px-3 py-2 text-sm text-wiki-text focus:border-wiki-accent focus:outline-none"
                             value={sk.name}
                             onChange={e => { const n = [...skins]; n[i] = { ...sk, name: e.target.value }; setSkins(n) }} />
                         </div>
                         <div>
-                          <label className="block text-xs text-wiki-text-muted mb-1">獲取途徑</label>
+                          <label className="block text-xs text-wiki-text-muted mb-1">獲得途徑</label>
                           <input className="w-full bg-wiki-gray-light border border-wiki-border px-3 py-2 text-sm text-wiki-text focus:border-wiki-accent focus:outline-none"
                             value={sk.acquisition}
                             onChange={e => { const n = [...skins]; n[i] = { ...sk, acquisition: e.target.value }; setSkins(n) }} />
@@ -970,14 +970,14 @@ export default function AdminCharacterEditPage() {
                       </div>
                     </div>
                   ))}
-                  {skins.length === 0 && <p className="text-wiki-text-muted text-sm text-center py-4">尚無皮膚</p>}
+                  {skins.length === 0 && <p className="text-wiki-text-muted text-sm text-center py-4">尚無造型</p>}
                 </div>
               </div>
 
-              {/* §8 皮膚羁绊 */}
+              {/* §8 造型羁绊 */}
               <div ref={el => { sectionRefs.current['skinbonds'] = el }} className={cardCls}>
                 <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-lg font-bold text-wiki-accent">皮膚羁绊</h3>
+                  <h3 className="text-lg font-bold text-wiki-accent">造型羁绊</h3>
                   <button type="button"
                     onClick={() => setSkinBonds([...skinBonds, { name: '', skinIds: [], bonuses: [] }])}
                     className="text-sm text-wiki-accent border border-wiki-accent px-3 py-1 hover:bg-wiki-accent hover:text-wiki-bg transition-colors">
@@ -999,7 +999,7 @@ export default function AdminCharacterEditPage() {
                           onChange={e => { const n = [...skinBonds]; n[i] = { ...sb, name: e.target.value }; setSkinBonds(n) }} />
                       </div>
                       <div>
-                        <label className="block text-xs text-wiki-text-muted mb-2">包含皮膚</label>
+                        <label className="block text-xs text-wiki-text-muted mb-2">包含造型</label>
                         <div className="flex flex-wrap gap-2">
                           {skins.map((sk, si) => {
                             if (!sk.name) return null
@@ -1027,7 +1027,7 @@ export default function AdminCharacterEditPage() {
                       </div>
                     </div>
                   ))}
-                  {skinBonds.length === 0 && <p className="text-wiki-text-muted text-sm text-center py-4">尚無皮膚羁绊</p>}
+                  {skinBonds.length === 0 && <p className="text-wiki-text-muted text-sm text-center py-4">尚無造型羁绊</p>}
                 </div>
               </div>
 

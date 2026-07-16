@@ -88,7 +88,7 @@ export default function AdminEquipmentEditPage() {
     ...(isHaojie(form.equipType) ? [{ id: 'mainAttr', label: '主屬性（推薦）' }] : []),
     { id: 'attrs',   label: isHaojie(form.equipType) ? (form.equipType === 'haojie_weapon' ? '武器屬性' : '戰徽屬性') : '裝備屬性' },
     ...(!isHaojie(form.equipType) ? [{ id: 'set', label: '所屬套裝' }] : []),
-    { id: 'source',  label: '獲取途徑' },
+    { id: 'source',  label: '獲得途徑' },
     { id: 'publish', label: '發佈設置' },
   ]
 
@@ -367,9 +367,9 @@ export default function AdminEquipmentEditPage() {
               </section>
             )}
 
-            {/* 獲取途徑 */}
+            {/* 獲得途徑 */}
             <section ref={el => { sectionRefs.current['source'] = el }} className={cardCls}>
-              <h2 className="text-wiki-text font-bold text-base mb-5 flex items-center gap-2"><span className="text-wiki-accent">◆</span>獲取途徑</h2>
+              <h2 className="text-wiki-text font-bold text-base mb-5 flex items-center gap-2"><span className="text-wiki-accent">◆</span>獲得途徑</h2>
               <p className="text-wiki-text-muted text-xs mb-3">支持富文本（含鏈接）</p>
               <RichTextEditor value={form.acquisition} onChange={html => set('acquisition', html)} minHeight="min-h-[120px]" />
             </section>

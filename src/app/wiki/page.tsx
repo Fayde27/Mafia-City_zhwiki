@@ -45,7 +45,7 @@ const wikiCategories: WikiCategory[] = [
     id: 'equipment',
     name: '裝備圖鑑',
     slug: 'equipment',
-    description: '瀏覽武器裝備的屬性、強化方式和獲取途徑',
+    description: '瀏覽武器裝備的屬性、強化方式和獲得途徑',
     icon: '⚔️',
     route: '/wiki/equipment',
     count: 0,

@@ -245,7 +245,7 @@ function HaojiePreviewModal(p: HaojiePreviewProps) {
                   <span className={`font-bold ${rarityColor}`}>{p.rarity}</span>
                   {p.traits.map(t => <span key={t} className="px-2 py-0.5 text-xs bg-wiki-accent/20 text-wiki-accent border border-wiki-accent/40 rounded">{t}</span>)}
                   {p.troopType && <span className="px-2 py-0.5 text-xs bg-white/10 text-white/80 border border-white/20 rounded">{p.troopType}</span>}
-                  {p.acquisition && <span className="text-xs text-white/60">獲取：{p.acquisition}</span>}
+                  {p.acquisition && <span className="text-xs text-white/60">獲得：{p.acquisition}</span>}
                 </div>
               </div>
             </div>
@@ -593,7 +593,7 @@ export default function AdminHaojieEditPage() {
                     </select>
                   </div>
                   <div>
-                    <label className={labelCls}>獲取方式</label>
+                    <label className={labelCls}>獲得方式</label>
                     <input className={inputCls} value={acquisition} onChange={e => setAcquisition(e.target.value)} />
                   </div>
                   <div className="flex items-center gap-6 pt-6">

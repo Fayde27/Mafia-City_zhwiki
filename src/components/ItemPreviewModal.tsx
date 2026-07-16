@@ -111,7 +111,7 @@ export default function ItemPreviewModal({ form, categoryName, onClose }: Props)
               <div className="px-4 py-2 text-sm font-bold rounded bg-wiki-gray text-wiki-text-muted">兌換內容</div>
             )}
             {hasSource && (
-              <div className="px-4 py-2 text-sm font-bold rounded bg-wiki-gray text-wiki-text-muted">獲取途徑</div>
+              <div className="px-4 py-2 text-sm font-bold rounded bg-wiki-gray text-wiki-text-muted">獲得途徑</div>
             )}
           </div>
 
@@ -123,10 +123,10 @@ export default function ItemPreviewModal({ form, categoryName, onClose }: Props)
             </div>
           )}
 
-          {/* 獲取途徑內容 */}
+          {/* 獲得途徑內容 */}
           {hasSource && (
             <div className="bg-wiki-gray-light border border-wiki-border rounded-xl p-5 mb-4">
-              <h3 className="font-bold text-wiki-accent mb-3 text-sm uppercase tracking-wider">獲取途徑</h3>
+              <h3 className="font-bold text-wiki-accent mb-3 text-sm uppercase tracking-wider">獲得途徑</h3>
               <MarkdownRenderer content={form.source!} />
             </div>
           )}

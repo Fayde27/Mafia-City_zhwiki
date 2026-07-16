@@ -13,7 +13,7 @@ import ItemPreviewModal from '@/components/ItemPreviewModal'
 const SECTIONS = [
   { id: 'basic',   label: '基本信息' },
   { id: 'images',  label: '圖片上傳' },
-  { id: 'source',  label: '獲取途徑' },
+  { id: 'source',  label: '獲得途徑' },
   { id: 'publish', label: '發佈設置' },
 ]
 
@@ -205,10 +205,10 @@ export default function AdminItemNewPage() {
               </div>
             </section>
 
-            {/* Section 3: 獲取途徑 */}
+            {/* Section 3: 獲得途徑 */}
             <section ref={el => { sectionRefs.current['source'] = el }} className={cardCls}>
               <h2 className="text-wiki-text font-bold text-base mb-5 flex items-center gap-2">
-                <span className="text-wiki-accent">◆</span>獲取途徑
+                <span className="text-wiki-accent">◆</span>獲得途徑
               </h2>
               <p className="text-wiki-text-muted text-xs mb-3">可填寫文字描述，支持富文本（包含鏈接）</p>
               <RichTextEditor
