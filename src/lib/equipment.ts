@@ -62,8 +62,8 @@ export interface FilterField { field: string; label: string }
 export const FILTER_FIELDS: Record<string, FilterField[]> = {
   haojie_weapon:   [{ field: 'rarity', label: '品質' }, { field: 'type', label: '種類' }],
   haojie_warbadge: [{ field: 'rarity', label: '品質' }, { field: 'type', label: '種類' }],
-  leader:          [{ field: 'rarity', label: '品質' }, { field: 'slot', label: '部位' }, { field: 'attrBias', label: '偏向' }, { field: 'type', label: '類型' }],
-  hero:            [{ field: 'rarity', label: '品質' }, { field: 'slot', label: '部位' }, { field: 'type', label: '類型' }],
+  leader:          [{ field: 'rarity', label: '品質' }, { field: 'slot', label: '部位' }, { field: 'attrBias', label: '偏向' }, { field: 'type', label: '類型' }, { field: 'set', label: '套裝' }],
+  hero:            [{ field: 'rarity', label: '品質' }, { field: 'slot', label: '部位' }, { field: 'type', label: '類型' }, { field: 'set', label: '套裝' }],
 }
 export const fieldLabel = (equipType: string, field: string) =>
   (FILTER_FIELDS[equipType] || []).find(f => f.field === field)?.label || field

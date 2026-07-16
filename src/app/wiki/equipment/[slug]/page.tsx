@@ -13,7 +13,12 @@ interface Equipment {
   id: string; name: string; slug: string; summary?: string
   icon: string; image: string; iconPosition?: string; imagePosition?: string
   rarity: number; type?: string; slot?: string; attrBias?: string; equipType: string
+  set?: { name?: string } | null
 }
+
+// 取某筆裝備在指定 field 上用於比較的值（套裝取 set.name）
+const fieldVal = (e: Equipment, field: string): string =>
+  field === 'set' ? String(e.set?.name ?? '') : String((e as any)[field] ?? '')
 
 interface FilterOption { id: string; type: string; value: string; field: string; sortOrder: number }
 
@@ -59,7 +64,7 @@ export default function EquipmentTypeListPage() {
   const filtered = useConfigured
     ? equipment.filter(e => groupList.every(g => {
         const sel = active[g.field]
-        return !sel || sel === 'all' || String((e as any)[g.field] ?? '') === sel
+        return !sel || sel === 'all' || fieldVal(e, g.field) === sel
       }))
     : equipment
         .filter(e => rarityFilter === 0 || e.rarity === rarityFilter)
