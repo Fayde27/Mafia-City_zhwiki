@@ -7,7 +7,7 @@ import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { EQUIP_TYPE_LABELS, rarityInfo, RARITY_TIERS, rarityTiersFor, fieldLabel } from '@/lib/equipment'
+import { EQUIP_TYPE_LABELS, rarityInfo, fieldLabel } from '@/lib/equipment'
 
 interface Equipment {
   id: string; name: string; slug: string; summary?: string
@@ -22,8 +22,6 @@ const fieldVal = (e: Equipment, field: string): string =>
 
 interface FilterOption { id: string; type: string; value: string; field: string; sortOrder: number }
 
-const isHaojie = (t: string) => t === 'haojie_weapon' || t === 'haojie_warbadge'
-
 export default function EquipmentTypeListPage() {
   const params = useParams()
   const equipType = params?.slug as string
@@ -32,9 +30,6 @@ export default function EquipmentTypeListPage() {
   const [loading, setLoading] = useState(true)
   // 後台自定義篩選：{ field: 選中的 value }，'all' / 未設 = 不過濾
   const [active, setActive] = useState<Record<string, string>>({})
-  // fallback（後台未配置時沿用）
-  const [rarityFilter, setRarityFilter] = useState(0) // 0 = 全部
-  const [kindFilter, setKindFilter] = useState('all')  // 種類/部位
 
   useEffect(() => {
     fetch(`/api/wiki/equipment?equipType=${equipType}`)
@@ -48,9 +43,6 @@ export default function EquipmentTypeListPage() {
   }, [equipType])
 
   const typeLabel = EQUIP_TYPE_LABELS[equipType] || equipType
-  const haojie = isHaojie(equipType)
-  const kindKey = haojie ? 'type' : 'slot'
-  const kindLabel = haojie ? '種類' : '部位'
 
   // 後台配置的篩選按 field 分組（保留插入順序）
   const groups = options.reduce((acc, o) => {
@@ -58,17 +50,11 @@ export default function EquipmentTypeListPage() {
     return acc
   }, {} as Record<string, { label: string; field: string; values: FilterOption[] }>)
   const groupList = Object.values(groups)
-  const useConfigured = groupList.length > 0
 
-  const kinds = Array.from(new Set(equipment.map(e => (e as any)[kindKey]).filter(Boolean)))
-  const filtered = useConfigured
-    ? equipment.filter(e => groupList.every(g => {
-        const sel = active[g.field]
-        return !sel || sel === 'all' || fieldVal(e, g.field) === sel
-      }))
-    : equipment
-        .filter(e => rarityFilter === 0 || e.rarity === rarityFilter)
-        .filter(e => kindFilter === 'all' || (e as any)[kindKey] === kindFilter)
+  const filtered = equipment.filter(e => groupList.every(g => {
+    const sel = active[g.field]
+    return !sel || sel === 'all' || fieldVal(e, g.field) === sel
+  }))
 
   return (
     <div className="min-h-screen bg-wiki-bg">
@@ -89,10 +75,10 @@ export default function EquipmentTypeListPage() {
           <h1 className="text-3xl md:text-4xl font-heading font-bold text-wiki-accent heading-hard">{typeLabel}</h1>
         </div>
 
-        {/* 篩選 */}
-        <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-4 md:p-6 mb-6 space-y-4">
-          {useConfigured ? (
-            groupList.map(g => {
+        {/* 篩選（僅顯示後台已配置的字段；未配置則不顯示篩選欄） */}
+        {groupList.length > 0 && (
+          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-4 md:p-6 mb-6 space-y-4">
+            {groupList.map(g => {
               const sel = active[g.field] || 'all'
               const setSel = (v: string) => setActive(prev => ({ ...prev, [g.field]: v }))
               const isRarity = g.field === 'rarity'
@@ -113,34 +99,9 @@ export default function EquipmentTypeListPage() {
                   </div>
                 </div>
               )
-            })
-          ) : (
-            <>
-              <div>
-                <div className="text-sm font-bold text-wiki-accent uppercase tracking-wider mb-2">品質</div>
-                <div className="flex flex-wrap gap-2">
-                  <button onClick={() => setRarityFilter(0)} className={`px-3 py-1.5 text-xs font-bold ${rarityFilter === 0 ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>全部</button>
-                  {rarityTiersFor(equipType).map(t => (
-                    <button key={t.value} onClick={() => setRarityFilter(t.value)}
-                      className={`px-3 py-1.5 text-xs font-bold ${rarityFilter === t.value ? 'text-white' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}
-                      style={rarityFilter === t.value ? { backgroundColor: t.color } : {}}>{t.label}</button>
-                  ))}
-                </div>
-              </div>
-              {kinds.length > 0 && (
-                <div>
-                  <div className="text-sm font-bold text-wiki-accent uppercase tracking-wider mb-2">{kindLabel}</div>
-                  <div className="flex flex-wrap gap-2">
-                    <button onClick={() => setKindFilter('all')} className={`px-3 py-1.5 text-xs font-bold ${kindFilter === 'all' ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>全部</button>
-                    {kinds.map(k => (
-                      <button key={k} onClick={() => setKindFilter(k)} className={`px-3 py-1.5 text-xs font-bold ${kindFilter === k ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>{k}</button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-        </div>
+            })}
+          </div>
+        )}
 
         {loading ? (
           <div className="text-center py-12 text-wiki-text-muted">載入中...</div>
