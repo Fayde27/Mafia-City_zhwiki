@@ -82,7 +82,7 @@ export async function GET(request: Request) {
     return NextResponse.json({
       ...charRest,
       category: CharacterCategory,
-      skins: skins || [],
+      skins: (skins || []).map((s: any) => ({ ...s, bonuses: tryParse(s.bonuses, []) })),
       skinBonds: (skinBonds || []).map((b: any) => ({
         ...b,
         skinIds: tryParse(b.skinIds, []),
