@@ -8,8 +8,10 @@ import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
 import { useRouter } from 'next/navigation'
+import { MODULE_FILTER_FIELDS, moduleFieldLabel, moduleValuePresets, displayFilterValue } from '@/lib/filters'
 
 type Tab = 'list' | 'categories' | 'filters'
+const C_FIELDS = MODULE_FILTER_FIELDS.character
 
 interface Character {
   id: string; name: string; slug: string; title: string; avatar: string
@@ -21,7 +23,7 @@ interface CharacterCategory {
   id: string; name: string; slug: string; description: string; icon: string; sortOrder: number
   _count: { characters: number }
 }
-interface FilterOption { id: string; type: string; value: string; sortOrder: number; categoryId: string }
+interface FilterOption { id: string; type: string; value: string; field?: string; sortOrder: number; categoryId: string }
 
 export default function AdminCharactersPage() {
   const router = useRouter()
@@ -42,6 +44,7 @@ export default function AdminCharactersPage() {
   // 篩選
   const [filterOptions, setFilterOptions] = useState<FilterOption[]>([])
   const [selectedCatId, setSelectedCatId] = useState('')
+  const [newField, setNewField] = useState(C_FIELDS[0].field)
   const [newType, setNewType] = useState('')
   const [newValue, setNewValue] = useState('')
   const [filterSaving, setFilterSaving] = useState(false)
@@ -116,10 +119,11 @@ export default function AdminCharactersPage() {
   }
 
   const handleFilterAdd = async () => {
-    if (!newValue.trim() || !newType.trim() || !selectedCatId) return
+    if (!newValue.trim() || !newField || !selectedCatId) return
+    const label = newType.trim() || moduleFieldLabel('character', newField)
     setFilterSaving(true)
     try {
-      const res = await fetch('/api/admin/character-filters', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: newType.trim(), value: newValue.trim(), categoryId: selectedCatId }) })
+      const res = await fetch('/api/admin/character-filters', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: label, value: newValue.trim(), field: newField, categoryId: selectedCatId }) })
       if (res.ok) { setNewValue(''); refetchFilters() }
     } finally { setFilterSaving(false) }
   }
@@ -140,9 +144,14 @@ export default function AdminCharactersPage() {
   const selectedCatName = selectedCat?.name ?? ''
 
   const currentOptions = filterOptions.filter(o => o.categoryId === selectedCatId)
-  const existingTypes = Array.from(new Set(currentOptions.map(o => o.type))).sort()
-  const groupedOptions = existingTypes.reduce((acc, type) => { acc[type] = currentOptions.filter(o => o.type === type).sort((a, b) => a.sortOrder - b.sortOrder); return acc }, {} as Record<string, FilterOption[]>)
-  const allTypes = Array.from(new Set(filterOptions.map(o => o.type))).sort()
+  const existingFields = C_FIELDS.map(f => f.field).filter(fld => currentOptions.some(o => o.field === fld))
+  const groupedOptions = existingFields.reduce((acc, fld) => { acc[fld] = currentOptions.filter(o => o.field === fld).sort((a, b) => a.sortOrder - b.sortOrder); return acc }, {} as Record<string, FilterOption[]>)
+  const valueCandidates: { value: string; label: string }[] = (() => {
+    const out = [...moduleValuePresets('character', newField)]
+    Array.from(new Set(characters.map(e => (e as any)[newField]).filter(v => v !== null && v !== undefined && v !== '').map(String)))
+      .forEach(v => { if (!out.some(c => c.value === v)) out.push({ value: v, label: displayFilterValue('character', newField, v) }) })
+    return out
+  })()
 
   const tabCls = (t: Tab) => `px-6 py-3 font-bold text-sm border-b-2 transition-colors ${activeTab === t ? 'border-wiki-accent text-wiki-accent' : 'border-transparent text-wiki-text-muted hover:text-wiki-text'}`
   const catBtnCls = (active: boolean) => `px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-colors ${active ? 'bg-wiki-accent/20 text-wiki-accent border border-wiki-accent/40' : 'bg-wiki-gray text-wiki-text-muted border border-wiki-border hover:text-wiki-text'}`
@@ -327,33 +336,42 @@ export default function AdminCharactersPage() {
                   <h3 className="text-base font-bold text-wiki-accent mb-4">添加篩選選項（到「{categories.find(c => c.id === selectedCatId)?.name ?? '...'}」）</h3>
                   <div className="flex gap-4 items-end flex-wrap">
                     <div className="flex-shrink-0">
-                      <label className="block text-wiki-text-muted text-xs mb-1">篩選大類</label>
-                      <input type="text" value={newType} onChange={e => setNewType(e.target.value)} list="type-suggestions"
-                        className="w-40 bg-wiki-gray border-2 border-wiki-border px-3 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none text-sm" placeholder="如：稀有度" />
-                      <datalist id="type-suggestions">{allTypes.map(t => <option key={t} value={t} />)}</datalist>
+                      <label className="block text-wiki-text-muted text-xs mb-1">篩選字段</label>
+                      <select value={newField} onChange={e => { setNewField(e.target.value); setNewValue(''); setNewType('') }}
+                        className="w-40 bg-wiki-gray border-2 border-wiki-border px-3 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none text-sm cursor-pointer">
+                        {C_FIELDS.map(f => <option key={f.field} value={f.field}>{f.label}</option>)}
+                      </select>
+                    </div>
+                    <div className="flex-shrink-0">
+                      <label className="block text-wiki-text-muted text-xs mb-1">顯示名（可留空）</label>
+                      <input type="text" value={newType} onChange={e => setNewType(e.target.value)}
+                        className="w-32 bg-wiki-gray border-2 border-wiki-border px-3 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none text-sm" placeholder={moduleFieldLabel('character', newField)} />
                     </div>
                     <div className="flex-1 min-w-[160px]">
                       <label className="block text-wiki-text-muted text-xs mb-1">選項值</label>
-                      <input type="text" value={newValue} onChange={e => setNewValue(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleFilterAdd()}
-                        className="w-full bg-wiki-gray border-2 border-wiki-border px-3 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none text-sm" placeholder="如：金色" />
+                      <select value={newValue} onChange={e => setNewValue(e.target.value)}
+                        className="w-full bg-wiki-gray border-2 border-wiki-border px-3 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none text-sm cursor-pointer">
+                        <option value="">— 選擇值 —</option>
+                        {valueCandidates.map(v => <option key={v.value} value={v.value}>{v.label}</option>)}
+                      </select>
                     </div>
-                    <button onClick={handleFilterAdd} disabled={filterSaving || !newValue.trim() || !newType.trim() || !selectedCatId}
+                    <button onClick={handleFilterAdd} disabled={filterSaving || !newValue.trim() || !newField || !selectedCatId}
                       className="btn-hard text-wiki-text disabled:opacity-50 px-6 py-2 text-sm">添加</button>
                   </div>
                 </div>
-                {existingTypes.length === 0 ? (
+                {existingFields.length === 0 ? (
                   <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-8 text-center text-wiki-text-muted">該分類暫無篩選選項</div>
                 ) : (
                   <div className="space-y-4">
-                    {existingTypes.map(type => (
-                      <div key={type} className="bg-wiki-gray-light border border-wiki-border rounded-lg p-4">
-                        <h3 className="text-sm font-bold text-wiki-accent mb-3">{type}</h3>
+                    {existingFields.map(fld => (
+                      <div key={fld} className="bg-wiki-gray-light border border-wiki-border rounded-lg p-4">
+                        <h3 className="text-sm font-bold text-wiki-accent mb-3">{groupedOptions[fld][0]?.type || moduleFieldLabel('character', fld)}</h3>
                         <div className="space-y-2">
-                          {groupedOptions[type].map(opt => (
+                          {groupedOptions[fld].map(opt => (
                             <div key={opt.id} className="flex items-center gap-4 bg-wiki-gray rounded p-2.5">
                               <input type="number" value={opt.sortOrder} onChange={e => handleFilterSort(opt.id, parseInt(e.target.value) || 0)}
                                 className="w-16 bg-wiki-gray-light border border-wiki-border px-2 py-1 text-wiki-text text-center text-sm" />
-                              <span className="text-wiki-text flex-1 text-sm">{opt.value}</span>
+                              <span className="text-wiki-text flex-1 text-sm">{displayFilterValue('character', fld, opt.value)}</span>
                               <button onClick={() => handleFilterDelete(opt.id)} className="text-red-400 text-sm hover:opacity-70">刪除</button>
                             </div>
                           ))}

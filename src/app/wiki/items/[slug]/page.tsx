@@ -7,6 +7,7 @@ import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
+import { moduleFieldLabel, displayFilterValue } from '@/lib/filters'
 
 interface Item {
   id: string
@@ -17,6 +18,9 @@ interface Item {
   iconPosition?: string
   image: string
   imagePosition?: string
+  rarity?: number
+  type?: string
+  quality?: string
   category: { name: string; slug: string }
 }
 
@@ -25,7 +29,7 @@ interface ItemCategory {
 }
 
 interface ItemFilterOption {
-  id: string; type: string; value: string; sortOrder: number
+  id: string; type: string; value: string; field?: string; sortOrder: number
 }
 
 export default function ItemListPage() {
@@ -50,14 +54,18 @@ export default function ItemListPage() {
     }).catch(() => setLoading(false))
   }, [categorySlug])
 
-  const filterTypes = Array.from(new Set(filterOptions.map(o => o.type)))
+  const filterFields = Array.from(new Set(filterOptions.map(o => o.field).filter(Boolean))) as string[]
   const groupedFilters: Record<string, ItemFilterOption[]> = {}
-  filterTypes.forEach(type => {
-    groupedFilters[type] = filterOptions.filter(o => o.type === type).sort((a, b) => a.sortOrder - b.sortOrder)
+  filterFields.forEach(fld => {
+    groupedFilters[fld] = filterOptions.filter(o => o.field === fld).sort((a, b) => a.sortOrder - b.sortOrder)
   })
 
   const filteredItems = items.filter(i =>
-    Object.entries(activeFilters).every(([, value]) => !value || value === 'all')
+    filterFields.every(fld => {
+      const value = activeFilters[fld]
+      if (!value || value === 'all') return true
+      return String((i as any)[fld] ?? '') === value
+    })
   )
 
   return (
@@ -87,28 +95,28 @@ export default function ItemListPage() {
         </div>
 
         {/* 篩選欄 */}
-        {filterTypes.length > 0 && (
+        {filterFields.length > 0 && (
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-4 mb-6 space-y-3">
-            {filterTypes.map(type => (
-              <div key={type}>
-                <div className="text-xs font-bold text-wiki-accent uppercase tracking-wider mb-2">{type}</div>
+            {filterFields.map(fld => (
+              <div key={fld}>
+                <div className="text-xs font-bold text-wiki-accent uppercase tracking-wider mb-2">{groupedFilters[fld][0]?.type || moduleFieldLabel('item', fld)}</div>
                 <div className="flex flex-wrap gap-2">
                   <button
-                    onClick={() => setActiveFilters(prev => ({ ...prev, [type]: 'all' }))}
+                    onClick={() => setActiveFilters(prev => ({ ...prev, [fld]: 'all' }))}
                     className={`px-3 py-1.5 text-xs font-bold rounded transition-colors ${
-                      !activeFilters[type] || activeFilters[type] === 'all'
+                      !activeFilters[fld] || activeFilters[fld] === 'all'
                         ? 'bg-wiki-accent text-wiki-darker'
                         : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
                     }`}>全部</button>
-                  {groupedFilters[type].map(opt => (
+                  {groupedFilters[fld].map(opt => (
                     <button key={opt.id}
-                      onClick={() => setActiveFilters(prev => ({ ...prev, [type]: opt.value }))}
+                      onClick={() => setActiveFilters(prev => ({ ...prev, [fld]: opt.value }))}
                       className={`px-3 py-1.5 text-xs font-bold rounded transition-colors ${
-                        activeFilters[type] === opt.value
+                        activeFilters[fld] === opt.value
                           ? 'bg-wiki-accent text-wiki-darker'
                           : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
                       }`}>
-                      {opt.value}
+                      {displayFilterValue('item', fld, opt.value)}
                     </button>
                   ))}
                 </div>

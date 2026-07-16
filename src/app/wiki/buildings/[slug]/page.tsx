@@ -9,6 +9,7 @@ import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { BUILDING_TYPE_LABELS, BUILDING_TYPE_OPTIONS } from '@/lib/building'
+import { moduleFieldLabel, displayFilterValue } from '@/lib/filters'
 
 interface Building {
   id: string
@@ -21,6 +22,7 @@ interface Building {
   iconPosition?: string
   rarity: number
   type: string
+  affiliation?: string
   function: string
   summary?: string
   unlockCondition?: string
@@ -46,6 +48,7 @@ interface BuildingFilterOption {
   id: string
   type: string
   value: string
+  field?: string
   sortOrder: number
 }
 
@@ -80,23 +83,25 @@ export default function BuildingListPage() {
     })
   }, [categorySlug])
 
+  const getRarityStars = (r: number) => '★'.repeat(Math.max(0, r)) + '☆'.repeat(Math.max(0, 5 - r))
+
+  // 後台配置的篩選按 field 分組（僅取有 field 的選項）
+  const filterFields = Array.from(new Set(filterOptions.map(o => o.field).filter(Boolean))) as string[]
+  const groupedFilters: {[k: string]: typeof filterOptions} = {}
+  filterFields.forEach(fld => {
+    groupedFilters[fld] = filterOptions.filter(o => o.field === fld).sort((a, b) => a.sortOrder - b.sortOrder)
+  })
+
   const filteredBuildings = buildings
     .filter(b => typeFilter === 'all' || (b.buildingType || 'inner') === typeFilter)
-    .filter(b => Object.entries(activeFilters).every(([type, value]) => {
+    .filter(b => filterFields.every(fld => {
+      const value = activeFilters[fld]
       if (!value || value === 'all') return true
-      if (type === 'rarity') return b.rarity === parseInt(value)
-      return Object.values(b as any).some(v => String(v) === value)
+      return String((b as any)[fld] ?? '') === value
     }))
 
   // 僅顯示該分類下實際存在的建築類別 Tab
   const availableTypes = BUILDING_TYPE_OPTIONS.filter(t => buildings.some(b => (b.buildingType || 'inner') === t))
-
-  const getRarityStars = (r: number) => '★'.repeat(Math.max(0, r)) + '☆'.repeat(Math.max(0, 5 - r))
-  const filterTypes = Array.from(new Set(filterOptions.map(o => o.type)))
-  const groupedFilters: {[k: string]: typeof filterOptions} = {}
-  filterTypes.forEach(type => {
-    groupedFilters[type] = filterOptions.filter(o => o.type === type).sort((a, b) => a.sortOrder - b.sortOrder)
-  })
 
   return (
     <div className="min-h-screen bg-wiki-bg">
@@ -138,23 +143,23 @@ export default function BuildingListPage() {
           </div>
         )}
 
-        {filterTypes.length > 0 && (
+        {filterFields.length > 0 && (
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-4 md:p-6 mb-6 space-y-4">
-            {filterTypes.map(type => (
-              <div key={type}>
-                <div className="text-sm font-bold text-wiki-accent uppercase tracking-wider mb-2">{type}</div>
+            {filterFields.map(fld => (
+              <div key={fld}>
+                <div className="text-sm font-bold text-wiki-accent uppercase tracking-wider mb-2">{groupedFilters[fld][0]?.type || moduleFieldLabel('building', fld)}</div>
                 <div className="flex flex-wrap gap-2">
                   <button
-                    onClick={() => setActiveFilters(prev => ({ ...prev, [type]: 'all' }))}
-                    className={(!activeFilters[type] || activeFilters[type] === 'all') ? 'px-3 py-1.5 text-xs font-bold bg-wiki-accent text-wiki-darker' : 'px-3 py-1.5 text-xs font-bold bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}
+                    onClick={() => setActiveFilters(prev => ({ ...prev, [fld]: 'all' }))}
+                    className={(!activeFilters[fld] || activeFilters[fld] === 'all') ? 'px-3 py-1.5 text-xs font-bold bg-wiki-accent text-wiki-darker' : 'px-3 py-1.5 text-xs font-bold bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}
                   >全部</button>
-                  {groupedFilters[type].map(opt => (
+                  {groupedFilters[fld].map(opt => (
                     <button
                       key={opt.id}
-                      onClick={() => setActiveFilters(prev => ({ ...prev, [type]: opt.value }))}
-                      className={activeFilters[type] === opt.value ? 'px-3 py-1.5 text-xs font-bold bg-wiki-accent text-wiki-darker' : 'px-3 py-1.5 text-xs font-bold bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}
+                      onClick={() => setActiveFilters(prev => ({ ...prev, [fld]: opt.value }))}
+                      className={activeFilters[fld] === opt.value ? 'px-3 py-1.5 text-xs font-bold bg-wiki-accent text-wiki-darker' : 'px-3 py-1.5 text-xs font-bold bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}
                     >
-                      {type === 'rarity' && !isNaN(parseInt(opt.value)) ? getRarityStars(parseInt(opt.value)) : opt.value}
+                      {displayFilterValue('building', fld, opt.value)}
                     </button>
                   ))}
                 </div>

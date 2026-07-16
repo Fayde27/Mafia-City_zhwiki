@@ -20,13 +20,13 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { type, value, categoryId } = await request.json()
+    const { type, value, field, categoryId } = await request.json()
     if (!type || !value || !categoryId) {
       return NextResponse.json({ error: '類型、值和分類不能為空' }, { status: 400 })
     }
     const { data: option, error } = await supabaseAdmin
       .from('CharacterFilterOption')
-      .insert({ type, value, categoryId })
+      .insert({ type, value, field: field ?? null, categoryId })
       .select()
       .single()
 

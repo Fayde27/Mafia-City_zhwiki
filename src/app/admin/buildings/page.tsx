@@ -9,8 +9,10 @@ import Link from 'next/link'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
 import { useRouter } from 'next/navigation'
 import { BUILDING_TYPE_LABELS, BUILDING_TYPE_OPTIONS } from '@/lib/building'
+import { MODULE_FILTER_FIELDS, moduleFieldLabel, moduleValuePresets, displayFilterValue } from '@/lib/filters'
 
 type Tab = 'list' | 'categories' | 'filters'
+const B_FIELDS = MODULE_FILTER_FIELDS.building
 
 interface EntityItem {
   id: string; name: string; slug: string; rarity: number
@@ -24,7 +26,7 @@ interface EntityCategory {
   icon: string; sortOrder: number
   _count: { buildings: number }
 }
-interface FilterOption { id: string; type: string; value: string; sortOrder: number; categoryId: string }
+interface FilterOption { id: string; type: string; value: string; field?: string; sortOrder: number; categoryId: string }
 
 export default function AdminBuildingsPage() {
   const router = useRouter()
@@ -40,6 +42,7 @@ export default function AdminBuildingsPage() {
   const [catForm, setCatForm] = useState({ name: '', slug: '', description: '', icon: '', sortOrder: 0 })
   const [filterOptions, setFilterOptions] = useState<FilterOption[]>([])
   const [selectedCatId, setSelectedCatId] = useState('')
+  const [newField, setNewField] = useState(B_FIELDS[0].field)
   const [newType, setNewType] = useState('')
   const [newValue, setNewValue] = useState('')
   const [filterSaving, setFilterSaving] = useState(false)
@@ -105,10 +108,11 @@ export default function AdminBuildingsPage() {
   }
 
   const handleFilterAdd = async () => {
-    if (!newValue.trim() || !newType.trim() || !selectedCatId) return
+    if (!newValue.trim() || !newField || !selectedCatId) return
+    const label = newType.trim() || moduleFieldLabel('building', newField)
     setFilterSaving(true)
     try {
-      const res = await fetch('/api/admin/building-filters', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: newType.trim(), value: newValue.trim(), categoryId: selectedCatId }) })
+      const res = await fetch('/api/admin/building-filters', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: label, value: newValue.trim(), field: newField, categoryId: selectedCatId }) })
       if (res.ok) { setNewValue(''); refetchFilters() }
     } finally { setFilterSaving(false) }
   }
@@ -128,9 +132,15 @@ export default function AdminBuildingsPage() {
     return typeOk && catOk
   })
   const currentOptions = filterOptions.filter(o => o.categoryId === selectedCatId)
-  const existingTypes = Array.from(new Set(currentOptions.map(o => o.type))).sort()
-  const groupedOptions = existingTypes.reduce((acc, type) => { acc[type] = currentOptions.filter(o => o.type === type).sort((a, b) => a.sortOrder - b.sortOrder); return acc }, {} as Record<string, FilterOption[]>)
-  const allTypes = Array.from(new Set(filterOptions.map(o => o.type))).sort()
+  const existingFields = B_FIELDS.map(f => f.field).filter(fld => currentOptions.some(o => o.field === fld))
+  const groupedOptions = existingFields.reduce((acc, fld) => { acc[fld] = currentOptions.filter(o => o.field === fld).sort((a, b) => a.sortOrder - b.sortOrder); return acc }, {} as Record<string, FilterOption[]>)
+  // 選項值候選：標準全集並上真實數據，去重
+  const valueCandidates: { value: string; label: string }[] = (() => {
+    const out = [...moduleValuePresets('building', newField)]
+    Array.from(new Set(items.map(e => (e as any)[newField]).filter(v => v !== null && v !== undefined && v !== '').map(String)))
+      .forEach(v => { if (!out.some(c => c.value === v)) out.push({ value: v, label: displayFilterValue('building', newField, v) }) })
+    return out
+  })()
   const tabCls = (t: Tab) => `px-6 py-3 font-bold text-sm border-b-2 transition-colors ${activeTab === t ? 'border-wiki-accent text-wiki-accent' : 'border-transparent text-wiki-text-muted hover:text-wiki-text'}`
 
   return (
@@ -241,31 +251,40 @@ export default function AdminBuildingsPage() {
                 </div>
                 <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6 mb-6">
                   <h3 className="text-lg font-bold text-wiki-accent mb-4">添加篩選選項（到「{categories.find(c => c.id === selectedCatId)?.name ?? '...'}」）</h3>
-                  <div className="flex gap-4 items-end">
+                  <div className="flex gap-4 items-end flex-wrap">
                     <div className="flex-shrink-0">
-                      <label className="block text-wiki-text-muted text-xs mb-1">篩選大類</label>
-                      <input type="text" value={newType} onChange={ev => setNewType(ev.target.value)} list="types-buildings" className="w-40 bg-wiki-gray border-2 border-wiki-border px-3 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none" placeholder="如：稀有度" />
-                      <datalist id="types-buildings">{allTypes.map(t => <option key={t} value={t} />)}</datalist>
+                      <label className="block text-wiki-text-muted text-xs mb-1">篩選字段</label>
+                      <select value={newField} onChange={ev => { setNewField(ev.target.value); setNewValue(''); setNewType('') }} className="w-40 bg-wiki-gray border-2 border-wiki-border px-3 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none cursor-pointer">
+                        {B_FIELDS.map(f => <option key={f.field} value={f.field}>{f.label}</option>)}
+                      </select>
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-shrink-0">
+                      <label className="block text-wiki-text-muted text-xs mb-1">顯示名（可留空取字段名）</label>
+                      <input type="text" value={newType} onChange={ev => setNewType(ev.target.value)} className="w-40 bg-wiki-gray border-2 border-wiki-border px-3 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none" placeholder={moduleFieldLabel('building', newField)} />
+                    </div>
+                    <div className="flex-1 min-w-[200px]">
                       <label className="block text-wiki-text-muted text-xs mb-1">選項值</label>
-                      <input type="text" value={newValue} onChange={ev => setNewValue(ev.target.value)} onKeyDown={ev => ev.key === 'Enter' && handleFilterAdd()} className="w-full bg-wiki-gray border-2 border-wiki-border px-3 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none" placeholder="如：★★★★★" />
+                      <select value={newValue} onChange={ev => setNewValue(ev.target.value)} className="w-full bg-wiki-gray border-2 border-wiki-border px-3 py-2 text-wiki-text focus:border-wiki-accent focus:outline-none cursor-pointer">
+                        <option value="">— 選擇值 —</option>
+                        {valueCandidates.map(v => <option key={v.value} value={v.value}>{v.label}</option>)}
+                      </select>
                     </div>
-                    <button onClick={handleFilterAdd} disabled={filterSaving || !newValue.trim() || !newType.trim() || !selectedCatId} className="btn-hard text-wiki-text disabled:opacity-50 px-6 py-2">添加</button>
+                    <button onClick={handleFilterAdd} disabled={filterSaving || !newValue.trim() || !newField || !selectedCatId} className="btn-hard text-wiki-text disabled:opacity-50 px-6 py-2">添加</button>
                   </div>
+                  <p className="text-wiki-text-muted text-xs mt-3">選項值取標準全集並上真實數據；前台按此字段過濾。</p>
                 </div>
-                {existingTypes.length === 0 ? (
+                {existingFields.length === 0 ? (
                   <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-8 text-center text-wiki-text-muted">該分類暫無篩選選項</div>
                 ) : (
                   <div className="space-y-4">
-                    {existingTypes.map(type => (
-                      <div key={type} className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6">
-                        <h3 className="text-lg font-bold text-wiki-accent mb-4">{type}</h3>
+                    {existingFields.map(fld => (
+                      <div key={fld} className="bg-wiki-gray-light border border-wiki-border rounded-lg p-6">
+                        <h3 className="text-lg font-bold text-wiki-accent mb-4">{groupedOptions[fld][0]?.type || moduleFieldLabel('building', fld)}</h3>
                         <div className="space-y-2">
-                          {groupedOptions[type].map(opt => (
+                          {groupedOptions[fld].map(opt => (
                             <div key={opt.id} className="flex items-center gap-4 bg-wiki-gray rounded-lg p-3">
                               <input type="number" value={opt.sortOrder} onChange={ev => handleFilterSort(opt.id, parseInt(ev.target.value) || 0)} className="w-16 bg-wiki-carder border border-wiki-border px-2 py-1 text-wiki-text text-center" />
-                              <span className="text-wiki-text flex-1">{opt.value}</span>
+                              <span className="text-wiki-text flex-1">{displayFilterValue('building', fld, opt.value)}</span>
                               <button onClick={() => handleFilterDelete(opt.id)} className="text-wiki-danger text-sm hover:opacity-70">刪除</button>
                             </div>
                           ))}

@@ -8,6 +8,7 @@ import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
+import { moduleFieldLabel, displayFilterValue } from '@/lib/filters'
 
 interface Character {
   id: string
@@ -19,6 +20,7 @@ interface Character {
   avatarPosition?: string
   bannerPosition?: string
   rarity: string
+  troopType?: string
   role: string
   weapon: string
   coreBonus: string
@@ -41,6 +43,7 @@ interface CharacterFilterOption {
   id: string
   type: string
   value: string
+  field?: string
   sortOrder: number
 }
 
@@ -74,18 +77,20 @@ export default function CharacterListPage() {
     })
   }, [categorySlug])
 
-  const filteredCharacters = characters.filter(c => {
-    return Object.entries(activeFilters).every(([type, value]) => {
-      if (!value || value === 'all') return true
-      if (type === 'rarity') return String(c.rarity) === value
-      if (type === 'role') return c.role === value
-      if (type === 'weapon') return c.weapon === value
-      // 自定義類型：嘗試匹配角色所有字段
-      return Object.values(c as any).some((v: unknown) => String(v) === value)
-    })
-  })
+  // 後台配置的篩選按 field 分組（僅取有 field 的選項）
+  const filterFields = Array.from(new Set(filterOptions.map(o => o.field).filter(Boolean))) as string[]
+  const groupedFilters = filterFields.reduce((acc, fld) => {
+    acc[fld] = filterOptions.filter(o => o.field === fld).sort((a, b) => a.sortOrder - b.sortOrder)
+    return acc
+  }, {} as Record<string, CharacterFilterOption[]>)
 
-  const getRarityStars = (rarity: number) => '★'.repeat(Math.max(0, rarity)) + '☆'.repeat(Math.max(0, 5 - rarity))
+  const filteredCharacters = characters.filter(c =>
+    filterFields.every(fld => {
+      const value = activeFilters[fld]
+      if (!value || value === 'all') return true
+      return String((c as any)[fld] ?? '') === value
+    })
+  )
 
   // 稀有度色（底部最濃、向上漸弱）— rarity 為字串 金/紫/藍；class 為完整字面量避免 Tailwind 裁剪
   const rarityFade = (rarity: string) =>
@@ -93,13 +98,6 @@ export default function CharacterListPage() {
     rarity === '紫' ? 'from-purple-500' :
     rarity === '藍' ? 'from-blue-500' :
                       'from-gray-500'
-
-  // 動態分組
-  const filterTypes = Array.from(new Set(filterOptions.map(o => o.type)))
-  const groupedFilters = filterTypes.reduce((acc, type) => {
-    acc[type] = filterOptions.filter(o => o.type === type).sort((a, b) => a.sortOrder - b.sortOrder)
-    return acc
-  }, {} as Record<string, CharacterFilterOption[]>)
 
   return (
     <div className="min-h-screen bg-wiki-bg">
@@ -125,35 +123,33 @@ export default function CharacterListPage() {
           </div>
         </div>
 
-        {filterTypes.length > 0 && (
+        {filterFields.length > 0 && (
           <div className="bg-wiki-gray-light border border-wiki-border rounded-lg rounded-lg p-4 md:p-6 mb-6 space-y-4">
-            {filterTypes.map(type => (
-              <div key={type}>
-                <div className="text-sm font-bold text-wiki-accent uppercase tracking-wider mb-2">{type}</div>
+            {filterFields.map(fld => (
+              <div key={fld}>
+                <div className="text-sm font-bold text-wiki-accent uppercase tracking-wider mb-2">{groupedFilters[fld][0]?.type || moduleFieldLabel('character', fld)}</div>
                 <div className="flex flex-wrap gap-2">
                   <button
-                    onClick={() => setActiveFilters(prev => ({ ...prev, [type]: 'all' }))}
+                    onClick={() => setActiveFilters(prev => ({ ...prev, [fld]: 'all' }))}
                     className={`px-3 py-1.5 text-xs font-bold transition-colors ${
-                      !activeFilters[type] || activeFilters[type] === 'all'
+                      !activeFilters[fld] || activeFilters[fld] === 'all'
                         ? 'bg-wiki-accent text-wiki-darker'
                         : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
                     }`}
                   >
                     全部
                   </button>
-                  {groupedFilters[type].map(opt => (
+                  {groupedFilters[fld].map(opt => (
                     <button
                       key={opt.id}
-                      onClick={() => setActiveFilters(prev => ({ ...prev, [type]: opt.value }))}
+                      onClick={() => setActiveFilters(prev => ({ ...prev, [fld]: opt.value }))}
                       className={`px-3 py-1.5 text-xs font-bold transition-colors ${
-                        activeFilters[type] === opt.value
+                        activeFilters[fld] === opt.value
                           ? 'bg-wiki-accent text-wiki-darker'
                           : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
                       }`}
                     >
-                      {type === 'rarity' && !isNaN(parseInt(opt.value))
-                        ? getRarityStars(parseInt(opt.value))
-                        : opt.value}
+                      {displayFilterValue('character', fld, opt.value)}
                     </button>
                   ))}
                 </div>

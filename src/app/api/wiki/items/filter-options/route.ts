@@ -19,7 +19,7 @@ export async function GET(request: Request) {
 
     const { data: options, error } = await supabaseAdmin
       .from('ItemFilterOption')
-      .select('id, type, value, sortOrder')
+      .select('id, type, value, field, sortOrder')
       .eq('categoryId', cat.id)
       .order('type', { ascending: true })
       .order('sortOrder', { ascending: true })
