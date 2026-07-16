@@ -9,7 +9,7 @@ import Link from 'next/link'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
 import { useRouter } from 'next/navigation'
 import ImageUploadInput from '@/components/ImageUploadInput'
-import { FILTER_FIELDS, fieldLabel, rarityInfo, rarityTiersFor } from '@/lib/equipment'
+import { FILTER_FIELDS, fieldLabel, rarityInfo, rarityTiersFor, filterValuePresets } from '@/lib/equipment'
 
 type Tab = 'list' | 'categories' | 'filters' | 'sets'
 
@@ -196,11 +196,11 @@ export default function AdminEquipmentPage() {
   const currentOptions = filterOptions.filter(o => o.equipType === filterEquipType)
   const existingFields = availableFields.map(f => f.field).filter(fld => currentOptions.some(o => o.field === fld))
   const groupedOptions = existingFields.reduce((acc, fld) => { acc[fld] = currentOptions.filter(o => o.field === fld).sort((a, b) => a.sortOrder - b.sortOrder); return acc }, {} as Record<string, FilterOption[]>)
-  // 「選項值」候選：rarity 用檔位，其餘取該 equipType 真實數據裡出現過的值
-  const valueCandidates: { value: string; label: string }[] = newField === 'rarity'
-    ? rarityTiersFor(filterEquipType).map(t => ({ value: String(t.value), label: t.label }))
-    : Array.from(new Set(items.filter(e => e.equipType === filterEquipType).map(e => (e as any)[newField]).filter(Boolean)))
-        .map(v => ({ value: String(v), label: String(v) }))
+  // 「選項值」候選：標準全集（品質檔位/部位/種類）並上真實數據裡出現過的值，去重
+  const presetVals = filterValuePresets(filterEquipType, newField)
+  const realVals = Array.from(new Set(items.filter(e => e.equipType === filterEquipType).map(e => (e as any)[newField]).filter(Boolean).map(String)))
+  const valueCandidates: { value: string; label: string }[] = [...presetVals]
+  realVals.forEach(v => { if (!valueCandidates.some(c => c.value === v)) valueCandidates.push({ value: v, label: v }) })
   const getRarityStars = (r: number) => '★'.repeat(Math.max(0, r)) + '☆'.repeat(Math.max(0, 5 - r))
   const tabCls = (t: Tab) => `px-6 py-3 font-bold text-sm border-b-2 transition-colors ${activeTab === t ? 'border-wiki-accent text-wiki-accent' : 'border-transparent text-wiki-text-muted hover:text-wiki-text'}`
 

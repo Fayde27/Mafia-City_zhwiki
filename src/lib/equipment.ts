@@ -62,8 +62,8 @@ export interface FilterField { field: string; label: string }
 export const FILTER_FIELDS: Record<string, FilterField[]> = {
   haojie_weapon:   [{ field: 'rarity', label: '品質' }, { field: 'type', label: '種類' }],
   haojie_warbadge: [{ field: 'rarity', label: '品質' }, { field: 'type', label: '種類' }],
-  leader:          [{ field: 'rarity', label: '品質' }, { field: 'slot', label: '部位' }, { field: 'attrBias', label: '偏向' }],
-  hero:            [{ field: 'rarity', label: '品質' }, { field: 'slot', label: '部位' }],
+  leader:          [{ field: 'rarity', label: '品質' }, { field: 'slot', label: '部位' }, { field: 'attrBias', label: '偏向' }, { field: 'type', label: '類型' }],
+  hero:            [{ field: 'rarity', label: '品質' }, { field: 'slot', label: '部位' }, { field: 'type', label: '類型' }],
 }
 export const fieldLabel = (equipType: string, field: string) =>
   (FILTER_FIELDS[equipType] || []).find(f => f.field === field)?.label || field
@@ -72,4 +72,12 @@ export const fieldLabel = (equipType: string, field: string) =>
 export const KIND_PRESETS: Record<string, string[]> = {
   haojie_weapon: ['殺人蜂', '執法者', '荒野獵人', '蜂蛇', '豪傑專用'],
   haojie_warbadge: ['幸運戰徽', '動力戰徽', '預限戰徽', '將領戰徽', '災厄戰徽'],
+}
+
+// 篩選「選項值」的標準全集（後台下拉候選，會再並上真實數據裡的值）
+export const filterValuePresets = (equipType: string, field: string): { value: string; label: string }[] => {
+  if (field === 'rarity') return rarityTiersFor(equipType).map(t => ({ value: String(t.value), label: t.label }))
+  if (field === 'slot') return (SLOT_OPTIONS[equipType] || []).map(s => ({ value: s, label: s }))
+  if (field === 'type') return (KIND_PRESETS[equipType] || []).map(s => ({ value: s, label: s }))
+  return []
 }
