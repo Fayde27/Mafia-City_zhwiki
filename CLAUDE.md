@@ -1,6 +1,8 @@
 # 黑道風雲 Wiki 攻略站 — 項目參考文檔
 
-> 最後更新：2026-06-29
+> 最後更新：2026-07-24
+>
+> ⚠️ 2026-07 大調整：**移除四大圖鑑**（角色/裝備/兵種/建築），站點現只保留三個內容模塊 —— **陣容搭配 · 道具介紹 · 活動介紹**（道具↔活動可互鏈）。詳見第四節。
 
 ---
 
@@ -39,11 +41,13 @@ const labelCls = 'block text-wiki-text text-sm font-bold uppercase tracking-wide
 
 **大型編輯頁佈局（標準範本）：**  
 左側 Sticky 導航 + 右側分區表單 + scroll-spy 高亮（`offsetTop <= scrollY + 140`）+ 左側「👁 預覽效果」按鈕。  
-→ 參考：`src/app/admin/buildings/edit/[id]/page.tsx`（所有大型編輯頁的標準範本）
+→ 參考：`src/app/admin/events/edit/[id]/page.tsx` 或 `src/app/admin/items/edit/[id]/page.tsx`
 
 **預覽 Modal 規範：**  
-每個圖鑑有對應的 `XxxPreviewModal` 組件（`src/components/`），接收當前表單 state 實時渲染 Wiki 效果，ESC 關閉。  
-→ 已實現：`BuildingPreviewModal.tsx` · `ItemPreviewModal.tsx` · `TroopPreviewModal.tsx` · `EquipmentPreviewModal.tsx`
+接收當前表單 state 實時渲染 Wiki 效果，ESC 關閉。  
+→ 現存：`ItemPreviewModal.tsx` · `EventPreviewModal.tsx`（建築/裝備/兵種的預覽 Modal 已隨圖鑑移除）
+
+**陣容搭配後台**（`/admin/lineups`）是**單頁全量編輯**模型（不走上面的 sticky 範本）：一次 GET 載入整個資料集到記憶體，改動後點「保存全部」→ PUT 整組刪舊插新。詳見 4-1。
 
 **ImageUploadInput props：**
 - `compact` — 圖標用，限寬 176px、預覽 144×144px 正方形
@@ -62,105 +66,47 @@ const labelCls = 'block text-wiki-text text-sm font-bold uppercase tracking-wide
 
 ## 四、內容模塊結構
 
-每個模塊通用形狀：`XxxCategory` + `Xxx` 主表 + `XxxFilterOption`
+站點現有三個內容模塊：**陣容搭配 · 道具介紹 · 活動介紹**，外加攻略文章與首頁輪播。
 
-### 4-1 角色圖鑑（`Character` 表，`characterType` 區分）
+### 4-1 陣容搭配（豪傑）✅ — 由線下 HTML 工具並入
 
-| 類型 | characterType | API | 編輯頁 |
-|------|--------------|-----|--------|
-| 英雄 | `hero` | `/api/admin/characters` | `/admin/characters/edit/[id]` |
-| 豪傑 | `haojie` | `/api/admin/haojie` | `/admin/characters/haojie/edit/[id]` |
+一組相關表，展示運營人工配好的「豪傑陣容方案」（不做戰力計算）。**本版只做豪傑**，英雄暫緩（將來用 `characterKind` 區分即可擴展）。
 
-後台統一入口：`/admin/characters`（三 Tab：全部 / 英雄 / 豪傑），編輯按鈕智能路由。
+**表結構**（全部手動在 Supabase 建，見 `supabase-migrations/2026-07-lineup-restructure.sql`）：
+| 表 | 說明 |
+|----|------|
+| `Lineup` | 陣容主表：`title/slug/characterKind/genreId/bgUrl/badgeIds(JSON)/description(富文本)/slots(JSON)/updateText/isPinned/isPublished/sortOrder` |
+| `LineupHero` | 角色池：`name/style/imgUrl/characterKind` |
+| `LineupWeapon` | 武器：`parentId/displayName/variantLabel/quality/isExclusive/exclusiveHeroId/imgUrl/attrs(JSON)`（父類/變體） |
+| `LineupEmblem` | 戰徽：`parentId/displayName/variantLabel/quality/imgUrl/attrs(JSON)` |
+| `LineupGenre` | 流派：`name/color/imgUrl` |
 
-**英雄**：8 張關聯表（皮膚/羁绊/陣容/血盟/裝備/攻略）· 4 軸雷達圖（攻擊/防衛/統帥/速度）  
-**豪傑**：全 JSON 字段 · 5 軸雷達圖（力量/技術/體魄/防護/速度，存 `attributes`）· 裝備存 `haojieEquip JSON({weapon,warbadge})` · `awakenHero` 布爾字段
+- `slots` JSON 形狀：`[{role:'main'|'sub1'|'sub2', heroId, stat, weaponId, emblemId} x3]`
+- **全域配置**（風格圖標/加點圖標/標籤/角色標識/頁面標題/風格&屬性名稱）存 `SiteConfig` 鍵 `lineupConfig`（一個 JSON）
+- 常量與型別集中在 `src/lib/lineup.ts`（品質色 QUALITY_COLOR、風格、加點軸、內建標籤等）
 
-**豪傑裝備推薦 UI**：使用 `EquipPickerField` 組件（搜索框 + 可滾動列表），按 `equipType` 過濾（`haojie_weapon` / `haojie_warbadge`），不用 grid checkbox。
+**後台** `/admin/lineups`：**單頁全量編輯**，頂部 6 Tab（陣容/角色池/武器/戰徽/流派/圖標與配置）+「保存全部」。API 只有兩個動作：GET 讀整組、PUT 刪舊插新寫整組（`/api/admin/lineups`）。圖片全走現有 `ImageUploadInput` 快速上傳。  
+**Wiki** `/wiki/lineups`：卡片式（3 槽位×立繪+加點+武器+戰徽+富文本解說），流派篩選 + 按角色反查；槽位純展示不可點。公開 API `/api/wiki/lineups?characterKind=&genreId=&heroId=`。
 
-**Wiki 角色卡片樣式**：`aspect-[3/4]` 立繪鋪滿，左側 4px 稀有度色條，底部黑色漸層 + 名字 + 星數，`objectPosition: '50% 20%'` 臉部居中。  
-→ 參考：`src/app/wiki/characters/[slug]/page.tsx`
+**線下獨立工具**：`桌面\英雄 豪杰搭配工具\豪杰搭配组合工具.html` 可分發、脫機編輯，圖片用 anon 公鑰**直傳** Supabase 桶 `tool-uploads`（匿名 INSERT 策略），數據靠 JSON 存檔導入導出。
 
-**常見坑：**
-- 豪傑 `editLink` 判斷需同時檢查 `characterType==='haojie'` 和分類名含「豪」（舊數據 `characterType` 可能未正確設置）
-- 修復工具：後台角色列表頁有「🔧 修復豪傑 characterType」按鈕，也可調用 `POST /api/admin/fix-character-types`
+### 4-2 道具介紹（`Item` 表，主打稀有道具）✅ — 已層級上調
 
-### 4-2 建築圖鑑（`Building` 表）✅ 完整
+**字段**：`name/slug/categoryId/summary/icon(+Position)/image(+Position)/source(富文本)/isExchange/exchangeContent(JSON)/relatedEventIds(JSON 互鏈)/sortOrder/isFeatured/isPublished`（另有 rarity/type/quality/... 舊字段保留兼容）
 
-**字段：**
-```
-name / slug / categoryId / summary
-icon / iconPosition / image（Banner）/ imagePosition
-type / function / unlockCondition
-description（富文本）/ upgradeLevels（JSON升級表格）
-rarity / level / maxLevel / cost / production
-sortOrder / isFeatured / isPublished / publishedAt
-```
+**後台編輯頁** `/admin/items/edit/[id]`：分區含 基本信息/圖片/兌換內容/獲得途徑/**相關活動**/發佈設置。  
+**Wiki 列表** `/wiki/items`：**單層**，直接列所有道具，分類變頂部篩選 Tab。  
+**Wiki 詳情** `/wiki/items/[slug]`（層級上調，無分類段）：SectionCard 分區 + 底部「相關活動」互鏈卡片。
 
-**升級表格 JSON 格式：**
-```json
-{ "columns": ["等級","升級條件","建造時間","效果加成"], "rows": [["1","總部Lv1","立即","容量500"]] }
-```
+### 4-3 活動介紹（`Event` 表）✅ — 已層級上調
 
-**後台編輯頁** `/admin/buildings/edit/[id]`：6 分區 + 左側預覽按鈕  
-**Wiki 詳情頁** 渲染升級表格為斑馬紋 HTML table，向後兼容舊 `upgradeInfo` 富文本
+**字段**：`name/slug/categoryId/summary/icon(+Position)/image(+Position)/condition/gameplay/rewards(均富文本)/relatedArticleIds(JSON)/relatedItemIds(JSON 互鏈)/likes/sortOrder/isFeatured/isPublished`
 
-### 4-3 道具圖鑑（`Item` 表）✅ 完整
+**後台編輯頁** `/admin/events/edit/[id]`：sticky 分區含 基本/圖片/參與條件/活動玩法/活動獎勵/相關攻略/**相關道具**/發佈；`EventPreviewModal` 預覽。  
+**Wiki 列表** `/wiki/events`：**單層**，直接列所有活動，分類變篩選 Tab。  
+**Wiki 詳情** `/wiki/events/[slug]`（層級上調）：SectionCard 分區 + 底部「相關道具」互鏈卡片 + 相關攻略 + 點贊。
 
-**字段：**
-```
-name / slug / categoryId / summary（簡介，列表卡片用）
-icon / iconPosition / image（Banner，選填）/ imagePosition
-source（獲取途徑，富文本，支持鏈接）
-sortOrder / isFeatured / isPublished
--- 舊字段保留兼容：rarity / type / quality / stackable / effect / description / usage / recipe
-```
-
-**⚠️ 新字段需在 Supabase SQL Editor 執行（若尚未執行）：**
-```sql
-ALTER TABLE "Item" ADD COLUMN IF NOT EXISTS "summary" TEXT;
-ALTER TABLE "Item" ADD COLUMN IF NOT EXISTS "iconPosition" TEXT DEFAULT '50% 50%';
-ALTER TABLE "Item" ADD COLUMN IF NOT EXISTS "imagePosition" TEXT DEFAULT '50% 50%';
-ALTER TABLE "Item" ADD COLUMN IF NOT EXISTS "isFeatured" BOOLEAN DEFAULT false;
-```
-
-**後台編輯頁** `/admin/items/edit/[id]`：4 分區（基本信息/圖片/獲取途徑/發佈設置）+ 預覽按鈕  
-**Wiki 分類頁** `/wiki/items/[slug]`：方形圖標卡片網格，顯示圖片 + summary  
-**Wiki 詳情頁** `/wiki/items/[slug]/[itemSlug]`：`summary` 在 Tabs 上方獨立顯示為「道具簡介」富文本模塊；Tabs 按有無內容動態顯示（兌換內容/道具詳情/獲取途徑/使用方法/合成配方）
-
-### 4-4 裝備圖鑑（`Equipment` 表，`equipType` 區分）✅ 完整
-
-**一張表四子類型**（仿角色 hero/haojie 模式），`equipType` ∈：
-| 類型 | equipType | 專屬字段 |
-|------|----------|---------|
-| 豪傑武器 | `haojie_weapon` | type(種類) · buffs(分類→細分 JSON) |
-| 豪傑戰徽 | `haojie_warbadge` | type(種類) · buffs(分類→細分 JSON) |
-| 首領裝備 | `leader` | slot(部位) · attrBias(偏向) · stats(屬性文本) · setId |
-| 英雄裝備 | `hero` | slot(部位) · stats(屬性文本) · setId |
-
-**共用字段**：name/slug/summary/icon(+Position)/image(+Position)/rarity(品質,1白~6金，豪傑武器只開 3~6)/acquisition(富文本)/sortOrder/isFeatured/isPublished
-
-**品質→顏色**：1白 2綠 3藍 4紫 5橙 6金（常量在 `src/lib/equipment.ts`）
-**buffs JSON**：`[{ group:"加強暴徒", items:[{name,value}] }]`，分類桶固定（加強暴徒/飛車黨/槍手/改裝車輛/出征上限/豪傑），細分可增刪
-**部位選項**：首領＝枪械/武器/飾品/衣服/褲子/鞋子；英雄＝枪械/武器/頭部/衣服/鞋子/飾品
-
-**套裝**：獨立 `EquipmentSet` 表（`equipType` 區分 hero/leader），裝備經 `setId` 歸屬；套裝管理已整合進 `/admin/equipment` 第 4 Tab；前台詳情頁聚合「同套 N 件 + 套裝加成」
-
-**後台**：統一列表 `/admin/equipment`（**4 主 Tab**：裝備列表/分類管理/篩選設定/套裝管理）· 裝備列表 Tab 內含 5 類型子篩選（全部/豪傑武器/豪傑戰徽/首領/英雄）· 新增頁選類型+名稱後跳編輯 · 編輯頁 `/admin/equipment/edit/[id]` 按 equipType 條件渲染分區 + `EquipmentPreviewModal`
-**Wiki**：總覽 `/wiki/equipment`（4 類型卡）→ 列表 `/wiki/equipment/[equipType]`（品質色框方圖 + 篩選）→ 詳情 `/wiki/equipment/[equipType]/[slug]`
-**公開 API**：`/api/wiki/equipment?equipType=` · `/api/wiki/equipment/types`（各類型計數）
-
-> 武器圖鑑/戰徽圖鑑已併入此模塊；後續對接豪傑 `haojieEquip.weapon/.warbadge` 時直接引用對應 equipType 記錄。
-
-### 4-5 兵種圖鑑（`Troop` 表）✅ 後台完整，Wiki 主列表已完成
-
-**天賦字段格式**：`talent` 存 JSON 數組 `[{ icon: string; content: string }]`（icon 為圖片 URL，content 為富文本 HTML）。舊數據為 HTML 字串，讀取時用 `tryParseArr()` 做向後兼容（fallback 為 `[{ icon: '', content: html }]`）。
-
-**後台編輯頁** `/admin/troops/edit/[id]`：天賦區為多行列表，每行含圖標上傳（點擊正方形觸發上傳）+ 富文本框 + 刪除按鈕，支持新增行。保存時將 `talents[]` 序列化為 `JSON.stringify(talents)` 寫入 `talent` 字段。
-
-**Wiki 前台** `/wiki/troops`：單層主頁，雙層篩選（第一層：兵種類型 mobster/gunman/biker/vehicle；第二層：細分分類，只在多於 1 個時顯示）。原 `/wiki/troops/[slug]` 分類中間層已移除，訪問時重定向回 `/wiki/troops`。詳情頁路由不變：`/wiki/troops/[catSlug]/[troopSlug]`。
-
-**troopType 值**：`mobster`(暴徒) · `gunman`(槍手) · `biker`(飛車黨) · `vehicle`(改裝車輛)
+> **道具 ↔ 活動 互鏈**：`Item.relatedEventIds` 與 `Event.relatedItemIds` 各自獨立維護（在各自編輯頁勾選），兩邊詳情頁互相渲染可點卡片。公開 API 在 `slug` 查詢時解析對方 ID 補出展示欄位。
 
 ### 4-6 攻略文章（`Article` 表）✅ 完整
 
@@ -180,31 +126,28 @@ fallback：未配置時取 `isFeatured=true` 的文章
 ### 後台 `/admin/*`
 ```
 /admin/login · /admin/dashboard
-/admin/characters                     ← 英雄+豪傑統一列表（三Tab）
-/admin/characters/edit/[id]
-/admin/characters/haojie/edit/[id]
-/admin/buildings · /admin/buildings/new · /admin/buildings/edit/[id]
-/admin/items · /admin/items/new · /admin/items/edit/[id]   ← 完整
-/admin/equipment                      ← 4 Tab：裝備列表/分類管理/篩選設定/套裝管理
-/admin/troops · /admin/articles
+/admin/lineups                        ← 陣容搭配（單頁全量編輯，6 Tab）
+/admin/items · /admin/items/new · /admin/items/edit/[id]      ← 道具介紹
+/admin/events · /admin/events/new · /admin/events/edit/[id]   ← 活動介紹
+/admin/articles · /admin/drafts · /admin/submissions
 /admin/announcements · /admin/categories · /admin/site-config
 /admin/banner-articles                ← 首頁輪播文章管理
-/admin/sidebar-nav · /admin/sidebar-sections · /admin/wiki-categories
-/admin/character-filters · /admin/building-filters · /admin/equipment-filters
+/admin/sidebar · /admin/sidebar-nav · /admin/sidebar-sections · /admin/wiki-categories
+/admin/item-categories · /admin/item-filters · /admin/event-categories
 ```
 
 ### 公開 Wiki `/wiki/*`
 ```
 /                                     ← 首頁（搜索Banner + 輪播 + 熱門攻略 + 公告）
-/wiki                                 ← 圖鑑總覽
+/wiki                                 ← 內容總覽（陣容/道具/活動 三卡）
+/wiki/lineups                         ← 陣容搭配（流派篩選 + 按角色反查）
+/wiki/items                           ← 道具列表（單層，分類篩選）
+/wiki/items/[slug]                    ← 道具詳情（含相關活動互鏈）
+/wiki/events                          ← 活動列表（單層，分類篩選）
+/wiki/events/[slug]                   ← 活動詳情（含相關道具互鏈）
 /wiki/article/[slug]                  ← 文章詳情
-/wiki/characters/[slug]/[characterSlug]       ← 英雄詳情
-/wiki/buildings/[slug]/[buildingSlug]         ← 建築詳情
-/wiki/items/[slug]/[itemSlug]                 ← 道具詳情
-/wiki/equipment · /wiki/items                 ← 其他圖鑑
-/wiki/troops                                  ← 兵種主列表（雙層篩選）
-/wiki/troops/[catSlug]/[troopSlug]            ← 兵種詳情
-/wiki/search · /wiki/rankings · /wiki/events · /wiki/submit
+/wiki/guides · /wiki/tools · /wiki/rankings · /wiki/submit
+/wiki/search                          ← 全站搜索（陣容/道具/活動/攻略，模糊匹配）
 ```
 
 ---
@@ -215,24 +158,23 @@ fallback：未配置時取 `isFeatured=true` 的文章
 | 路徑 | 方法 | 說明 |
 |------|------|------|
 | `/api/admin/login` | POST | 登錄 |
-| `/api/admin/upload` | POST | 圖片上傳到 Supabase Storage |
-| `/api/admin/characters` | GET/POST | 角色（含 type 篩選） |
-| `/api/admin/haojie/[id]` | GET/PUT/DELETE | 豪傑 |
-| `/api/admin/buildings/[id]` | GET/PUT/DELETE | 建築 |
-| `/api/admin/items/[id]` | GET/PUT/DELETE | 道具 |
-| `/api/admin/fix-character-types` | POST | 批量修復豪傑 characterType |
+| `/api/admin/upload` | POST | 圖片上傳到 Supabase Storage（`assets` 桶） |
+| `/api/admin/lineups` | GET/PUT | 陣容整組讀取 / 刪舊插新寫入 |
+| `/api/admin/items/[id]` | GET/PUT/DELETE | 道具（含 relatedEventIds） |
+| `/api/admin/events/[id]` | GET/PUT/DELETE | 活動（含 relatedItemIds） |
 | `/api/admin/site-config` | GET/PUT | 鍵值對，upsert by key |
 
 ### 公開 Wiki API
 | 路徑 | 說明 |
 |------|------|
-| `/api/wiki/banner-articles` | 首頁輪播文章（從 SiteConfig 讀取順序） |
-| `/api/wiki/articles` | 文章列表（featured/limit/category 參數） |
-| `/api/wiki/buildings` | 建築列表（isPublished 過濾） |
-| `/api/wiki/items` | 道具列表（category/slug 參數） |
+| `/api/wiki/lineups` | 陣容 + 角色/武器/戰徽/流派/配置（characterKind/genreId/heroId 參數） |
+| `/api/wiki/items` | 道具列表（無參列全部；slug 查詳情並解析 relatedEvents） |
 | `/api/wiki/items/categories` | 道具分類列表 |
-| `/api/wiki/items/filter-options` | 道具篩選選項 |
-| `/api/wiki/characters/heroes` | 英雄列表 |
+| `/api/wiki/events` | 活動列表（無參列全部；slug 查詳情並解析 relatedArticles/relatedItems） |
+| `/api/wiki/events/categories` | 活動分類列表 |
+| `/api/wiki/search` | 全站搜索（q/type/limit），聚合 陣容/道具/活動/攻略，ilike 模糊 |
+| `/api/wiki/articles` | 文章列表（featured/limit/category/search 參數） |
+| `/api/wiki/banner-articles` | 首頁輪播文章（從 SiteConfig 讀取順序） |
 | `/api/wiki/site-config` | 網站配置公開字段 |
 | `/api/wiki/like` · `/api/wiki/view` | POST，點贊/瀏覽計數 |
 
@@ -243,10 +185,8 @@ fallback：未配置時取 `isFeatured=true` 的文章
 | 組件 | 路徑 | 說明 |
 |------|------|------|
 | `ImageUploadInput` | `src/components/` | 圖片上傳+預覽+拖拽調位，支持 `compact` 模式（圖標用） |
-| `BuildingPreviewModal` | `src/components/` | 建築後台預覽 Modal，傳入 form state 實時渲染 |
-| `ItemPreviewModal` | `src/components/` | 道具後台預覽 Modal，同上 |
-| `TroopPreviewModal` | `src/components/` | 兵種後台預覽 Modal，支持多行天賦（JSON/舊HTML 均可） |
-| `EquipmentPreviewModal` | `src/components/` | 裝備後台預覽 Modal，按 equipType 條件渲染 |
+| `ItemPreviewModal` | `src/components/` | 道具後台預覽 Modal，傳入 form state 實時渲染 |
+| `EventPreviewModal` | `src/components/` | 活動後台預覽 Modal，同上 |
 | `RichTextEditor` | `src/components/` | TipTap 富文本，支持圖片嵌入 |
 | `MarkdownRenderer` | `src/components/` | Wiki 前台富文本渲染 |
 | `LikeButton` | `src/components/` | 點贊按鈕，傳 `entityType` + `entityId` |
@@ -275,27 +215,23 @@ JWT_SECRET / ADMIN_USERNAME / ADMIN_PASSWORD
 
 ---
 
-## 九、待辦事項
+## 九、待辦 / 收尾事項
 
-### 前台 Wiki（高優先級）
-- [ ] 英雄 Wiki 列表頁 `/wiki/characters/heroes`
-- [ ] 豪傑 Wiki 列表頁 `/wiki/characters/haojie`
-- [ ] 豪傑 Wiki 詳情頁 `/wiki/characters/haojie/[slug]`
-- [ ] 公開豪傑 API `/api/wiki/haojie`
+### 2026-07 大調整收尾
+- [ ] **刪舊圖鑑表**（不可逆）：確認新站穩定、舊數據不再需要後，手動執行 `supabase-migrations/2026-07-lineup-restructure.sql` 的「四、DROP TABLE」段（Building/Equipment/Troop/Character 等表；代碼與前台已全部移除）
+- [ ] 英雄陣容（本版只做豪傑）：需要時在 `Lineup/LineupHero` 用 `characterKind='hero'` 擴展，前台 `/wiki/lineups` 用篩選區分
 
-### 圖鑑完善（中優先級）
-- [x] 裝備圖鑑（含武器/戰徽/首領/英雄四子類型，equipType 區分）✅ 完整
-- [x] 兵種圖鑑後台編輯頁 ✅
-- [x] 兵種圖鑑 Wiki 前台主列表 ✅（雙層篩選，單頁架構）
-- [ ] 兵種圖鑑 Wiki 詳情頁完整化（`/wiki/troops/[catSlug]/[troopSlug]`）
-- [ ] 後續對接豪傑 `haojieEquip.weapon/.warbadge` 引用裝備記錄
-- [ ] 各圖鑑跳轉 `href="#"` 補充真實路由
+### 已完成（2026-07）
+- [x] 陣容搭配模組（並入線下工具，豪傑）
+- [x] 移除角色/裝備/兵種/建築四大圖鑑
+- [x] 活動、道具層級上調為兩層（列表→詳情）
+- [x] 道具 ↔ 活動 互鏈
+- [x] 全站搜索（陣容/道具/活動/攻略，模糊匹配）
+- [x] 線下工具直傳 Supabase（`tool-uploads` 桶）
 
-### 新增圖鑑 — 標準開發流程
-1. Supabase SQL Editor 建表 + 加字段
+### 新增內容模塊 — 參考流程
+1. Supabase SQL Editor 建表 + 加字段（記得 `runtime='edge'`、只用 `supabaseAdmin`）
 2. 同步 `prisma/schema.prisma`
-3. 後台 API `route.ts`（GET/POST/PUT/DELETE）
-4. 後台列表頁（三Tab：列表/分類/篩選）
-5. 後台新增頁 + 編輯頁（sticky 側邊欄 + 分區 + 預覽 Modal）
-6. Wiki 分類總覽頁 → 分類列表頁 → 詳情頁
-7. Wiki API（公開，isPublished 過濾）
+3. 後台 API `route.ts` + 後台編輯頁（sticky 分區 + 預覽 Modal，或單頁全量如陣容）
+4. Wiki 列表頁 → 詳情頁（兩層；公開 API 加 `isPublished` 過濾）
+5. 導航（WikiHeader / dashboard / `/wiki` 總覽）與搜索 `/api/wiki/search` 掛上新模塊
