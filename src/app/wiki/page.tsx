@@ -22,54 +22,34 @@ interface WikiCategory {
 
 const wikiCategories: WikiCategory[] = [
   {
-    id: 'characters',
-    name: '角色圖鑑',
-    slug: 'characters',
-    description: '查看遊戲內所有角色的詳細信息，包括屬性、技能、陣容搭配等',
-    icon: '👤',
-    route: '/wiki/characters',
+    id: 'lineups',
+    name: '陣容搭配',
+    slug: 'lineups',
+    description: '運營精選的豪傑陣容方案，按流派篩選、按角色反查',
+    icon: '🎯',
+    route: '/wiki/lineups',
     count: 0,
-    countLabel: '名角色',
-  },
-  {
-    id: 'buildings',
-    name: '建築圖鑑',
-    slug: 'buildings',
-    description: '瞭解各類建築的功能、升級需求和產出效果',
-    icon: '🏠',
-    route: '/wiki/buildings',
-    count: 0,
-    countLabel: '座建築',
-  },
-  {
-    id: 'equipment',
-    name: '裝備圖鑑',
-    slug: 'equipment',
-    description: '瀏覽武器裝備的屬性、強化方式和獲得途徑',
-    icon: '⚔️',
-    route: '/wiki/equipment',
-    count: 0,
-    countLabel: '件裝備',
+    countLabel: '套陣容',
   },
   {
     id: 'items',
-    name: '道具圖鑑',
+    name: '道具介紹',
     slug: 'items',
-    description: '查詢道具用途、合成配方和使用效果',
+    description: '稀有道具的用途、獲取途徑與關聯活動',
     icon: '🎁',
     route: '/wiki/items',
     count: 0,
     countLabel: '個道具',
   },
   {
-    id: 'troops',
-    name: '兵種圖鑑',
-    slug: 'troops',
-    description: '瞭解各兵種的特點、剋制關係和搭配策略',
-    icon: '🛡️',
-    route: '/wiki/troops',
+    id: 'events',
+    name: '活動介紹',
+    slug: 'events',
+    description: '活動玩法、參與條件、獎勵與關聯道具',
+    icon: '🎉',
+    route: '/wiki/events',
     count: 0,
-    countLabel: '種兵種',
+    countLabel: '個活動',
   },
 ]
 
@@ -78,16 +58,7 @@ export default function WikiIndexPage() {
   const { isLoaded } = useAdminAuth()
 
   useEffect(() => {
-    fetch('/api/wiki/characters/categories')
-      .then(res => res.json())
-      .then(data => {
-        const totalChars = data?.reduce((sum: number, cat: any) => sum + (cat._count?.characters || 0), 0) || 0
-        wikiCategories[0].count = totalChars
-        setLoading(false)
-      })
-      .catch(() => {
-        setLoading(false)
-      })
+    setLoading(false)
   }, [])
 
   if (!isLoaded) {

@@ -33,6 +33,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         source: data.source || null,
         isExchange: data.isExchange || false,
         exchangeContent: data.exchangeContent || null,
+        relatedEventIds: JSON.stringify(Array.isArray(data.relatedEventIds) ? data.relatedEventIds : []),
         categoryId: data.categoryId,
         sortOrder: data.sortOrder,
         isFeatured: data.isFeatured,

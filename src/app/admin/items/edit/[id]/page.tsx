@@ -15,6 +15,7 @@ const ALL_SECTIONS = [
   { id: 'images',   label: '圖片上傳' },
   { id: 'exchange', label: '兌換內容' },
   { id: 'source',   label: '獲得途徑' },
+  { id: 'events',   label: '相關活動' },
   { id: 'publish',  label: '發佈設置' },
 ]
 
@@ -103,6 +104,8 @@ export default function AdminItemEditPage() {
   const { isAdmin, isLoaded } = useAdminAuth()
 
   const [categories, setCategories] = useState<ItemCategory[]>([])
+  const [allEvents, setAllEvents] = useState<{ id: string; name: string }[]>([])
+  const [eventSearch, setEventSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -122,6 +125,7 @@ export default function AdminItemEditPage() {
     source: '',
     isExchange: false,
     exchangeContent: JSON.stringify(DEFAULT_EXCHANGE),
+    relatedEventIds: [] as string[],
     sortOrder: 0,
     isFeatured: false,
     isPublished: false,
@@ -146,9 +150,13 @@ export default function AdminItemEditPage() {
     Promise.all([
       fetch(`/api/admin/items/${id}`).then(r => r.json()),
       fetch('/api/admin/item-categories').then(r => r.json()),
-    ]).then(([item, cats]) => {
+      fetch('/api/admin/events?limit=200').then(r => r.json()),
+    ]).then(([item, cats, events]) => {
       setCategories(Array.isArray(cats) ? cats : [])
+      setAllEvents(events?.events || [])
       if (item && !item.error) {
+        let eventIds: string[] = []
+        try { eventIds = JSON.parse(item.relatedEventIds || '[]') } catch { eventIds = [] }
         setForm({
           name: item.name || '',
           slug: item.slug || '',
@@ -161,6 +169,7 @@ export default function AdminItemEditPage() {
           source: item.source || '',
           isExchange: item.isExchange || false,
           exchangeContent: item.exchangeContent || JSON.stringify(DEFAULT_EXCHANGE),
+          relatedEventIds: Array.isArray(eventIds) ? eventIds : [],
           sortOrder: item.sortOrder || 0,
           isFeatured: item.isFeatured || false,
           isPublished: item.isPublished || false,
@@ -360,6 +369,41 @@ export default function AdminItemEditPage() {
                 onChange={html => set('source', html)}
                 minHeight="min-h-[120px]"
               />
+            </section>
+
+            {/* Section 3.5: 相關活動（互鏈） */}
+            <section ref={el => { sectionRefs.current['events'] = el }} className={cardCls}>
+              <h2 className="text-wiki-text font-bold text-base mb-5 flex items-center gap-2">
+                <span className="text-wiki-accent">◆</span>相關活動
+              </h2>
+              <p className="text-wiki-text-muted text-xs mb-3">勾選與本道具相關的活動，道具詳情頁會展示為可點卡片</p>
+              <input
+                className="w-full bg-wiki-gray border border-wiki-border px-3 py-2 text-sm text-wiki-text focus:border-wiki-accent focus:outline-none mb-3"
+                placeholder="搜尋活動名稱..."
+                value={eventSearch}
+                onChange={e => setEventSearch(e.target.value)}
+              />
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {allEvents
+                  .filter(ev => !eventSearch || ev.name.toLowerCase().includes(eventSearch.toLowerCase()))
+                  .map(ev => {
+                    const sel = form.relatedEventIds.includes(ev.id)
+                    return (
+                      <label key={ev.id}
+                        className={`flex items-center gap-2 p-3 border cursor-pointer transition-colors rounded
+                          ${sel ? 'border-wiki-accent bg-wiki-accent/10' : 'border-wiki-border bg-wiki-gray hover:border-wiki-accent/50'}`}>
+                        <input type="checkbox" className="accent-wiki-accent"
+                          checked={sel}
+                          onChange={e => set('relatedEventIds', e.target.checked ? [...form.relatedEventIds, ev.id] : form.relatedEventIds.filter(id => id !== ev.id))} />
+                        <span className="text-sm text-wiki-text truncate">{ev.name}</span>
+                      </label>
+                    )
+                  })}
+                {allEvents.length === 0 && <p className="text-wiki-text-muted text-sm text-center py-4">活動庫為空</p>}
+              </div>
+              {form.relatedEventIds.length > 0 && (
+                <p className="text-xs text-wiki-text-muted mt-2">已選 {form.relatedEventIds.length} 個</p>
+              )}
             </section>
 
             {/* Section 4: 發佈設置 */}

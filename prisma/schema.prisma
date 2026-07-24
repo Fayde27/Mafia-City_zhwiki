@@ -370,6 +370,7 @@ model Item {
   source        String?
   isExchange      Boolean    @default(false) // 是否為兌換道具（寶箱/兌換券）
   exchangeContent String?    // 兌換內容 JSON：{ intro, items: [{ icon, name, quantity }] }
+  relatedEventIds String?    // 互鏈：關聯活動 ID（JSON 數組）
   categoryId    String
   sortOrder     Int          @default(0)
   isFeatured    Boolean      @default(false)
@@ -404,6 +405,7 @@ model Event {
   gameplay      String?       // 活動玩法（富文本）
   rewards       String?       // 活動獎勵（富文本）
   relatedArticleIds String?   // 相關攻略：關聯文章 ID（JSON 數組）
+  relatedItemIds    String?   // 互鏈：關聯道具 ID（JSON 數組）
   likes         Int           @default(0)
   categoryId    String
   sortOrder     Int           @default(0)
@@ -469,6 +471,73 @@ model Troop {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
   category      TroopCategory @relation(fields: [categoryId], references: [id])
+}
+
+model Lineup {
+  id            String   @id @default(cuid())
+  title         String
+  slug          String   @unique
+  characterKind String   @default("haojie") // haojie | hero
+  genreId       String?
+  bgUrl         String?
+  badgeIds      String?  @default("[]") // JSON 數組
+  description   String?  // 富文本解說
+  slots         String?  @default("[]") // JSON：[{role,heroId,stat,weaponId,emblemId} x3]
+  updateText    String?
+  isPinned      Boolean  @default(false)
+  isPublished   Boolean  @default(false)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model LineupHero {
+  id            String   @id @default(cuid())
+  name          String
+  style         String?
+  imgUrl        String?
+  characterKind String   @default("haojie")
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model LineupWeapon {
+  id              String   @id @default(cuid())
+  parentId        String?
+  displayName     String
+  variantLabel    String?
+  quality         String   @default("gold")
+  isExclusive     Boolean  @default(false)
+  exclusiveHeroId String?
+  imgUrl          String?
+  attrs           String?  @default("[]") // JSON 數組
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model LineupEmblem {
+  id           String   @id @default(cuid())
+  parentId     String?
+  displayName  String
+  variantLabel String?
+  quality      String   @default("gold")
+  imgUrl       String?
+  attrs        String?  @default("[]") // JSON 數組
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model LineupGenre {
+  id        String   @id @default(cuid())
+  name      String
+  color     String?  @default("#C9A227")
+  imgUrl    String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model SidebarNav {

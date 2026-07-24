@@ -12,11 +12,9 @@ import { useRouter } from 'next/navigation'
 interface Stats {
   articles: number
   announcements: number
-  characters: number
-  equipment: number
+  lineups: number
   items: number
-  troops: number
-  buildings: number
+  events: number
   submissions: number
   drafts: number
 }
@@ -32,13 +30,10 @@ const NAV_SECTIONS = [
     ],
   },
   {
-    title: '圖鑑管理',
+    title: '內容模塊',
     links: [
-      { label: '角色圖鑑', href: '/admin/characters', icon: '👤', desc: '英雄 & 豪傑、分類、篩選設定' },
-      { label: '裝備圖鑑', href: '/admin/equipment', icon: '⚔️', desc: '列表、分類、篩選設定' },
-      { label: '道具圖鑑', href: '/admin/items', icon: '🎒', desc: '列表、分類、篩選設定' },
-      { label: '兵種圖鑑', href: '/admin/troops', icon: '🛡️', desc: '列表、分類、篩選設定' },
-      { label: '建築圖鑑', href: '/admin/buildings', icon: '🏛️', desc: '列表、分類、篩選設定' },
+      { label: '陣容搭配', href: '/admin/lineups', icon: '🎯', desc: '豪傑陣容 · 角色/武器/戰徽/流派' },
+      { label: '道具介紹', href: '/admin/items', icon: '🎒', desc: '稀有道具列表、分類、篩選' },
       { label: '活動一覽', href: '/admin/events', icon: '🎉', desc: '活動列表、分類管理' },
     ],
   },
@@ -65,25 +60,21 @@ export default function AdminDashboardPage() {
 
   const fetchStats = async () => {
     try {
-      const [artRes, annRes, charRes, eqRes, itemRes, troopRes, bldRes, subRes] = await Promise.all([
+      const [artRes, annRes, lineupRes, itemRes, eventRes, subRes] = await Promise.all([
         fetch('/api/admin/articles?limit=1').then(r => r.json()),
         fetch('/api/admin/announcements').then(r => r.json()),
-        fetch('/api/admin/characters?limit=1').then(r => r.json()),
-        fetch('/api/admin/equipment?limit=1').then(r => r.json()),
+        fetch('/api/admin/lineups').then(r => r.json()),
         fetch('/api/admin/items?limit=1').then(r => r.json()),
-        fetch('/api/admin/troops?limit=1').then(r => r.json()),
-        fetch('/api/admin/buildings?limit=1').then(r => r.json()),
+        fetch('/api/admin/events').then(r => r.json()),
         fetch('/api/admin/submissions').then(r => r.json()),
       ])
       const draftRes = await fetch('/api/admin/articles?draft=true&limit=1').then(r => r.json())
       setStats({
         articles: artRes?.pagination?.total || 0,
         announcements: Array.isArray(annRes) ? annRes.length : 0,
-        characters: charRes?.pagination?.total || 0,
-        equipment: eqRes?.pagination?.total || 0,
+        lineups: Array.isArray(lineupRes?.lineups) ? lineupRes.lineups.length : 0,
         items: itemRes?.pagination?.total || 0,
-        troops: troopRes?.pagination?.total || 0,
-        buildings: bldRes?.pagination?.total || 0,
+        events: Array.isArray(eventRes?.events) ? eventRes.events.length : (Array.isArray(eventRes) ? eventRes.length : 0),
         submissions: Array.isArray(subRes?.submissions) ? subRes.submissions.length : 0,
         drafts: draftRes?.pagination?.total || 0,
       })
@@ -95,11 +86,9 @@ export default function AdminDashboardPage() {
   const statCards = stats ? [
     { label: '攻略文章', value: stats.articles, href: '/admin/articles', color: 'text-wiki-accent' },
     { label: '全站公告', value: stats.announcements, href: '/admin/announcements', color: 'text-blue-400' },
-    { label: '角色', value: stats.characters, href: '/admin/characters', color: 'text-purple-400' },
-    { label: '裝備', value: stats.equipment, href: '/admin/equipment', color: 'text-yellow-400' },
+    { label: '陣容搭配', value: stats.lineups, href: '/admin/lineups', color: 'text-purple-400' },
     { label: '道具', value: stats.items, href: '/admin/items', color: 'text-green-400' },
-    { label: '兵種', value: stats.troops, href: '/admin/troops', color: 'text-red-400' },
-    { label: '建築', value: stats.buildings, href: '/admin/buildings', color: 'text-orange-400' },
+    { label: '活動', value: stats.events, href: '/admin/events', color: 'text-orange-400' },
     { label: '待審投稿', value: stats.submissions, href: '/admin/submissions', color: 'text-pink-400' },
     { label: '草稿', value: stats.drafts, href: '/admin/drafts', color: 'text-wiki-text-muted' },
   ] : []

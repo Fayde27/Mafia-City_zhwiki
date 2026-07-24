@@ -34,41 +34,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPaths: MetadataRoute.Sitemap = [
     '',
     '/wiki',
-    '/wiki/characters',
-    '/wiki/buildings',
-    '/wiki/equipment',
+    '/wiki/lineups',
     '/wiki/items',
-    '/wiki/troops',
+    '/wiki/events',
     '/wiki/guides',
     '/wiki/submit',
   ].map(p => ({ url: `${BASE}${p}` }))
 
-  // 裝備 4 個子類型列表頁
-  const equipTypes = ['haojie_weapon', 'haojie_warbadge', 'leader', 'hero']
-  const equipTypePaths: MetadataRoute.Sitemap = equipTypes.map(t => ({
-    url: `${BASE}/wiki/equipment/${t}`,
-  }))
+  // 帶分類的道具詳情頁
+  const items = await categoryPaths('Item', 'ItemCategory', 'items')
 
-  // 帶分類的內容詳情頁
-  const [buildings, characters, items, troops] = await Promise.all([
-    categoryPaths('Building', 'BuildingCategory', 'buildings'),
-    categoryPaths('Character', 'CharacterCategory', 'characters'),
-    categoryPaths('Item', 'ItemCategory', 'items'),
-    categoryPaths('Troop', 'TroopCategory', 'troops'),
-  ])
-
-  // 裝備詳情頁：URL = /wiki/equipment/{equipType}/{slug}
-  let equipment: MetadataRoute.Sitemap = []
+  // 活動詳情頁：URL = /wiki/events/{slug}（層級上調，無分類段）
+  let events: MetadataRoute.Sitemap = []
   try {
     const { data } = await supabaseAdmin
-      .from('Equipment')
-      .select('slug, equipType')
+      .from('Event')
+      .select('slug')
       .eq('isPublished', true)
-    equipment = (data || [])
-      .filter((e: any) => e.slug && e.equipType)
-      .map((e: any) => ({ url: `${BASE}/wiki/equipment/${e.equipType}/${e.slug}` }))
+    events = (data || [])
+      .filter((e: any) => e.slug)
+      .map((e: any) => ({ url: `${BASE}/wiki/events/${e.slug}` }))
   } catch {
-    equipment = []
+    events = []
   }
 
   // 文章詳情頁：URL = /wiki/article/{slug}（無分類段）
@@ -87,12 +74,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     ...staticPaths,
-    ...equipTypePaths,
-    ...buildings,
-    ...characters,
     ...items,
-    ...troops,
-    ...equipment,
+    ...events,
     ...articles,
   ]
 }

@@ -17,11 +17,13 @@ const SECTIONS = [
   { id: 'gameplay',  label: '活動玩法' },
   { id: 'rewards',   label: '活動獎勵' },
   { id: 'guides',    label: '相關攻略' },
+  { id: 'items',     label: '相關道具' },
   { id: 'publish',   label: '發佈設置' },
 ]
 
 interface EventCategory { id: string; name: string; slug: string }
 interface ArticleOption { id: string; title: string }
+interface ItemOption { id: string; name: string }
 
 const cardCls  = 'bg-wiki-gray-light border border-wiki-border rounded-lg p-6'
 const inputCls = 'w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none'
@@ -36,6 +38,8 @@ export default function AdminEventEditPage() {
   const [categories, setCategories] = useState<EventCategory[]>([])
   const [allArticles, setAllArticles] = useState<ArticleOption[]>([])
   const [articleSearch, setArticleSearch] = useState('')
+  const [allItems, setAllItems] = useState<ItemOption[]>([])
+  const [itemSearch, setItemSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -56,6 +60,7 @@ export default function AdminEventEditPage() {
     gameplay: '',
     rewards: '',
     relatedArticleIds: [] as string[],
+    relatedItemIds: [] as string[],
     sortOrder: 0,
     isFeatured: false,
     isPublished: false,
@@ -72,12 +77,16 @@ export default function AdminEventEditPage() {
       fetch(`/api/admin/events/${id}`).then(r => r.json()),
       fetch('/api/admin/event-categories').then(r => r.json()),
       fetch('/api/admin/articles?limit=200').then(r => r.json()),
-    ]).then(([event, cats, arts]) => {
+      fetch('/api/admin/items?limit=200').then(r => r.json()),
+    ]).then(([event, cats, arts, items]) => {
       setCategories(Array.isArray(cats) ? cats : [])
       setAllArticles(arts?.articles || [])
+      setAllItems(items?.items || [])
       if (event && !event.error) {
         let articleIds: string[] = []
         try { articleIds = JSON.parse(event.relatedArticleIds || '[]') } catch { articleIds = [] }
+        let itemIds: string[] = []
+        try { itemIds = JSON.parse(event.relatedItemIds || '[]') } catch { itemIds = [] }
         setForm({
           name: event.name || '',
           slug: event.slug || '',
@@ -91,6 +100,7 @@ export default function AdminEventEditPage() {
           gameplay: event.gameplay || '',
           rewards: event.rewards || '',
           relatedArticleIds: Array.isArray(articleIds) ? articleIds : [],
+          relatedItemIds: Array.isArray(itemIds) ? itemIds : [],
           sortOrder: event.sortOrder || 0,
           isFeatured: event.isFeatured || false,
           isPublished: event.isPublished || false,
@@ -301,6 +311,41 @@ export default function AdminEventEditPage() {
               </div>
               {form.relatedArticleIds.length > 0 && (
                 <p className="text-xs text-wiki-text-muted mt-2">已選 {form.relatedArticleIds.length} 篇</p>
+              )}
+            </section>
+
+            {/* Section 6.5: 相關道具（互鏈） */}
+            <section ref={el => { sectionRefs.current['items'] = el }} className={cardCls}>
+              <h2 className="text-wiki-text font-bold text-base mb-5 flex items-center gap-2">
+                <span className="text-wiki-accent">◆</span>相關道具
+              </h2>
+              <p className="text-wiki-text-muted text-xs mb-3">勾選本活動涉及的道具，活動詳情頁會展示為可點卡片；道具詳情頁也會反向顯示本活動</p>
+              <input
+                className="w-full bg-wiki-gray border border-wiki-border px-3 py-2 text-sm text-wiki-text focus:border-wiki-accent focus:outline-none mb-3"
+                placeholder="搜尋道具名稱..."
+                value={itemSearch}
+                onChange={e => setItemSearch(e.target.value)}
+              />
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {allItems
+                  .filter(it => !itemSearch || it.name.toLowerCase().includes(itemSearch.toLowerCase()))
+                  .map(it => {
+                    const sel = form.relatedItemIds.includes(it.id)
+                    return (
+                      <label key={it.id}
+                        className={`flex items-center gap-2 p-3 border cursor-pointer transition-colors rounded
+                          ${sel ? 'border-wiki-accent bg-wiki-accent/10' : 'border-wiki-border bg-wiki-gray hover:border-wiki-accent/50'}`}>
+                        <input type="checkbox" className="accent-wiki-accent"
+                          checked={sel}
+                          onChange={e => set('relatedItemIds', e.target.checked ? [...form.relatedItemIds, it.id] : form.relatedItemIds.filter(id => id !== it.id))} />
+                        <span className="text-sm text-wiki-text truncate">{it.name}</span>
+                      </label>
+                    )
+                  })}
+                {allItems.length === 0 && <p className="text-wiki-text-muted text-sm text-center py-4">道具庫為空</p>}
+              </div>
+              {form.relatedItemIds.length > 0 && (
+                <p className="text-xs text-wiki-text-muted mt-2">已選 {form.relatedItemIds.length} 個</p>
               )}
             </section>
 

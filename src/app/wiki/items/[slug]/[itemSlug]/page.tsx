@@ -28,6 +28,7 @@ interface Item {
   description?: string
   usage?: string
   recipe?: string
+  relatedEvents?: { id: string; name: string; slug: string; icon?: string; iconPosition?: string }[]
   category: { name: string; slug: string }
 }
 
@@ -165,6 +166,23 @@ export default function ItemDetailPage() {
         {item.recipe && (
           <SectionCard title="合成配方">
             <MarkdownRenderer content={item.recipe} />
+          </SectionCard>
+        )}
+
+        {/* 相關活動（互鏈） */}
+        {item.relatedEvents && item.relatedEvents.length > 0 && (
+          <SectionCard title="相關活動">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {item.relatedEvents.map(ev => (
+                <Link key={ev.id} href={`/wiki/events/${ev.slug}`}
+                  className="flex items-center gap-2 p-2 rounded-lg border border-wiki-border hover:border-wiki-accent transition-colors group">
+                  <div className="w-10 h-10 rounded bg-wiki-gray overflow-hidden flex-shrink-0 flex items-center justify-center">
+                    {ev.icon ? <img src={ev.icon} alt={ev.name} className="w-full h-full object-cover" style={{ objectPosition: ev.iconPosition || '50% 50%' }} /> : <span className="text-lg">🎉</span>}
+                  </div>
+                  <span className="text-sm text-wiki-text group-hover:text-wiki-accent truncate">{ev.name}</span>
+                </Link>
+              ))}
+            </div>
           </SectionCard>
         )}
 

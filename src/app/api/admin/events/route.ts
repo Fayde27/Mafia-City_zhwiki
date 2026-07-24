@@ -55,6 +55,7 @@ export async function POST(request: Request) {
         gameplay: data.gameplay || null,
         rewards: data.rewards || null,
         relatedArticleIds: JSON.stringify(Array.isArray(data.relatedArticleIds) ? data.relatedArticleIds : []),
+        relatedItemIds: JSON.stringify(Array.isArray(data.relatedItemIds) ? data.relatedItemIds : []),
         categoryId: data.categoryId,
         sortOrder: data.sortOrder || 0,
         isFeatured: data.isFeatured || false,

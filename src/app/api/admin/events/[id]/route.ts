@@ -34,6 +34,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         gameplay: data.gameplay || null,
         rewards: data.rewards || null,
         relatedArticleIds: JSON.stringify(Array.isArray(data.relatedArticleIds) ? data.relatedArticleIds : []),
+        relatedItemIds: JSON.stringify(Array.isArray(data.relatedItemIds) ? data.relatedItemIds : []),
         categoryId: data.categoryId,
         sortOrder: data.sortOrder,
         isFeatured: data.isFeatured,

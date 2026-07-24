@@ -31,6 +31,23 @@ export async function GET(request: Request) {
       category: ItemCategory,
     }))
 
+    // 詳情頁：解析相關活動 ID（互鏈），補出展示欄位
+    if (slug && mapped.length > 0) {
+      let eventIds: string[] = []
+      try { eventIds = JSON.parse(mapped[0].relatedEventIds || '[]') } catch { eventIds = [] }
+      if (Array.isArray(eventIds) && eventIds.length > 0) {
+        const { data: events } = await supabaseAdmin
+          .from('Event')
+          .select('id, name, slug, icon, iconPosition')
+          .in('id', eventIds)
+          .eq('isPublished', true)
+        const byId = new Map((events || []).map((e: any) => [e.id, e]))
+        mapped[0].relatedEvents = eventIds.map(id => byId.get(id)).filter(Boolean)
+      } else {
+        mapped[0].relatedEvents = []
+      }
+    }
+
     return NextResponse.json({ items: mapped })
   } catch {
     return NextResponse.json({ error: '獲取道具失敗' }, { status: 500 })

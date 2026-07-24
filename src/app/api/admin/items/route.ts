@@ -53,6 +53,7 @@ export async function POST(request: Request) {
         source: data.source || null,
         isExchange: data.isExchange || false,
         exchangeContent: data.exchangeContent || null,
+        relatedEventIds: JSON.stringify(Array.isArray(data.relatedEventIds) ? data.relatedEventIds : []),
         categoryId: data.categoryId,
         sortOrder: data.sortOrder || 0,
         isFeatured: data.isFeatured || false,
