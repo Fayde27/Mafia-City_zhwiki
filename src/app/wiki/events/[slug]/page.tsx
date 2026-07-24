@@ -119,7 +119,7 @@ export default function EventDetailPage() {
           <SectionCard title="相關道具">
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {event.relatedItems.map(it => (
-                <Link key={it.id} href={it.categorySlug ? `/wiki/items/${it.categorySlug}/${it.slug}` : '#'}
+                <Link key={it.id} href={`/wiki/items/${it.slug}`}
                   className="flex items-center gap-2 p-2 rounded-lg border border-wiki-border hover:border-wiki-accent transition-colors group">
                   <div className="w-10 h-10 rounded bg-wiki-gray overflow-hidden flex-shrink-0 flex items-center justify-center">
                     {it.icon ? <img src={it.icon} alt={it.name} className="w-full h-full object-cover" style={{ objectPosition: it.iconPosition || '50% 50%' }} /> : <span className="text-lg">🎁</span>}

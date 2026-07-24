@@ -64,16 +64,14 @@ export async function GET(request: Request) {
           .order('sortOrder', { ascending: false })
           .limit(limit)
           .then(({ data }) =>
-            (data || [])
-              .filter((i: any) => i.ItemCategory?.slug)
-              .map((i: any) => ({
-                type: 'item' as const,
-                id: i.id,
-                name: i.name,
-                url: `/wiki/items/${i.ItemCategory.slug}/${i.slug}`,
-                category: i.ItemCategory?.name || TYPE_LABELS.item,
-                icon: i.icon || '',
-              }))
+            (data || []).map((i: any) => ({
+              type: 'item' as const,
+              id: i.id,
+              name: i.name,
+              url: `/wiki/items/${i.slug}`,
+              category: i.ItemCategory?.name || TYPE_LABELS.item,
+              icon: i.icon || '',
+            }))
           )
       )
     }

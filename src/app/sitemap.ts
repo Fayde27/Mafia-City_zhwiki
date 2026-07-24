@@ -6,29 +6,6 @@ export const dynamic = 'force-dynamic'
 
 const BASE = 'https://mafiacity-zhwiki.com'
 
-// 帶分類的內容：URL = /wiki/{seg}/{分類slug}/{內容slug}
-async function categoryPaths(
-  table: string,
-  categoryRel: string,
-  seg: string,
-): Promise<MetadataRoute.Sitemap> {
-  try {
-    const { data } = await supabaseAdmin
-      .from(table)
-      .select(`slug, ${categoryRel}(slug)`)
-      .eq('isPublished', true)
-    return (data || [])
-      .map((row: any) => {
-        const catSlug = row[categoryRel]?.slug
-        if (!row.slug || !catSlug) return null
-        return { url: `${BASE}/wiki/${seg}/${catSlug}/${row.slug}` }
-      })
-      .filter(Boolean) as MetadataRoute.Sitemap
-  } catch {
-    return []
-  }
-}
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 靜態公開頁面
   const staticPaths: MetadataRoute.Sitemap = [
@@ -41,8 +18,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/wiki/submit',
   ].map(p => ({ url: `${BASE}${p}` }))
 
-  // 帶分類的道具詳情頁
-  const items = await categoryPaths('Item', 'ItemCategory', 'items')
+  // 道具詳情頁：URL = /wiki/items/{slug}（層級上調，無分類段）
+  let items: MetadataRoute.Sitemap = []
+  try {
+    const { data } = await supabaseAdmin
+      .from('Item')
+      .select('slug')
+      .eq('isPublished', true)
+    items = (data || [])
+      .filter((i: any) => i.slug)
+      .map((i: any) => ({ url: `${BASE}/wiki/items/${i.slug}` }))
+  } catch {
+    items = []
+  }
 
   // 活動詳情頁：URL = /wiki/events/{slug}（層級上調，無分類段）
   let events: MetadataRoute.Sitemap = []

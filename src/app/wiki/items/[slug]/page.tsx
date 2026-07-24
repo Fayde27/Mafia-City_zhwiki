@@ -7,10 +7,14 @@ import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { moduleFieldLabel, displayFilterValue } from '@/lib/filters'
+import MarkdownRenderer from '@/components/MarkdownRenderer'
+import LikeButton from '@/components/LikeButton'
+import ItemExchangeContent, { parseExchangeContent } from '@/components/ItemExchangeContent'
+import SectionCard from '@/components/SectionCard'
 
 interface Item {
   id: string
+  likes?: number
   name: string
   slug: string
   summary?: string
@@ -18,157 +22,135 @@ interface Item {
   iconPosition?: string
   image: string
   imagePosition?: string
-  rarity?: number
-  type?: string
-  quality?: string
-  category: { name: string; slug: string }
+  source?: string
+  isExchange?: boolean
+  exchangeContent?: string
+  description?: string
+  usage?: string
+  recipe?: string
+  relatedEvents?: { id: string; name: string; slug: string; icon?: string; iconPosition?: string }[]
+  category?: { name: string; slug: string }
 }
 
-interface ItemCategory {
-  id: string; name: string; slug: string; icon: string
-}
-
-interface ItemFilterOption {
-  id: string; type: string; value: string; field?: string; sortOrder: number
-}
-
-export default function ItemListPage() {
+export default function ItemDetailPage() {
   const params = useParams()
-  const categorySlug = params?.slug as string
-  const [items, setItems] = useState<Item[]>([])
-  const [category, setCategory] = useState<ItemCategory | null>(null)
+  const itemSlug = params?.slug as string
+  const [item, setItem] = useState<Item | null>(null)
   const [loading, setLoading] = useState(true)
-  const [activeFilters, setActiveFilters] = useState<Record<string, string>>({})
-  const [filterOptions, setFilterOptions] = useState<ItemFilterOption[]>([])
 
   useEffect(() => {
-    Promise.all([
-      fetch(`/api/wiki/items?category=${categorySlug}`).then(r => r.json()),
-      fetch('/api/wiki/items/categories').then(r => r.json()),
-      fetch(`/api/wiki/items/filter-options?categorySlug=${categorySlug}`).then(r => r.json()),
-    ]).then(([itemData, catData, filterData]) => {
-      setItems(itemData?.items || [])
-      setCategory((Array.isArray(catData) ? catData : []).find((c: ItemCategory) => c.slug === categorySlug) || null)
-      setFilterOptions(Array.isArray(filterData) ? filterData : [])
-      setLoading(false)
-    }).catch(() => setLoading(false))
-  }, [categorySlug])
+    fetch(`/api/wiki/items?slug=${itemSlug}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.items?.length > 0) setItem(data.items[0])
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [itemSlug])
 
-  const filterFields = Array.from(new Set(filterOptions.map(o => o.field).filter(Boolean))) as string[]
-  const groupedFilters: Record<string, ItemFilterOption[]> = {}
-  filterFields.forEach(fld => {
-    groupedFilters[fld] = filterOptions.filter(o => o.field === fld).sort((a, b) => a.sortOrder - b.sortOrder)
-  })
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-wiki-bg">
+        <WikiHeader />
+        <div className="text-center py-20 text-wiki-text-muted">載入中...</div>
+        <WikiFooter />
+      </div>
+    )
+  }
 
-  const filteredItems = items.filter(i =>
-    filterFields.every(fld => {
-      const value = activeFilters[fld]
-      if (!value || value === 'all') return true
-      return String((i as any)[fld] ?? '') === value
-    })
-  )
+  if (!item) {
+    return (
+      <div className="min-h-screen bg-wiki-bg">
+        <WikiHeader />
+        <main className="container mx-auto px-4 py-12">
+          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-12 text-center text-wiki-text-muted">道具不存在</div>
+        </main>
+        <WikiFooter />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-wiki-bg">
       <WikiHeader />
 
-      <main className="container mx-auto px-4 py-6 md:py-8">
+      <main className="container mx-auto px-4 py-6 md:py-8 max-w-4xl">
         {/* 麵包屑 */}
         <div className="text-sm text-wiki-text-muted mb-4 md:mb-6">
           <Link href="/" className="hover:text-wiki-accent">首頁</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki" className="hover:text-wiki-accent">圖鑑</Link>
+          <Link href="/wiki/items" className="hover:text-wiki-accent">道具介紹</Link>
           <span className="mx-2">/</span>
-          <Link href="/wiki/items" className="hover:text-wiki-accent">道具圖鑑</Link>
-          <span className="mx-2">/</span>
-          <span className="text-wiki-text">{category?.name || '載入中...'}</span>
+          <span className="text-wiki-text">{item.name}</span>
         </div>
 
-        {/* 頁頭 */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            {category?.icon && <span className="text-3xl">{category.icon}</span>}
-            <h1 className="text-3xl md:text-4xl font-heading font-bold text-wiki-accent heading-hard">
-              {category?.name}
-            </h1>
+        {/* Banner 大圖 */}
+        {item.image && (
+          <div className="relative w-full aspect-[3/1] rounded-xl overflow-hidden mb-6 md:mb-8">
+            <img src={item.image} alt={item.name} className="w-full h-full object-cover" style={{ objectPosition: item.imagePosition || '50% 50%' }} />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+            <div className="absolute bottom-4 left-5 md:bottom-8 md:left-8">
+              <h1 className="text-3xl md:text-5xl font-heading font-bold text-white drop-shadow-xl mb-1">{item.name}</h1>
+              {item.summary && <p className="text-white/80 text-sm md:text-base">{item.summary}</p>}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* 篩選欄 */}
-        {filterFields.length > 0 && (
-          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-4 mb-6 space-y-3">
-            {filterFields.map(fld => (
-              <div key={fld}>
-                <div className="text-xs font-bold text-wiki-accent uppercase tracking-wider mb-2">{groupedFilters[fld][0]?.type || moduleFieldLabel('item', fld)}</div>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => setActiveFilters(prev => ({ ...prev, [fld]: 'all' }))}
-                    className={`px-3 py-1.5 text-xs font-bold rounded transition-colors ${
-                      !activeFilters[fld] || activeFilters[fld] === 'all'
-                        ? 'bg-wiki-accent text-wiki-darker'
-                        : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
-                    }`}>全部</button>
-                  {groupedFilters[fld].map(opt => (
-                    <button key={opt.id}
-                      onClick={() => setActiveFilters(prev => ({ ...prev, [fld]: opt.value }))}
-                      className={`px-3 py-1.5 text-xs font-bold rounded transition-colors ${
-                        activeFilters[fld] === opt.value
-                          ? 'bg-wiki-accent text-wiki-darker'
-                          : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'
-                      }`}>
-                      {displayFilterValue('item', fld, opt.value)}
-                    </button>
-                  ))}
-                </div>
+        {/* 無 Banner 時的標題區 */}
+        {!item.image && (
+          <div className="flex items-center gap-4 mb-6">
+            {item.icon && (
+              <div className="w-20 h-20 rounded-xl overflow-hidden border-2 border-wiki-accent bg-wiki-gray flex-shrink-0">
+                <img src={item.icon} alt={item.name} className="w-full h-full object-contain p-1" style={{ objectPosition: item.iconPosition || '50% 50%' }} />
               </div>
-            ))}
+            )}
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-wiki-text">{item.name}</h1>
+              {item.summary && <p className="text-wiki-text-muted mt-1 text-sm">{item.summary}</p>}
+            </div>
           </div>
         )}
 
-        {/* 道具列表 */}
-        {loading ? (
-          <div className="text-center py-12 text-wiki-text-muted">載入中...</div>
-        ) : filteredItems.length === 0 ? (
-          <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-12 text-center text-wiki-text-muted">
-            該分類下暫無道具
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
-            {filteredItems.map(item => (
-              <Link key={item.id}
-                href={`/wiki/items/${categorySlug}/${item.slug}`}
-                className="bg-wiki-gray-light border border-wiki-border rounded-xl overflow-hidden group block hover:border-wiki-accent transition-all hover:shadow-md">
-                {/* 圖片區 */}
-                <div className="relative aspect-square bg-wiki-gray overflow-hidden">
-                  {item.image ? (
-                    <img src={item.image} alt={item.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      style={{ objectPosition: item.imagePosition || '50% 50%' }} />
-                  ) : item.icon ? (
-                    <img src={item.icon} alt={item.name}
-                      className="w-full h-full object-contain p-3 group-hover:scale-105 transition-transform duration-300"
-                      style={{ objectPosition: item.iconPosition || '50% 50%' }} />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-4xl text-wiki-text-muted">{item.name[0]}</span>
-                    </div>
-                  )}
-                </div>
-                {/* 文字區 */}
-                <div className="p-3">
-                  <h3 className="text-sm font-bold text-wiki-text group-hover:text-wiki-accent transition-colors line-clamp-1">
-                    {item.name}
-                  </h3>
-                  {item.summary && (
-                    <p className="text-wiki-text-muted text-xs mt-1 line-clamp-2 leading-relaxed">
-                      {item.summary}
-                    </p>
-                  )}
-                </div>
-              </Link>
-            ))}
+        {/* 有 Banner 時，下方顯示圖標 */}
+        {item.image && item.icon && (
+          <div className="flex items-center gap-4 mb-5">
+            <div className="w-14 h-14 rounded-lg overflow-hidden border border-wiki-border bg-wiki-gray flex-shrink-0">
+              <img src={item.icon} alt={item.name} className="w-full h-full object-contain p-1" style={{ objectPosition: item.iconPosition || '50% 50%' }} />
+            </div>
           </div>
         )}
+
+        {/* 各內容模塊 */}
+        {item.summary && <SectionCard title="道具簡介"><MarkdownRenderer content={item.summary} /></SectionCard>}
+        {item.isExchange && parseExchangeContent(item.exchangeContent) && (
+          <SectionCard title="兌換內容"><ItemExchangeContent raw={item.exchangeContent} /></SectionCard>
+        )}
+        {item.description && <SectionCard title="道具詳情"><MarkdownRenderer content={item.description} /></SectionCard>}
+        {item.source && <SectionCard title="獲得途徑"><MarkdownRenderer content={item.source} /></SectionCard>}
+        {item.usage && <SectionCard title="使用方法"><MarkdownRenderer content={item.usage} /></SectionCard>}
+        {item.recipe && <SectionCard title="合成配方"><MarkdownRenderer content={item.recipe} /></SectionCard>}
+
+        {/* 相關活動（互鏈） */}
+        {item.relatedEvents && item.relatedEvents.length > 0 && (
+          <SectionCard title="相關活動">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {item.relatedEvents.map(ev => (
+                <Link key={ev.id} href={`/wiki/events/${ev.slug}`}
+                  className="flex items-center gap-2 p-2 rounded-lg border border-wiki-border hover:border-wiki-accent transition-colors group">
+                  <div className="w-10 h-10 rounded bg-wiki-gray overflow-hidden flex-shrink-0 flex items-center justify-center">
+                    {ev.icon ? <img src={ev.icon} alt={ev.name} className="w-full h-full object-cover" style={{ objectPosition: ev.iconPosition || '50% 50%' }} /> : <span className="text-lg">🎉</span>}
+                  </div>
+                  <span className="text-sm text-wiki-text group-hover:text-wiki-accent truncate">{ev.name}</span>
+                </Link>
+              ))}
+            </div>
+          </SectionCard>
+        )}
+
+        {/* 點贊 */}
+        <div className="mt-8 flex justify-center">
+          <LikeButton entityType="item" entityId={item.id} initialLikes={item.likes || 0} />
+        </div>
       </main>
 
       <WikiFooter />
