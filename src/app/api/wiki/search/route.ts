@@ -8,12 +8,13 @@ import { sanitizeSearch, clampLimit } from '@/lib/sanitize'
 // 參數：q（關鍵字）· type（可選，限定單一實體）· limit（每類上限）
 // 返回：統一形狀 { type, id, name, url, category, icon }
 
-type EntityType = 'article' | 'item' | 'event'
+type EntityType = 'article' | 'item' | 'event' | 'lineup'
 
 const TYPE_LABELS: Record<EntityType, string> = {
-  article: '文章',
+  article: '攻略',
   item: '道具',
   event: '活動',
+  lineup: '陣容',
 }
 
 export async function GET(request: Request) {
@@ -25,7 +26,6 @@ export async function GET(request: Request) {
 
     if (!q) return NextResponse.json({ results: [] })
 
-    const like = `%${q}%`
     const want = (t: EntityType) => !type || type === t
 
     const tasks: PromiseLike<any[]>[] = []
@@ -37,7 +37,7 @@ export async function GET(request: Request) {
           .from('Article')
           .select('id, title, slug, coverImage')
           .eq('isPublished', true)
-          .ilike('title', like)
+          .or(`title.ilike.%${q}%,content.ilike.%${q}%,tags.ilike.%${q}%`)
           .order('sortOrder', { ascending: false })
           .limit(limit)
           .then(({ data }) =>
@@ -58,9 +58,9 @@ export async function GET(request: Request) {
       tasks.push(
         supabaseAdmin
           .from('Item')
-          .select('id, name, slug, icon, ItemCategory(slug, name)')
+          .select('id, name, slug, icon')
           .eq('isPublished', true)
-          .ilike('name', like)
+          .or(`name.ilike.%${q}%,summary.ilike.%${q}%`)
           .order('sortOrder', { ascending: false })
           .limit(limit)
           .then(({ data }) =>
@@ -69,21 +69,21 @@ export async function GET(request: Request) {
               id: i.id,
               name: i.name,
               url: `/wiki/items/${i.slug}`,
-              category: i.ItemCategory?.name || TYPE_LABELS.item,
+              category: TYPE_LABELS.item,
               icon: i.icon || '',
             }))
           )
       )
     }
 
-    // 活動 /wiki/events/[slug]
+    // 活動 /wiki/events/[slug]（名稱或簡介模糊匹配）
     if (want('event')) {
       tasks.push(
         supabaseAdmin
           .from('Event')
           .select('id, name, slug, icon')
           .eq('isPublished', true)
-          .ilike('name', like)
+          .or(`name.ilike.%${q}%,summary.ilike.%${q}%`)
           .order('sortOrder', { ascending: false })
           .limit(limit)
           .then(({ data }) =>
@@ -94,6 +94,29 @@ export async function GET(request: Request) {
               url: `/wiki/events/${e.slug}`,
               category: TYPE_LABELS.event,
               icon: e.icon || '',
+            }))
+          )
+      )
+    }
+
+    // 陣容 /wiki/lineups（標題或解說模糊匹配；無獨立詳情頁，導向列表）
+    if (want('lineup')) {
+      tasks.push(
+        supabaseAdmin
+          .from('Lineup')
+          .select('id, title, slug')
+          .eq('isPublished', true)
+          .or(`title.ilike.%${q}%,description.ilike.%${q}%`)
+          .order('sortOrder', { ascending: true })
+          .limit(limit)
+          .then(({ data }) =>
+            (data || []).map((l: any) => ({
+              type: 'lineup' as const,
+              id: l.id,
+              name: l.title,
+              url: `/wiki/lineups`,
+              category: TYPE_LABELS.lineup,
+              icon: '',
             }))
           )
       )
