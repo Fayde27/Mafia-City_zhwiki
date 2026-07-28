@@ -9,7 +9,7 @@ import RichTextEditor from '@/components/RichTextEditor'
 import {
   QUALITY_COLOR, QUALITY_LABEL, QUALITY_KEYS, STYLE_KEYS, STYLE_DEFAULT_ICON,
   STAT_KEYS, STAT_DEFAULT_NAME, STAT_DEFAULT_ICON, ROLE_KEYS, BUILTIN_BADGES,
-  parseArr, uid, defaultConfig,
+  parseArr, uid, defaultConfig, badgeStyle,
   type LineupT, type LineupHeroT, type LineupWeaponT, type LineupEmblemT,
   type LineupGenreT, type LineupConfigT, type BadgeT, type LineupSlotT,
 } from '@/lib/lineup'
@@ -21,15 +21,18 @@ const btnPri = 'px-5 py-2.5 bg-wiki-accent text-black font-bold rounded hover:op
 const btnSec = 'px-4 py-2 bg-wiki-gray border border-wiki-border text-wiki-text rounded hover:border-wiki-accent'
 const btnDanger = 'px-3 py-1.5 text-sm bg-wiki-gray border border-wiki-border text-red-500 rounded hover:border-red-500'
 
-type Tab = 'lineups' | 'heroes' | 'weapons' | 'emblems' | 'genres' | 'config'
+type Tab = 'lineups' | 'heroes' | 'styleicons' | 'badges' | 'staticons' | 'weapons' | 'emblems' | 'genres'
 
+// 對照線下工具的側邊欄 8 項
 const TABS: { key: Tab; label: string }[] = [
   { key: 'lineups', label: '陣容搭配' },
-  { key: 'heroes', label: '角色池' },
-  { key: 'weapons', label: '武器' },
-  { key: 'emblems', label: '戰徽' },
-  { key: 'genres', label: '流派' },
-  { key: 'config', label: '圖標與配置' },
+  { key: 'heroes', label: '豪傑管理' },
+  { key: 'styleicons', label: '風格圖標' },
+  { key: 'badges', label: '標籤管理' },
+  { key: 'staticons', label: '加點圖標' },
+  { key: 'weapons', label: '武器管理' },
+  { key: 'emblems', label: '戰徽管理' },
+  { key: 'genres', label: '流派管理' },
 ]
 
 export default function LineupsAdminPage() {
@@ -125,10 +128,13 @@ export default function LineupsAdminPage() {
 
       <div className="max-w-6xl mx-auto px-4 py-6">
         {tab === 'lineups' && (
-          <LineupsTab {...{ lineups, setLineups, heroes, weapons, emblems, genres, config, markDirty, styleName, statName, weaponLabel, emblemLabel }} />
+          <LineupsTab {...{ lineups, setLineups, heroes, weapons, emblems, genres, config, setConfig, markDirty, styleName, statName, weaponLabel, emblemLabel }} />
         )}
         {tab === 'heroes' && (
           <HeroesTab {...{ heroes, setHeroes, config, markDirty, styleName }} />
+        )}
+        {(tab === 'styleicons' || tab === 'badges' || tab === 'staticons') && (
+          <ConfigTab section={tab} {...{ config, setConfig, markDirty }} />
         )}
         {tab === 'weapons' && (
           <EquipTab kind="weapon" items={weapons as any} setItems={setWeapons as any} heroes={heroes} markDirty={markDirty} label="武器" />
@@ -139,17 +145,22 @@ export default function LineupsAdminPage() {
         {tab === 'genres' && (
           <GenresTab {...{ genres, setGenres, markDirty }} />
         )}
-        {tab === 'config' && (
-          <ConfigTab {...{ config, setConfig, markDirty }} />
-        )}
       </div>
     </div>
   )
 }
 
 /* ───────────── 陣容 Tab ───────────── */
-function LineupsTab({ lineups, setLineups, heroes, weapons, emblems, genres, config, markDirty, styleName, statName, weaponLabel, emblemLabel }: any) {
+function LineupsTab({ lineups, setLineups, heroes, weapons, emblems, genres, config, setConfig, markDirty, styleName, statName, weaponLabel, emblemLabel }: any) {
   const [editing, setEditing] = useState<LineupT | null>(null)
+
+  // 全域配置（函數式更新，避免異步/連續修改互相覆蓋）
+  const updCfg = (fn: (c: LineupConfigT) => Partial<LineupConfigT>) => {
+    setConfig((c: LineupConfigT) => ({ ...c, ...fn(c) }))
+    markDirty()
+  }
+  const setPage = (patch: any) => updCfg(c => ({ pageConfig: { ...c.pageConfig, ...patch } }))
+  const setRole = (r: string, patch: any) => updCfg(c => ({ roleLabels: { ...c.roleLabels, [r]: { ...(c.roleLabels as any)[r], ...patch } } }))
 
   const blankSlots = (): LineupSlotT[] => ROLE_KEYS.map(r => ({ role: r }))
   const newLineup = (): LineupT => ({ id: uid(), title: '', characterKind: 'haojie', badgeIds: [], slots: blankSlots(), isPublished: true, isPinned: false, sortOrder: lineups.length })
@@ -191,38 +202,64 @@ function LineupsTab({ lineups, setLineups, heroes, weapons, emblems, genres, con
           <div className="flex gap-2"><button className={btnSec} onClick={() => setEditing(null)}>取消</button><button className={btnPri} onClick={commit}>套用</button></div>
         </div>
 
-        {/* 3 槽位 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        {/* ▸ 選擇豪傑 & 各自加點（對照線下工具：立繪預覽 + 角色 + 加點） */}
+        <div className="text-sm font-bold text-wiki-accent mb-3">▸ 選擇豪傑 &amp; 各自加點</div>
+        <div className="flex flex-wrap gap-4 mb-6">
           {ROLE_KEYS.map((role, idx) => {
             const s = slots.find(x => x.role === role)!
+            const hero = heroes.find((h: LineupHeroT) => h.id === s.heroId)
+            const roleLabel = config.roleLabels?.[role]?.text || (idx === 0 ? '主力' : '輔助' + idx)
             return (
-              <div key={role} className="border border-wiki-border rounded-lg p-4">
-                <div className="text-sm font-bold text-wiki-accent mb-3">{idx === 0 ? '主力' : '輔助' + idx}</div>
-                <label className={labelCls}>角色</label>
-                <select className={inputCls + ' mb-2'} value={s.heroId || ''} onChange={e => setSlot(role, { heroId: e.target.value })}>
-                  <option value="">— 選擇角色 —</option>
-                  {heroes.map((h: LineupHeroT) => <option key={h.id} value={h.id}>{h.name}（{styleName(h.style)}）</option>)}
+              <div key={role} className="flex flex-col gap-1.5 items-center">
+                <div className="text-xs text-wiki-text-muted uppercase tracking-wider">{roleLabel}</div>
+                {/* 立繪預覽 */}
+                <div className="w-24 h-32 rounded border border-dashed border-wiki-border bg-wiki-gray overflow-hidden flex items-center justify-center text-xs text-wiki-text-muted">
+                  {hero?.imgUrl
+                    ? <img src={hero.imgUrl} alt={hero.name} className="w-full h-full object-cover" style={{ objectPosition: 'top' }} />
+                    : <span>{hero?.name || '未選擇'}</span>}
+                </div>
+                <select className="w-28 bg-wiki-gray border border-wiki-border px-2 py-1.5 text-xs text-wiki-text focus:border-wiki-accent focus:outline-none"
+                  value={s.heroId || ''} onChange={e => setSlot(role, { heroId: e.target.value })}>
+                  <option value="">— 選擇 —</option>
+                  {heroes.map((h: LineupHeroT) => <option key={h.id} value={h.id}>{h.name}</option>)}
                 </select>
-                <label className={labelCls}>加點</label>
-                <select className={inputCls + ' mb-2'} value={s.stat || ''} onChange={e => setSlot(role, { stat: e.target.value })}>
+                <select className="w-28 bg-wiki-gray border border-wiki-border px-2 py-1.5 text-xs text-wiki-text focus:border-wiki-accent focus:outline-none"
+                  value={s.stat || ''} onChange={e => setSlot(role, { stat: e.target.value })}>
                   <option value="">— 加點 —</option>
                   {STAT_KEYS.map(k => <option key={k} value={k}>{statName(k)}</option>)}
-                </select>
-                <label className={labelCls}>武器</label>
-                <select className={inputCls + ' mb-2'} value={s.weaponId || ''} onChange={e => setSlot(role, { weaponId: e.target.value })}>
-                  <option value="">— 武器 —</option>
-                  {weapons.map((w: LineupWeaponT) => <option key={w.id} value={w.id}>{weaponLabel(w)}</option>)}
-                </select>
-                <label className={labelCls}>戰徽</label>
-                <select className={inputCls} value={s.emblemId || ''} onChange={e => setSlot(role, { emblemId: e.target.value })}>
-                  <option value="">— 戰徽 —</option>
-                  {emblems.map((em: LineupEmblemT) => <option key={em.id} value={em.id}>{emblemLabel(em)}</option>)}
                 </select>
               </div>
             )
           })}
         </div>
 
+        {/* ▸ 選擇裝備（6 個下拉，對照線下工具佈局） */}
+        <div className="text-sm font-bold text-wiki-accent mb-3">▸ 選擇裝備</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          {ROLE_KEYS.map((role, idx) => {
+            const s = slots.find(x => x.role === role)!
+            const prefix = idx === 0 ? '主力' : '輔助' + idx
+            return [
+              <div key={role + '-w'}>
+                <label className={labelCls}>{prefix}武器</label>
+                <select className={inputCls} value={s.weaponId || ''} onChange={e => setSlot(role, { weaponId: e.target.value })}>
+                  <option value="">— 武器 —</option>
+                  {weapons.map((w: LineupWeaponT) => <option key={w.id} value={w.id}>{weaponLabel(w)}</option>)}
+                </select>
+              </div>,
+              <div key={role + '-e'}>
+                <label className={labelCls}>{prefix}戰徽</label>
+                <select className={inputCls} value={s.emblemId || ''} onChange={e => setSlot(role, { emblemId: e.target.value })}>
+                  <option value="">— 戰徽 —</option>
+                  {emblems.map((em: LineupEmblemT) => <option key={em.id} value={em.id}>{emblemLabel(em)}</option>)}
+                </select>
+              </div>,
+            ]
+          })}
+        </div>
+
+        {/* ▸ 陣容資訊 */}
+        <div className="text-sm font-bold text-wiki-accent mb-3">▸ 陣容資訊</div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
             <label className={labelCls}>陣容標題</label>
@@ -240,14 +277,18 @@ function LineupsTab({ lineups, setLineups, heroes, weapons, emblems, genres, con
             <input className={inputCls} value={editing.updateText || ''} onChange={e => setEditing({ ...editing, updateText: e.target.value })} placeholder="選填" />
           </div>
           <div>
-            <label className={labelCls}>顯示標籤</label>
+            <label className={labelCls}>顯示標籤 <span className="normal-case font-normal text-wiki-text-muted">（可多選）</span></label>
             <div className="flex flex-wrap gap-2 pt-1">
               {(config.badges || []).map((b: BadgeT) => (
                 <button key={b.id} type="button" onClick={() => toggleBadge(b.id)}
-                  className={`px-3 py-1.5 rounded text-sm border ${badgeIds.includes(b.id) ? 'border-wiki-accent bg-wiki-accent/10 text-wiki-accent' : 'border-wiki-border text-wiki-text-muted'}`}>
-                  {b.name}
+                  className={`flex flex-col items-center gap-1 px-3 py-2 rounded border transition-colors ${badgeIds.includes(b.id) ? 'border-wiki-accent bg-wiki-accent/10' : 'border-wiki-border hover:border-wiki-accent/50'}`}>
+                  {b.imgUrl
+                    ? <img src={b.imgUrl} alt={b.name} className="h-5 max-w-[80px] object-contain" />
+                    : <span className="text-[10px] font-bold tracking-widest px-2 py-0.5 rounded" style={badgeStyle(b)}>{b.name}</span>}
+                  <span className="text-[10px] text-wiki-text-muted">{b.name}</span>
                 </button>
               ))}
+              {!(config.badges || []).length && <span className="text-xs text-wiki-text-muted">尚無標籤，請至「標籤管理」新增</span>}
             </div>
           </div>
         </div>
@@ -273,6 +314,31 @@ function LineupsTab({ lineups, setLineups, heroes, weapons, emblems, genres, con
 
   return (
     <div>
+      {/* 展示頁標題設定 */}
+      <div className={cardCls + ' mb-4'}>
+        <h3 className="font-bold text-wiki-accent mb-4">▸ 展示頁標題設定</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div><label className={labelCls}>副標題（小字）</label><input className={inputCls} value={config.pageConfig?.eyebrow || ''} onChange={e => setPage({ eyebrow: e.target.value })} placeholder="MAFIA CITY · TACTICAL GUIDE" /></div>
+          <div><label className={labelCls}>主標題</label><input className={inputCls} value={config.pageConfig?.title || ''} onChange={e => setPage({ title: e.target.value })} placeholder="豪傑最強陣容" /></div>
+          <div><label className={labelCls}>時間文字</label><input className={inputCls} value={config.pageConfig?.timeText || ''} onChange={e => setPage({ timeText: e.target.value })} placeholder="選填，如 2026 第三賽季" /></div>
+          <label className="flex items-center gap-2 text-wiki-text mt-8"><input type="checkbox" checked={!!config.pageConfig?.showTime} onChange={e => setPage({ showTime: e.target.checked })} /> 顯示時間文字</label>
+        </div>
+      </div>
+
+      {/* 角色標識（全域生效） */}
+      <div className={cardCls + ' mb-4'}>
+        <h3 className="font-bold text-wiki-accent mb-1">▸ 角色標識（全域生效）</h3>
+        <p className="text-xs text-wiki-text-muted mb-4">陣容卡片上「主力 / 輔助」的顯示文字與圖示</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {ROLE_KEYS.map(r => (
+            <div key={r} className="flex gap-2">
+              <input className="flex-1 bg-wiki-gray border border-wiki-border px-3 py-2 text-wiki-text" value={config.roleLabels?.[r]?.text || ''} onChange={e => setRole(r, { text: e.target.value })} placeholder={r} />
+              <input className="w-16 bg-wiki-gray border border-wiki-border px-3 py-2 text-wiki-text text-center" value={config.roleLabels?.[r]?.emoji || ''} onChange={e => setRole(r, { emoji: e.target.value })} placeholder="⚔️" />
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div className="flex items-center justify-between mb-4">
         <p className="text-sm text-wiki-text-muted">共 {lineups.length} 套陣容 · 修改後記得點右上「保存全部」</p>
         <button className={btnPri} onClick={startNew}>+ 新增陣容</button>
@@ -488,89 +554,113 @@ function GenresTab({ genres, setGenres, markDirty }: any) {
 }
 
 /* ───────────── 配置 Tab ───────────── */
-function ConfigTab({ config, setConfig, markDirty }: any) {
-  const upd = (patch: Partial<LineupConfigT>) => { setConfig((c: LineupConfigT) => ({ ...c, ...patch })); markDirty() }
+function ConfigTab({ section, config, setConfig, markDirty }: any) {
+  // ⚠️ 必須用函數式更新：圖片上傳是異步回調，若基於閉包裡的舊 config 計算，
+  // 連續上傳多張時後一次會覆蓋前一次，導致已上傳的圖片消失。
+  const upd = (fn: (c: LineupConfigT) => Partial<LineupConfigT>) => {
+    setConfig((c: LineupConfigT) => ({ ...c, ...fn(c) }))
+    markDirty()
+  }
   const [newBadge, setNewBadge] = useState<BadgeT>({ id: '', name: '', color: '#C9A227', bg: '#1A1408', imgUrl: '' })
 
-  const setStyleName = (k: string, v: string) => upd({ styleNames: { ...config.styleNames, [k]: v } })
-  const setStyleIcon = (s: string, url: string) => upd({ styleIcons: (config.styleIcons || []).map((x: any) => x.style === s ? { ...x, imgUrl: url } : x) })
-  const setStatName = (k: string, v: string) => upd({ statNames: { ...config.statNames, [k]: v } })
-  const setStatIcon = (k: string, url: string) => upd({ statIcons: (config.statIcons || []).map((x: any) => x.key === k ? { ...x, imgUrl: url } : x) })
-  const setRole = (r: string, patch: any) => upd({ roleLabels: { ...config.roleLabels, [r]: { ...config.roleLabels[r], ...patch } } })
-  const setPage = (patch: any) => upd({ pageConfig: { ...config.pageConfig, ...patch } })
-  const addBadge = () => { if (!newBadge.name) return; upd({ badges: [...(config.badges || []), { ...newBadge, id: uid(), builtIn: false }] }); setNewBadge({ id: '', name: '', color: '#C9A227', bg: '#1A1408', imgUrl: '' }) }
-  const delBadge = (id: string) => upd({ badges: (config.badges || []).filter((b: BadgeT) => b.id !== id) })
+  const setStyleName = (k: string, v: string) => upd(c => ({ styleNames: { ...c.styleNames, [k]: v } }))
+  const setStyleIcon = (s: string, url: string) => upd(c => ({ styleIcons: (c.styleIcons || []).map((x: any) => x.style === s ? { ...x, imgUrl: url } : x) }))
+  const setStatName = (k: string, v: string) => upd(c => ({ statNames: { ...c.statNames, [k]: v } }))
+  const setStatIcon = (k: string, url: string) => upd(c => ({ statIcons: (c.statIcons || []).map((x: any) => x.key === k ? { ...x, imgUrl: url } : x) }))
+  const setBadgeImg = (id: string, url: string) => upd(c => ({ badges: (c.badges || []).map(b => b.id === id ? { ...b, imgUrl: url } : b) }))
+  const addBadge = () => { if (!newBadge.name) return; upd(c => ({ badges: [...(c.badges || []), { ...newBadge, id: uid(), builtIn: false }] })); setNewBadge({ id: '', name: '', color: '#C9A227', bg: '#1A1408', imgUrl: '' }) }
+  const delBadge = (id: string) => upd(c => ({ badges: (c.badges || []).filter((b: BadgeT) => b.id !== id) }))
 
-  return (
-    <div className="space-y-6">
-      {/* 頁面標題 */}
+  // 風格圖標
+  if (section === 'styleicons') {
+    return (
       <div className={cardCls}>
-        <h3 className="font-bold text-wiki-accent mb-4">展示頁標題</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div><label className={labelCls}>副標題</label><input className={inputCls} value={config.pageConfig?.eyebrow || ''} onChange={e => setPage({ eyebrow: e.target.value })} /></div>
-          <div><label className={labelCls}>主標題</label><input className={inputCls} value={config.pageConfig?.title || ''} onChange={e => setPage({ title: e.target.value })} /></div>
-          <div><label className={labelCls}>時間文字</label><input className={inputCls} value={config.pageConfig?.timeText || ''} onChange={e => setPage({ timeText: e.target.value })} placeholder="如：2026 第三賽季" /></div>
-          <label className="flex items-center gap-2 text-wiki-text mt-8"><input type="checkbox" checked={!!config.pageConfig?.showTime} onChange={e => setPage({ showTime: e.target.checked })} /> 顯示時間文字</label>
-        </div>
-      </div>
-
-      {/* 風格 */}
-      <div className={cardCls}>
-        <h3 className="font-bold text-wiki-accent mb-4">風格（名稱 + 圖標）</h3>
+        <h3 className="font-bold text-wiki-accent mb-1">風格圖標</h3>
+        <p className="text-xs text-wiki-text-muted mb-4">為 4 種風格各自設定顯示名稱與圖標（推薦 80×80 圓形透明 PNG），豪傑會自動套用。</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {STYLE_KEYS.map(s => {
             const si = (config.styleIcons || []).find((x: any) => x.style === s)
             return (
               <div key={s}>
+                <label className={labelCls}>{s} <span className="normal-case font-normal text-wiki-text-muted">顯示名</span></label>
                 <input className={inputCls + ' mb-2'} value={config.styleNames?.[s] || ''} onChange={e => setStyleName(s, e.target.value)} placeholder={s} />
-                <ImageUploadInput label={'圖標 ' + STYLE_DEFAULT_ICON[s]} value={si?.imgUrl || ''} position="50% 50%" onChange={url => setStyleIcon(s, url)} onPositionChange={() => {}} compact />
+                <ImageUploadInput label={'圖標 ' + STYLE_DEFAULT_ICON[s]} value={si?.imgUrl || ''} position="50% 50%" onChange={url => setStyleIcon(s, url)} onPositionChange={() => {}} compact objectFit="contain" />
               </div>
             )
           })}
         </div>
       </div>
+    )
+  }
 
-      {/* 加點 */}
+  // 加點圖標
+  if (section === 'staticons') {
+    return (
       <div className={cardCls}>
-        <h3 className="font-bold text-wiki-accent mb-4">加點軸（名稱 + 圖標）</h3>
+        <h3 className="font-bold text-wiki-accent mb-1">加點圖標</h3>
+        <p className="text-xs text-wiki-text-muted mb-4">5 條加點軸的顯示名稱與圖標（推薦 60×60 透明 PNG）。</p>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {STAT_KEYS.map(k => {
             const si = (config.statIcons || []).find((x: any) => x.key === k)
             return (
               <div key={k}>
+                <label className={labelCls}>{STAT_DEFAULT_NAME[k]} <span className="normal-case font-normal text-wiki-text-muted">顯示名</span></label>
                 <input className={inputCls + ' mb-2'} value={config.statNames?.[k] || ''} onChange={e => setStatName(k, e.target.value)} placeholder={STAT_DEFAULT_NAME[k]} />
-                <ImageUploadInput label={'圖標 ' + STAT_DEFAULT_ICON[k]} value={si?.imgUrl || ''} position="50% 50%" onChange={url => setStatIcon(k, url)} onPositionChange={() => {}} compact />
+                <ImageUploadInput label={'圖標 ' + STAT_DEFAULT_ICON[k]} value={si?.imgUrl || ''} position="50% 50%" onChange={url => setStatIcon(k, url)} onPositionChange={() => {}} compact objectFit="contain" />
               </div>
             )
           })}
         </div>
       </div>
+    )
+  }
 
-      {/* 角色標識 */}
-      <div className={cardCls}>
-        <h3 className="font-bold text-wiki-accent mb-4">角色標識</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {ROLE_KEYS.map(r => (
-            <div key={r} className="flex gap-2">
-              <input className="flex-1 bg-wiki-gray border border-wiki-border px-3 py-2 text-wiki-text" value={config.roleLabels?.[r]?.text || ''} onChange={e => setRole(r, { text: e.target.value })} placeholder={r} />
-              <input className="w-16 bg-wiki-gray border border-wiki-border px-3 py-2 text-wiki-text text-center" value={config.roleLabels?.[r]?.emoji || ''} onChange={e => setRole(r, { emoji: e.target.value })} placeholder="⚔️" />
+  // 標籤管理
+  return (
+    <div className={cardCls}>
+      <h3 className="font-bold text-wiki-accent mb-1">標籤管理</h3>
+      <p className="text-xs text-wiki-text-muted mb-4">HOT / NEW / 推薦 為內建樣式，不可刪除。自訂標籤可設定文字色、底色，或上傳圖片（有圖片時優先顯示圖片，推薦高度 22px）。</p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+        {(config.badges || []).map((b: BadgeT) => (
+          <div key={b.id} className="border border-wiki-border rounded-lg p-3">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                {b.imgUrl
+                  ? <img src={b.imgUrl} alt={b.name} className="h-5 max-w-[80px] object-contain" />
+                  : <span className="text-[10px] font-bold tracking-widest px-2 py-0.5 rounded" style={badgeStyle(b)}>{b.name}</span>}
+                <span className="text-sm text-wiki-text">{b.name}</span>
+              </div>
+              {b.builtIn
+                ? <span className="text-[10px] text-wiki-accent border border-wiki-accent px-1.5 py-0.5 rounded">內建</span>
+                : <button className={btnDanger} onClick={() => delBadge(b.id)}>刪除</button>}
             </div>
-          ))}
-        </div>
+            {!b.builtIn && (
+              <ImageUploadInput label="標籤圖片（選填）" value={b.imgUrl || ''} position="50% 50%" onChange={url => setBadgeImg(b.id, url)} onPositionChange={() => {}} compact objectFit="contain" />
+            )}
+          </div>
+        ))}
       </div>
 
-      {/* 標籤 */}
-      <div className={cardCls}>
-        <h3 className="font-bold text-wiki-accent mb-4">標籤（HOT/NEW/推薦 為內建）</h3>
-        <div className="flex flex-wrap gap-2 mb-4">
-          {(config.badges || []).map((b: BadgeT) => (
-            <span key={b.id} className="px-3 py-1.5 rounded border border-wiki-border text-sm text-wiki-text flex items-center gap-2">
-              {b.name}{b.builtIn ? <span className="text-xs text-wiki-accent">內建</span> : <button className="text-red-500" onClick={() => delBadge(b.id)}>×</button>}
-            </span>
-          ))}
-        </div>
-        <div className="flex gap-2 items-end">
-          <div><label className={labelCls}>新標籤名</label><input className={inputCls} value={newBadge.name} onChange={e => setNewBadge({ ...newBadge, name: e.target.value })} /></div>
+      <div className="border-t border-wiki-border pt-4">
+        <h4 className="text-sm font-bold text-wiki-text mb-3">新增自訂標籤</h4>
+        <div className="flex flex-wrap gap-3 items-end">
+          <div>
+            <label className={labelCls}>標籤名</label>
+            <input className={inputCls} value={newBadge.name} onChange={e => setNewBadge({ ...newBadge, name: e.target.value })} placeholder="如：限時" />
+          </div>
+          <div>
+            <label className={labelCls}>文字色</label>
+            <input type="color" className="w-20 h-12 bg-wiki-gray border border-wiki-border" value={newBadge.color} onChange={e => setNewBadge({ ...newBadge, color: e.target.value })} />
+          </div>
+          <div>
+            <label className={labelCls}>底色</label>
+            <input type="color" className="w-20 h-12 bg-wiki-gray border border-wiki-border" value={newBadge.bg} onChange={e => setNewBadge({ ...newBadge, bg: e.target.value })} />
+          </div>
+          <div>
+            <label className={labelCls}>預覽</label>
+            <span className="inline-block text-[10px] font-bold tracking-widest px-2 py-1 rounded" style={badgeStyle({ ...newBadge, id: 'preview' })}>{newBadge.name || '標籤'}</span>
+          </div>
           <button className={btnPri} onClick={addBadge}>+ 新增標籤</button>
         </div>
       </div>

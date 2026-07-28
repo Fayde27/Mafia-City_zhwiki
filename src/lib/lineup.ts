@@ -60,6 +60,14 @@ export const BUILTIN_BADGES: BadgeT[] = [
   { id: 'b-rec', name: '推薦', builtIn: true, builtInCls: 'badge-recommend', color: '#000' },
 ]
 
+// 標籤視覺樣式（對照線下工具的 badge-hot / badge-new / badge-recommend）
+export function badgeStyle(b: BadgeT): Record<string, string> {
+  if (b.builtInCls === 'badge-hot') return { background: 'linear-gradient(135deg,#D4363A,#8B0000)', color: '#fff' }
+  if (b.builtInCls === 'badge-new') return { background: 'linear-gradient(135deg,#2196F3,#0D47A1)', color: '#fff' }
+  if (b.builtInCls === 'badge-recommend') return { background: 'linear-gradient(135deg,#C9A227,#8B6914)', color: '#000' }
+  return { background: b.bg || '#1A1408', color: b.color || '#C9A227', border: `1px solid ${b.color || '#C9A227'}55` }
+}
+
 // 安全解析 JSON 數組
 export function parseArr<T = any>(raw: any, fallback: T[] = []): T[] {
   if (Array.isArray(raw)) return raw
