@@ -86,6 +86,23 @@ body{background:var(--c-black);color:var(--c-text);font-family:var(--ff-body);mi
 .equip-excl{font-size:13px;color:var(--c-gold)}
 .equip-attrs{display:flex;flex-direction:column;gap:1px;margin-top:3px}
 .equip-attr-line{font-size:14px;color:#2C6E8A;line-height:1.55}
+/* ── 英雄陣容卡：戰寵 / 套裝 / 6格裝備 ── */
+.hero-pets-row{display:flex;flex-wrap:wrap;gap:4px;padding:8px 10px;border-top:1px solid var(--c-border)}
+.hero-pet-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 6px;border:1px solid var(--c-border);border-radius:3px;background:rgba(255,255,255,.7)}
+.hero-pet-chip img{width:20px;height:20px;object-fit:contain}
+.hero-pet-name{font-size:13px;color:var(--c-text)}
+.hero-set-block{padding:8px 10px;border-top:1px solid var(--c-border)}
+.hero-set-title{display:flex;align-items:center;gap:5px;margin-bottom:3px}
+.hero-set-title img{width:20px;height:20px;object-fit:contain}
+.hero-set-name{font-size:15px;font-weight:700;color:var(--c-gold)}
+.hero-set-bonus{font-size:13px;color:var(--c-gold-dark);line-height:1.6}
+.hero-eq-block{padding:8px 10px;border-top:1px solid var(--c-border)}
+.hero-eq-row{display:flex;align-items:center;gap:6px;padding:2px 0}
+.hero-eq-slot{font-size:13px;color:var(--c-text-dim);width:34px;flex-shrink:0}
+.hero-eq-icon{width:22px;height:22px;flex-shrink:0;border:1px solid var(--c-border);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:13px;overflow:hidden}
+.hero-eq-icon img{width:100%;height:100%;object-fit:contain}
+.hero-eq-name{font-size:13px;color:var(--c-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hero-eq-empty{font-size:13px;color:var(--c-text-dim);opacity:.6}
 .card-bottom{position:relative;z-index:2;padding:14px 18px;background:rgba(255,255,255,.55)}
 .card-title{font-family:var(--ff-display);font-size:24px;font-weight:700;letter-spacing:1.2px;color:var(--c-gold-bright);text-transform:uppercase;margin-bottom:6px}
 .card-desc{font-size:15px;color:var(--c-text-dim);line-height:1.8}
@@ -295,6 +312,7 @@ body{background:var(--c-black);color:var(--c-text);font-family:var(--ff-body);mi
 <div id="page-frontend" class="page active">
   <div class="frontend-wrap">
     <div class="page-header" id="page-header-wrap"></div>
+    <div class="filter-bar" id="kind-switch"></div>
     <div class="filter-bar" id="genre-filter"></div>
     <div class="lineup-stack" id="lineup-stack"></div>
     <div style="text-align:center;padding:24px 0 12px;font-family:var(--ff-display);font-size:14px;letter-spacing:1px;color:var(--c-text-dim);opacity:.55;">建議自行截圖使用</div>
@@ -313,6 +331,9 @@ body{background:var(--c-black);color:var(--c-text);font-family:var(--ff-body);mi
       <button class="admin-nav-item" data-section="staticons" onclick="switchAdmin('staticons')">加點圖標</button>
       <button class="admin-nav-item" data-section="weapons" onclick="switchAdmin('weapons')">武器管理</button>
       <button class="admin-nav-item" data-section="emblems" onclick="switchAdmin('emblems')">戰徽管理</button>
+      <button class="admin-nav-item" data-section="pets" onclick="switchAdmin('pets')">戰寵/異獸</button>
+      <button class="admin-nav-item" data-section="heroequips" onclick="switchAdmin('heroequips')">英雄裝備</button>
+      <button class="admin-nav-item" data-section="equipsets" onclick="switchAdmin('equipsets')">套裝管理</button>
       <button class="admin-nav-item" data-section="genres" onclick="switchAdmin('genres')">流派管理</button>
     </aside>
     <div class="admin-content">
@@ -335,6 +356,12 @@ body{background:var(--c-black);color:var(--c-text);font-family:var(--ff-body);mi
       <div id="admin-lineups" class="admin-section active">
         <div class="admin-section-title">陣容搭配管理</div>
 
+        <!-- 豪傑 / 英雄 切換（後台） -->
+        <div class="variant-type-row" style="margin-bottom:14px;">
+          <button class="variant-type-btn active" id="kind-btn-haojie" onclick="switchAdminKind('haojie')">豪傑陣容</button>
+          <button class="variant-type-btn" id="kind-btn-hero" onclick="switchAdminKind('hero')">英雄陣容</button>
+        </div>
+
         <!-- PAGE CONFIG -->
         <div style="background:var(--c-dark);border:1px solid var(--c-border);border-radius:4px;padding:14px 16px;margin-bottom:16px;">
           <div style="font-family:var(--ff-display);font-size:14px;letter-spacing:1px;color:var(--c-gold);margin-bottom:12px;">&#9656; 展示頁標題設定</div>
@@ -343,9 +370,13 @@ body{background:var(--c-black);color:var(--c-text);font-family:var(--ff-body);mi
               <label class="form-label">副標題（小字）</label>
               <input class="form-input" id="cfg-eyebrow" type="text" placeholder="MAFIA CITY · TACTICAL GUIDE" oninput="applyPageConfig()">
             </div>
-            <div class="form-group">
-              <label class="form-label">主標題</label>
+            <div class="form-group" id="cfg-title-group">
+              <label class="form-label">主標題（豪傑）</label>
               <input class="form-input" id="cfg-title" type="text" placeholder="豪傑最強陣容" oninput="applyPageConfig()">
+            </div>
+            <div class="form-group" id="cfg-herotitle-group" style="display:none;">
+              <label class="form-label">主標題（英雄）</label>
+              <input class="form-input" id="cfg-hero-title" type="text" placeholder="英雄最強陣容" oninput="applyPageConfig()">
             </div>
             <div class="form-group">
               <label class="form-label">時間文字 <small>（如：2025年第三賽季）</small></label>
@@ -383,6 +414,8 @@ body{background:var(--c-black);color:var(--c-text);font-family:var(--ff-body);mi
           </button>
           <div class="lineup-form-body" id="lineup-form-body">
           <div style="height:14px;"></div>
+          <!-- ── 豪傑專屬：角色+加點、武器+戰徽 ── -->
+          <div id="haojie-slot-blocks">
           <div class="lineup-builder-title">&#9656; 選擇豪傑 &amp; 各自加點</div>
           <div class="hero-slots-row">
             <div class="hero-select-slot">
@@ -413,6 +446,14 @@ body{background:var(--c-black);color:var(--c-text);font-family:var(--ff-body);mi
             <div class="form-group"><label class="form-label">輔助2武器</label><select class="form-select" id="eq-sub2-weapon"><option value="">選擇武器</option></select></div>
             <div class="form-group"><label class="form-label">輔助2戰徽</label><select class="form-select" id="eq-sub2-emblem"><option value="">選擇戰徽</option></select></div>
           </div>
+          </div><!-- /haojie-slot-blocks -->
+
+          <!-- ── 英雄專屬：英雄 + 戰寵 + 套裝 + 6格裝備（每一豎列一個英雄） ── -->
+          <div id="hero-slot-blocks" style="display:none;">
+            <div class="lineup-builder-title">&#9656; 選擇英雄 · 戰寵 · 套裝 · 裝備</div>
+            <div id="hero-slot-cols" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;"></div>
+          </div>
+
           <div class="lineup-builder-title">&#9656; 陣容資訊</div>
           <div class="form-grid">
             <div class="form-group"><label class="form-label">陣容標題</label><input class="form-input" id="lineup-title" type="text" placeholder="如：鐵壁破城流"></div>
@@ -462,11 +503,12 @@ body{background:var(--c-black);color:var(--c-text);font-family:var(--ff-body);mi
       </div>
 
       <div id="admin-heroes" class="admin-section">
-        <div class="admin-section-title">豪傑管理</div>
+        <div class="admin-section-title" id="heroes-section-title">豪傑管理</div>
+        <p style="font-size:14px;color:var(--c-text-dim);margin-bottom:12px;">依「陣容搭配」頁上方選的類型，這裡分別維護豪傑或英雄角色池。</p>
         <div class="admin-item-grid" id="admin-hero-list"></div>
-        <div class="section-divider"><span class="section-divider-text">新增豪傑</span></div>
+        <div class="section-divider"><span class="section-divider-text" id="heroes-add-divider">新增豪傑</span></div>
         <div class="form-grid">
-          <div class="form-group"><label class="form-label">豪傑名稱</label><input class="form-input" id="hero-name" type="text" placeholder="豪傑名稱"></div>
+          <div class="form-group"><label class="form-label" id="hero-name-label">豪傑名稱</label><input class="form-input" id="hero-name" type="text" placeholder="角色名稱"></div>
           <div class="form-group"><label class="form-label">風格類型</label>
             <select class="form-select" id="hero-style" onchange="previewHeroStyleIcon()">
               <option value="迅捷">迅捷</option><option value="智謀">智謀</option>
@@ -626,6 +668,83 @@ body{background:var(--c-black);color:var(--c-text);font-family:var(--ff-body);mi
         <button class="btn-secondary" onclick="clearEmblemForm()">清除</button>
       </div>
 
+      <!-- 戰寵 / 異獸 -->
+      <div id="admin-pets" class="admin-section">
+        <div class="admin-section-title">戰寵 / 異獸管理</div>
+        <p style="font-size:14px;color:var(--c-text-dim);margin-bottom:16px;">英雄配隊用。每個英雄槽位最多可掛 <b>3</b> 個。</p>
+        <div class="admin-item-grid" id="admin-pet-list"></div>
+        <div class="section-divider"><span class="section-divider-text">新增戰寵 / 異獸</span></div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">名稱</label><input class="form-input" id="pet-name" type="text" placeholder="如：赤炎虎"></div>
+          <div class="form-group"><label class="form-label">類型</label>
+            <select class="form-select" id="pet-kind"><option value="pet">戰寵</option><option value="beast">異獸</option></select>
+          </div>
+          <div class="form-group"><label class="form-label">品質</label>
+            <select class="form-select" id="pet-quality">
+              <option value="gray">灰色</option><option value="green">綠色</option><option value="blue">藍色</option>
+              <option value="purple">紫色</option><option value="orange">橙色</option><option value="gold" selected>金色</option>
+            </select>
+          </div>
+          <div class="form-group full"><label class="form-label">圖片URL <small>推薦 200×200px</small></label><input class="form-input" id="pet-img" type="text" placeholder="https://..."></div>
+          <div class="form-group full"><label class="form-label">技能 / 加成說明</label>
+            <div class="attr-list-builder" id="pet-attrs-builder"></div>
+            <button class="btn-sm" style="margin-top:6px;" onclick="addAttrRow('pet-attrs-builder')">+ 新增一條</button>
+          </div>
+        </div>
+        <input type="hidden" id="editing-pet-id">
+        <button class="btn-primary" onclick="savePet()">保存</button>
+        <button class="btn-secondary" onclick="clearPetForm()">清除</button>
+      </div>
+
+      <!-- 英雄裝備（6 部位） -->
+      <div id="admin-heroequips" class="admin-section">
+        <div class="admin-section-title">英雄裝備管理</div>
+        <p style="font-size:14px;color:var(--c-text-dim);margin-bottom:16px;">共 6 個部位：武器 / 頭部 / 衣服 / 褲子 / 鞋子 / 飾品。可歸屬套裝以取得額外加成。</p>
+        <div id="admin-heroequip-list"></div>
+        <div class="section-divider"><span class="section-divider-text">新增英雄裝備</span></div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">裝備名稱</label><input class="form-input" id="heq-name" type="text" placeholder="如：龍鱗胸甲"></div>
+          <div class="form-group"><label class="form-label">部位</label><select class="form-select" id="heq-slot"></select></div>
+          <div class="form-group"><label class="form-label">品質</label>
+            <select class="form-select" id="heq-quality">
+              <option value="gray">灰色</option><option value="green">綠色</option><option value="blue">藍色</option>
+              <option value="purple">紫色</option><option value="orange">橙色</option><option value="gold" selected>金色</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">所屬套裝 <small>選填</small></label><select class="form-select" id="heq-set"></select></div>
+          <div class="form-group full"><label class="form-label">圖標URL <small>推薦 200×200px</small></label><input class="form-input" id="heq-img" type="text" placeholder="https://..."></div>
+          <div class="form-group full"><label class="form-label">屬性 / 詞條</label>
+            <div class="attr-list-builder" id="heq-attrs-builder"></div>
+            <button class="btn-sm" style="margin-top:6px;" onclick="addAttrRow('heq-attrs-builder')">+ 新增一條</button>
+          </div>
+        </div>
+        <input type="hidden" id="editing-heq-id">
+        <button class="btn-primary" onclick="saveHeroEquip()">保存</button>
+        <button class="btn-secondary" onclick="clearHeroEquipForm()">清除</button>
+      </div>
+
+      <!-- 套裝 -->
+      <div id="admin-equipsets" class="admin-section">
+        <div class="admin-section-title">套裝管理</div>
+        <p style="font-size:14px;color:var(--c-text-dim);margin-bottom:16px;">套裝有額外加成，並可標記適配的流派（可多選）。</p>
+        <div class="admin-item-grid" id="admin-equipset-list"></div>
+        <div class="section-divider"><span class="section-divider-text">新增套裝</span></div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">套裝名稱</label><input class="form-input" id="set-name" type="text" placeholder="如：狂暴之怒"></div>
+          <div class="form-group full"><label class="form-label">圖標URL <small>選填</small></label><input class="form-input" id="set-img" type="text" placeholder="https://..."></div>
+          <div class="form-group full"><label class="form-label">適配流派 <small>可多選</small></label>
+            <div class="checkbox-group" id="set-genre-picker"></div>
+          </div>
+          <div class="form-group full"><label class="form-label">套裝額外加成</label>
+            <div class="attr-list-builder" id="set-bonus-builder"></div>
+            <button class="btn-sm" style="margin-top:6px;" onclick="addAttrRow('set-bonus-builder')">+ 新增加成</button>
+          </div>
+        </div>
+        <input type="hidden" id="editing-set-id">
+        <button class="btn-primary" onclick="saveEquipSet()">保存</button>
+        <button class="btn-secondary" onclick="clearEquipSetForm()">清除</button>
+      </div>
+
       <div id="admin-genres" class="admin-section">
         <div class="admin-section-title">流派管理</div>
         <div class="admin-item-grid" id="admin-genre-list"></div>
@@ -718,11 +837,29 @@ var appData={
     {id:'g2',name:'暴徒',color:'#D4363A',imgUrl:''},
     {id:'g3',name:'槍手',color:'#2196F3',imgUrl:''},
   ],
+  pets:[],
+  heroEquips:[],
+  equipSets:[],
   lineups:[
     {id:'l1',title:'鐵壁破城流',description:'以鐵拳王為核心，利用無畏風格的減傷特性，配合智謀輔助形成攻守兼備的完美陣容。適合正面突破敵陣。',genreId:'g2',badgeIds:['b-hot'],bgUrl:'',mainHeroId:'h1',subHero1Id:'h2',subHero2Id:'h4',mainStat:'force',sub1Stat:'skill',sub2Stat:'defense',mainWeaponId:'w1',mainEmblemId:'e1',sub1WeaponId:'w2',sub1EmblemId:'e3',sub2WeaponId:'w4',sub2EmblemId:'e4'},
     {id:'l2',title:'閃電突擊隊',description:'三迅捷風格搭配，速度加成疊加可達最大爆發。前期壓制力極強，適合速攻戰術。',genreId:'g1',badgeIds:['b-new'],bgUrl:'',mainHeroId:'h5',subHero1Id:'h3',subHero2Id:'h6',mainStat:'speed',sub1Stat:'skill',sub2Stat:'physique',mainWeaponId:'w3',mainEmblemId:'e2',sub1WeaponId:'w2',sub1EmblemId:'e3',sub2WeaponId:'w2',sub2EmblemId:'e4'},
   ],
 };
+
+/* ───────── 英雄配隊常量 ───────── */
+var HERO_EQUIP_SLOTS=[
+  {index:1,label:'武器'},{index:2,label:'頭部'},{index:3,label:'衣服'},
+  {index:4,label:'褲子'},{index:5,label:'鞋子'},{index:6,label:'飾品'}
+];
+var PET_MAX=3;                       // 每個英雄槽位最多掛幾個戰寵
+var ROLES=['main','sub1','sub2'];
+function heroEquipLabel(i){var s=HERO_EQUIP_SLOTS.filter(function(x){return x.index===i})[0];return s?s.label:'部位'+i}
+function blankHeroSlots(){return ROLES.map(function(r){return {role:r,heroId:'',petIds:[],setId:'',equipIds:['','','','','','']}})}
+/* 當前正在瀏覽/編輯的角色類型（豪傑 / 英雄） */
+var curKind='haojie';
+function kindHeroes(k){return appData.heroes.filter(function(h){return (h.characterKind||'haojie')===(k||curKind)})}
+function kindLineups(k){return appData.lineups.filter(function(l){return (l.characterKind||'haojie')===(k||curKind)})}
+function slotOf(l,role){var s=(l.slots||[]).filter(function(x){return x.role===role})[0];return s||{role:role,heroId:'',petIds:[],setId:'',equipIds:['','','','','','']}}
 
 /* 品質色：白底主題用加深版本（豪傑名字與裝備框吃這個色，太淺會看不清） */
 var QC={gray:'#757575',green:'#2E7D32',blue:'#1565C0',purple:'#7B1FA2',orange:'#E65100',gold:'#A6822B'};
@@ -796,15 +933,18 @@ function switchAdmin(s){
   document.querySelectorAll('.admin-nav-item').forEach(function(x){x.classList.remove('active')});
   document.getElementById('admin-'+s).classList.add('active');
   var n=document.querySelector('.admin-nav-item[data-section="'+s+'"]');if(n)n.classList.add('active');
-  if(s==='heroes')previewHeroStyleIcon();
+  if(s==='heroes'){previewHeroStyleIcon();renderHeroList();}
   if(s==='styleicons'){renderStyleIconList();renderStyleNamesGrid();}
   if(s==='staticons'){renderStatIconList();renderStatNamesGrid();}
-  if(s==='lineups'){renderBadgeSelector('lineup-badge-selector',[]);renderRoleLabelCards();syncPageConfigInputs();}
+  if(s==='lineups'){renderBadgeSelector('lineup-badge-selector',[]);renderRoleLabelCards();syncPageConfigInputs();applyAdminKind();renderLineupList();}
+  if(s==='pets')renderPetList();
+  if(s==='heroequips'){rebuildHeroEquipSelects();renderHeroEquipList();}
+  if(s==='equipsets'){renderEquipSetList();renderSetGenrePicker([]);}
 }
 
 /* FRONTEND */
 var gf=null;
-function renderFrontend(){renderPageHeader();buildFilterBar();buildLineups()}
+function renderFrontend(){renderPageHeader();buildKindBar();buildFilterBar();buildLineups()}
 function buildFilterBar(){
   var b=document.getElementById('genre-filter');
   b.innerHTML='<button class="filter-btn active" data-gid="all" onclick="filterGenre(null,this)">全部陣容</button>';
@@ -818,11 +958,95 @@ function buildFilterBar(){
 function filterGenre(id,btn){
   gf=id;document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active')});btn.classList.add('active');buildLineups();
 }
+/* 豪傑 / 英雄 切換（前台） */
+function buildKindBar(){
+  var b=document.getElementById('kind-switch');
+  if(!b)return;
+  b.innerHTML=[{k:'haojie',label:'豪傑陣容'},{k:'hero',label:'英雄陣容'}].map(function(t){
+    return '<button class="filter-btn'+(curKind===t.k?' active':'')+'" onclick="switchKind(\''+t.k+'\')">'+t.label+'</button>';
+  }).join('');
+}
+function switchKind(k){
+  curKind=k;gf=null;
+  buildKindBar();renderPageHeader();buildFilterBar();buildLineups();
+}
 function buildLineups(){
   var s=document.getElementById('lineup-stack');
-  var ls=gf?appData.lineups.filter(function(l){return l.genreId===gf}):appData.lineups;
-  if(!ls.length){s.innerHTML='<div style="color:var(--c-text-dim);text-align:center;padding:60px;font-family:var(--ff-display);letter-spacing:1px;">暫無陣容</div>';return}
-  s.innerHTML=ls.map(buildCard).join('');
+  var ls=kindLineups();
+  if(gf)ls=ls.filter(function(l){return l.genreId===gf});
+  if(!ls.length){s.innerHTML='<div style="color:var(--c-text-dim);text-align:center;padding:60px;letter-spacing:1px;">暫無陣容</div>';return}
+  s.innerHTML=ls.map(function(l){return curKind==='hero'?buildHeroCard(l):buildCard(l)}).join('');
+}
+
+/* ───────── 英雄陣容卡片 ───────── */
+function buildHeroCard(lineup){
+  var genre=appData.genres.filter(function(g){return g.id===lineup.genreId})[0];
+  var bgA=lineup.bgUrl?'style="background-image:url(\''+lineup.bgUrl+'\')"':'';
+  var badgesHtml=(lineup.badgeIds||[]).map(function(bid){
+    var b=appData.badges.filter(function(x){return x.id===bid})[0];if(!b)return '';
+    if(b.builtIn)return '<span class="card-badge '+b.builtInCls+'">'+b.name+'</span>';
+    if(b.imgUrl)return '<img class="badge-img" src="'+b.imgUrl+'" alt="'+b.name+'">';
+    return '<span class="card-badge" style="background:'+b.bg+';color:'+b.color+';border:1px solid '+b.color+'40;">'+b.name+'</span>';
+  }).join('');
+  var genreH=genre?'<div class="card-genre-badge">'+(genre.imgUrl?'<img class="card-genre-icon" src="'+genre.imgUrl+'" alt="">':'<span class="card-genre-dot" style="background:'+genre.color+'"></span>')+'<span class="card-genre-name" style="color:'+genre.color+'">'+genre.name+'</span></div>':'';
+  return '<a href="#" class="lineup-card">'
+    +'<div class="card-bg" '+bgA+'></div><div class="card-bg-grad"></div>'
+    +'<div class="card-top-bar"><div class="card-badges">'+badgesHtml+'</div>'+genreH+'</div>'
+    +'<div class="card-heroes-row">'
+    +ROLES.map(function(r){return buildHeroColHero(lineup,r)}).join('')
+    +'</div>'
+    +'<div class="card-bottom"><div class="card-title">'+(lineup.title||'未命名')+'</div>'
+    +'<div class="card-desc">'+(lineup.description||'')+'</div></div>'
+    +'</a>';
+}
+function buildHeroColHero(lineup,role){
+  var s=slotOf(lineup,role);
+  var hero=appData.heroes.filter(function(h){return h.id===s.heroId})[0];
+  var set=appData.equipSets.filter(function(x){return x.id===s.setId})[0];
+  var qColor=QC.gold;
+  var si=getStyleIcon(hero);
+  var styleIconH=si&&si.imgUrl
+    ?'<img class="hero-style-icon-img" src="'+si.imgUrl+'" alt="" style="border-color:'+qColor+';">'
+    :'<span class="hero-style-icon-default" style="color:'+qColor+';border-color:'+qColor+';">'+(hero?SI_DEFAULTS[hero.style]||'⚡':'⚡')+'</span>';
+  var imgH=hero&&hero.imgUrl
+    ?'<img class="hero-portrait-img" src="'+hero.imgUrl+'" alt="'+(hero.name||'')+'" loading="lazy">'
+    :'<div class="hero-portrait-placeholder"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span style="font-size:13px;">'+(hero?hero.name:'空')+'</span></div>';
+  var roleH=buildRoleBadgeHtml(role);
+  var nameBar='<div class="hero-name-bar" style="color:'+qColor+';border-top-color:'+qColor+';">'+styleIconH+'<span class="hero-name-text">'+(hero?hero.name:'—')+'</span></div>';
+  var portrait='<div class="hero-portrait-wrap">'+imgH+'<div class="portrait-q-frame" style="color:'+qColor+';"></div>'+roleH+'</div>'+nameBar;
+
+  // 戰寵 / 異獸
+  var petsH='';
+  var pets=(s.petIds||[]).map(function(id){return appData.pets.filter(function(p){return p.id===id})[0]}).filter(Boolean);
+  if(pets.length){
+    petsH='<div class="hero-pets-row">'+pets.map(function(p){
+      var pc=QC[p.quality]||QC.gold;
+      return '<div class="hero-pet-chip" style="border-color:'+pc+'99;">'
+        +(p.imgUrl?'<img src="'+p.imgUrl+'" alt="'+p.name+'">':'<span>&#128062;</span>')
+        +'<span class="hero-pet-name">'+p.name+'</span></div>';
+    }).join('')+'</div>';
+  }
+  // 套裝 + 加成
+  var setH='';
+  if(set){
+    setH='<div class="hero-set-block"><div class="hero-set-title">'
+      +(set.imgUrl?'<img src="'+set.imgUrl+'" alt="">':'<span>&#10024;</span>')
+      +'<span class="equip-type-label">套裝</span><span class="hero-set-name">'+set.name+'</span></div>'
+      +(set.bonus||[]).map(function(b){return '<div class="hero-set-bonus">&#10024; '+b+'</div>'}).join('')
+      +'</div>';
+  }
+  // 6 格裝備
+  var eqRows=HERO_EQUIP_SLOTS.map(function(sl,i){
+    var eq=appData.heroEquips.filter(function(x){return x.id===(s.equipIds||[])[i]})[0];
+    if(!eq)return '<div class="hero-eq-row"><span class="hero-eq-slot">'+sl.label+'</span><span class="hero-eq-empty">—</span></div>';
+    var qc=QC[eq.quality]||QC.gold;
+    return '<div class="hero-eq-row"><span class="hero-eq-slot">'+sl.label+'</span>'
+      +'<span class="hero-eq-icon" style="border-color:'+qc+';">'+(eq.imgUrl?'<img src="'+eq.imgUrl+'" alt="">':'&#128737;')+'</span>'
+      +'<span class="hero-eq-name">'+eq.name+'</span></div>';
+  }).join('');
+  var eqH='<div class="hero-eq-block"><div class="equip-type-label" style="margin-bottom:4px;display:inline-block;">裝備</div>'+eqRows+'</div>';
+
+  return '<div class="hero-col">'+portrait+petsH+setH+eqH+'</div>';
 }
 function buildCard(lineup){
   var genre=appData.genres.filter(function(g){return g.id===lineup.genreId})[0];
@@ -1166,22 +1390,38 @@ function cleanStaleRefs(){
   });
 }
 function renderLineupList(){
-  document.getElementById('admin-lineup-list').innerHTML=appData.lineups.map(function(l){
+  document.getElementById('admin-lineup-list').innerHTML=kindLineups().map(function(l){
     var g=appData.genres.filter(function(x){return x.id===l.genreId})[0];
     return '<div class="admin-item-card"><div class="admin-item-card-name">'+(l.title||'未命名')+'</div><div class="admin-item-card-sub">'+(g?g.name:'無流派')+'</div><div class="admin-item-card-actions"><button class="btn-sm" onclick="editLineup(this.dataset.id)" data-id="'+l.id+'">✎ 編輯</button><button class="btn-sm danger" onclick="deleteLineup(this.dataset.id)" data-id="'+l.id+'">刪除</button></div></div>';
-  }).join('')||'<div style="color:var(--c-text-dim);font-size:14px;">尚無陣容</div>';
+  }).join('')||'<div style="color:var(--c-text-dim);font-size:14px;">尚無'+(curKind==='hero'?'英雄':'豪傑')+'陣容</div>';
 }
 function saveLineup(){
   var id=document.getElementById('editing-lineup-id').value;
-  var o={id:id||uid(),title:document.getElementById('lineup-title').value,
+  var base={id:id||uid(),characterKind:curKind,
+    title:document.getElementById('lineup-title').value,
     description:document.getElementById('lineup-desc-rte').innerHTML,
     genreId:document.getElementById('lineup-genre').value,bgUrl:document.getElementById('lineup-bg').value,
-    badgeIds:getSelectedBadgeIds('lineup-badge-selector'),
-    mainHeroId:document.getElementById('slot-main-select').value,subHero1Id:document.getElementById('slot-sub1-select').value,subHero2Id:document.getElementById('slot-sub2-select').value,
-    mainStat:document.getElementById('slot-main-stat').value,sub1Stat:document.getElementById('slot-sub1-stat').value,sub2Stat:document.getElementById('slot-sub2-stat').value,
-    mainWeaponId:document.getElementById('eq-main-weapon').value,mainEmblemId:document.getElementById('eq-main-emblem').value,
-    sub1WeaponId:document.getElementById('eq-sub1-weapon').value,sub1EmblemId:document.getElementById('eq-sub1-emblem').value,
-    sub2WeaponId:document.getElementById('eq-sub2-weapon').value,sub2EmblemId:document.getElementById('eq-sub2-emblem').value};
+    badgeIds:getSelectedBadgeIds('lineup-badge-selector')};
+  var o;
+  if(curKind==='hero'){
+    // 英雄：slots 陣列（與官網結構一致）
+    o=Object.assign(base,{slots:ROLES.map(function(role){
+      var pets=Array.from(document.querySelectorAll('.hero-pet-cb[data-role="'+role+'"]'))
+        .filter(function(c){return c.checked}).map(function(c){return c.getAttribute('data-pid')});
+      var eq=HERO_EQUIP_SLOTS.map(function(_,i){
+        var el=document.getElementById('hslot-'+role+'-eq'+i);return el?el.value:'';
+      });
+      var hEl=document.getElementById('hslot-'+role+'-hero'),sEl=document.getElementById('hslot-'+role+'-set');
+      return {role:role,heroId:hEl?hEl.value:'',petIds:pets,setId:sEl?sEl.value:'',equipIds:eq};
+    })});
+  }else{
+    o=Object.assign(base,{
+      mainHeroId:document.getElementById('slot-main-select').value,subHero1Id:document.getElementById('slot-sub1-select').value,subHero2Id:document.getElementById('slot-sub2-select').value,
+      mainStat:document.getElementById('slot-main-stat').value,sub1Stat:document.getElementById('slot-sub1-stat').value,sub2Stat:document.getElementById('slot-sub2-stat').value,
+      mainWeaponId:document.getElementById('eq-main-weapon').value,mainEmblemId:document.getElementById('eq-main-emblem').value,
+      sub1WeaponId:document.getElementById('eq-sub1-weapon').value,sub1EmblemId:document.getElementById('eq-sub1-emblem').value,
+      sub2WeaponId:document.getElementById('eq-sub2-weapon').value,sub2EmblemId:document.getElementById('eq-sub2-emblem').value});
+  }
   var i=appData.lineups.findIndex(function(l){return l.id===id});
   if(i>=0)appData.lineups[i]=o;else appData.lineups.push(o);
   clearLineupForm();renderLineupList();toast(id?'陣容已更新':'陣容已新增');
@@ -1199,6 +1439,26 @@ function editLineup(id){
   // scroll form into view
   var fw=document.getElementById('lineup-form-wrap');
   if(fw)fw.scrollIntoView({behavior:'smooth',block:'start'});
+  // 若點到另一類型的陣容，自動切換到對應的表單
+  var lk=l.characterKind||'haojie';
+  if(lk!==curKind){curKind=lk;applyAdminKind();renderLineupList();syncPageConfigInputs();}
+
+  if(lk==='hero'){
+    renderHeroSlotCols();
+    ROLES.forEach(function(role){
+      var s=slotOf(l,role);
+      var hEl=document.getElementById('hslot-'+role+'-hero');if(hEl)hEl.value=s.heroId||'';
+      onHeroSlotChange(role);
+      var sEl=document.getElementById('hslot-'+role+'-set');if(sEl)sEl.value=s.setId||'';
+      Array.from(document.querySelectorAll('.hero-pet-cb[data-role="'+role+'"]')).forEach(function(cb){
+        cb.checked=(s.petIds||[]).indexOf(cb.getAttribute('data-pid'))>=0;
+      });
+      HERO_EQUIP_SLOTS.forEach(function(_,i){
+        var el=document.getElementById('hslot-'+role+'-eq'+i);if(el)el.value=(s.equipIds||[])[i]||'';
+      });
+    });
+    return;
+  }
   var sm={main:'mainHeroId',sub1:'subHero1Id',sub2:'subHero2Id'};
   var st={main:'mainStat',sub1:'sub1Stat',sub2:'sub2Stat'};
   var sw={main:'mainWeaponId',sub1:'sub1WeaponId',sub2:'sub2WeaponId'};
@@ -1222,25 +1482,35 @@ function clearLineupForm(){
     document.getElementById('slot-'+s+'-select').value='';document.getElementById('slot-'+s+'-stat').value='';
     updateSlotPreview(s,null);document.getElementById('eq-'+s+'-weapon').value='';document.getElementById('eq-'+s+'-emblem').value='';
   });
+  if(curKind==='hero')renderHeroSlotCols();   // 英雄欄位一併重置
 }
 
 /* HEROES */
 function renderHeroList(){
-  document.getElementById('admin-hero-list').innerHTML=appData.heroes.map(function(h){
+  var label=curKind==='hero'?'英雄':'豪傑';
+  document.getElementById('admin-hero-list').innerHTML=kindHeroes().map(function(h){
     var si=getStyleIcon(h);
     return '<div class="admin-item-card"><div class="admin-item-card-img-wrap">'+(h.imgUrl?'<img src="'+h.imgUrl+'" alt="'+h.name+'" style="object-position:top;">':'<span style="color:var(--c-text-dim);font-size:14px;">無圖</span>')+'</div><div class="admin-item-card-name">'+h.name+'</div><div class="admin-item-card-sub">'+styleName(h.style)+(si&&si.imgUrl?' · ✓':'')+'</div><div class="admin-item-card-actions"><button class="btn-sm" onclick="editHero(this.dataset.id)" data-id="'+h.id+'">編輯</button><button class="btn-sm danger" onclick="deleteHero(this.dataset.id)" data-id="'+h.id+'">刪除</button></div></div>';
-  }).join('')||'<div style="color:var(--c-text-dim);font-size:14px;">尚無豪傑</div>';
+  }).join('')||'<div style="color:var(--c-text-dim);font-size:14px;">尚無'+label+'</div>';
+  // 標題與按鈕文案跟著切換
+  var t=document.getElementById('heroes-section-title');if(t)t.textContent=label+'管理';
+  var d=document.getElementById('heroes-add-divider');if(d)d.textContent='新增'+label;
+  var nl=document.getElementById('hero-name-label');if(nl)nl.textContent=label+'名稱';
 }
 function saveHero(){
   var id=document.getElementById('editing-hero-id').value;
-  var o={id:id||uid(),name:document.getElementById('hero-name').value,style:document.getElementById('hero-style').value,imgUrl:document.getElementById('hero-img').value};
+  var old=appData.heroes.filter(function(h){return h.id===id})[0];
+  var o={id:id||uid(),name:document.getElementById('hero-name').value,style:document.getElementById('hero-style').value,
+    imgUrl:document.getElementById('hero-img').value,
+    characterKind:(old&&old.characterKind)||curKind};   // 沿用原類型，新增時用當前類型
   var i=appData.heroes.findIndex(function(h){return h.id===id});
   if(i>=0)appData.heroes[i]=o;else appData.heroes.push(o);
-  clearHeroForm();renderHeroList();populateSel();toast(id?'豪傑已更新':'豪傑已新增');
+  clearHeroForm();renderHeroList();populateSel();populateHeroSel();
+  toast(id?'已更新':'已新增');
   archiveAutoSave();
 }
 function editHero(id){var h=appData.heroes.filter(function(x){return x.id===id})[0];if(!h)return;document.getElementById('editing-hero-id').value=h.id;document.getElementById('hero-name').value=h.name;document.getElementById('hero-style').value=h.style;document.getElementById('hero-img').value=h.imgUrl||'';previewHeroStyleIcon()}
-function deleteHero(id){var h=appData.heroes.filter(function(x){return x.id===id})[0];if(!confirm('確定刪除豪傑「'+(h?h.name:'')+'」？\n此操作無法復原。'))return;appData.heroes=appData.heroes.filter(function(h){return h.id!==id});cleanStaleRefs();renderHeroList();populateSel();toast('豪傑已刪除');archiveAutoSave();}
+function deleteHero(id){var h=appData.heroes.filter(function(x){return x.id===id})[0];if(!confirm('確定刪除「'+(h?h.name:'')+'」？\n此操作無法復原。'))return;appData.heroes=appData.heroes.filter(function(h){return h.id!==id});cleanStaleRefs();cleanHeroRefs();renderHeroList();populateSel();populateHeroSel();toast('已刪除');archiveAutoSave();}
 function clearHeroForm(){['editing-hero-id','hero-name','hero-img'].forEach(function(i){document.getElementById(i).value=''});document.getElementById('hero-style').value='迅捷';previewHeroStyleIcon()}
 
 
@@ -1519,6 +1789,280 @@ function clearEmblemForm(){
   setEmblemType('parent');
 }
 
+/* ───────── 後台 豪傑 / 英雄 切換 ───────── */
+function switchAdminKind(k){
+  curKind=k;
+  clearLineupForm();
+  applyAdminKind();
+  renderLineupList();
+  populateHeroSel();
+  syncPageConfigInputs();
+}
+function applyAdminKind(){
+  var isHero=curKind==='hero';
+  var bh=document.getElementById('kind-btn-haojie'),be=document.getElementById('kind-btn-hero');
+  if(bh)bh.classList.toggle('active',!isHero);
+  if(be)be.classList.toggle('active',isHero);
+  var hb=document.getElementById('haojie-slot-blocks'),eb=document.getElementById('hero-slot-blocks');
+  if(hb)hb.style.display=isHero?'none':'block';
+  if(eb)eb.style.display=isHero?'block':'none';
+  var tg=document.getElementById('cfg-title-group'),hg=document.getElementById('cfg-herotitle-group');
+  if(tg)tg.style.display=isHero?'none':'flex';
+  if(hg)hg.style.display=isHero?'flex':'none';
+  // 側邊欄：只顯示該類型用得到的管理項
+  var show={
+    haojie:{weapons:1,emblems:1,staticons:1,pets:0,heroequips:0,equipsets:0},
+    hero:{weapons:0,emblems:0,staticons:0,pets:1,heroequips:1,equipsets:1}
+  }[curKind];
+  Object.keys(show).forEach(function(sec){
+    var btn=document.querySelector('.admin-nav-item[data-section="'+sec+'"]');
+    if(btn)btn.style.display=show[sec]?'':'none';
+  });
+  // 若當前停在被隱藏的分頁，退回陣容搭配
+  var cur=document.querySelector('.admin-section.active');
+  if(cur){
+    var id=cur.id.replace('admin-','');
+    if(show.hasOwnProperty(id)&&!show[id])switchAdmin('lineups');
+  }
+  if(isHero)renderHeroSlotCols();
+}
+
+/* ───────── 英雄陣容：三個槽位的編輯欄 ───────── */
+function renderHeroSlotCols(){
+  var wrap=document.getElementById('hero-slot-cols');
+  if(!wrap)return;
+  var hs=kindHeroes('hero');
+  wrap.innerHTML=ROLES.map(function(role,idx){
+    var rl=(appData.roleLabels&&appData.roleLabels[role])||{};
+    var title=rl.text||(idx===0?'主力':'輔助'+idx);
+    var heroOpts='<option value="">— 選擇英雄 —</option>'+hs.map(function(h){return '<option value="'+h.id+'">'+h.name+'</option>'}).join('');
+    var setOpts='<option value="">— 套裝 —</option>'+appData.equipSets.map(function(s){return '<option value="'+s.id+'">'+s.name+'</option>'}).join('');
+    var petChips=appData.pets.length?appData.pets.map(function(p){
+      return '<label class="checkbox-label" style="font-size:13px;"><input type="checkbox" class="hero-pet-cb" data-role="'+role+'" data-pid="'+p.id+'" onchange="onPetToggle(this)">'+p.name+'</label>';
+    }).join(''):'<span style="font-size:13px;color:var(--c-text-dim);">尚無戰寵，請先到「戰寵/異獸」新增</span>';
+    var eqRows=HERO_EQUIP_SLOTS.map(function(sl,i){
+      var opts='<option value="">— 未設置 —</option>'+appData.heroEquips.filter(function(e){return (e.slotIndex||1)===sl.index})
+        .map(function(e){return '<option value="'+e.id+'">'+e.name+' ['+QL[e.quality]+']</option>'}).join('');
+      return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">'
+        +'<span style="font-size:13px;color:var(--c-text-dim);width:34px;flex-shrink:0;">'+sl.label+'</span>'
+        +'<select class="form-select" style="flex:1;font-size:13px;padding:4px 6px;" id="hslot-'+role+'-eq'+i+'">'+opts+'</select></div>';
+    }).join('');
+    return '<div style="flex:1;min-width:230px;border:1px solid var(--c-border);border-radius:4px;padding:12px;">'
+      +'<div class="lineup-builder-title" style="margin-bottom:8px;">'+title+'</div>'
+      +'<div class="hero-select-preview" id="hslot-'+role+'-preview" style="width:100%;height:120px;margin-bottom:6px;"><span>未選擇</span></div>'
+      +'<label class="form-label">英雄</label>'
+      +'<select class="form-select" style="margin-bottom:8px;" id="hslot-'+role+'-hero" onchange="onHeroSlotChange(\''+role+'\')">'+heroOpts+'</select>'
+      +'<label class="form-label">戰寵 / 異獸 <small>最多 '+PET_MAX+' 個</small></label>'
+      +'<div class="checkbox-group" style="margin-bottom:8px;" id="hslot-'+role+'-pets">'+petChips+'</div>'
+      +'<label class="form-label">套裝</label>'
+      +'<select class="form-select" style="margin-bottom:8px;" id="hslot-'+role+'-set">'+setOpts+'</select>'
+      +'<label class="form-label">裝備 6 格</label>'+eqRows
+      +'</div>';
+  }).join('');
+}
+/* 戰寵勾選：超過上限自動回退 */
+function onPetToggle(cb){
+  var role=cb.getAttribute('data-role');
+  var boxes=Array.from(document.querySelectorAll('.hero-pet-cb[data-role="'+role+'"]'));
+  var checked=boxes.filter(function(b){return b.checked});
+  if(checked.length>PET_MAX){cb.checked=false;toast('每個英雄最多 '+PET_MAX+' 個戰寵');}
+}
+function onHeroSlotChange(role){
+  var id=document.getElementById('hslot-'+role+'-hero').value;
+  var h=appData.heroes.filter(function(x){return x.id===id})[0];
+  var p=document.getElementById('hslot-'+role+'-preview');
+  if(!p)return;
+  if(h&&h.imgUrl)p.innerHTML='<img src="'+h.imgUrl+'" style="width:100%;height:100%;object-fit:cover;object-position:top;">';
+  else if(h)p.innerHTML='<span style="font-size:14px;color:var(--c-text);">'+h.name+'</span>';
+  else p.innerHTML='<span>未選擇</span>';
+}
+/* 重建英雄相關下拉（角色池/戰寵/套裝/裝備 變動後呼叫） */
+function populateHeroSel(){
+  if(curKind==='hero')renderHeroSlotCols();
+}
+
+/* ───────── 戰寵 / 異獸 ───────── */
+function renderPetList(){
+  document.getElementById('admin-pet-list').innerHTML=appData.pets.map(function(p){
+    var qc=QC[p.quality]||QC.gold;
+    return '<div class="admin-item-card" style="border-color:'+qc+'55;">'
+      +'<div class="admin-item-card-img-wrap">'+(p.imgUrl?'<img src="'+p.imgUrl+'" alt="'+p.name+'" style="object-fit:contain;">':'<span style="font-size:26px;">&#128062;</span>')+'</div>'
+      +'<div class="admin-item-card-name">'+p.name+'</div>'
+      +'<div class="admin-item-card-sub">'+(p.kind==='beast'?'異獸':'戰寵')+' · '+QL[p.quality]+'</div>'
+      +'<div class="admin-item-card-actions"><button class="btn-sm" onclick="editPet(this.dataset.id)" data-id="'+p.id+'">編輯</button>'
+      +'<button class="btn-sm danger" onclick="deletePet(this.dataset.id)" data-id="'+p.id+'">刪除</button></div></div>';
+  }).join('')||'<div style="color:var(--c-text-dim);font-size:14px;">尚無戰寵 / 異獸</div>';
+}
+function savePet(){
+  var id=document.getElementById('editing-pet-id').value;
+  var name=document.getElementById('pet-name').value.trim();
+  if(!name){toast('請填寫名稱');return}
+  var o={id:id||uid(),name:name,kind:document.getElementById('pet-kind').value,
+    quality:document.getElementById('pet-quality').value,imgUrl:document.getElementById('pet-img').value,
+    attrs:getAttrs('pet-attrs-builder')};
+  var i=appData.pets.findIndex(function(p){return p.id===id});
+  if(i>=0)appData.pets[i]=o;else appData.pets.push(o);
+  clearPetForm();renderPetList();populateHeroSel();toast(id?'已更新':'已新增');archiveAutoSave();
+}
+function editPet(id){
+  var p=appData.pets.filter(function(x){return x.id===id})[0];if(!p)return;
+  document.getElementById('editing-pet-id').value=p.id;
+  document.getElementById('pet-name').value=p.name;
+  document.getElementById('pet-kind').value=p.kind||'pet';
+  document.getElementById('pet-quality').value=p.quality||'gold';
+  document.getElementById('pet-img').value=p.imgUrl||'';
+  setAttrs('pet-attrs-builder',p.attrs);
+}
+function deletePet(id){
+  var p=appData.pets.filter(function(x){return x.id===id})[0];
+  if(!confirm('確定刪除「'+(p?p.name:'')+'」？'))return;
+  appData.pets=appData.pets.filter(function(x){return x.id!==id});
+  cleanHeroRefs();renderPetList();populateHeroSel();toast('已刪除');archiveAutoSave();
+}
+function clearPetForm(){
+  ['editing-pet-id','pet-name','pet-img'].forEach(function(i){document.getElementById(i).value=''});
+  document.getElementById('pet-kind').value='pet';document.getElementById('pet-quality').value='gold';
+  document.getElementById('pet-attrs-builder').innerHTML='';
+}
+
+/* ───────── 英雄裝備（6 部位） ───────── */
+function rebuildHeroEquipSelects(){
+  var ss=document.getElementById('heq-slot');
+  if(ss){var c=ss.value;ss.innerHTML=HERO_EQUIP_SLOTS.map(function(s){return '<option value="'+s.index+'">'+s.index+'. '+s.label+'</option>'}).join('');ss.value=c||'1';}
+  var st=document.getElementById('heq-set');
+  if(st){var c2=st.value;st.innerHTML='<option value="">— 無套裝 —</option>'+appData.equipSets.map(function(s){return '<option value="'+s.id+'">'+s.name+'</option>'}).join('');st.value=c2;}
+}
+function renderHeroEquipList(){
+  var el=document.getElementById('admin-heroequip-list');
+  el.innerHTML=HERO_EQUIP_SLOTS.map(function(sl){
+    var list=appData.heroEquips.filter(function(e){return (e.slotIndex||1)===sl.index});
+    var cards=list.map(function(e){
+      var qc=QC[e.quality]||QC.gold;
+      var set=appData.equipSets.filter(function(s){return s.id===e.setId})[0];
+      return '<div class="admin-equip-card" style="border-color:'+qc+'55;">'
+        +'<div class="admin-equip-card-img">'+(e.imgUrl?'<img src="'+e.imgUrl+'" alt="">':'<span class="admin-equip-card-img-ph">&#128737;</span>')+'</div>'
+        +'<div class="admin-equip-card-info"><span class="admin-equip-card-name">'+e.name+'</span>'
+        +'<span class="admin-equip-card-meta">'+QL[e.quality]+(set?' · '+set.name:'')+'</span></div>'
+        +'<div class="admin-equip-card-btns"><button class="btn-sm" onclick="editHeroEquip(this.dataset.id)" data-id="'+e.id+'">編輯</button>'
+        +'<button class="btn-sm danger" onclick="deleteHeroEquip(this.dataset.id)" data-id="'+e.id+'">刪除</button></div></div>';
+    }).join('')||'<div style="color:var(--c-text-dim);font-size:13px;">尚無</div>';
+    return '<div style="margin-bottom:14px;"><div class="admin-equip-panel-title">'+sl.index+'. '+sl.label+'（'+list.length+'）</div>'
+      +'<div class="admin-equip-grid">'+cards+'</div></div>';
+  }).join('');
+}
+function saveHeroEquip(){
+  var id=document.getElementById('editing-heq-id').value;
+  var name=document.getElementById('heq-name').value.trim();
+  if(!name){toast('請填寫裝備名稱');return}
+  var o={id:id||uid(),name:name,slotIndex:parseInt(document.getElementById('heq-slot').value)||1,
+    quality:document.getElementById('heq-quality').value,setId:document.getElementById('heq-set').value,
+    imgUrl:document.getElementById('heq-img').value,attrs:getAttrs('heq-attrs-builder')};
+  var i=appData.heroEquips.findIndex(function(e){return e.id===id});
+  if(i>=0)appData.heroEquips[i]=o;else appData.heroEquips.push(o);
+  clearHeroEquipForm();renderHeroEquipList();populateHeroSel();toast(id?'已更新':'已新增');archiveAutoSave();
+}
+function editHeroEquip(id){
+  var e=appData.heroEquips.filter(function(x){return x.id===id})[0];if(!e)return;
+  rebuildHeroEquipSelects();
+  document.getElementById('editing-heq-id').value=e.id;
+  document.getElementById('heq-name').value=e.name;
+  document.getElementById('heq-slot').value=e.slotIndex||1;
+  document.getElementById('heq-quality').value=e.quality||'gold';
+  document.getElementById('heq-set').value=e.setId||'';
+  document.getElementById('heq-img').value=e.imgUrl||'';
+  setAttrs('heq-attrs-builder',e.attrs);
+}
+function deleteHeroEquip(id){
+  var e=appData.heroEquips.filter(function(x){return x.id===id})[0];
+  if(!confirm('確定刪除「'+(e?e.name:'')+'」？'))return;
+  appData.heroEquips=appData.heroEquips.filter(function(x){return x.id!==id});
+  cleanHeroRefs();renderHeroEquipList();populateHeroSel();toast('已刪除');archiveAutoSave();
+}
+function clearHeroEquipForm(){
+  ['editing-heq-id','heq-name','heq-img'].forEach(function(i){document.getElementById(i).value=''});
+  document.getElementById('heq-quality').value='gold';
+  document.getElementById('heq-attrs-builder').innerHTML='';
+  rebuildHeroEquipSelects();
+  document.getElementById('heq-slot').value='1';document.getElementById('heq-set').value='';
+}
+
+/* ───────── 套裝 ───────── */
+function renderSetGenrePicker(selIds){
+  var el=document.getElementById('set-genre-picker');if(!el)return;
+  el.innerHTML=appData.genres.map(function(g){
+    var ck=(selIds||[]).indexOf(g.id)>=0?' checked':'';
+    return '<label class="checkbox-label"><input type="checkbox" data-gid="'+g.id+'"'+ck+'>'
+      +'<span class="genre-dot" style="background:'+g.color+'"></span>'+g.name+'</label>';
+  }).join('')||'<span style="font-size:13px;color:var(--c-text-dim);">尚無流派，請先到「流派管理」新增</span>';
+}
+function getSetGenreIds(){
+  return Array.from(document.querySelectorAll('#set-genre-picker input[type=checkbox]'))
+    .filter(function(c){return c.checked}).map(function(c){return c.getAttribute('data-gid')});
+}
+function renderEquipSetList(){
+  document.getElementById('admin-equipset-list').innerHTML=appData.equipSets.map(function(s){
+    var gs=(s.genreIds||[]).map(function(id){var g=appData.genres.filter(function(x){return x.id===id})[0];return g?g.name:''}).filter(Boolean).join('、');
+    return '<div class="admin-item-card">'
+      +'<div class="admin-item-card-img-wrap">'+(s.imgUrl?'<img src="'+s.imgUrl+'" alt="" style="object-fit:contain;">':'<span style="font-size:26px;">&#10024;</span>')+'</div>'
+      +'<div class="admin-item-card-name">'+s.name+'</div>'
+      +'<div class="admin-item-card-sub">'+(gs||'未設適配流派')+'</div>'
+      +'<div class="admin-item-card-actions"><button class="btn-sm" onclick="editEquipSet(this.dataset.id)" data-id="'+s.id+'">編輯</button>'
+      +'<button class="btn-sm danger" onclick="deleteEquipSet(this.dataset.id)" data-id="'+s.id+'">刪除</button></div></div>';
+  }).join('')||'<div style="color:var(--c-text-dim);font-size:14px;">尚無套裝</div>';
+}
+function saveEquipSet(){
+  var id=document.getElementById('editing-set-id').value;
+  var name=document.getElementById('set-name').value.trim();
+  if(!name){toast('請填寫套裝名稱');return}
+  var o={id:id||uid(),name:name,imgUrl:document.getElementById('set-img').value,
+    bonus:getAttrs('set-bonus-builder'),genreIds:getSetGenreIds()};
+  var i=appData.equipSets.findIndex(function(s){return s.id===id});
+  if(i>=0)appData.equipSets[i]=o;else appData.equipSets.push(o);
+  clearEquipSetForm();renderEquipSetList();renderHeroEquipList();rebuildHeroEquipSelects();populateHeroSel();
+  toast(id?'已更新':'已新增');archiveAutoSave();
+}
+function editEquipSet(id){
+  var s=appData.equipSets.filter(function(x){return x.id===id})[0];if(!s)return;
+  document.getElementById('editing-set-id').value=s.id;
+  document.getElementById('set-name').value=s.name;
+  document.getElementById('set-img').value=s.imgUrl||'';
+  setAttrs('set-bonus-builder',s.bonus);
+  renderSetGenrePicker(s.genreIds);
+}
+function deleteEquipSet(id){
+  var s=appData.equipSets.filter(function(x){return x.id===id})[0];
+  if(!confirm('確定刪除套裝「'+(s?s.name:'')+'」？'))return;
+  appData.equipSets=appData.equipSets.filter(function(x){return x.id!==id});
+  appData.heroEquips=appData.heroEquips.map(function(e){if(e.setId===id)e.setId='';return e});
+  cleanHeroRefs();renderEquipSetList();renderHeroEquipList();rebuildHeroEquipSelects();populateHeroSel();
+  toast('已刪除');archiveAutoSave();
+}
+function clearEquipSetForm(){
+  ['editing-set-id','set-name','set-img'].forEach(function(i){document.getElementById(i).value=''});
+  document.getElementById('set-bonus-builder').innerHTML='';
+  renderSetGenrePicker([]);
+}
+
+/* 清掉英雄陣容中已失效的引用 */
+function cleanHeroRefs(){
+  var pIds={},eIds={},sIds={},hIds={};
+  appData.pets.forEach(function(p){pIds[p.id]=1});
+  appData.heroEquips.forEach(function(e){eIds[e.id]=1});
+  appData.equipSets.forEach(function(s){sIds[s.id]=1});
+  appData.heroes.forEach(function(h){hIds[h.id]=1});
+  appData.lineups=appData.lineups.map(function(l){
+    if(l.characterKind!=='hero'||!Array.isArray(l.slots))return l;
+    l.slots=l.slots.map(function(s){
+      if(s.heroId&&!hIds[s.heroId])s.heroId='';
+      s.petIds=(s.petIds||[]).filter(function(id){return pIds[id]});
+      if(s.setId&&!sIds[s.setId])s.setId='';
+      s.equipIds=(s.equipIds||['','','','','','']).map(function(id){return (id&&eIds[id])?id:''});
+      return s;
+    });
+    return l;
+  });
+}
+
 /* GENRES */
 function renderGenreList(){
   document.getElementById('admin-genre-list').innerHTML=appData.genres.map(function(g){
@@ -1543,7 +2087,7 @@ function clearGenreForm(){['editing-genre-id','genre-name','genre-img'].forEach(
 function renderPageHeader(){
   var cfg=appData.pageConfig||{};
   var eyebrow=cfg.eyebrow||'MAFIA CITY · TACTICAL GUIDE';
-  var title=cfg.title||'豪傑最強陣容';
+  var title=curKind==='hero'?(cfg.heroTitle||'英雄最強陣容'):(cfg.title||'豪傑最強陣容');
   var showTime=cfg.showTime&&cfg.timeText;
   var wrap=document.getElementById('page-header-wrap');
   if(!wrap)return;
@@ -1561,6 +2105,8 @@ function syncPageConfigInputs(){
   if(t)t.value=cfg.title||'';
   if(tm)tm.value=cfg.timeText||'';
   if(st)st.checked=!!cfg.showTime;
+  var ht=document.getElementById('cfg-hero-title');
+  if(ht)ht.value=cfg.heroTitle||'';
 }
 function applyPageConfig(){
   if(!appData.pageConfig)appData.pageConfig={};
@@ -1572,6 +2118,8 @@ function applyPageConfig(){
   if(t)appData.pageConfig.title=t.value;
   if(tm)appData.pageConfig.timeText=tm.value;
   if(st)appData.pageConfig.showTime=st.checked;
+  var ht=document.getElementById('cfg-hero-title');
+  if(ht)appData.pageConfig.heroTitle=ht.value;
   renderPageHeader();
   archiveAutoSave();
 }
@@ -1628,6 +2176,9 @@ function refreshAll(){
   renderLineupList();syncPageConfigInputs();renderHeroList();renderStyleIconList();renderStyleNamesGrid();renderStatNamesGrid();rebuildStaticonKeySelect();renderRoleLabelCards();
   renderBadgeList();renderStatIconList();renderWeaponList();renderEmblemList();
   renderGenreList();populateSel();
+  // 英雄配隊
+  renderPetList();rebuildHeroEquipSelects();renderHeroEquipList();renderEquipSetList();renderSetGenrePicker([]);
+  applyAdminKind();populateHeroSel();
   renderBadgeSelector('lineup-badge-selector',[]);
   previewHeroStyleIcon();
 }
@@ -1741,16 +2292,41 @@ function _migrateData(d){
     if(!em.variantLabel)em.variantLabel='';
     return em;
   });
-  // heroes migration
+  // heroes migration（新增 characterKind：舊資料一律視為豪傑）
   d.heroes=(d.heroes||[]).map(function(h){
     if(!h.hasOwnProperty('imgUrl'))h.imgUrl='';
+    if(!h.characterKind)h.characterKind='haojie';
     return h;
   });
-  // lineups migration
+  // lineups migration（新增 characterKind；英雄陣容用 slots 陣列）
   d.lineups=(d.lineups||[]).map(function(l){
     if(!l.badgeIds)l.badgeIds=[];
     if(!l.hasOwnProperty('bgUrl'))l.bgUrl='';
+    if(!l.characterKind)l.characterKind='haojie';
+    if(l.characterKind==='hero'&&!Array.isArray(l.slots))l.slots=blankHeroSlots();
     return l;
+  });
+  // 英雄配隊三張新表
+  if(!Array.isArray(d.pets))d.pets=[];
+  d.pets=d.pets.map(function(p){
+    if(!p.kind)p.kind='pet';
+    if(!p.quality)p.quality='gold';
+    if(!Array.isArray(p.attrs))p.attrs=[];
+    return p;
+  });
+  if(!Array.isArray(d.heroEquips))d.heroEquips=[];
+  d.heroEquips=d.heroEquips.map(function(e){
+    if(!e.slotIndex)e.slotIndex=1;
+    if(!e.quality)e.quality='gold';
+    if(!Array.isArray(e.attrs))e.attrs=[];
+    if(!e.hasOwnProperty('setId'))e.setId='';
+    return e;
+  });
+  if(!Array.isArray(d.equipSets))d.equipSets=[];
+  d.equipSets=d.equipSets.map(function(s){
+    if(!Array.isArray(s.bonus))s.bonus=[];
+    if(!Array.isArray(s.genreIds))s.genreIds=[];
+    return s;
   });
   // ensure all top-level keys exist
   if(!d.statNames)d.statNames={force:'力量',skill:'技術',physique:'體魄',defense:'防護',speed:'速度'};
@@ -1877,15 +2453,23 @@ function cloudLoad(withLineups){
   var info=document.getElementById('archive-info');
   if(info)info.textContent='正在載入線上素材...';
   Promise.all([
-    _cloudGet('LineupHero?characterKind=eq.haojie&select=*&order=sortOrder'),
+    _cloudGet('LineupHero?select=*&order=sortOrder'),          // 豪傑 + 英雄（用 characterKind 區分）
     _cloudGet('LineupWeapon?select=*&order=sortOrder'),
     _cloudGet('LineupEmblem?select=*&order=sortOrder'),
     _cloudGet('LineupGenre?select=*&order=sortOrder'),
-    _cloudGet('SiteConfig?key=eq.lineupConfig&select=value')
+    _cloudGet('SiteConfig?key=eq.lineupConfig&select=value'),
+    _cloudGet('LineupPet?select=*&order=sortOrder').catch(function(){return []}),
+    _cloudGet('LineupHeroEquip?select=*&order=sortOrder').catch(function(){return []}),
+    _cloudGet('LineupEquipSet?select=*&order=sortOrder').catch(function(){return []})
   ]).then(function(res){
     var heroes=res[0],weapons=res[1],emblems=res[2],genres=res[3],cfgRow=res[4];
+    var pets=res[5],hEquips=res[6],eSets=res[7];
 
-    appData.heroes=heroes.map(function(h){return {id:h.id,name:h.name,style:h.style||'迅捷',imgUrl:h.imgUrl||''}});
+    appData.heroes=heroes.map(function(h){return {id:h.id,name:h.name,style:h.style||'迅捷',imgUrl:h.imgUrl||'',characterKind:h.characterKind||'haojie'}});
+    // 英雄配隊素材
+    appData.pets=(pets||[]).map(function(p){return {id:p.id,name:p.name,kind:p.kind||'pet',quality:p.quality||'gold',imgUrl:p.imgUrl||'',attrs:_pArr(p.attrs)}});
+    appData.heroEquips=(hEquips||[]).map(function(e){return {id:e.id,name:e.name,slotIndex:e.slotIndex||1,quality:e.quality||'gold',imgUrl:e.imgUrl||'',setId:e.setId||'',attrs:_pArr(e.attrs)}});
+    appData.equipSets=(eSets||[]).map(function(s){return {id:s.id,name:s.name,imgUrl:s.imgUrl||'',bonus:_pArr(s.bonus),genreIds:_pArr(s.genreIds)}});
     appData.weapons=weapons.map(function(w){return {id:w.id,parentId:w.parentId||null,displayName:w.displayName||'',
       variantLabel:w.variantLabel||'',quality:w.quality||'gold',isExclusive:!!w.isExclusive,
       exclusiveHeroId:w.exclusiveHeroId||null,imgUrl:w.imgUrl||'',attrs:_pArr(w.attrs)}});
@@ -1914,26 +2498,40 @@ function cloudLoad(withLineups){
     if(cfg.pageConfig) appData.pageConfig=Object.assign({},appData.pageConfig,cfg.pageConfig);
 
     if(withLineups){
-      return _cloudGet('Lineup?characterKind=eq.haojie&isPublished=eq.true&select=*&order=sortOrder')
+      return _cloudGet('Lineup?isPublished=eq.true&select=*&order=sortOrder')
         .then(function(ls){
           appData.lineups=ls.map(function(l){
+            var kind=l.characterKind||'haojie';
             var s=_pArr(l.slots), g=function(role){return s.filter(function(x){return x.role===role})[0]||{}};
+            var base={id:l.id,characterKind:kind,title:l.title||'',description:l.description||'',
+              genreId:l.genreId||'',bgUrl:l.bgUrl||'',badgeIds:_pArr(l.badgeIds)};
+            if(kind==='hero'){
+              // 英雄：直接沿用 slots 結構
+              return Object.assign(base,{slots:ROLES.map(function(role){
+                var x=g(role);
+                var eq=(x.equipIds||[]).slice(0,6);
+                while(eq.length<6)eq.push('');
+                return {role:role,heroId:x.heroId||'',petIds:x.petIds||[],setId:x.setId||'',equipIds:eq.map(function(v){return v||''})};
+              })});
+            }
+            // 豪傑：slots → 工具的扁平欄位
             var m=g('main'),a=g('sub1'),b=g('sub2');
-            return {id:l.id,title:l.title||'',description:l.description||'',genreId:l.genreId||'',
-              bgUrl:l.bgUrl||'',badgeIds:_pArr(l.badgeIds),
+            return Object.assign(base,{
               mainHeroId:m.heroId||'',subHero1Id:a.heroId||'',subHero2Id:b.heroId||'',
               mainStat:m.stat||'',sub1Stat:a.stat||'',sub2Stat:b.stat||'',
               mainWeaponId:m.weaponId||'',mainEmblemId:m.emblemId||'',
               sub1WeaponId:a.weaponId||'',sub1EmblemId:a.emblemId||'',
-              sub2WeaponId:b.weaponId||'',sub2EmblemId:b.emblemId||''};
+              sub2WeaponId:b.weaponId||'',sub2EmblemId:b.emblemId||''});
           });
         });
     }
   }).then(function(){
-    cleanStaleRefs();
+    cleanStaleRefs();cleanHeroRefs();
     // 重繪全部
     populateSel();renderFrontend();
     renderHeroList();renderWeaponList();renderEmblemList();renderGenreList();
+    renderPetList();rebuildHeroEquipSelects();renderHeroEquipList();renderEquipSetList();renderSetGenrePicker([]);
+    applyAdminKind();populateHeroSel();
     renderLineupList();renderStyleIconList();renderStatIconList();renderBadgeList();
     renderStyleNamesGrid();renderStatNamesGrid();renderRoleLabelCards();
     renderBadgeSelector('lineup-badge-selector',[]);
