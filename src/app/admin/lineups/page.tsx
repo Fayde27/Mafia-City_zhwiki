@@ -152,7 +152,9 @@ export default function LineupsAdminPage() {
 
 /* ───────────── 陣容 Tab ───────────── */
 function LineupsTab({ lineups, setLineups, heroes, weapons, emblems, genres, config, setConfig, markDirty, styleName, statName, weaponLabel, emblemLabel }: any) {
-  const [editing, setEditing] = useState<LineupT | null>(null)
+  // 只存 id：編輯中的改動**直接寫回 lineups**，避免「忘記按套用 → 改動丟失」
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const editing: LineupT | undefined = lineups.find((l: LineupT) => l.id === editingId)
 
   // 全域配置（函數式更新，避免異步/連續修改互相覆蓋）
   const updCfg = (fn: (c: LineupConfigT) => Partial<LineupConfigT>) => {
@@ -165,41 +167,53 @@ function LineupsTab({ lineups, setLineups, heroes, weapons, emblems, genres, con
   const blankSlots = (): LineupSlotT[] => ROLE_KEYS.map(r => ({ role: r }))
   const newLineup = (): LineupT => ({ id: uid(), title: '', characterKind: 'haojie', badgeIds: [], slots: blankSlots(), isPublished: true, isPinned: false, sortOrder: lineups.length })
 
-  const startNew = () => setEditing(newLineup())
-  const edit = (l: LineupT) => setEditing({ ...l, badgeIds: parseArr(l.badgeIds), slots: (parseArr(l.slots).length ? parseArr(l.slots) : blankSlots()) as LineupSlotT[] })
-
-  const commit = () => {
-    if (!editing) return
-    setLineups((prev: LineupT[]) => {
-      const i = prev.findIndex(x => x.id === editing.id)
-      if (i >= 0) { const c = [...prev]; c[i] = editing; return c }
-      return [...prev, editing]
-    })
-    markDirty(); setEditing(null)
+  // 對當前編輯中的陣容做局部更新（函數式，直接寫回 lineups）
+  const patch = (fn: (l: LineupT) => Partial<LineupT>) => {
+    setLineups((prev: LineupT[]) => prev.map(l => l.id === editingId ? { ...l, ...fn(l) } : l))
+    markDirty()
   }
-  const remove = (id: string) => { if (!confirm('確定刪除此陣容？')) return; setLineups((p: LineupT[]) => p.filter(x => x.id !== id)); markDirty() }
+  const set = (fields: Partial<LineupT>) => patch(() => fields)
 
-  const setSlot = (role: string, patch: Partial<LineupSlotT>) => {
-    setEditing((e: LineupT | null) => {
-      if (!e) return e
-      const slots = (e.slots as LineupSlotT[]).map(s => s.role === role ? { ...s, ...patch } : s)
-      return { ...e, slots }
-    })
+  const startNew = () => {
+    const l = newLineup()
+    setLineups((prev: LineupT[]) => [...prev, l])
+    markDirty()
+    setEditingId(l.id)
   }
-  const toggleBadge = (bid: string) => setEditing((e: any) => {
-    if (!e) return e
-    const cur: string[] = parseArr(e.badgeIds)
-    return { ...e, badgeIds: cur.includes(bid) ? cur.filter(x => x !== bid) : [...cur, bid] }
+  const edit = (l: LineupT) => {
+    // 確保 slots/badgeIds 為陣列形態（從 DB 載入時可能是字串）
+    setLineups((prev: LineupT[]) => prev.map(x => x.id === l.id
+      ? { ...x, badgeIds: parseArr(x.badgeIds), slots: (parseArr(x.slots).length ? parseArr(x.slots) : blankSlots()) as LineupSlotT[] }
+      : x))
+    setEditingId(l.id)
+  }
+  const remove = (id: string) => {
+    if (!confirm('確定刪除此陣容？')) return
+    setLineups((p: LineupT[]) => p.filter(x => x.id !== id))
+    markDirty()
+    if (editingId === id) setEditingId(null)
+  }
+
+  const setSlot = (role: string, p: Partial<LineupSlotT>) => patch(l => ({
+    slots: (parseArr<LineupSlotT>(l.slots).length ? parseArr<LineupSlotT>(l.slots) : blankSlots())
+      .map(s => s.role === role ? { ...s, ...p } : s),
+  }))
+  const toggleBadge = (bid: string) => patch(l => {
+    const cur: string[] = parseArr(l.badgeIds)
+    return { badgeIds: cur.includes(bid) ? cur.filter(x => x !== bid) : [...cur, bid] }
   })
 
   if (editing) {
-    const slots = editing.slots as LineupSlotT[]
+    const slots: LineupSlotT[] = parseArr<LineupSlotT>(editing.slots).length ? parseArr<LineupSlotT>(editing.slots) : blankSlots()
     const badgeIds: string[] = parseArr(editing.badgeIds)
     return (
       <div className={cardCls}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-wiki-text">{lineups.find((x: LineupT) => x.id === editing.id) ? '編輯陣容' : '新增陣容'}</h2>
-          <div className="flex gap-2"><button className={btnSec} onClick={() => setEditing(null)}>取消</button><button className={btnPri} onClick={commit}>套用</button></div>
+          <div>
+            <h2 className="text-lg font-bold text-wiki-text">編輯陣容</h2>
+            <p className="text-xs text-wiki-text-muted mt-1">改動即時生效，完成後點右上「保存全部」寫入資料庫</p>
+          </div>
+          <button className={btnSec} onClick={() => setEditingId(null)}>← 返回列表</button>
         </div>
 
         {/* ▸ 選擇豪傑 & 各自加點（對照線下工具：立繪預覽 + 角色 + 加點） */}
@@ -233,28 +247,30 @@ function LineupsTab({ lineups, setLineups, heroes, weapons, emblems, genres, con
           })}
         </div>
 
-        {/* ▸ 選擇裝備（6 個下拉，對照線下工具佈局） */}
+        {/* ▸ 選擇裝備：每一豎列 = 一個角色的武器 + 戰徽 */}
         <div className="text-sm font-bold text-wiki-accent mb-3">▸ 選擇裝備</div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           {ROLE_KEYS.map((role, idx) => {
             const s = slots.find(x => x.role === role)!
-            const prefix = idx === 0 ? '主力' : '輔助' + idx
-            return [
-              <div key={role + '-w'}>
-                <label className={labelCls}>{prefix}武器</label>
-                <select className={inputCls} value={s.weaponId || ''} onChange={e => setSlot(role, { weaponId: e.target.value })}>
+            const hero = heroes.find((h: LineupHeroT) => h.id === s.heroId)
+            const prefix = config.roleLabels?.[role]?.text || (idx === 0 ? '主力' : '輔助' + idx)
+            return (
+              <div key={role} className="border border-wiki-border rounded-lg p-4">
+                <div className="text-sm font-bold text-wiki-accent mb-3">
+                  {prefix}{hero ? <span className="text-wiki-text-muted font-normal">（{hero.name}）</span> : null}
+                </div>
+                <label className={labelCls}>武器</label>
+                <select className={inputCls + ' mb-3'} value={s.weaponId || ''} onChange={e => setSlot(role, { weaponId: e.target.value })}>
                   <option value="">— 武器 —</option>
                   {weapons.map((w: LineupWeaponT) => <option key={w.id} value={w.id}>{weaponLabel(w)}</option>)}
                 </select>
-              </div>,
-              <div key={role + '-e'}>
-                <label className={labelCls}>{prefix}戰徽</label>
+                <label className={labelCls}>戰徽</label>
                 <select className={inputCls} value={s.emblemId || ''} onChange={e => setSlot(role, { emblemId: e.target.value })}>
                   <option value="">— 戰徽 —</option>
                   {emblems.map((em: LineupEmblemT) => <option key={em.id} value={em.id}>{emblemLabel(em)}</option>)}
                 </select>
-              </div>,
-            ]
+              </div>
+            )
           })}
         </div>
 
@@ -263,18 +279,18 @@ function LineupsTab({ lineups, setLineups, heroes, weapons, emblems, genres, con
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
             <label className={labelCls}>陣容標題</label>
-            <input className={inputCls} value={editing.title} onChange={e => setEditing({ ...editing, title: e.target.value })} placeholder="如：飛車流強力組合" />
+            <input className={inputCls} value={editing.title} onChange={e => set({ title: e.target.value })} placeholder="如：飛車流強力組合" />
           </div>
           <div>
             <label className={labelCls}>適配流派</label>
-            <select className={inputCls} value={editing.genreId || ''} onChange={e => setEditing({ ...editing, genreId: e.target.value })}>
+            <select className={inputCls} value={editing.genreId || ''} onChange={e => set({ genreId: e.target.value })}>
               <option value="">— 流派 —</option>
               {genres.map((g: LineupGenreT) => <option key={g.id} value={g.id}>{g.name}</option>)}
             </select>
           </div>
           <div>
             <label className={labelCls}>更新日期文字 <span className="normal-case font-normal text-wiki-text-muted">（右上角展示，如 2026/07）</span></label>
-            <input className={inputCls} value={editing.updateText || ''} onChange={e => setEditing({ ...editing, updateText: e.target.value })} placeholder="選填" />
+            <input className={inputCls} value={editing.updateText || ''} onChange={e => set({ updateText: e.target.value })} placeholder="選填" />
           </div>
           <div>
             <label className={labelCls}>顯示標籤 <span className="normal-case font-normal text-wiki-text-muted">（可多選）</span></label>
@@ -295,18 +311,18 @@ function LineupsTab({ lineups, setLineups, heroes, weapons, emblems, genres, con
 
         <div className="mb-4">
           <ImageUploadInput label="背景圖（選填，建議 1920×1080）" value={editing.bgUrl || ''} position="50% 50%"
-            onChange={url => setEditing({ ...editing, bgUrl: url })} onPositionChange={() => {}} previewHeight="h-40" />
+            onChange={url => set({ bgUrl: url })} onPositionChange={() => {}} previewHeight="h-40" />
         </div>
 
         <div className="mb-4">
           <label className={labelCls}>陣容介紹（解說）</label>
-          <RichTextEditor value={editing.description || ''} onChange={html => setEditing({ ...editing, description: html })} placeholder="陣容說明、技能聯動、打法建議..." />
+          <RichTextEditor value={editing.description || ''} onChange={html => set({ description: html })} placeholder="陣容說明、技能聯動、打法建議..." />
         </div>
 
         <div className="flex flex-wrap gap-6 items-center">
-          <label className="flex items-center gap-2 text-wiki-text"><input type="checkbox" checked={!!editing.isPinned} onChange={e => setEditing({ ...editing, isPinned: e.target.checked })} /> 置頂</label>
-          <label className="flex items-center gap-2 text-wiki-text"><input type="checkbox" checked={editing.isPublished !== false} onChange={e => setEditing({ ...editing, isPublished: e.target.checked })} /> 發佈</label>
-          <div className="flex items-center gap-2 text-wiki-text"><span>排序</span><input type="number" className="w-20 bg-wiki-gray border border-wiki-border px-2 py-1" value={editing.sortOrder ?? 0} onChange={e => setEditing({ ...editing, sortOrder: parseInt(e.target.value) || 0 })} /></div>
+          <label className="flex items-center gap-2 text-wiki-text"><input type="checkbox" checked={!!editing.isPinned} onChange={e => set({ isPinned: e.target.checked })} /> 置頂</label>
+          <label className="flex items-center gap-2 text-wiki-text"><input type="checkbox" checked={editing.isPublished !== false} onChange={e => set({ isPublished: e.target.checked })} /> 發佈</label>
+          <div className="flex items-center gap-2 text-wiki-text"><span>排序</span><input type="number" className="w-20 bg-wiki-gray border border-wiki-border px-2 py-1" value={editing.sortOrder ?? 0} onChange={e => set({ sortOrder: parseInt(e.target.value) || 0 })} /></div>
         </div>
       </div>
     )
@@ -528,10 +544,10 @@ function GenresTab({ genres, setGenres, markDirty }: any) {
     <div>
       {editing ? (
         <div className={cardCls + ' mb-6'}>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
             <div><label className={labelCls}>流派名稱</label><input className={inputCls} value={editing.name} onChange={e => setEditing({ ...editing, name: e.target.value })} placeholder="如：飛車黨" /></div>
             <div><label className={labelCls}>代表色</label><input type="color" className="w-full h-12 bg-wiki-gray border border-wiki-border" value={editing.color} onChange={e => setEditing({ ...editing, color: e.target.value })} /></div>
-            <ImageUploadInput label="流派圖標（選填）" value={editing.imgUrl || ''} position="50% 50%" onChange={url => setEditing({ ...editing, imgUrl: url })} onPositionChange={() => {}} compact />
+            <ImageUploadInput label="流派圖標（選填）" value={editing.imgUrl || ''} position="50% 50%" onChange={url => setEditing({ ...editing, imgUrl: url })} onPositionChange={() => {}} compact objectFit="contain" />
           </div>
           <div className="flex gap-2 mt-4"><button className={btnPri} onClick={commit}>套用</button><button className={btnSec} onClick={() => setEditing(null)}>取消</button></div>
         </div>
