@@ -1,0 +1,2043 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>黑道風雲 · 豪傑搭配</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* 淺色主題：black=頁面底、dark=面板/輸入框、card=圖片占位槽（略灰以看出邊界） */
+  --c-black:#F5F5F0;--c-dark:#FFFFFF;--c-card:#EFEFE9;--c-card2:#FAFAF7;
+  --c-gold:#A6822B;--c-gold-bright:#8A6A12;--c-gold-dark:#8B6914;
+  --c-gold-glow:rgba(166,130,43,0.18);--c-red:#D4363A;
+  --c-text:#1A1A1A;--c-text-dim:#6B6B63;
+  --c-border:rgba(0,0,0,0.12);--c-border-strong:rgba(166,130,43,0.55);
+  /* 統一使用微軟雅黑（Windows 內建，離線可用） */
+  --ff-display:'Microsoft YaHei','微软雅黑','Microsoft JhengHei',sans-serif;
+  --ff-body:'Microsoft YaHei','微软雅黑','Microsoft JhengHei',sans-serif;
+}
+body{background:var(--c-black);color:var(--c-text);font-family:var(--ff-body);min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--c-dark)}::-webkit-scrollbar-thumb{background:var(--c-gold-dark);border-radius:3px}
+.top-nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:56px;background:linear-gradient(180deg,#FFFFFF,rgba(250,250,247,.96));border-bottom:1px solid var(--c-border);position:sticky;top:0;z-index:100;backdrop-filter:blur(10px)}
+.nav-logo{font-family:var(--ff-display);font-size:21px;letter-spacing:1.2px;color:var(--c-gold);text-shadow:0 0 18px var(--c-gold-glow)}
+.nav-logo span{color:var(--c-text)}
+.nav-tabs{display:flex;gap:4px}
+.nav-tab{padding:7px 18px;background:transparent;border:1px solid transparent;color:var(--c-text-dim);font-family:var(--ff-body);font-size:15px;cursor:pointer;border-radius:3px;transition:all .2s}
+.nav-tab:hover{color:var(--c-gold);border-color:var(--c-border)}
+.nav-tab.active{color:var(--c-gold);border-color:var(--c-border-strong);background:rgba(201,162,39,.08)}
+.page{display:none}.page.active{display:block}
+.frontend-wrap{max-width:1060px;margin:0 auto;padding:32px 18px 60px}
+.page-header{text-align:center;margin-bottom:32px}
+.page-header::before{content:'';display:block;width:48px;height:2px;background:var(--c-gold);margin:0 auto 12px;box-shadow:0 0 12px var(--c-gold-glow)}
+.page-header-eyebrow{font-family:var(--ff-display);font-size:13px;letter-spacing:1.6px;color:var(--c-gold-dark);text-transform:uppercase;margin-bottom:5px}
+.page-header-title{font-family:var(--ff-display);font-size:clamp(28px,4.4vw,44px);font-weight:700;letter-spacing:1.6px;color:var(--c-gold-bright);text-shadow:0 0 30px rgba(166,130,43,.18);text-transform:uppercase}
+.filter-bar{display:flex;gap:8px;margin-bottom:26px;flex-wrap:wrap;justify-content:center}
+.filter-btn{padding:6px 16px;border:1px solid var(--c-border);background:transparent;color:var(--c-text-dim);font-family:var(--ff-body);font-size:14px;cursor:pointer;border-radius:2px;letter-spacing:1px;transition:all .2s;display:flex;align-items:center;gap:6px}
+.filter-btn:hover{border-color:var(--c-gold);color:var(--c-gold)}
+.filter-btn.active{border-color:var(--c-gold);color:var(--c-gold);background:rgba(201,162,39,.1)}
+.genre-dot{width:7px;height:7px;border-radius:50%}
+.lineup-stack{display:flex;flex-direction:column;gap:20px}
+.lineup-card{display:flex;flex-direction:column;background:linear-gradient(145deg,#FFFFFF,#FBFBF8 55%,#F7F7F2);border:1px solid var(--c-border);border-radius:8px;overflow:hidden;position:relative;transition:transform .25s,box-shadow .25s,border-color .25s;cursor:pointer;text-decoration:none;color:inherit}
+.lineup-card:hover{transform:translateY(-2px);box-shadow:0 10px 48px rgba(201,162,39,.13);border-color:var(--c-border-strong)}
+.card-bg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.09;filter:saturate(.4);pointer-events:none}
+.card-bg-grad{position:absolute;inset:0;background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.75) 60%,rgba(255,255,255,.97));pointer-events:none}
+.card-top-bar{position:relative;z-index:2;display:flex;justify-content:flex-start;align-items:center;gap:8px;padding:10px 14px 8px;border-bottom:1px solid var(--c-border)}
+.card-badges{display:flex;gap:5px;flex-wrap:wrap}
+.card-badge{font-family:var(--ff-display);font-size:13px;letter-spacing:1px;padding:3px 9px;border-radius:2px;text-transform:uppercase}
+.badge-hot{background:linear-gradient(135deg,#D4363A,#8B0000);color:#fff;box-shadow:0 0 10px rgba(212,54,58,.5)}
+.badge-new{background:linear-gradient(135deg,#2196F3,#0D47A1);color:#fff;box-shadow:0 0 10px rgba(33,150,243,.5)}
+.badge-recommend{background:linear-gradient(135deg,var(--c-gold),var(--c-gold-dark));color:#000;box-shadow:0 0 10px var(--c-gold-glow)}
+.badge-img{height:22px;max-width:80px;object-fit:contain;vertical-align:middle}
+.card-genre-badge{display:flex;align-items:center;gap:5px;padding:3px 10px;border:1px solid var(--c-border);border-radius:2px;background:rgba(255,255,255,.78)}
+.card-genre-icon{width:16px;height:16px;object-fit:contain}
+.card-genre-dot{width:8px;height:8px;border-radius:50%}
+.card-genre-name{font-family:var(--ff-display);font-size:14px;letter-spacing:1.5px}
+.card-heroes-row{position:relative;z-index:2;display:flex;border-bottom:1px solid var(--c-border)}
+.hero-col{display:flex;flex-direction:column;flex:1;position:relative;border-right:1px solid var(--c-border)}
+.hero-col:last-child{border-right:none}
+.hero-portrait-wrap{position:relative;overflow:hidden;background:linear-gradient(160deg,#FBFBF8,#E6E6DF);height:280px}
+.hero-portrait-img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+.hero-portrait-placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:var(--c-text-dim)}
+.hero-portrait-placeholder svg{opacity:.3}
+.portrait-q-frame{position:absolute;inset:0;pointer-events:none}
+.portrait-q-frame::after{content:'';position:absolute;inset:0;box-shadow:inset 0 0 18px currentColor;opacity:.28}
+.portrait-q-frame::before{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:currentColor;opacity:.7}
+.hero-role-badge{position:absolute;top:8px;right:8px;z-index:4;font-family:var(--ff-display);font-size:13px;letter-spacing:1px;padding:2px 7px;border-radius:2px;background:rgba(201,162,39,.15);border:1px solid var(--c-gold);color:var(--c-gold);display:flex;align-items:center;gap:4px;}
+.hero-stat-tag{position:absolute;bottom:8px;left:8px;z-index:4;padding:3px 8px;border-radius:2px;font-family:var(--ff-display);font-size:14px;letter-spacing:1px;border:1px solid transparent;backdrop-filter:blur(6px);display:flex;align-items:center;gap:5px}
+.hero-stat-icon{width:18px;height:18px;object-fit:contain;flex-shrink:0;filter:drop-shadow(0 0 3px currentColor)}
+.hero-stat-icon-default{width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.hero-name-bar{display:flex;align-items:center;gap:6px;padding:7px 10px;border-top:2px solid currentColor;background:rgba(255,255,255,.92)}
+.hero-style-icon-default{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;border:1px solid currentColor;background:rgba(255,255,255,.82)}
+.hero-style-icon-img{width:22px;height:22px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1px solid currentColor}
+.hero-name-text{font-family:var(--ff-display);font-size:17px;letter-spacing:1.5px;color:currentColor;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;font-weight:700}
+.hero-equip-section{display:flex;flex-direction:column}
+.equip-item-row{display:flex;align-items:flex-start;gap:8px;padding:9px 10px;border-bottom:1px solid var(--c-border)}
+.equip-item-row:last-child{border-bottom:none}
+.equip-icon-wrap{position:relative;flex-shrink:0;width:38px;height:38px}
+.equip-icon{width:100%;height:100%;object-fit:cover;border-radius:3px;display:block}
+.equip-icon-placeholder{width:100%;height:100%;background:rgba(0,0,0,.04);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--c-text-dim)}
+.equip-q-frame{position:absolute;inset:-1.5px;border-radius:4px;pointer-events:none}
+.equip-q-frame::before{content:'';position:absolute;inset:0;border-radius:4px;border:1.5px solid currentColor;box-shadow:0 0 7px currentColor}
+.equip-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.equip-type-name-row{display:flex;align-items:baseline;gap:5px;flex-wrap:wrap}
+.equip-type-label{font-family:var(--ff-display);font-size:13px;letter-spacing:1px;color:var(--c-text-dim);flex-shrink:0;padding:1px 5px;border:1px solid var(--c-border);border-radius:2px;line-height:1.5}
+.equip-name{font-family:var(--ff-display);font-size:18px;letter-spacing:0.8px;color:var(--c-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.equip-excl{font-size:13px;color:var(--c-gold)}
+.equip-attrs{display:flex;flex-direction:column;gap:1px;margin-top:3px}
+.equip-attr-line{font-size:14px;color:#2C6E8A;line-height:1.55}
+.card-bottom{position:relative;z-index:2;padding:14px 18px;background:rgba(255,255,255,.55)}
+.card-title{font-family:var(--ff-display);font-size:24px;font-weight:700;letter-spacing:1.2px;color:var(--c-gold-bright);text-transform:uppercase;margin-bottom:6px}
+.card-desc{font-size:15px;color:var(--c-text-dim);line-height:1.8}
+.card-desc img{max-height:22px;vertical-align:middle}
+.card-desc a{color:var(--c-gold)}
+
+
+
+
+
+.admin-wrap{display:flex;min-height:calc(100vh - 56px)}
+.admin-sidebar{width:188px;flex-shrink:0;background:var(--c-dark);border-right:1px solid var(--c-border);padding:18px 0}
+.admin-sidebar-title{font-family:var(--ff-display);font-size:13px;letter-spacing:1.2px;color:var(--c-text-dim);text-transform:uppercase;padding:0 16px 10px;border-bottom:1px solid var(--c-border);margin-bottom:6px}
+.admin-nav-item{display:block;width:100%;padding:9px 16px;background:transparent;border:none;text-align:left;color:var(--c-text-dim);font-family:var(--ff-body);font-size:15px;cursor:pointer;transition:all .2s}
+.admin-nav-item:hover{color:var(--c-gold);background:rgba(201,162,39,.05)}
+.admin-nav-item.active{color:var(--c-gold);background:rgba(201,162,39,.1);border-left:2px solid var(--c-gold)}
+.admin-content{flex:1;padding:26px;overflow-y:auto;max-height:calc(100vh - 56px)}
+.admin-section{display:none}.admin-section.active{display:block}
+.admin-section-title{font-family:var(--ff-display);font-size:18px;letter-spacing:1.2px;color:var(--c-gold);text-transform:uppercase;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--c-border)}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-bottom:18px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+.form-label{font-size:13px;letter-spacing:1.5px;color:var(--c-text-dim);text-transform:uppercase;font-family:var(--ff-display)}
+.form-label small{font-family:var(--ff-body);font-size:13px;text-transform:none;letter-spacing:0;margin-left:4px;opacity:.6}
+.form-input,.form-select,.form-textarea{background:var(--c-dark);border:1px solid var(--c-border);color:var(--c-text);padding:8px 11px;font-family:var(--ff-body);font-size:15px;border-radius:3px;transition:border-color .2s;width:100%}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--c-gold)}
+.form-select option{background:var(--c-dark)}
+.form-textarea{resize:vertical;min-height:72px}
+.form-hint{font-size:13px;color:var(--c-text-dim);opacity:.65}
+.admin-item-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:18px}
+.admin-item-card{background:var(--c-dark);border:1px solid var(--c-border);border-radius:4px;padding:8px;position:relative}
+.admin-item-card-img-wrap{width:100%;height:80px;border-radius:3px;margin-bottom:6px;background:var(--c-card);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.admin-item-card-img-wrap img{width:100%;height:100%;object-fit:cover;object-position:center center;display:block}
+.admin-item-card-name{font-size:14px;color:var(--c-text);font-family:var(--ff-display);letter-spacing:0.8px;margin-bottom:2px}
+.admin-item-card-sub{font-size:13px;color:var(--c-text-dim)}
+.admin-item-card-actions{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}
+.btn-sm{padding:3px 9px;font-size:13px;border-radius:2px;cursor:pointer;letter-spacing:1px;font-family:var(--ff-display);transition:all .15s;border:1px solid var(--c-border);background:transparent;color:var(--c-text-dim)}
+.btn-sm:hover{border-color:var(--c-gold);color:var(--c-gold)}
+.btn-sm.danger:hover{border-color:#D4363A;color:#D4363A}
+.btn-primary{padding:9px 22px;background:linear-gradient(135deg,var(--c-gold),var(--c-gold-dark));border:none;border-radius:3px;color:#000;font-family:var(--ff-display);font-size:14px;letter-spacing:1px;cursor:pointer;text-transform:uppercase;transition:all .2s}
+.btn-primary:hover{box-shadow:0 4px 18px var(--c-gold-glow)}
+.btn-secondary{padding:9px 22px;background:transparent;border:1px solid var(--c-border);border-radius:3px;color:var(--c-text-dim);font-family:var(--ff-display);font-size:14px;letter-spacing:1px;cursor:pointer;text-transform:uppercase;transition:all .2s;margin-left:7px}
+.btn-secondary:hover{border-color:var(--c-gold);color:var(--c-gold)}
+.lineup-builder{background:var(--c-dark);border:1px solid var(--c-border);border-radius:4px;padding:18px;margin-bottom:18px}
+.lineup-builder-title{font-family:var(--ff-display);font-size:14px;letter-spacing:1px;color:var(--c-gold);margin-bottom:12px}
+.hero-slots-row{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-bottom:16px}
+.hero-select-slot{display:flex;flex-direction:column;gap:5px;align-items:center}
+.hero-select-slot-label{font-size:13px;letter-spacing:1px;color:var(--c-text-dim);font-family:var(--ff-display);text-transform:uppercase}
+.hero-select-preview{background:var(--c-card);border:1px dashed var(--c-border);border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--c-text-dim);font-size:13px;overflow:hidden;cursor:pointer;width:80px;height:108px}
+.hero-select-preview img{width:100%;height:100%;object-fit:cover;object-position:top}
+.attr-list-builder{display:flex;flex-direction:column;gap:5px}
+.attr-row{display:flex;gap:6px;align-items:center}
+.attr-row .form-input{flex:1}
+.btn-icon{width:28px;height:28px;border-radius:2px;border:1px solid var(--c-border);background:transparent;color:var(--c-text-dim);cursor:pointer;font-size:19px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.btn-icon:hover{border-color:var(--c-gold);color:var(--c-gold)}
+.btn-icon.danger:hover{border-color:#D4363A;color:#D4363A}
+.section-divider{display:flex;align-items:center;gap:14px;margin:28px 0 18px}
+.section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--c-border-strong),transparent)}
+.section-divider-text{font-family:var(--ff-display);font-size:13px;letter-spacing:1.6px;color:var(--c-gold-dark);text-transform:uppercase;white-space:nowrap}
+.checkbox-group{display:flex;gap:10px;flex-wrap:wrap}
+.checkbox-label{display:flex;align-items:center;gap:5px;cursor:pointer;font-size:14px;color:var(--c-text-dim)}
+.checkbox-label input{cursor:pointer;accent-color:var(--c-gold)}
+.toast{position:fixed;bottom:65px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--c-card2);border:1px solid var(--c-gold);color:var(--c-gold);padding:9px 22px;border-radius:4px;font-size:14px;letter-spacing:1px;opacity:0;transition:all .3s;z-index:200;pointer-events:none;font-family:var(--ff-display)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:150;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--c-card);border:1px solid var(--c-border-strong);border-radius:6px;padding:22px;max-width:480px;width:100%;max-height:78vh;overflow-y:auto}
+.modal-title{font-family:var(--ff-display);font-size:17px;letter-spacing:1.2px;color:var(--c-gold);margin-bottom:14px;text-transform:uppercase}
+.modal-hero-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px;margin-bottom:14px}
+.modal-hero-item{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:5px;border-radius:4px;border:1px solid transparent;transition:all .15s}
+.modal-hero-item:hover,.modal-hero-item.selected{border-color:var(--c-gold);background:rgba(201,162,39,.08)}
+.modal-hero-img{width:54px;height:70px;object-fit:cover;object-position:top;border-radius:3px;background:var(--c-dark)}
+.modal-hero-name{font-size:13px;color:var(--c-text);text-align:center;font-family:var(--ff-display)}
+.modal-actions{display:flex;justify-content:flex-end;gap:7px;margin-top:12px}
+
+
+
+
+
+.btn-close{position:absolute;top:16px;right:18px;background:transparent;border:1px solid var(--c-border);color:var(--c-text-dim);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.btn-close:hover{border-color:var(--c-gold);color:var(--c-gold)}
+.badge-selector{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.badge-opt{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:6px 8px;border-radius:4px;border:1px solid var(--c-border);transition:all .15s}
+.badge-opt:hover,.badge-opt.selected{border-color:var(--c-gold);background:rgba(201,162,39,.08)}
+.badge-opt img{height:22px;max-width:90px;object-fit:contain}
+.badge-opt .badge-built-in{font-family:var(--ff-display);font-size:13px;letter-spacing:1px;padding:3px 9px;border-radius:2px}
+.badge-opt span.badge-label{font-size:13px;color:var(--c-text-dim);font-family:var(--ff-display)}
+.rte-wrap{display:flex;flex-direction:column;border:1px solid var(--c-border);border-radius:3px;overflow:hidden;transition:border-color .2s}
+.rte-wrap:focus-within{border-color:var(--c-gold)}
+.rte-toolbar{display:flex;flex-wrap:wrap;gap:2px;padding:6px 8px;background:rgba(0,0,0,.03);border-bottom:1px solid var(--c-border)}
+.rte-btn{padding:4px 8px;background:transparent;border:1px solid transparent;border-radius:2px;color:var(--c-text-dim);cursor:pointer;font-size:14px;font-family:var(--ff-body);transition:all .15s;line-height:1.4}
+.rte-btn:hover{border-color:var(--c-border);color:var(--c-text);background:rgba(0,0,0,.05)}
+.rte-sep{width:1px;height:20px;background:var(--c-border);margin:0 3px;align-self:center}
+.rte-select{background:var(--c-dark);border:1px solid var(--c-border);color:var(--c-text-dim);padding:3px 6px;font-size:14px;border-radius:2px;cursor:pointer;height:26px}
+.rte-select:focus{outline:none;border-color:var(--c-gold)}
+.rte-select option{background:var(--c-dark)}
+.rte-body{min-height:120px;max-height:320px;overflow-y:auto;padding:10px 12px;background:var(--c-dark);color:var(--c-text);font-family:var(--ff-body);font-size:15px;line-height:1.75;outline:none}
+.rte-body:empty::before{content:attr(data-placeholder);color:var(--c-text-dim);pointer-events:none}
+.rte-body img{max-height:24px;vertical-align:middle;display:inline}
+.rte-body a{color:var(--c-gold);text-decoration:underline}
+.rte-popup{position:fixed;z-index:300;background:var(--c-card2);border:1px solid var(--c-border-strong);border-radius:5px;padding:14px;width:320px;box-shadow:0 8px 32px rgba(255,255,255,.85)}
+.rte-popup-title{font-family:var(--ff-display);font-size:14px;letter-spacing:1px;color:var(--c-gold);margin-bottom:10px}
+.rte-popup input{width:100%;background:var(--c-dark);border:1px solid var(--c-border);color:var(--c-text);padding:7px 10px;font-size:14px;border-radius:3px;margin-bottom:8px}
+.rte-popup input:focus{outline:none;border-color:var(--c-gold)}
+.rte-popup-btns{display:flex;gap:7px;justify-content:flex-end}
+.emoji-picker{position:fixed;z-index:300;background:var(--c-card2);border:1px solid var(--c-border-strong);border-radius:5px;padding:10px;width:260px;box-shadow:0 8px 32px rgba(255,255,255,.85)}
+.emoji-picker-grid{display:flex;flex-wrap:wrap;gap:3px;max-height:180px;overflow-y:auto}
+.emoji-picker span{width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:21px;cursor:pointer;border-radius:3px;transition:background .1s}
+.emoji-picker span:hover{background:rgba(0,0,0,.06)}
+@media(max-width:680px){
+  .hero-portrait-wrap{height:180px}
+  .admin-wrap{flex-direction:column}
+  .admin-sidebar{width:100%;padding:8px 0;display:flex;overflow-x:auto;border-right:none;border-bottom:1px solid var(--c-border)}
+  .admin-sidebar-title{display:none}
+  .admin-nav-item{white-space:nowrap;border-left:none!important;border-bottom:2px solid transparent}
+  .admin-nav-item.active{border-bottom-color:var(--c-gold)!important}
+  .admin-content{padding:14px}
+  .form-grid{grid-template-columns:1fr}
+}
+
+/* parent-variant selector */
+.variant-type-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.variant-type-btn{padding:5px 14px;border-radius:2px;border:1px solid var(--c-border);background:transparent;color:var(--c-text-dim);font-family:var(--ff-display);font-size:14px;letter-spacing:1px;cursor:pointer;transition:all .15s}
+.variant-type-btn.active{border-color:var(--c-gold);color:var(--c-gold);background:rgba(201,162,39,.1)}
+.variant-parent-group{display:none}
+.variant-label-group{display:none}
+
+.archive-bar{display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(201,162,39,.06);border:1px solid var(--c-border);border-radius:4px;margin-bottom:20px;flex-wrap:wrap}
+.archive-bar-title{font-family:var(--ff-display);font-size:14px;letter-spacing:1px;color:var(--c-gold-dark);text-transform:uppercase;margin-right:4px;white-space:nowrap}
+.archive-info{font-size:14px;color:var(--c-text-dim);flex:1;min-width:120px}
+.archive-actions{display:flex;gap:7px;flex-wrap:wrap}
+.btn-archive{padding:6px 14px;border-radius:2px;font-family:var(--ff-display);font-size:13px;letter-spacing:1.5px;cursor:pointer;text-transform:uppercase;transition:all .2s;white-space:nowrap}
+.btn-archive-save{background:linear-gradient(135deg,var(--c-gold),var(--c-gold-dark));border:none;color:#000}
+.btn-archive-save:hover{box-shadow:0 3px 14px var(--c-gold-glow)}
+.btn-archive-load{background:transparent;border:1px solid var(--c-border-strong);color:var(--c-gold);display:inline-flex;align-items:center}
+.btn-archive-load:hover{background:rgba(201,162,39,.08)}
+.btn-archive-reset{background:transparent;border:1px solid rgba(212,54,58,.4);color:#D4363A}
+.btn-archive-reset:hover{background:rgba(212,54,58,.08)}
+#archive-file-input{display:none}
+
+.hero-role-badge img{height:14px;width:auto;object-fit:contain;vertical-align:middle}
+.hero-role-badge-emoji{font-size:14px;line-height:1}
+
+/* lineup form states */
+.form-state-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--c-border)}
+.form-state-title{font-family:var(--ff-display);font-size:17px;letter-spacing:1px;color:var(--c-gold)}
+.form-state-badge{font-family:var(--ff-display);font-size:13px;letter-spacing:1px;padding:3px 9px;border-radius:2px;text-transform:uppercase}
+.form-state-badge-new{background:linear-gradient(135deg,#2196F3,#0D47A1);color:#fff}
+.form-state-badge-edit{background:linear-gradient(135deg,var(--c-gold),var(--c-gold-dark));color:#000}
+.lineup-form-actions{display:flex;align-items:center;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--c-border)}
+
+/* collapsible lineup form */
+.lineup-form-body{display:none}
+.lineup-form-body.open{display:block}
+.lineup-form-header-btn{display:flex;align-items:center;justify-content:space-between;width:100%;cursor:pointer;background:transparent;border:none;text-align:left;padding:0;color:inherit;}
+.lineup-form-header-btn:hover .form-state-title{color:var(--c-gold-bright)}
+.form-chevron{font-size:14px;color:var(--c-text-dim);transition:transform .2s;flex-shrink:0}
+.form-chevron.open{transform:rotate(180deg)}
+
+.page-time{font-family:var(--ff-display);font-size:15px;letter-spacing:1px;color:var(--c-text-dim);margin-top:8px}
+
+/* admin hero portrait — taller preview */
+.admin-item-card-img-wrap.portrait{height:130px}
+.admin-item-card-img-wrap.portrait img{object-position:top center}
+
+/* equip layout */
+.admin-equip-wrap{margin-bottom:16px;width:100%;overflow:hidden}
+.admin-equip-grid{display:flex;flex-direction:row;flex-wrap:wrap;gap:7px;width:100%;box-sizing:border-box;overflow:hidden}
+.admin-equip-card{display:inline-flex;align-items:center;gap:8px;padding:5px 9px 5px 5px;background:var(--c-dark);border:1px solid var(--c-border);border-radius:3px;transition:border-color .15s;cursor:default;box-sizing:border-box;max-width:100%}
+.admin-equip-card.clickable{cursor:pointer}
+.admin-equip-card:hover{border-color:var(--c-border-strong)}
+.admin-equip-card.active{border-color:var(--c-gold);background:rgba(201,162,39,.07)}
+.admin-equip-card-img{width:40px;height:40px;border-radius:3px;flex-shrink:0;overflow:hidden;background:var(--c-card);display:flex;align-items:center;justify-content:center}
+.admin-equip-card-img img{width:100%;height:100%;object-fit:cover;display:block}
+.admin-equip-card-img-ph{font-size:21px}
+.admin-equip-card-info{display:flex;flex-direction:column;gap:2px}
+.admin-equip-card-name{font-family:var(--ff-display);font-size:14px;letter-spacing:0.6px;color:var(--c-text);white-space:nowrap}
+.admin-equip-card-meta{font-size:13px;color:var(--c-text-dim);white-space:nowrap}
+.admin-equip-card-chev{font-size:13px;color:var(--c-gold);flex-shrink:0;transition:transform .2s;margin:0 2px}
+.admin-equip-card-chev.open{transform:rotate(180deg)}
+.admin-equip-card-btns{display:flex;gap:4px;flex-shrink:0}
+.admin-equip-card-btns .btn-sm{padding:3px 8px;font-size:13px;white-space:nowrap}
+/* panel row: appended after grid, full width */
+.admin-equip-panel-row{width:100%;margin-top:6px;box-sizing:border-box}
+.admin-equip-variants-panel{background:rgba(201,162,39,.05);border:1px solid rgba(201,162,39,.35);border-radius:3px;padding:8px 10px;display:flex;flex-direction:row;flex-wrap:wrap;gap:5px;width:100%;box-sizing:border-box;overflow:hidden}
+.admin-equip-panel-title{font-family:var(--ff-display);font-size:13px;letter-spacing:1px;color:var(--c-gold-dark);margin-bottom:2px;text-transform:uppercase}
+.admin-equip-vrow{display:inline-flex;align-items:center;gap:8px;padding:4px 6px;background:var(--c-dark);border:1px solid var(--c-border);border-radius:2px}
+.admin-equip-vrow-img{width:28px;height:28px;border-radius:2px;flex-shrink:0;overflow:hidden;background:var(--c-card);display:flex;align-items:center;justify-content:center}
+.admin-equip-vrow-img img{width:100%;height:100%;object-fit:cover;display:block}
+.admin-equip-vrow-label{font-family:var(--ff-display);font-size:14px;color:var(--c-gold);white-space:nowrap}
+.admin-equip-vrow-meta{font-size:13px;color:var(--c-text-dim);white-space:nowrap;margin-right:4px}
+.admin-equip-vrow-btns{display:flex;gap:3px}
+.admin-equip-vrow-btns .btn-sm{padding:2px 7px;font-size:13px;white-space:nowrap}
+
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="nav-logo">黑道風雲 <span>·</span> 豪傑搭配</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-page="frontend" onclick="switchPage('frontend')">陣容展示</button>
+    <button class="nav-tab" data-page="admin" onclick="switchPage('admin')">管理後台</button>
+  </div>
+</nav>
+
+<div id="page-frontend" class="page active">
+  <div class="frontend-wrap">
+    <div class="page-header" id="page-header-wrap"></div>
+    <div class="filter-bar" id="genre-filter"></div>
+    <div class="lineup-stack" id="lineup-stack"></div>
+    <div style="text-align:center;padding:24px 0 12px;font-family:var(--ff-display);font-size:14px;letter-spacing:1px;color:var(--c-text-dim);opacity:.55;">建議自行截圖使用</div>
+  </div>
+
+</div>
+
+<div id="page-admin" class="page">
+  <div class="admin-wrap">
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar-title">管理項目</div>
+      <button class="admin-nav-item active" data-section="lineups" onclick="switchAdmin('lineups')">陣容搭配</button>
+      <button class="admin-nav-item" data-section="heroes" onclick="switchAdmin('heroes')">豪傑管理</button>
+      <button class="admin-nav-item" data-section="styleicons" onclick="switchAdmin('styleicons')">風格圖標</button>
+      <button class="admin-nav-item" data-section="badges" onclick="switchAdmin('badges')">標籤管理</button>
+      <button class="admin-nav-item" data-section="staticons" onclick="switchAdmin('staticons')">加點圖標</button>
+      <button class="admin-nav-item" data-section="weapons" onclick="switchAdmin('weapons')">武器管理</button>
+      <button class="admin-nav-item" data-section="emblems" onclick="switchAdmin('emblems')">戰徽管理</button>
+      <button class="admin-nav-item" data-section="genres" onclick="switchAdmin('genres')">流派管理</button>
+    </aside>
+    <div class="admin-content">
+
+      <!-- ARCHIVE BAR -->
+      <div class="archive-bar">
+        <span class="archive-bar-title">&#128190; 資料存檔</span>
+        <span class="archive-info" id="archive-info">尚未存檔</span>
+        <div class="archive-actions">
+          <button class="btn-archive btn-archive-load" onclick="cloudLoad()">&#9729; 載入線上素材</button>
+          <button class="btn-archive btn-archive-save" onclick="archiveSave()">&#8595; 下載存檔</button>
+          <label class="btn-archive btn-archive-load">
+            &#8593; 上傳存檔
+            <input type="file" id="archive-file-input" accept=".json" onchange="archiveLoad(this)">
+          </label>
+          <button class="btn-archive btn-archive-reset" onclick="archiveReset()">重置資料</button>
+        </div>
+      </div>
+
+      <div id="admin-lineups" class="admin-section active">
+        <div class="admin-section-title">陣容搭配管理</div>
+
+        <!-- PAGE CONFIG -->
+        <div style="background:var(--c-dark);border:1px solid var(--c-border);border-radius:4px;padding:14px 16px;margin-bottom:16px;">
+          <div style="font-family:var(--ff-display);font-size:14px;letter-spacing:1px;color:var(--c-gold);margin-bottom:12px;">&#9656; 展示頁標題設定</div>
+          <div class="form-grid" style="margin-bottom:10px;">
+            <div class="form-group">
+              <label class="form-label">副標題（小字）</label>
+              <input class="form-input" id="cfg-eyebrow" type="text" placeholder="MAFIA CITY · TACTICAL GUIDE" oninput="applyPageConfig()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">主標題</label>
+              <input class="form-input" id="cfg-title" type="text" placeholder="豪傑最強陣容" oninput="applyPageConfig()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">時間文字 <small>（如：2025年第三賽季）</small></label>
+              <input class="form-input" id="cfg-time-text" type="text" placeholder="選填，留空不顯示" oninput="applyPageConfig()">
+            </div>
+            <div class="form-group" style="justify-content:flex-end;">
+              <label class="form-label">&nbsp;</label>
+              <label class="checkbox-label" style="margin-top:8px;">
+                <input type="checkbox" id="cfg-show-time" onchange="applyPageConfig()"> 顯示時間文字
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <span style="font-size:14px;color:var(--c-text-dim);">已建立的陣容列表，點 ✎ 編輯可修改</span>
+          <button class="btn-primary" style="padding:6px 16px;font-size:14px;" onclick="clearLineupForm();toggleLineupForm(true);document.getElementById('lineup-form-wrap').scrollIntoView({behavior:'smooth'})">+ 新增陣容</button>
+        </div>
+        <div class="admin-item-grid" id="admin-lineup-list"></div>
+        <!-- ROLE LABELS BAR -->
+        <div id="rolelabel-bar" style="background:var(--c-dark);border:1px solid var(--c-border);border-radius:4px;padding:10px 14px;margin-bottom:12px;">
+          <div style="font-family:var(--ff-display);font-size:13px;letter-spacing:1px;color:var(--c-gold);margin-bottom:8px;">&#9656; 角色標識（全域生效）</div>
+          <div id="rolelabel-cards" style="display:flex;flex-direction:column;gap:5px;"></div>
+        </div>
+        <div class="lineup-builder" id="lineup-form-wrap">
+          <button class="lineup-form-header-btn" onclick="toggleLineupForm()">
+            <div class="form-state-header" style="margin-bottom:0;border-bottom:none;padding-bottom:0;flex:1;">
+              <div>
+                <div class="form-state-title" id="lineup-form-title">新增陣容</div>
+                <div style="font-size:14px;color:var(--c-text-dim);margin-top:2px;" id="lineup-form-hint">點擊展開，填寫資訊新增陣容</div>
+              </div>
+              <span class="form-state-badge form-state-badge-new" id="lineup-form-badge">NEW</span>
+            </div>
+            <span class="form-chevron" id="lineup-form-chevron">&#9660;</span>
+          </button>
+          <div class="lineup-form-body" id="lineup-form-body">
+          <div style="height:14px;"></div>
+          <div class="lineup-builder-title">&#9656; 選擇豪傑 &amp; 各自加點</div>
+          <div class="hero-slots-row">
+            <div class="hero-select-slot">
+              <div class="hero-select-slot-label">主力</div>
+              <div class="hero-select-preview" id="slot-main-preview" onclick="openHeroModal('main')"><span>點擊選擇</span></div>
+              <select class="form-select" style="width:90px;font-size:14px;margin-top:3px;" id="slot-main-select" onchange="updateSlotFromSelect('main')"><option value="">主力</option></select>
+              <select class="form-select" style="width:90px;font-size:14px;margin-top:2px;" id="slot-main-stat"><option value="">加點</option></select>
+            </div>
+            <div class="hero-select-slot">
+              <div class="hero-select-slot-label">輔助 1</div>
+              <div class="hero-select-preview" id="slot-sub1-preview" onclick="openHeroModal('sub1')"><span>選擇</span></div>
+              <select class="form-select" style="width:90px;font-size:14px;margin-top:3px;" id="slot-sub1-select" onchange="updateSlotFromSelect('sub1')"><option value="">輔助1</option></select>
+              <select class="form-select" style="width:90px;font-size:14px;margin-top:2px;" id="slot-sub1-stat"><option value="">加點</option></select>
+            </div>
+            <div class="hero-select-slot">
+              <div class="hero-select-slot-label">輔助 2</div>
+              <div class="hero-select-preview" id="slot-sub2-preview" onclick="openHeroModal('sub2')"><span>選擇</span></div>
+              <select class="form-select" style="width:90px;font-size:14px;margin-top:3px;" id="slot-sub2-select" onchange="updateSlotFromSelect('sub2')"><option value="">輔助2</option></select>
+              <select class="form-select" style="width:90px;font-size:14px;margin-top:2px;" id="slot-sub2-stat"><option value="">加點</option></select>
+            </div>
+          </div>
+          <div class="lineup-builder-title">&#9656; 選擇裝備</div>
+          <div class="form-grid" style="margin-bottom:14px;">
+            <div class="form-group"><label class="form-label">主力武器</label><select class="form-select" id="eq-main-weapon"><option value="">選擇武器</option></select></div>
+            <div class="form-group"><label class="form-label">主力戰徽</label><select class="form-select" id="eq-main-emblem"><option value="">選擇戰徽</option></select></div>
+            <div class="form-group"><label class="form-label">輔助1武器</label><select class="form-select" id="eq-sub1-weapon"><option value="">選擇武器</option></select></div>
+            <div class="form-group"><label class="form-label">輔助1戰徽</label><select class="form-select" id="eq-sub1-emblem"><option value="">選擇戰徽</option></select></div>
+            <div class="form-group"><label class="form-label">輔助2武器</label><select class="form-select" id="eq-sub2-weapon"><option value="">選擇武器</option></select></div>
+            <div class="form-group"><label class="form-label">輔助2戰徽</label><select class="form-select" id="eq-sub2-emblem"><option value="">選擇戰徽</option></select></div>
+          </div>
+          <div class="lineup-builder-title">&#9656; 陣容資訊</div>
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">陣容標題</label><input class="form-input" id="lineup-title" type="text" placeholder="如：鐵壁破城流"></div>
+            <div class="form-group"><label class="form-label">適配流派</label><select class="form-select" id="lineup-genre"><option value="">選擇流派</option></select></div>
+            <div class="form-group"><label class="form-label">背景圖URL <small>建議 1920×1080px</small></label><input class="form-input" id="lineup-bg" type="text" placeholder="https://..."></div>
+            <div class="form-group full">
+              <label class="form-label">顯示標籤 <small>（可多選）</small></label>
+              <div class="badge-selector" id="lineup-badge-selector"></div>
+            </div>
+            <div class="form-group full">
+              <label class="form-label">陣容介紹</label>
+              <div class="rte-wrap">
+                <div class="rte-toolbar">
+                  <select class="rte-select" title="字號" onchange="rteCmd('fontSize',this.value);this.value=''">
+                    <option value="">字號</option>
+                    <option value="1">小</option><option value="3">中</option>
+                    <option value="4">大</option><option value="5">特大</option>
+                  </select>
+                  <div class="rte-sep"></div>
+                  <button class="rte-btn" title="粗體" onclick="rteCmd('bold')"><b>B</b></button>
+                  <button class="rte-btn" title="斜體" onclick="rteCmd('italic')"><i>I</i></button>
+                  <button class="rte-btn" title="底線" onclick="rteCmd('underline')"><u>U</u></button>
+                  <div class="rte-sep"></div>
+                  <button class="rte-btn" title="文字顏色" onclick="document.getElementById('rte-color-picker').click()">
+                    <span>A&#9660;</span>
+                  </button>
+                  <input type="color" id="rte-color-picker" style="display:none;position:absolute;opacity:0;width:0;height:0;" onchange="rteCmd('foreColor',this.value)">
+                  <div class="rte-sep"></div>
+                  <button class="rte-btn" title="插入Emoji" onclick="toggleEmojiPicker(event)">&#128512;</button>
+                  <button class="rte-btn" title="插入圖片/圖標" onclick="showRtePopup('img',event)">&#128444;</button>
+                  <button class="rte-btn" title="插入連結" onclick="showRtePopup('link',event)">&#128279;</button>
+                  <div class="rte-sep"></div>
+                  <button class="rte-btn" onclick="rteCmd('removeFormat')">清除格式</button>
+                </div>
+                <div class="rte-body" id="lineup-desc-rte" contenteditable="true" data-placeholder="陣容說明、適合場景、技能說明... 支援文字大小/顏色/emoji/圖標插入"></div>
+              </div>
+            </div>
+          </div>
+          <input type="hidden" id="editing-lineup-id">
+          <div class="lineup-form-actions">
+            <button class="btn-primary" id="lineup-submit-btn" onclick="saveLineup()">建立陣容</button>
+            <button class="btn-secondary" id="lineup-cancel-btn" onclick="clearLineupForm()" style="display:none;margin-left:0;">取消編輯</button>
+            <button class="btn-secondary" onclick="clearLineupForm()">清除表單</button>
+          </div>
+          </div><!-- /lineup-form-body -->
+        </div>
+      </div>
+
+      <div id="admin-heroes" class="admin-section">
+        <div class="admin-section-title">豪傑管理</div>
+        <div class="admin-item-grid" id="admin-hero-list"></div>
+        <div class="section-divider"><span class="section-divider-text">新增豪傑</span></div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">豪傑名稱</label><input class="form-input" id="hero-name" type="text" placeholder="豪傑名稱"></div>
+          <div class="form-group"><label class="form-label">風格類型</label>
+            <select class="form-select" id="hero-style" onchange="previewHeroStyleIcon()">
+              <option value="迅捷">迅捷</option><option value="智謀">智謀</option>
+              <option value="無畏">無畏</option><option value="穩重">穩重</option>
+            </select>
+          </div>
+          <div class="form-group full"><label class="form-label">半身像URL <small>推薦 400×600px (2:3)</small></label><input class="form-input" id="hero-img" type="text" placeholder="https://..."></div>
+          <div class="form-group full">
+            <label class="form-label" style="color:var(--c-text-dim);">風格圖標 <small>自動套用對應風格圖標，請至「風格圖標」管理頁上傳</small></label>
+            <div id="hero-style-icon-preview" style="display:flex;align-items:center;gap:8px;margin-top:4px;"></div>
+          </div>
+        </div>
+        <input type="hidden" id="editing-hero-id">
+        <button class="btn-primary" onclick="saveHero()">保存豪傑</button>
+        <button class="btn-secondary" onclick="clearHeroForm()">清除</button>
+      </div>
+
+      <div id="admin-styleicons" class="admin-section">
+        <div class="admin-section-title">風格圖標管理</div>
+        <p style="font-size:14px;color:var(--c-text-dim);margin-bottom:16px;">為 4 種風格各自上傳圖標，豪傑會自動套用。推薦 80×80px 圓形透明背景 PNG。</p>
+        <div class="section-divider"><span class="section-divider-text">風格名稱設定</span></div>
+        <p style="font-size:14px;color:var(--c-text-dim);margin-bottom:14px;">可自訂各風格的顯示名稱，支援多語言。內部 Key 固定不變，名稱僅影響前台顯示。</p>
+        <div class="form-grid" style="margin-bottom:14px;" id="style-names-grid"></div>
+        <button class="btn-primary" onclick="saveStyleNames()">保存名稱</button>
+        <div class="section-divider"><span class="section-divider-text">上傳風格圖標</span></div>
+        <div class="admin-item-grid" id="admin-styleicon-list"></div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">風格</label>
+            <select class="form-select" id="styleicon-style">
+              <option value="迅捷">迅捷</option><option value="智謀">智謀</option>
+              <option value="無畏">無畏</option><option value="穩重">穩重</option>
+            </select>
+          </div>
+          <div class="form-group full"><label class="form-label">圖標URL <small>推薦 80×80px 圓形透明背景 PNG</small></label><input class="form-input" id="styleicon-img" type="text" placeholder="https://..."></div>
+        </div>
+        <button class="btn-primary" onclick="saveStyleIcon()">保存圖標</button>
+        <button class="btn-secondary" onclick="clearStyleIconForm()">清除</button>
+      </div>
+
+      <div id="admin-badges" class="admin-section">
+        <div class="admin-section-title">標籤管理</div>
+        <p style="font-size:14px;color:var(--c-text-dim);margin-bottom:16px;">新增自訂標籤後，可在陣容搭配中選擇使用。HOT / NEW / 推薦 為內建標籤不可刪除。</p>
+        <div class="admin-item-grid" id="admin-badge-list"></div>
+        <div class="section-divider"><span class="section-divider-text">新增自訂標籤</span></div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">標籤名稱</label><input class="form-input" id="badge-name" type="text" placeholder="如：推薦新手"></div>
+          <div class="form-group full"><label class="form-label">標籤圖片URL <small>推薦高度 22px PNG；未填則顯示文字</small></label><input class="form-input" id="badge-img" type="text" placeholder="https://..."></div>
+          <div class="form-group"><label class="form-label">文字顏色（無圖時）</label><input class="form-input" id="badge-color" type="color" value="#A6822B"></div>
+          <div class="form-group"><label class="form-label">背景顏色（無圖時）</label><input class="form-input" id="badge-bg" type="color" value="#FBF3DC"></div>
+        </div>
+        <input type="hidden" id="editing-badge-id">
+        <button class="btn-primary" onclick="saveBadge()">保存標籤</button>
+        <button class="btn-secondary" onclick="clearBadgeForm()">清除</button>
+      </div>
+
+      <div id="admin-staticons" class="admin-section">
+        <div class="admin-section-title">加點圖標管理</div>
+        <p style="font-size:14px;color:var(--c-text-dim);margin-bottom:16px;">為五種加點方向上傳圖標，顯示在豪傑圖片左下角。推薦 60×60px 透明背景 PNG。</p>
+        <div class="section-divider"><span class="section-divider-text">加點名稱設定</span></div>
+        <p style="font-size:14px;color:var(--c-text-dim);margin-bottom:14px;">可自訂各加點方向的顯示名稱，支援多語言。內部 Key 固定不變，名稱影響前台與下拉選單顯示。</p>
+        <div class="form-grid" style="margin-bottom:14px;" id="stat-names-grid"></div>
+        <button class="btn-primary" onclick="saveStatNames()">保存名稱</button>
+        <div class="section-divider"><span class="section-divider-text">上傳加點圖標</span></div>
+        <div class="admin-item-grid" id="admin-staticon-list"></div>
+        <div class="section-divider"><span class="section-divider-text">編輯加點圖標</span></div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">加點方向</label>
+            <select class="form-select" id="staticon-key"></select>
+          </div>
+          <div class="form-group full"><label class="form-label">圖標URL <small>推薦 60×60px 透明背景 PNG</small></label><input class="form-input" id="staticon-img" type="text" placeholder="https://..."></div>
+        </div>
+        <button class="btn-primary" onclick="saveStatIcon()">保存圖標</button>
+        <button class="btn-secondary" onclick="clearStatIconForm()">清除</button>
+      </div>
+
+      <div id="admin-weapons" class="admin-section">
+        <div class="admin-section-title">武器管理</div>
+        <div id="admin-weapon-list"></div>
+        <div class="section-divider"><span class="section-divider-text">新增武器</span></div>
+        <div class="form-grid">
+          <div class="form-group full">
+            <label class="form-label">類型</label>
+            <div class="variant-type-row">
+              <button class="variant-type-btn active" id="weapon-type-parent" onclick="setWeaponType('parent')">父類武器（新建）</button>
+              <button class="variant-type-btn" id="weapon-type-variant" onclick="setWeaponType('variant')">子版本（屬於某父類）</button>
+            </div>
+          </div>
+          <div class="form-group" id="weapon-parent-group-wrap" style="display:none;">
+            <label class="form-label">所屬父類武器</label>
+            <select class="form-select" id="weapon-parent-id"><option value="">選擇父類</option></select>
+          </div>
+          <div class="form-group"><label class="form-label">武器名稱 <small>（父類顯示名）</small></label><input class="form-input" id="weapon-name" type="text" placeholder="武器名稱"></div>
+          <div class="form-group" id="weapon-variant-label-group" style="display:none;">
+            <label class="form-label">版本標籤 <small>（如：夜雀版本）</small></label>
+            <input class="form-input" id="weapon-variant-label" type="text" placeholder="如：夜雀版本">
+          </div>
+          <div class="form-group"><label class="form-label">品質</label>
+            <select class="form-select" id="weapon-quality">
+              <option value="blue">藍色</option><option value="purple">紫色</option>
+              <option value="orange">橙色</option><option value="gold" selected>金色</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">是否專屬</label>
+            <select class="form-select" id="weapon-exclusive" onchange="toggleExclusiveHero()">
+              <option value="false">普通武器</option><option value="true">專屬武器</option>
+            </select>
+          </div>
+          <div class="form-group" id="weapon-exclusive-hero-group" style="display:none;"><label class="form-label">專屬豪傑</label><select class="form-select" id="weapon-exclusive-hero"><option value="">選擇豪傑</option></select></div>
+          <div class="form-group full"><label class="form-label">武器圖片URL <small>推薦 200×200px（子版本可不填，繼承父類）</small></label><input class="form-input" id="weapon-img" type="text" placeholder="https://..."></div>
+          <div class="form-group full">
+            <label class="form-label">屬性詞條</label>
+            <div class="attr-list-builder" id="weapon-attrs-builder"></div>
+            <button class="btn-sm" style="margin-top:6px;" onclick="addAttrRow('weapon-attrs-builder')">+ 新增詞條</button>
+          </div>
+        </div>
+        <input type="hidden" id="editing-weapon-id">
+        <button class="btn-primary" onclick="saveWeapon()">保存武器</button>
+        <button class="btn-secondary" onclick="clearWeaponForm()">清除</button>
+      </div>
+
+      <div id="admin-emblems" class="admin-section">
+        <div class="admin-section-title">戰徽管理</div>
+        <div id="admin-emblem-list"></div>
+        <div class="section-divider"><span class="section-divider-text">新增戰徽</span></div>
+        <div class="form-grid">
+          <div class="form-group full">
+            <label class="form-label">類型</label>
+            <div class="variant-type-row">
+              <button class="variant-type-btn active" id="emblem-type-parent" onclick="setEmblemType('parent')">父類戰徽（新建）</button>
+              <button class="variant-type-btn" id="emblem-type-variant" onclick="setEmblemType('variant')">子版本（屬於某父類）</button>
+            </div>
+          </div>
+          <div class="form-group" id="emblem-parent-group-wrap" style="display:none;">
+            <label class="form-label">所屬父類戰徽</label>
+            <select class="form-select" id="emblem-parent-id"><option value="">選擇父類</option></select>
+          </div>
+          <div class="form-group"><label class="form-label">戰徽名稱 <small>（父類顯示名）</small></label><input class="form-input" id="emblem-name" type="text" placeholder="戰徽名稱"></div>
+          <div class="form-group" id="emblem-variant-label-group" style="display:none;">
+            <label class="form-label">版本標籤 <small>（如：夜雀版本）</small></label>
+            <input class="form-input" id="emblem-variant-label" type="text" placeholder="如：夜雀版本">
+          </div>
+          <div class="form-group"><label class="form-label">品質</label>
+            <select class="form-select" id="emblem-quality">
+              <option value="gray">灰色</option><option value="green">綠色</option><option value="blue">藍色</option>
+              <option value="purple">紫色</option><option value="orange">橙色</option><option value="gold" selected>金色</option>
+            </select>
+          </div>
+          <div class="form-group full"><label class="form-label">戰徽圖片URL <small>推薦 200×200px（子版本可不填，繼承父類）</small></label><input class="form-input" id="emblem-img" type="text" placeholder="https://..."></div>
+          <div class="form-group full">
+            <label class="form-label">屬性詞條</label>
+            <div class="attr-list-builder" id="emblem-attrs-builder"></div>
+            <button class="btn-sm" style="margin-top:6px;" onclick="addAttrRow('emblem-attrs-builder')">+ 新增詞條</button>
+          </div>
+        </div>
+        <input type="hidden" id="editing-emblem-id">
+        <button class="btn-primary" onclick="saveEmblem()">保存戰徽</button>
+        <button class="btn-secondary" onclick="clearEmblemForm()">清除</button>
+      </div>
+
+      <div id="admin-genres" class="admin-section">
+        <div class="admin-section-title">流派管理</div>
+        <div class="admin-item-grid" id="admin-genre-list"></div>
+        <div class="section-divider"><span class="section-divider-text">新增流派</span></div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">流派名稱</label><input class="form-input" id="genre-name" type="text" placeholder="如：飛車黨"></div>
+          <div class="form-group"><label class="form-label">主色調</label><input class="form-input" id="genre-color" type="color" value="#A6822B"></div>
+          <div class="form-group full"><label class="form-label">流派圖標URL <small>推薦 120×120px</small></label><input class="form-input" id="genre-img" type="text" placeholder="https://..."></div>
+        </div>
+        <input type="hidden" id="editing-genre-id">
+        <button class="btn-primary" onclick="saveGenre()">保存流派</button>
+        <button class="btn-secondary" onclick="clearGenreForm()">清除</button>
+
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="hero-modal">
+  <div class="modal-box">
+    <div class="modal-title">選擇豪傑</div>
+    <div class="modal-hero-grid" id="modal-hero-grid"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeHeroModal()">取消</button>
+      <button class="btn-primary" onclick="confirmHeroSelect()">確認</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var appData={
+  styleNames:{迅捷:'迅捷',智謀:'智謀',無畏:'無畏',穩重:'穩重'},
+  styleIcons:[
+    {id:'si-xunjie',style:'迅捷',imgUrl:''},
+    {id:'si-zhimou',style:'智謀',imgUrl:''},
+    {id:'si-wuwei',style:'無畏',imgUrl:''},
+    {id:'si-wenzhong',style:'穩重',imgUrl:''},
+  ],
+  badges:[
+    {id:'b-hot',name:'HOT',imgUrl:'',color:'#fff',bg:'',builtIn:true,builtInCls:'badge-hot'},
+    {id:'b-new',name:'NEW',imgUrl:'',color:'#fff',bg:'',builtIn:true,builtInCls:'badge-new'},
+    {id:'b-rec',name:'推薦',imgUrl:'',color:'#000',bg:'',builtIn:true,builtInCls:'badge-recommend'},
+  ],
+  pageConfig:{
+    eyebrow:'MAFIA CITY · TACTICAL GUIDE',
+    title:'豪傑最強陣容',
+    showTime:false,
+    timeText:'',
+    showFilterBar:true,
+  },
+  statNames:{force:'力量',skill:'技術',physique:'體魄',defense:'防護',speed:'速度'},
+  roleLabels:{
+    main:{text:'主力', emoji:'⚔️', imgUrl:''},
+    sub1:{text:'輔助1', emoji:'🛡', imgUrl:''},
+    sub2:{text:'輔助2', emoji:'🛡', imgUrl:''},
+  },
+  statIcons:[
+    {id:'sti1',key:'force',imgUrl:''},
+    {id:'sti2',key:'skill',imgUrl:''},
+    {id:'sti3',key:'physique',imgUrl:''},
+    {id:'sti4',key:'defense',imgUrl:''},
+    {id:'sti5',key:'speed',imgUrl:''},
+  ],
+  heroes:[
+    {id:'h1',name:'鐵拳王',style:'無畏',imgUrl:''},
+    {id:'h2',name:'暗夜狐',style:'智謀',imgUrl:''},
+    {id:'h3',name:'烈焰姬',style:'迅捷',imgUrl:''},
+    {id:'h4',name:'鋼壁漢',style:'穩重',imgUrl:''},
+    {id:'h5',name:'閃電手',style:'迅捷',imgUrl:''},
+    {id:'h6',name:'毒蠍女',style:'智謀',imgUrl:''},
+  ],
+  weapons:[
+    {id:'w1',parentId:null,displayName:'黑鐵戰錘',variantLabel:'',quality:'gold',isExclusive:true,exclusiveHeroId:'h1',imgUrl:'',attrs:['攻擊力 +18%','暴擊率 +12%','【專屬】無畏傷害 +25%']},
+    {id:'w2',parentId:null,displayName:'暗刃短劍',variantLabel:'',quality:'gold',isExclusive:false,imgUrl:'',attrs:['攻擊速度 +15%','閃避率 +8%']},
+    {id:'w3',parentId:null,displayName:'烈焰長槍',variantLabel:'',quality:'gold',isExclusive:true,exclusiveHeroId:'h3',imgUrl:'',attrs:['技能傷害 +20%','【專屬】烈焰穿透 +30%']},
+    {id:'w4',parentId:null,displayName:'精鋼盾矛',variantLabel:'',quality:'gold',isExclusive:false,imgUrl:'',attrs:['防禦力 +10%','HP +5%']},
+  ],
+  emblems:[
+    {id:'e1',parentId:null,displayName:'黑玫瑰徽',variantLabel:'',quality:'gold',imgUrl:'',attrs:['全屬性 +8%','隊伍攻擊 +12%']},
+    {id:'e2',parentId:null,displayName:'嗜血鷹徽',variantLabel:'',quality:'gold',imgUrl:'',attrs:['暴擊傷害 +20%','生命偷取 +5%']},
+    {id:'e3',parentId:null,displayName:'暗夜狼徽',variantLabel:'',quality:'gold',imgUrl:'',attrs:['速度 +10%','技術 +8%']},
+    {id:'e4',parentId:null,displayName:'鋼鐵盾徽',variantLabel:'',quality:'gold',imgUrl:'',attrs:['防護 +15%']},
+  ],
+  genres:[
+    {id:'g1',name:'飛車黨',color:'#FF6B35',imgUrl:''},
+    {id:'g2',name:'暴徒',color:'#D4363A',imgUrl:''},
+    {id:'g3',name:'槍手',color:'#2196F3',imgUrl:''},
+  ],
+  lineups:[
+    {id:'l1',title:'鐵壁破城流',description:'以鐵拳王為核心，利用無畏風格的減傷特性，配合智謀輔助形成攻守兼備的完美陣容。適合正面突破敵陣。',genreId:'g2',badgeIds:['b-hot'],bgUrl:'',mainHeroId:'h1',subHero1Id:'h2',subHero2Id:'h4',mainStat:'force',sub1Stat:'skill',sub2Stat:'defense',mainWeaponId:'w1',mainEmblemId:'e1',sub1WeaponId:'w2',sub1EmblemId:'e3',sub2WeaponId:'w4',sub2EmblemId:'e4'},
+    {id:'l2',title:'閃電突擊隊',description:'三迅捷風格搭配，速度加成疊加可達最大爆發。前期壓制力極強，適合速攻戰術。',genreId:'g1',badgeIds:['b-new'],bgUrl:'',mainHeroId:'h5',subHero1Id:'h3',subHero2Id:'h6',mainStat:'speed',sub1Stat:'skill',sub2Stat:'physique',mainWeaponId:'w3',mainEmblemId:'e2',sub1WeaponId:'w2',sub1EmblemId:'e3',sub2WeaponId:'w2',sub2EmblemId:'e4'},
+  ],
+};
+
+/* 品質色：白底主題用加深版本（豪傑名字與裝備框吃這個色，太淺會看不清） */
+var QC={gray:'#757575',green:'#2E7D32',blue:'#1565C0',purple:'#7B1FA2',orange:'#E65100',gold:'#A6822B'};
+var QL={gray:'灰色',green:'綠色',blue:'藍色',purple:'紫色',orange:'橙色',gold:'金色'};
+var SC=[
+  {key:'force',label:'力量',color:'#D32F2F',bg:'rgba(255,255,255,0.9)'},
+  {key:'skill',label:'技術',color:'#1976D2',bg:'rgba(255,255,255,0.9)'},
+  {key:'physique',label:'體魄',color:'#388E3C',bg:'rgba(255,255,255,0.9)'},
+  {key:'defense',label:'防護',color:'#7B1FA2',bg:'rgba(255,255,255,0.9)'},
+  {key:'speed',label:'速度',color:'#E65100',bg:'rgba(255,255,255,0.9)'},
+];
+var BC={hot:{cls:'badge-hot',text:'HOT'},'new':{cls:'badge-new',text:'NEW'},recommend:{cls:'badge-recommend',text:'推薦'}};
+var SI_DEFAULTS={迅捷:'⚡',智謀:'🧠',無畏:'🔥',穩重:'🛡'};
+var SI_STAT_DEFAULTS={force:'💪',skill:'🎯',physique:'🔰',defense:'🛡',speed:'⚡'};
+
+/* weapon/emblem display helpers */
+function getRoleLabel(roleKey){
+  var rl=appData.roleLabels&&appData.roleLabels[roleKey];
+  if(!rl)return {text:roleKey,emoji:'',imgUrl:''};
+  return rl;
+}
+function buildRoleBadgeHtml(roleKey){
+  var rl=getRoleLabel(roleKey);
+  var iconHtml='';
+  if(rl.imgUrl) iconHtml='<img src="'+rl.imgUrl+'" alt="">';
+  else if(rl.emoji) iconHtml='<span class="hero-role-badge-emoji">'+rl.emoji+'</span>';
+  return '<div class="hero-role-badge">'+iconHtml+(rl.text?'<span>'+rl.text+'</span>':'')+'</div>';
+}
+function itemDisplayName(item){
+  if(!item)return '';
+  if(item.parentId){
+    // always show parent's display name on frontend card
+    var arr=item._isWeapon!==undefined?(item._isWeapon?appData.weapons:appData.emblems):null;
+    if(!arr){
+      // try both
+      var p=appData.weapons.filter(function(x){return x.id===item.parentId})[0]
+        ||appData.emblems.filter(function(x){return x.id===item.parentId})[0];
+      if(p)return p.displayName||p.name||'';
+    }
+  }
+  return item.displayName||item.name||'';
+}
+function itemFullLabel(item){
+  if(!item)return '';
+  var d=item.displayName||item.name||'';
+  return item.variantLabel?d+' · '+item.variantLabel:d;
+}
+function itemParents(arr){return arr.filter(function(x){return !x.parentId})}
+function itemVariants(arr,parentId){return arr.filter(function(x){return x.parentId===parentId})}
+
+function uid(){return 'i'+Math.random().toString(36).slice(2,8)}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2200)}
+function scfg(k){for(var i=0;i<SC.length;i++){if(SC[i].key===k)return SC[i]}return null}
+function styleName(key){return (appData.styleNames&&appData.styleNames[key])||key}
+function statName(key){
+  var defaults={force:'力量',skill:'技術',physique:'體魄',defense:'防護',speed:'速度'};
+  return (appData.statNames&&appData.statNames[key])||defaults[key]||key;
+}
+function getStyleIcon(hero){if(!hero)return null;for(var i=0;i<appData.styleIcons.length;i++){if(appData.styleIcons[i].style===hero.style)return appData.styleIcons[i]}return null}
+
+function switchPage(p){
+  document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active')});
+  document.querySelectorAll('.nav-tab').forEach(function(x){x.classList.remove('active')});
+  document.getElementById('page-'+p).classList.add('active');
+  var t=document.querySelector('.nav-tab[data-page="'+p+'"]');if(t)t.classList.add('active');
+  if(p==='frontend')renderFrontend();
+  if(p==='admin')refreshAll();
+}
+function switchAdmin(s){
+  document.querySelectorAll('.admin-section').forEach(function(x){x.classList.remove('active')});
+  document.querySelectorAll('.admin-nav-item').forEach(function(x){x.classList.remove('active')});
+  document.getElementById('admin-'+s).classList.add('active');
+  var n=document.querySelector('.admin-nav-item[data-section="'+s+'"]');if(n)n.classList.add('active');
+  if(s==='heroes')previewHeroStyleIcon();
+  if(s==='styleicons'){renderStyleIconList();renderStyleNamesGrid();}
+  if(s==='staticons'){renderStatIconList();renderStatNamesGrid();}
+  if(s==='lineups'){renderBadgeSelector('lineup-badge-selector',[]);renderRoleLabelCards();syncPageConfigInputs();}
+}
+
+/* FRONTEND */
+var gf=null;
+function renderFrontend(){renderPageHeader();buildFilterBar();buildLineups()}
+function buildFilterBar(){
+  var b=document.getElementById('genre-filter');
+  b.innerHTML='<button class="filter-btn active" data-gid="all" onclick="filterGenre(null,this)">全部陣容</button>';
+  appData.genres.forEach(function(g){
+    var btn=document.createElement('button');btn.className='filter-btn';btn.setAttribute('data-gid',g.id);
+    btn.onclick=function(){filterGenre(g.id,this)};
+    btn.innerHTML='<span class="genre-dot" style="background:'+g.color+'"></span>'+g.name;
+    b.appendChild(btn);
+  });
+}
+function filterGenre(id,btn){
+  gf=id;document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active')});btn.classList.add('active');buildLineups();
+}
+function buildLineups(){
+  var s=document.getElementById('lineup-stack');
+  var ls=gf?appData.lineups.filter(function(l){return l.genreId===gf}):appData.lineups;
+  if(!ls.length){s.innerHTML='<div style="color:var(--c-text-dim);text-align:center;padding:60px;font-family:var(--ff-display);letter-spacing:1px;">暫無陣容</div>';return}
+  s.innerHTML=ls.map(buildCard).join('');
+}
+function buildCard(lineup){
+  var genre=appData.genres.filter(function(g){return g.id===lineup.genreId})[0];
+  var mH=appData.heroes.filter(function(h){return h.id===lineup.mainHeroId})[0];
+  var s1H=appData.heroes.filter(function(h){return h.id===lineup.subHero1Id})[0];
+  var s2H=appData.heroes.filter(function(h){return h.id===lineup.subHero2Id})[0];
+  var mW=appData.weapons.filter(function(w){return w.id===lineup.mainWeaponId})[0];
+  var mE=appData.emblems.filter(function(e){return e.id===lineup.mainEmblemId})[0];
+  var s1W=appData.weapons.filter(function(w){return w.id===lineup.sub1WeaponId})[0];
+  var s1E=appData.emblems.filter(function(e){return e.id===lineup.sub1EmblemId})[0];
+  var s2W=appData.weapons.filter(function(w){return w.id===lineup.sub2WeaponId})[0];
+  var s2E=appData.emblems.filter(function(e){return e.id===lineup.sub2EmblemId})[0];
+  var mQC=mW?QC[mW.quality]:QC.gold;
+  var s1QC=s1W?QC[s1W.quality]:QC.blue;
+  var s2QC=s2W?QC[s2W.quality]:QC.blue;
+  var bgA=lineup.bgUrl?'style="background-image:url(\''+lineup.bgUrl+'\')"':'';
+  var badgesHtml=(lineup.badgeIds||[]).map(function(bid){
+    var b=appData.badges.filter(function(x){return x.id===bid})[0];if(!b)return '';
+    if(b.builtIn)return '<span class="card-badge '+b.builtInCls+'">'+b.name+'</span>';
+    if(b.imgUrl)return '<img class="badge-img" src="'+b.imgUrl+'" alt="'+b.name+'">';
+    return '<span class="card-badge" style="background:'+b.bg+';color:'+b.color+';border:1px solid '+b.color+'40;">'+b.name+'</span>';
+  }).join('');
+  var genreH=genre?'<div class="card-genre-badge">'+(genre.imgUrl?'<img class="card-genre-icon" src="'+genre.imgUrl+'" alt="">':'<span class="card-genre-dot" style="background:'+genre.color+'"></span>')+'<span class="card-genre-name" style="color:'+genre.color+'">'+genre.name+'</span></div>':'';
+  return '<a href="#" class="lineup-card">'
+    +'<div class="card-bg" '+bgA+'></div><div class="card-bg-grad"></div>'
+    +'<div class="card-top-bar"><div class="card-badges">'+badgesHtml+'</div>'+genreH+'</div>'
+    +'<div class="card-heroes-row">'
+    +buildHeroCol(mH,mQC,lineup.mainStat,mW,mE,true,'main')
+    +buildHeroCol(s1H,s1QC,lineup.sub1Stat,s1W,s1E,false,'sub1')
+    +buildHeroCol(s2H,s2QC,lineup.sub2Stat,s2W,s2E,false,'sub2')
+    +'</div>'
+    +'<div class="card-bottom"><div class="card-title">'+(lineup.title||'未命名')+'</div>'
+    +'<div class="card-desc">'+(lineup.description||'')+'</div></div>'
+    +'</a>';
+}
+function buildHeroCol(hero,qColor,statKey,weapon,emblem,isMain,slotKey){
+  var s=statKey?scfg(statKey):null;
+  var si=getStyleIcon(hero);
+  var styleIconH=si&&si.imgUrl
+    ?'<img class="hero-style-icon-img" src="'+si.imgUrl+'" alt="" style="border-color:'+qColor+';">'
+    :'<span class="hero-style-icon-default" style="color:'+qColor+';border-color:'+qColor+';">'+(hero?SI_DEFAULTS[hero.style]||'⚡':'⚡')+'</span>';
+  var imgH=hero&&hero.imgUrl
+    ?'<img class="hero-portrait-img" src="'+hero.imgUrl+'" alt="'+(hero.name||'')+'" loading="lazy">'
+    :'<div class="hero-portrait-placeholder"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span style="font-size:13px;">'+(hero?hero.name:'空')+'</span></div>';
+  var sIcon=s?appData.statIcons.filter(function(x){return x.key===s.key})[0]:null;
+  var sIconH=sIcon&&sIcon.imgUrl
+    ?'<img class="hero-stat-icon" src="'+sIcon.imgUrl+'" alt="'+statName(s.key)+'">'
+    :'<span class="hero-stat-icon-default">'+SI_STAT_DEFAULTS[s?s.key:'']+'</span>';
+  var statH=s?'<div class="hero-stat-tag" style="background:'+s.bg+';border-color:'+s.color+';color:'+s.color+';">'+sIconH+statName(s.key)+'</div>':'';
+  var roleKey=isMain?'main':(slotKey||'');
+  var roleH=roleKey?buildRoleBadgeHtml(roleKey):'';
+  var nameBar='<div class="hero-name-bar" style="color:'+qColor+';border-top-color:'+qColor+';">'+styleIconH+'<span class="hero-name-text">'+(hero?hero.name:'—')+'</span></div>';
+  var portrait='<div class="hero-portrait-wrap">'+imgH+'<div class="portrait-q-frame" style="color:'+qColor+';"></div>'+statH+roleH+'</div>'+nameBar;
+  var equip='<div class="hero-equip-section">'+buildEquipRow(weapon,'武器')+buildEquipRow(emblem,'戰徽')+'</div>';
+  return '<div class="hero-col">'+portrait+equip+'</div>';
+}
+function buildEquipRow(item,type){
+  if(!item)return '<div class="equip-item-row"><div class="equip-text"><div class="equip-type-name-row"><span class="equip-type-label">'+type+'</span><span class="equip-name" style="color:var(--c-text-dim);">未配備</span></div></div></div>';
+  var qc=QC[item.quality]||'#888';
+  var imgUrl=item.imgUrl;
+  if(!imgUrl&&item.parentId){
+    var arr=type==='武器'?appData.weapons:appData.emblems;
+    var par=arr.filter(function(x){return x.id===item.parentId})[0];
+    if(par)imgUrl=par.imgUrl;
+  }
+  var icon=imgUrl?'<img class="equip-icon" src="'+imgUrl+'" alt="">':'<div class="equip-icon-placeholder">'+(type==='武器'?'&#9876;':'&#128737;')+'</div>';
+  var excl=item.isExclusive?'<div class="equip-excl">&#9670; 專屬武器</div>':'';
+  var attrs=(item.attrs&&item.attrs.length)?'<div class="equip-attrs">'+item.attrs.map(function(a){return '<div class="equip-attr-line">'+a+'</div>'}).join('')+'</div>':'';
+  return '<div class="equip-item-row"><div class="equip-icon-wrap">'+icon+'<div class="equip-q-frame" style="color:'+qc+';"></div></div><div class="equip-text"><div class="equip-type-name-row"><span class="equip-type-label">'+type+'</span><span class="equip-name">'+itemDisplayName(item)+'</span></div>'+excl+attrs+'</div></div>';
+}
+
+/* HERO MODAL */
+var cSlot=null,selHero=null;
+function openHeroModal(slot){
+  cSlot=slot;selHero=null;
+  document.getElementById('modal-hero-grid').innerHTML=appData.heroes.map(function(h){
+    return '<div class="modal-hero-item" onclick="selHeroModal(this.dataset.id,this)" data-id="'+h.id+'">'
+      +(h.imgUrl?'<img class="modal-hero-img" src="'+h.imgUrl+'" alt="'+h.name+'">'
+        :'<div class="modal-hero-img" style="display:flex;align-items:center;justify-content:center;color:var(--c-text-dim);font-size:13px;">'+h.name+'</div>')
+      +'<span class="modal-hero-name">'+h.name+'</span></div>';
+  }).join('');
+  document.getElementById('hero-modal').classList.add('open');
+}
+function selHeroModal(id,el){selHero=id;document.querySelectorAll('.modal-hero-item').forEach(function(i){i.classList.remove('selected')});el.classList.add('selected')}
+function confirmHeroSelect(){
+  if(!selHero){closeHeroModal();return}
+  var h=appData.heroes.filter(function(x){return x.id===selHero})[0];
+  updateSlotPreview(cSlot,h);document.getElementById('slot-'+cSlot+'-select').value=selHero;closeHeroModal();
+}
+function closeHeroModal(){document.getElementById('hero-modal').classList.remove('open')}
+function updateSlotFromSelect(slot){var id=document.getElementById('slot-'+slot+'-select').value;updateSlotPreview(slot,appData.heroes.filter(function(h){return h.id===id})[0])}
+function updateSlotPreview(slot,hero){
+  var p=document.getElementById('slot-'+slot+'-preview');
+  if(hero&&hero.imgUrl)p.innerHTML='<img src="'+hero.imgUrl+'" style="width:100%;height:100%;object-fit:cover;object-position:top;">';
+  else if(hero)p.innerHTML='<span style="font-size:14px;color:var(--c-text)">'+hero.name+'</span>';
+  else p.innerHTML='<span>點擊選擇</span>';
+}
+
+/* SELECTS */
+function sopts(){return '<option value="">— 加點 —</option>'+SC.map(function(s){return '<option value="'+s.key+'">'+statName(s.key)+'</option>'}).join('')}
+function populateSel(){
+  ['main','sub1','sub2'].forEach(function(s){
+    var hs=document.getElementById('slot-'+s+'-select'),hc=hs.value;
+    hs.innerHTML='<option value="">— 選擇 —</option>'+appData.heroes.map(function(h){return '<option value="'+h.id+'">'+h.name+'</option>'}).join('');hs.value=hc;
+    var ss=document.getElementById('slot-'+s+'-stat'),sc2=ss.value;ss.innerHTML=sopts();ss.value=sc2;
+    var ws=document.getElementById('eq-'+s+'-weapon'),wc=ws.value;
+    ws.innerHTML='<option value="">— 武器 —</option>'+appData.weapons.map(function(w){
+      var label=itemFullLabel(w)+' ['+QL[w.quality]+']'+(w.isExclusive?'◆':'');
+      return '<option value="'+w.id+'">'+label+'</option>';
+    }).join('');ws.value=wc;
+    var es=document.getElementById('eq-'+s+'-emblem'),ec=es.value;
+    es.innerHTML='<option value="">— 戰徽 —</option>'+appData.emblems.map(function(e){
+      return '<option value="'+e.id+'">'+itemFullLabel(e)+' ['+QL[e.quality]+']</option>';
+    }).join('');es.value=ec;
+  });
+  var gs=document.getElementById('lineup-genre'),gc=gs.value;
+  gs.innerHTML='<option value="">— 流派 —</option>'+appData.genres.map(function(g){return '<option value="'+g.id+'">'+g.name+'</option>'}).join('');gs.value=gc;
+  var wh=document.getElementById('weapon-exclusive-hero');
+  wh.innerHTML='<option value="">— 豪傑 —</option>'+appData.heroes.map(function(h){return '<option value="'+h.id+'">'+h.name+'</option>'}).join('');
+}
+
+/* BADGE SELECTOR */
+function renderBadgeSelector(cid,selIds){
+  var el=document.getElementById(cid);
+  el.innerHTML=appData.badges.map(function(b){
+    var sel=(selIds||[]).indexOf(b.id)>=0?' selected':'';
+    var inner=b.builtIn?'<span class="badge-built-in '+b.builtInCls+'">'+b.name+'</span>'
+      :(b.imgUrl?'<img src="'+b.imgUrl+'" alt="'+b.name+'">'
+        :'<span class="badge-built-in" style="background:'+b.bg+';color:'+b.color+';">'+b.name+'</span>');
+    return '<div class="badge-opt'+sel+'" data-bid="'+b.id+'" onclick="this.classList.toggle(\'selected\')">'+inner+'<span class="badge-label">'+b.name+'</span></div>';
+  }).join('')||'<span style="font-size:14px;color:var(--c-text-dim);">尚無標籤</span>';
+}
+function getSelectedBadgeIds(cid){
+  return Array.from(document.querySelectorAll('#'+cid+' .badge-opt.selected')).map(function(el){return el.getAttribute('data-bid')});
+}
+
+/* ATTR BUILDER */
+function addAttrRow(bid,val){val=val||'';
+  var r=document.createElement('div');r.className='attr-row';
+  r.innerHTML='<input class="form-input" type="text" placeholder="如：攻擊力 +15%" value="'+val+'"><button class="btn-icon danger" onclick="this.parentElement.remove()">&times;</button>';
+  document.getElementById(bid).appendChild(r);
+  var inp=r.querySelector('input');
+  inp.focus();
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();addAttrRow(bid);}});
+}
+function getAttrs(bid){return Array.from(document.querySelectorAll('#'+bid+' .attr-row .form-input')).map(function(i){return i.value.trim()}).filter(Boolean)}
+function setAttrs(bid,attrs){document.getElementById(bid).innerHTML='';(attrs||[]).forEach(function(a){addAttrRow(bid,a)})}
+
+/* STYLE NAMES */
+function renderStyleNamesGrid(){
+  var keys=['迅捷','智謀','無畏','穩重'];
+  document.getElementById('style-names-grid').innerHTML=keys.map(function(k){
+    return '<div class="form-group"><label class="form-label">'+k+' <small>Key: '+k+'</small></label>'
+      +'<input class="form-input" id="sname-'+k+'" type="text" placeholder="'+k+'" value="'+(appData.styleNames[k]||k)+'"></div>';
+  }).join('');
+}
+function saveStyleNames(){
+  ['迅捷','智謀','無畏','穩重'].forEach(function(k){
+    var el=document.getElementById('sname-'+k);
+    if(el)appData.styleNames[k]=el.value||k;
+  });
+  renderStyleIconList();toast('風格名稱已保存');
+  archiveAutoSave();
+}
+
+/* STYLE ICONS */
+function renderStyleIconList(){
+  var el=document.getElementById('admin-styleicon-list');
+  var styles=['迅捷','智謀','無畏','穩重'];
+  var html='';
+  styles.forEach(function(sty){
+    var si=appData.styleIcons.filter(function(x){return x.style===sty})[0];
+    var hasImg=si&&si.imgUrl;
+    var icon=hasImg?'<img src="'+si.imgUrl+'" alt="'+sty+'" style="width:50px;height:50px;border-radius:50%;object-fit:cover;">':'<span style="font-size:31px;">'+(SI_DEFAULTS[sty]||'⚡')+'</span>';
+    var editBtn='<button class="btn-sm" onclick="editStyleIconByStyle(this.dataset.s)" data-s="'+sty+'">編輯</button>';
+    var clearBtn=hasImg?'<button class="btn-sm danger" onclick="clearStyleIconByStyle(this.dataset.s)" data-s="'+sty+'">清除</button>':'';
+    html+='<div class="admin-item-card"><div class="admin-item-card-img-wrap">'+icon+'</div>'
+      +'<div class="admin-item-card-name">'+styleName(sty)+'</div>'
+      +'<div class="admin-item-card-sub">'+(hasImg?'已上傳':'未上傳')+'</div>'
+      +'<div class="admin-item-card-actions">'+editBtn+clearBtn+'</div></div>';
+  });
+  el.innerHTML=html;
+}
+function saveStyleIcon(){
+  var sty=document.getElementById('styleicon-style').value;
+  var imgUrl=document.getElementById('styleicon-img').value;
+  var si=appData.styleIcons.filter(function(x){return x.style===sty})[0];
+  if(si)si.imgUrl=imgUrl;
+  clearStyleIconForm();renderStyleIconList();toast('風格圖標已更新');
+  archiveAutoSave();
+}
+function editStyleIconByStyle(sty){
+  var si=appData.styleIcons.filter(function(x){return x.style===sty})[0];
+  document.getElementById('styleicon-style').value=sty;
+  document.getElementById('styleicon-img').value=si?si.imgUrl||'':'';
+}
+function clearStyleIconByStyle(sty){
+  var si=appData.styleIcons.filter(function(x){return x.style===sty})[0];
+  if(si)si.imgUrl='';renderStyleIconList();toast('已清除 '+sty+' 圖標');
+}
+function clearStyleIconForm(){document.getElementById('styleicon-style').value='迅捷';document.getElementById('styleicon-img').value=''}
+function previewHeroStyleIcon(){
+  var sty=document.getElementById('hero-style').value;
+  var si=appData.styleIcons.filter(function(x){return x.style===sty})[0];
+  var el=document.getElementById('hero-style-icon-preview');
+  if(si&&si.imgUrl)el.innerHTML='<img src="'+si.imgUrl+'" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--c-gold);"><span style="font-size:14px;color:var(--c-text-dim);">'+styleName(sty)+' 圖標</span>';
+  else el.innerHTML='<span style="font-size:24px;">'+(SI_DEFAULTS[sty]||'⚡')+'</span><span style="font-size:14px;color:var(--c-text-dim);">'+styleName(sty)+'（預設符號）</span>';
+}
+
+/* BADGES */
+function renderBadgeList(){
+  document.getElementById('admin-badge-list').innerHTML=appData.badges.map(function(b){
+    var builtInTag=b.builtIn?'<span style="font-size:13px;color:var(--c-gold);border:1px solid var(--c-gold);padding:1px 5px;border-radius:2px;margin-left:4px;">內建</span>':'';
+    var preview=b.builtIn?'<span class="card-badge '+b.builtInCls+'" style="font-size:13px;">'+b.name+'</span>'
+      :(b.imgUrl?'<img src="'+b.imgUrl+'" style="height:22px;max-width:80px;object-fit:contain;">'
+        :'<span class="card-badge" style="background:'+b.bg+';color:'+b.color+';border:1px solid '+b.color+'40;font-size:13px;">'+b.name+'</span>');
+    var actions=b.builtIn?''
+      :'<button class="btn-sm" onclick="editBadge(this.dataset.id)" data-id="'+b.id+'">編輯</button><button class="btn-sm danger" onclick="deleteBadge(this.dataset.id)" data-id="'+b.id+'">刪除</button>';
+    return '<div class="admin-item-card"><div class="admin-item-card-img-wrap">'+preview+'</div><div class="admin-item-card-name">'+b.name+builtInTag+'</div><div class="admin-item-card-actions">'+actions+'</div></div>';
+  }).join('')||'<div style="color:var(--c-text-dim);font-size:14px;">尚無標籤</div>';
+}
+function saveBadge(){
+  var id=document.getElementById('editing-badge-id').value;
+  var o={id:id||uid(),name:document.getElementById('badge-name').value,imgUrl:document.getElementById('badge-img').value,color:document.getElementById('badge-color').value,bg:document.getElementById('badge-bg').value,builtIn:false};
+  var i=appData.badges.findIndex(function(b){return b.id===id});
+  if(i>=0)appData.badges[i]=o;else appData.badges.push(o);
+  clearBadgeForm();renderBadgeList();renderBadgeSelector('lineup-badge-selector',[]);toast(id?'標籤已更新':'標籤已新增');
+  archiveAutoSave();
+}
+function editBadge(id){var b=appData.badges.filter(function(x){return x.id===id})[0];if(!b||b.builtIn)return;document.getElementById('editing-badge-id').value=b.id;document.getElementById('badge-name').value=b.name;document.getElementById('badge-img').value=b.imgUrl||'';document.getElementById('badge-color').value=b.color||'#A6822B';document.getElementById('badge-bg').value=b.bg||'#FBF3DC'}
+function deleteBadge(id){var b=appData.badges.filter(function(x){return x.id===id})[0];if(b&&b.builtIn){toast('內建標籤無法刪除');return}appData.badges=appData.badges.filter(function(x){return x.id!==id});renderBadgeList();toast('標籤已刪除')
+  archiveAutoSave();}
+function clearBadgeForm(){['editing-badge-id','badge-name','badge-img'].forEach(function(i){document.getElementById(i).value=''});document.getElementById('badge-color').value='#A6822B';document.getElementById('badge-bg').value='#FBF3DC'}
+
+/* STAT ICONS */
+function rebuildStaticonKeySelect(){
+  var sel=document.getElementById('staticon-key');
+  if(!sel)return;
+  var keys=['force','skill','physique','defense','speed'];
+  sel.innerHTML=keys.map(function(k){return '<option value="'+k+'">'+statName(k)+'</option>'}).join('');
+}
+function renderStatNamesGrid(){
+  var keys=['force','skill','physique','defense','speed'];
+  var defaultNames={force:'力量',skill:'技術',physique:'體魄',defense:'防護',speed:'速度'};
+  rebuildStaticonKeySelect();
+  document.getElementById('stat-names-grid').innerHTML=keys.map(function(k){
+    return '<div class="form-group"><label class="form-label">'+defaultNames[k]+' <small>Key: '+k+'</small></label>'
+      +'<input class="form-input" id="stname-'+k+'" type="text" placeholder="'+defaultNames[k]+'" value="'+(appData.statNames[k]||defaultNames[k])+'"></div>';
+  }).join('');
+}
+function saveStatNames(){
+  ['force','skill','physique','defense','speed'].forEach(function(k){
+    var el=document.getElementById('stname-'+k);
+    if(el)appData.statNames[k]=el.value||k;
+  });
+  renderStatIconList();
+  rebuildStaticonKeySelect();
+  populateSel();
+  toast('加點名稱已保存');
+  archiveAutoSave();
+}
+function renderStatIconList(){
+  var el=document.getElementById('admin-staticon-list');
+  el.innerHTML=appData.statIcons.map(function(si){
+    var s=scfg(si.key);var col=s?s.color:'#A6822B';
+    return '<div class="admin-item-card" style="border-color:'+col+'60;"><div class="admin-item-card-img-wrap" style="background:'+col+'18;">'
+      +(si.imgUrl?'<img src="'+si.imgUrl+'" alt="'+statName(si.key)+'" style="width:40px;height:40px;object-fit:contain;">':'<span style="font-size:26px;">'+SI_STAT_DEFAULTS[si.key]+'</span>')
+      +'</div><div class="admin-item-card-name" style="color:'+col+'">'+statName(si.key)+'</div>'
+      +'<div class="admin-item-card-sub">'+(si.imgUrl?'已上傳':'未上傳')+'</div>'
+      +'<div class="admin-item-card-actions"><button class="btn-sm" onclick="editStatIcon(this.dataset.k)" data-k="'+si.key+'">編輯</button></div></div>';
+  }).join('');
+}
+function saveStatIcon(){
+  var key=document.getElementById('staticon-key').value;
+  var imgUrl=document.getElementById('staticon-img').value;
+  var si=appData.statIcons.filter(function(x){return x.key===key})[0];
+  if(si)si.imgUrl=imgUrl;
+  clearStatIconForm();renderStatIconList();toast('加點圖標已更新');
+  archiveAutoSave();
+}
+function editStatIcon(key){var si=appData.statIcons.filter(function(x){return x.key===key})[0];if(!si)return;document.getElementById('staticon-key').value=si.key;document.getElementById('staticon-img').value=si.imgUrl||''}
+function clearStatIconForm(){document.getElementById('staticon-key').value='force';document.getElementById('staticon-img').value=''}
+
+/* LINEUPS */
+
+
+function toggleLineupForm(forceOpen){
+  var body=document.getElementById('lineup-form-body');
+  var chev=document.getElementById('lineup-form-chevron');
+  if(!body)return;
+  var willOpen=(forceOpen===true)||(forceOpen===undefined&&!body.classList.contains('open'));
+  body.classList.toggle('open', willOpen);
+  if(chev)chev.classList.toggle('open', willOpen);
+  // update hint when collapsed
+  if(!willOpen){
+    document.getElementById('lineup-form-hint').textContent='點擊展開，填寫資訊新增陣容';
+  }
+}
+function setLineupFormState(isEditing, title){
+  var titleEl=document.getElementById('lineup-form-title');
+  var hintEl=document.getElementById('lineup-form-hint');
+  var badgeEl=document.getElementById('lineup-form-badge');
+  var submitBtn=document.getElementById('lineup-submit-btn');
+  var cancelBtn=document.getElementById('lineup-cancel-btn');
+  if(!titleEl)return;
+  if(isEditing){
+    titleEl.textContent='編輯陣容：'+(title||'');
+    hintEl.textContent='修改完成後點「儲存變更」套用';
+    badgeEl.textContent='EDIT';
+    badgeEl.className='form-state-badge form-state-badge-edit';
+    submitBtn.textContent='儲存變更';
+    if(cancelBtn)cancelBtn.style.display='inline-block';
+    toggleLineupForm(true);
+  } else {
+    titleEl.textContent='新增陣容';
+    hintEl.textContent='點擊展開，填寫資訊新增陣容';
+    badgeEl.textContent='NEW';
+    badgeEl.className='form-state-badge form-state-badge-new';
+    submitBtn.textContent='建立陣容';
+    if(cancelBtn)cancelBtn.style.display='none';
+    toggleLineupForm(false);
+  }
+}
+
+/* cleanup stale weapon/emblem refs in lineups */
+function cleanStaleRefs(){
+  var wIds=new Set(appData.weapons.map(function(w){return w.id}));
+  var eIds=new Set(appData.emblems.map(function(e){return e.id}));
+  var hIds=new Set(appData.heroes.map(function(h){return h.id}));
+  appData.lineups=appData.lineups.map(function(l){
+    if(l.mainWeaponId&&!wIds.has(l.mainWeaponId))l.mainWeaponId='';
+    if(l.sub1WeaponId&&!wIds.has(l.sub1WeaponId))l.sub1WeaponId='';
+    if(l.sub2WeaponId&&!wIds.has(l.sub2WeaponId))l.sub2WeaponId='';
+    if(l.mainEmblemId&&!eIds.has(l.mainEmblemId))l.mainEmblemId='';
+    if(l.sub1EmblemId&&!eIds.has(l.sub1EmblemId))l.sub1EmblemId='';
+    if(l.sub2EmblemId&&!eIds.has(l.sub2EmblemId))l.sub2EmblemId='';
+    if(l.mainHeroId&&!hIds.has(l.mainHeroId))l.mainHeroId='';
+    if(l.subHero1Id&&!hIds.has(l.subHero1Id))l.subHero1Id='';
+    if(l.subHero2Id&&!hIds.has(l.subHero2Id))l.subHero2Id='';
+    return l;
+  });
+}
+function renderLineupList(){
+  document.getElementById('admin-lineup-list').innerHTML=appData.lineups.map(function(l){
+    var g=appData.genres.filter(function(x){return x.id===l.genreId})[0];
+    return '<div class="admin-item-card"><div class="admin-item-card-name">'+(l.title||'未命名')+'</div><div class="admin-item-card-sub">'+(g?g.name:'無流派')+'</div><div class="admin-item-card-actions"><button class="btn-sm" onclick="editLineup(this.dataset.id)" data-id="'+l.id+'">✎ 編輯</button><button class="btn-sm danger" onclick="deleteLineup(this.dataset.id)" data-id="'+l.id+'">刪除</button></div></div>';
+  }).join('')||'<div style="color:var(--c-text-dim);font-size:14px;">尚無陣容</div>';
+}
+function saveLineup(){
+  var id=document.getElementById('editing-lineup-id').value;
+  var o={id:id||uid(),title:document.getElementById('lineup-title').value,
+    description:document.getElementById('lineup-desc-rte').innerHTML,
+    genreId:document.getElementById('lineup-genre').value,bgUrl:document.getElementById('lineup-bg').value,
+    badgeIds:getSelectedBadgeIds('lineup-badge-selector'),
+    mainHeroId:document.getElementById('slot-main-select').value,subHero1Id:document.getElementById('slot-sub1-select').value,subHero2Id:document.getElementById('slot-sub2-select').value,
+    mainStat:document.getElementById('slot-main-stat').value,sub1Stat:document.getElementById('slot-sub1-stat').value,sub2Stat:document.getElementById('slot-sub2-stat').value,
+    mainWeaponId:document.getElementById('eq-main-weapon').value,mainEmblemId:document.getElementById('eq-main-emblem').value,
+    sub1WeaponId:document.getElementById('eq-sub1-weapon').value,sub1EmblemId:document.getElementById('eq-sub1-emblem').value,
+    sub2WeaponId:document.getElementById('eq-sub2-weapon').value,sub2EmblemId:document.getElementById('eq-sub2-emblem').value};
+  var i=appData.lineups.findIndex(function(l){return l.id===id});
+  if(i>=0)appData.lineups[i]=o;else appData.lineups.push(o);
+  clearLineupForm();renderLineupList();toast(id?'陣容已更新':'陣容已新增');
+  archiveAutoSave();
+}
+function editLineup(id){
+  var l=appData.lineups.filter(function(x){return x.id===id})[0];if(!l)return;
+  document.getElementById('editing-lineup-id').value=l.id;
+  document.getElementById('lineup-title').value=l.title||'';
+  document.getElementById('lineup-desc-rte').innerHTML=l.description||'';
+  document.getElementById('lineup-genre').value=l.genreId||'';
+  document.getElementById('lineup-bg').value=l.bgUrl||'';
+  renderBadgeSelector('lineup-badge-selector',l.badgeIds||[]);
+  setLineupFormState(true, l.title||'');
+  // scroll form into view
+  var fw=document.getElementById('lineup-form-wrap');
+  if(fw)fw.scrollIntoView({behavior:'smooth',block:'start'});
+  var sm={main:'mainHeroId',sub1:'subHero1Id',sub2:'subHero2Id'};
+  var st={main:'mainStat',sub1:'sub1Stat',sub2:'sub2Stat'};
+  var sw={main:'mainWeaponId',sub1:'sub1WeaponId',sub2:'sub2WeaponId'};
+  var se={main:'mainEmblemId',sub1:'sub1EmblemId',sub2:'sub2EmblemId'};
+  ['main','sub1','sub2'].forEach(function(s){
+    document.getElementById('slot-'+s+'-select').value=l[sm[s]]||'';
+    document.getElementById('slot-'+s+'-stat').value=l[st[s]]||'';
+    updateSlotFromSelect(s);
+    document.getElementById('eq-'+s+'-weapon').value=l[sw[s]]||'';
+    document.getElementById('eq-'+s+'-emblem').value=l[se[s]]||'';
+  });
+}
+function deleteLineup(id){var l=appData.lineups.filter(function(x){return x.id===id})[0];if(!confirm('確定刪除陣容「'+(l?l.title||'未命名':'')+'」？\n此操作無法復原。'))return;appData.lineups=appData.lineups.filter(function(l){return l.id!==id});renderLineupList();toast('陣容已刪除');archiveAutoSave();}
+function clearLineupForm(){
+  setLineupFormState(false);
+  document.getElementById('editing-lineup-id').value='';
+  ['lineup-title','lineup-genre','lineup-bg'].forEach(function(i){document.getElementById(i).value=''});
+  document.getElementById('lineup-desc-rte').innerHTML='';
+  renderBadgeSelector('lineup-badge-selector',[]);
+  ['main','sub1','sub2'].forEach(function(s){
+    document.getElementById('slot-'+s+'-select').value='';document.getElementById('slot-'+s+'-stat').value='';
+    updateSlotPreview(s,null);document.getElementById('eq-'+s+'-weapon').value='';document.getElementById('eq-'+s+'-emblem').value='';
+  });
+}
+
+/* HEROES */
+function renderHeroList(){
+  document.getElementById('admin-hero-list').innerHTML=appData.heroes.map(function(h){
+    var si=getStyleIcon(h);
+    return '<div class="admin-item-card"><div class="admin-item-card-img-wrap">'+(h.imgUrl?'<img src="'+h.imgUrl+'" alt="'+h.name+'" style="object-position:top;">':'<span style="color:var(--c-text-dim);font-size:14px;">無圖</span>')+'</div><div class="admin-item-card-name">'+h.name+'</div><div class="admin-item-card-sub">'+styleName(h.style)+(si&&si.imgUrl?' · ✓':'')+'</div><div class="admin-item-card-actions"><button class="btn-sm" onclick="editHero(this.dataset.id)" data-id="'+h.id+'">編輯</button><button class="btn-sm danger" onclick="deleteHero(this.dataset.id)" data-id="'+h.id+'">刪除</button></div></div>';
+  }).join('')||'<div style="color:var(--c-text-dim);font-size:14px;">尚無豪傑</div>';
+}
+function saveHero(){
+  var id=document.getElementById('editing-hero-id').value;
+  var o={id:id||uid(),name:document.getElementById('hero-name').value,style:document.getElementById('hero-style').value,imgUrl:document.getElementById('hero-img').value};
+  var i=appData.heroes.findIndex(function(h){return h.id===id});
+  if(i>=0)appData.heroes[i]=o;else appData.heroes.push(o);
+  clearHeroForm();renderHeroList();populateSel();toast(id?'豪傑已更新':'豪傑已新增');
+  archiveAutoSave();
+}
+function editHero(id){var h=appData.heroes.filter(function(x){return x.id===id})[0];if(!h)return;document.getElementById('editing-hero-id').value=h.id;document.getElementById('hero-name').value=h.name;document.getElementById('hero-style').value=h.style;document.getElementById('hero-img').value=h.imgUrl||'';previewHeroStyleIcon()}
+function deleteHero(id){var h=appData.heroes.filter(function(x){return x.id===id})[0];if(!confirm('確定刪除豪傑「'+(h?h.name:'')+'」？\n此操作無法復原。'))return;appData.heroes=appData.heroes.filter(function(h){return h.id!==id});cleanStaleRefs();renderHeroList();populateSel();toast('豪傑已刪除');archiveAutoSave();}
+function clearHeroForm(){['editing-hero-id','hero-name','hero-img'].forEach(function(i){document.getElementById(i).value=''});document.getElementById('hero-style').value='迅捷';previewHeroStyleIcon()}
+
+
+/* ── weapon variant type toggle ── */
+function setWeaponType(type){
+  var isVariant=(type==='variant');
+  document.getElementById('weapon-type-parent').classList.toggle('active',!isVariant);
+  document.getElementById('weapon-type-variant').classList.toggle('active',isVariant);
+  document.getElementById('weapon-parent-group-wrap').style.display=isVariant?'flex':'none';
+  document.getElementById('weapon-variant-label-group').style.display=isVariant?'flex':'none';
+  // name field: if variant, auto-fill from parent on parent change
+  if(isVariant) rebuildWeaponParentSelect();
+}
+function rebuildWeaponParentSelect(){
+  var sel=document.getElementById('weapon-parent-id');
+  var cur=sel.value;
+  sel.innerHTML='<option value="">選擇父類</option>'+itemParents(appData.weapons).map(function(w){
+    return '<option value="'+w.id+'">'+w.displayName+'</option>';
+  }).join('');
+  sel.value=cur;
+  sel.onchange=function(){
+    var p=appData.weapons.filter(function(x){return x.id===sel.value})[0];
+    if(p){
+      document.getElementById('weapon-name').value=p.displayName;
+      document.getElementById('weapon-quality').value=p.quality;
+      if(p.imgUrl)document.getElementById('weapon-img').value=p.imgUrl;
+    }
+  };
+  // if a value is already selected, fire immediately to fill fields
+  if(sel.value) sel.onchange();
+}
+function rebuildEmblemParentSelect(){
+  var sel=document.getElementById('emblem-parent-id');
+  var cur=sel.value;
+  sel.innerHTML='<option value="">選擇父類</option>'+itemParents(appData.emblems).map(function(e){
+    return '<option value="'+e.id+'">'+e.displayName+'</option>';
+  }).join('');
+  sel.value=cur;
+  sel.onchange=function(){
+    var p=appData.emblems.filter(function(x){return x.id===sel.value})[0];
+    if(p){
+      document.getElementById('emblem-name').value=p.displayName;
+      document.getElementById('emblem-quality').value=p.quality;
+      if(p.imgUrl)document.getElementById('emblem-img').value=p.imgUrl;
+    }
+  };
+  // if a value is already selected, fire immediately to fill fields
+  if(sel.value) sel.onchange();
+}
+function setEmblemType(type){
+  var isVariant=(type==='variant');
+  document.getElementById('emblem-type-parent').classList.toggle('active',!isVariant);
+  document.getElementById('emblem-type-variant').classList.toggle('active',isVariant);
+  document.getElementById('emblem-parent-group-wrap').style.display=isVariant?'flex':'none';
+  document.getElementById('emblem-variant-label-group').style.display=isVariant?'flex':'none';
+  if(isVariant) rebuildEmblemParentSelect();
+}
+/* WEAPONS */
+
+function toggleEquipPanel(parentId){
+  var card=document.querySelector('[data-parent-id="'+parentId+'"]');
+  var grid=card?card.closest('.admin-equip-grid'):null;
+  if(!grid)return;
+  var wrap=grid.parentElement;
+  var isOpen=card.classList.contains('active');
+  // close all
+  wrap.querySelectorAll('.admin-equip-card').forEach(function(c){c.classList.remove('active')});
+  wrap.querySelectorAll('.admin-equip-card-chev').forEach(function(c){c.classList.remove('open')});
+  var existing=wrap.querySelector('.admin-equip-panel-row');
+  if(existing)existing.remove();
+  if(isOpen)return; // was open → just close
+  // open new panel
+  var panelData=document.getElementById('epanel-data-'+parentId);
+  if(!panelData)return;
+  card.classList.add('active');
+  var chev=document.getElementById('chev-'+parentId);
+  if(chev)chev.classList.add('open');
+  var row=document.createElement('div');
+  row.className='admin-equip-panel-row';
+  row.innerHTML=panelData.innerHTML;
+  wrap.appendChild(row);
+}
+
+
+
+
+function renderWeaponList(){
+  var parents=itemParents(appData.weapons);
+  var el=document.getElementById('admin-weapon-list');
+  if(!parents.length){el.innerHTML='<div style="color:var(--c-text-dim);font-size:14px;">尚無武器</div>';return;}
+  var cards='';
+  var dataPanels=''; // hidden data stores
+  parents.forEach(function(w){
+    var eh=w.isExclusive?appData.heroes.filter(function(h){return h.id===w.exclusiveHeroId})[0]:null;
+    var dname=w.displayName||w.name||'（未命名）';
+    var qc=QC[w.quality]||'#888';
+    var variants=itemVariants(appData.weapons,w.id);
+    var hasV=variants.length>0;
+    var pid='w'+w.id;
+    var imgH=w.imgUrl?'<img src="'+w.imgUrl+'" alt="'+dname+'">':'<span class="admin-equip-card-img-ph">&#9876;</span>';
+    var meta=QL[w.quality]+(w.isExclusive?' ◆'+(eh?' '+eh.name:''):'');
+    var chev=hasV?'<span class="admin-equip-card-chev" id="chev-'+pid+'">&#9660;</span>':'';
+    var clickAttr=hasV?'class="admin-equip-card clickable" onclick="toggleEquipPanel(\''+pid+'\')" data-parent-id="'+pid+'"':'class="admin-equip-card"';
+    cards+='<div '+clickAttr+' style="border-color:'+qc+'40;">'
+      +'<div class="admin-equip-card-img">'+imgH+'</div>'
+      +'<div class="admin-equip-card-info">'
+      +'<span class="admin-equip-card-name">'+dname+'</span>'
+      +'<span class="admin-equip-card-meta">'+meta+'</span>'
+      +'</div>'
+      +chev
+      +'<div class="admin-equip-card-btns">'
+      +'<button class="btn-sm" onclick="event.stopPropagation();editWeapon(this.dataset.id)" data-id="'+w.id+'">編輯</button>'
+      +'<button class="btn-sm danger" onclick="event.stopPropagation();deleteWeapon(this.dataset.id)" data-id="'+w.id+'">刪除</button>'
+      +'</div></div>';
+    if(hasV){
+      var vrows='<div class="admin-equip-variants-panel">'
+        +'<div class="admin-equip-panel-title">'+dname+'</div>';
+      variants.forEach(function(v){
+        var vimg=v.imgUrl||w.imgUrl;
+        var vimgH=vimg?'<img src="'+vimg+'" alt="'+v.variantLabel+'">':'';
+        vrows+='<div class="admin-equip-vrow">'
+          +'<div class="admin-equip-vrow-img">'+vimgH+'</div>'
+          +'<span class="admin-equip-vrow-label">'+v.variantLabel+'</span>'
+          +'<span class="admin-equip-vrow-meta">'+QL[v.quality]+'</span>'
+          +'<div class="admin-equip-vrow-btns">'
+          +'<button class="btn-sm" onclick="editWeapon(this.dataset.id)" data-id="'+v.id+'">編輯</button>'
+          +'<button class="btn-sm danger" onclick="deleteWeapon(this.dataset.id)" data-id="'+v.id+'">刪除</button>'
+          +'</div></div>';
+      });
+      vrows+='</div>';
+      dataPanels+='<div id="epanel-data-'+pid+'" style="display:none;">'+vrows+'</div>';
+    }
+  });
+  el.innerHTML='<div class="admin-equip-wrap">'
+    +'<div class="admin-equip-grid">'+cards+'</div>'
+    +dataPanels+'</div>';
+}
+function toggleExclusiveHero(){document.getElementById('weapon-exclusive-hero-group').style.display=document.getElementById('weapon-exclusive').value==='true'?'flex':'none'}
+function saveWeapon(){
+  var id=document.getElementById('editing-weapon-id').value;
+  var isE=document.getElementById('weapon-exclusive').value==='true';
+  var isVariant=document.getElementById('weapon-type-variant').classList.contains('active');
+  var parentId=isVariant?document.getElementById('weapon-parent-id').value:null;
+  var variantLabel=isVariant?document.getElementById('weapon-variant-label').value:'';
+  var displayName=document.getElementById('weapon-name').value;
+  // if variant and no displayName typed, inherit from parent
+  if(isVariant&&!displayName&&parentId){
+    var p=appData.weapons.filter(function(x){return x.id===parentId})[0];
+    if(p)displayName=p.displayName;
+  }
+  var o={id:id||uid(),parentId:parentId,displayName:displayName,variantLabel:variantLabel,
+    quality:document.getElementById('weapon-quality').value,isExclusive:isE,
+    exclusiveHeroId:isE?document.getElementById('weapon-exclusive-hero').value:null,
+    imgUrl:document.getElementById('weapon-img').value,attrs:getAttrs('weapon-attrs-builder')};
+  var i=appData.weapons.findIndex(function(w){return w.id===id});if(i>=0)appData.weapons[i]=o;else appData.weapons.push(o);
+  clearWeaponForm();renderWeaponList();populateSel();toast(id?'武器已更新':'武器已新增');
+  archiveAutoSave();
+}
+function editWeapon(id){
+  var w=appData.weapons.filter(function(x){return x.id===id})[0];if(!w)return;
+  document.getElementById('editing-weapon-id').value=w.id;
+  document.getElementById('weapon-name').value=w.displayName||w.name||'';
+  document.getElementById('weapon-quality').value=w.quality;
+  document.getElementById('weapon-exclusive').value=w.isExclusive?'true':'false';
+  document.getElementById('weapon-exclusive-hero').value=w.exclusiveHeroId||'';
+  document.getElementById('weapon-img').value=w.imgUrl||'';
+  setAttrs('weapon-attrs-builder',w.attrs);toggleExclusiveHero();
+  if(w.parentId){
+    setWeaponType('variant');
+    rebuildWeaponParentSelect();
+    document.getElementById('weapon-parent-id').value=w.parentId;
+    document.getElementById('weapon-variant-label').value=w.variantLabel||'';
+  } else {
+    setWeaponType('parent');
+  }
+}
+function deleteWeapon(id){var w=appData.weapons.filter(function(x){return x.id===id})[0];var label=w?(w.displayName||w.name||'')+(w.variantLabel?' · '+w.variantLabel:''):'';if(!confirm('確定刪除武器「'+label+'」？\n此操作無法復原。'))return;appData.weapons=appData.weapons.filter(function(w){return w.id!==id});cleanStaleRefs();renderWeaponList();populateSel();toast('武器已刪除');archiveAutoSave();}
+function clearWeaponForm(){
+  ['editing-weapon-id','weapon-name','weapon-img','weapon-variant-label'].forEach(function(i){document.getElementById(i).value=''});
+  document.getElementById('weapon-quality').value='gold';
+  document.getElementById('weapon-exclusive').value='false';
+  document.getElementById('weapon-exclusive-hero').value='';
+  document.getElementById('weapon-exclusive-hero-group').style.display='none';
+  document.getElementById('weapon-attrs-builder').innerHTML='';
+  setWeaponType('parent');
+}
+
+/* EMBLEMS */
+function renderEmblemList(){
+  var parents=itemParents(appData.emblems);
+  var el=document.getElementById('admin-emblem-list');
+  if(!parents.length){el.innerHTML='<div style="color:var(--c-text-dim);font-size:14px;">尚無戰徽</div>';return;}
+  var cards='';
+  var dataPanels='';
+  parents.forEach(function(e){
+    var dname=e.displayName||e.name||'（未命名）';
+    var qc=QC[e.quality]||'#888';
+    var variants=itemVariants(appData.emblems,e.id);
+    var hasV=variants.length>0;
+    var pid='e'+e.id;
+    var imgH=e.imgUrl?'<img src="'+e.imgUrl+'" alt="'+dname+'">':'<span class="admin-equip-card-img-ph">&#128737;</span>';
+    var chev=hasV?'<span class="admin-equip-card-chev" id="chev-'+pid+'">&#9660;</span>':'';
+    var clickAttr=hasV?'class="admin-equip-card clickable" onclick="toggleEquipPanel(\''+pid+'\')" data-parent-id="'+pid+'"':'class="admin-equip-card"';
+    cards+='<div '+clickAttr+' style="border-color:'+qc+'40;">'
+      +'<div class="admin-equip-card-img">'+imgH+'</div>'
+      +'<div class="admin-equip-card-info">'
+      +'<span class="admin-equip-card-name">'+dname+'</span>'
+      +'<span class="admin-equip-card-meta">'+QL[e.quality]+'</span>'
+      +'</div>'
+      +chev
+      +'<div class="admin-equip-card-btns">'
+      +'<button class="btn-sm" onclick="event.stopPropagation();editEmblem(this.dataset.id)" data-id="'+e.id+'">編輯</button>'
+      +'<button class="btn-sm danger" onclick="event.stopPropagation();deleteEmblem(this.dataset.id)" data-id="'+e.id+'">刪除</button>'
+      +'</div></div>';
+    if(hasV){
+      var vrows='<div class="admin-equip-variants-panel">'
+        +'<div class="admin-equip-panel-title">'+dname+'</div>';
+      variants.forEach(function(v){
+        var vimg=v.imgUrl||e.imgUrl;
+        var vimgH=vimg?'<img src="'+vimg+'" alt="'+v.variantLabel+'">':'';
+        vrows+='<div class="admin-equip-vrow">'
+          +'<div class="admin-equip-vrow-img">'+vimgH+'</div>'
+          +'<span class="admin-equip-vrow-label">'+v.variantLabel+'</span>'
+          +'<span class="admin-equip-vrow-meta">'+QL[v.quality]+'</span>'
+          +'<div class="admin-equip-vrow-btns">'
+          +'<button class="btn-sm" onclick="editEmblem(this.dataset.id)" data-id="'+v.id+'">編輯</button>'
+          +'<button class="btn-sm danger" onclick="deleteEmblem(this.dataset.id)" data-id="'+v.id+'">刪除</button>'
+          +'</div></div>';
+      });
+      vrows+='</div>';
+      dataPanels+='<div id="epanel-data-'+pid+'" style="display:none;">'+vrows+'</div>';
+    }
+  });
+  el.innerHTML='<div class="admin-equip-wrap">'
+    +'<div class="admin-equip-grid">'+cards+'</div>'
+    +dataPanels+'</div>';
+}
+function saveEmblem(){
+  var id=document.getElementById('editing-emblem-id').value;
+  var isVariant=document.getElementById('emblem-type-variant').classList.contains('active');
+  var parentId=isVariant?document.getElementById('emblem-parent-id').value:null;
+  var variantLabel=isVariant?document.getElementById('emblem-variant-label').value:'';
+  var displayName=document.getElementById('emblem-name').value;
+  if(isVariant&&!displayName&&parentId){
+    var p=appData.emblems.filter(function(x){return x.id===parentId})[0];
+    if(p)displayName=p.displayName;
+  }
+  var o={id:id||uid(),parentId:parentId,displayName:displayName,variantLabel:variantLabel,
+    quality:document.getElementById('emblem-quality').value,
+    imgUrl:document.getElementById('emblem-img').value,attrs:getAttrs('emblem-attrs-builder')};
+  var i=appData.emblems.findIndex(function(e){return e.id===id});if(i>=0)appData.emblems[i]=o;else appData.emblems.push(o);
+  clearEmblemForm();renderEmblemList();populateSel();toast(id?'戰徽已更新':'戰徽已新增');
+  archiveAutoSave();
+}
+function editEmblem(id){
+  var e=appData.emblems.filter(function(x){return x.id===id})[0];if(!e)return;
+  document.getElementById('editing-emblem-id').value=e.id;
+  document.getElementById('emblem-name').value=e.displayName||e.name||'';
+  document.getElementById('emblem-quality').value=e.quality;
+  document.getElementById('emblem-img').value=e.imgUrl||'';
+  setAttrs('emblem-attrs-builder',e.attrs);
+  if(e.parentId){
+    setEmblemType('variant');
+    rebuildEmblemParentSelect();
+    document.getElementById('emblem-parent-id').value=e.parentId;
+    document.getElementById('emblem-variant-label').value=e.variantLabel||'';
+  } else {
+    setEmblemType('parent');
+  }
+}
+function deleteEmblem(id){var e=appData.emblems.filter(function(x){return x.id===id})[0];var label=e?(e.displayName||e.name||'')+(e.variantLabel?' · '+e.variantLabel:''):'';if(!confirm('確定刪除戰徽「'+label+'」？\n此操作無法復原。'))return;appData.emblems=appData.emblems.filter(function(e){return e.id!==id});cleanStaleRefs();renderEmblemList();populateSel();toast('戰徽已刪除');archiveAutoSave();}
+function clearEmblemForm(){
+  ['editing-emblem-id','emblem-name','emblem-img','emblem-variant-label'].forEach(function(i){document.getElementById(i).value=''});
+  document.getElementById('emblem-quality').value='gold';
+  document.getElementById('emblem-attrs-builder').innerHTML='';
+  setEmblemType('parent');
+}
+
+/* GENRES */
+function renderGenreList(){
+  document.getElementById('admin-genre-list').innerHTML=appData.genres.map(function(g){
+    return '<div class="admin-item-card" style="border-color:'+g.color+'50;"><div class="admin-item-card-img-wrap" style="background:'+g.color+'18;">'+(g.imgUrl?'<img src="'+g.imgUrl+'" alt="'+g.name+'">':'<span style="font-size:26px;color:'+g.color+'">&#9889;</span>')+'</div><div class="admin-item-card-name" style="color:'+g.color+'">'+g.name+'</div><div class="admin-item-card-sub">'+g.color+'</div><div class="admin-item-card-actions"><button class="btn-sm" onclick="editGenre(this.dataset.id)" data-id="'+g.id+'">編輯</button><button class="btn-sm danger" onclick="deleteGenre(this.dataset.id)" data-id="'+g.id+'">刪除</button></div></div>';
+  }).join('')||'<div style="color:var(--c-text-dim);font-size:14px;">尚無流派</div>';
+}
+function saveGenre(){
+  var id=document.getElementById('editing-genre-id').value;
+  var o={id:id||uid(),name:document.getElementById('genre-name').value,color:document.getElementById('genre-color').value,imgUrl:document.getElementById('genre-img').value};
+  var i=appData.genres.findIndex(function(g){return g.id===id});if(i>=0)appData.genres[i]=o;else appData.genres.push(o);
+  clearGenreForm();renderGenreList();populateSel();toast(id?'流派已更新':'流派已新增');
+  archiveAutoSave();
+}
+function editGenre(id){var g=appData.genres.filter(function(x){return x.id===id})[0];if(!g)return;document.getElementById('editing-genre-id').value=g.id;document.getElementById('genre-name').value=g.name;document.getElementById('genre-color').value=g.color;document.getElementById('genre-img').value=g.imgUrl||''}
+function deleteGenre(id){var g=appData.genres.filter(function(x){return x.id===id})[0];if(!confirm('確定刪除流派「'+(g?g.name:'')+'」？\n此操作無法復原。'))return;appData.genres=appData.genres.filter(function(g){return g.id!==id});renderGenreList();populateSel();toast('流派已刪除');archiveAutoSave();}
+function clearGenreForm(){['editing-genre-id','genre-name','genre-img'].forEach(function(i){document.getElementById(i).value=''});document.getElementById('genre-color').value='#A6822B'}
+
+
+/* ROLE LABELS */
+
+/* PAGE CONFIG */
+function renderPageHeader(){
+  var cfg=appData.pageConfig||{};
+  var eyebrow=cfg.eyebrow||'MAFIA CITY · TACTICAL GUIDE';
+  var title=cfg.title||'豪傑最強陣容';
+  var showTime=cfg.showTime&&cfg.timeText;
+  var wrap=document.getElementById('page-header-wrap');
+  if(!wrap)return;
+  wrap.innerHTML='<div class="page-header-eyebrow">'+eyebrow+'</div>'
+    +'<div class="page-header-title">'+title+'</div>'
+    +(showTime?'<div class="page-time">'+cfg.timeText+'</div>':'');
+}
+function syncPageConfigInputs(){
+  var cfg=appData.pageConfig||{};
+  var e=document.getElementById('cfg-eyebrow');
+  var t=document.getElementById('cfg-title');
+  var tm=document.getElementById('cfg-time-text');
+  var st=document.getElementById('cfg-show-time');
+  if(e)e.value=cfg.eyebrow||'';
+  if(t)t.value=cfg.title||'';
+  if(tm)tm.value=cfg.timeText||'';
+  if(st)st.checked=!!cfg.showTime;
+}
+function applyPageConfig(){
+  if(!appData.pageConfig)appData.pageConfig={};
+  var e=document.getElementById('cfg-eyebrow');
+  var t=document.getElementById('cfg-title');
+  var tm=document.getElementById('cfg-time-text');
+  var st=document.getElementById('cfg-show-time');
+  if(e)appData.pageConfig.eyebrow=e.value;
+  if(t)appData.pageConfig.title=t.value;
+  if(tm)appData.pageConfig.timeText=tm.value;
+  if(st)appData.pageConfig.showTime=st.checked;
+  renderPageHeader();
+  archiveAutoSave();
+}
+function renderRoleLabelCards(){
+  var roles=[
+    {key:'main',label:'主力'},
+    {key:'sub1',label:'輔助1'},
+    {key:'sub2',label:'輔助2'},
+  ];
+  var container=document.getElementById('rolelabel-cards');
+  if(!container)return;
+  container.innerHTML=roles.map(function(r){
+    var rl=(appData.roleLabels&&appData.roleLabels[r.key])||{text:r.label,emoji:'',imgUrl:''};
+    var iconPrev=rl.imgUrl
+      ?'<img src="'+rl.imgUrl+'" alt="" style="height:12px;">'
+      :(rl.emoji?'<span>'+rl.emoji+'</span>':'');
+    var prevHtml='<div class="hero-role-badge" id="rl-preview-'+r.key+'" style="position:static;font-size:13px;padding:2px 6px;">'+iconPrev+(rl.text?'<span>'+rl.text+'</span>':'')+'</div>';
+    return '<div style="display:flex;align-items:center;gap:6px;">'
+      +'<span style="font-size:13px;color:var(--c-text-dim);font-family:var(--ff-display);width:36px;flex-shrink:0;">'+r.label+'</span>'
+      +'<input class="form-input" id="rl-text-'+r.key+'" type="text" value="'+rl.text+'" placeholder="文字" style="font-size:14px;padding:4px 7px;width:70px;flex-shrink:0;" oninput="applyRoleLabel(\''+r.key+'\')">'
+      +'<input class="form-input" id="rl-emoji-'+r.key+'" type="text" value="'+(rl.emoji||'')+'" placeholder="Emoji" style="font-size:14px;padding:4px 7px;width:60px;flex-shrink:0;" oninput="applyRoleLabel(\''+r.key+'\')">'
+      +'<input class="form-input" id="rl-img-'+r.key+'" type="text" value="'+(rl.imgUrl||'')+'" placeholder="圖標URL（選填）" style="font-size:14px;padding:4px 7px;flex:1;" oninput="applyRoleLabel(\''+r.key+'\')">'
+      +prevHtml
+      +'</div>';
+  }).join('');
+}
+
+function applyRoleLabel(key){
+  if(!appData.roleLabels)appData.roleLabels={};
+  var text=document.getElementById('rl-text-'+key);
+  var emoji=document.getElementById('rl-emoji-'+key);
+  var img=document.getElementById('rl-img-'+key);
+  if(!text)return;
+  appData.roleLabels[key]={
+    text:text.value,
+    emoji:emoji?emoji.value:'',
+    imgUrl:img?img.value:'',
+  };
+  // update preview badge
+  var prev=document.getElementById('rl-preview-'+key);
+  if(prev){
+    var iconHtml=img&&img.value?'<img src="'+img.value+'" alt="" style="height:12px;">':'';
+    if(!iconHtml&&emoji&&emoji.value)iconHtml='<span>'+emoji.value+'</span>';
+    prev.innerHTML=iconHtml+(text.value?'<span>'+text.value+'</span>':'');
+  }
+  // live-refresh the frontend lineup cards without full re-render
+  buildLineups();
+  archiveAutoSave();
+}
+function saveRoleLabels(){
+  ['main','sub1','sub2'].forEach(function(k){applyRoleLabel(k);});
+}
+function refreshAll(){
+  renderLineupList();syncPageConfigInputs();renderHeroList();renderStyleIconList();renderStyleNamesGrid();renderStatNamesGrid();rebuildStaticonKeySelect();renderRoleLabelCards();
+  renderBadgeList();renderStatIconList();renderWeaponList();renderEmblemList();
+  renderGenreList();populateSel();
+  renderBadgeSelector('lineup-badge-selector',[]);
+  previewHeroStyleIcon();
+}
+
+/* EXPORT */
+
+
+
+/* RTE */
+var rteLastRange=null;
+function rteCmd(cmd,val){
+  var ed=document.getElementById('lineup-desc-rte');
+  ed.focus();
+  if(rteLastRange){var sel=window.getSelection();sel.removeAllRanges();sel.addRange(rteLastRange);}
+  document.execCommand(cmd,false,val||null);
+  rteLastRange=null;
+}
+document.addEventListener('mousedown',function(e){
+  if(e.target.closest&&e.target.closest('.rte-toolbar')){
+    var sel=window.getSelection();
+    if(sel.rangeCount>0)rteLastRange=sel.getRangeAt(0).cloneRange();
+  }
+});
+var rtePopupMode=null;
+function showRtePopup(mode,evt){
+  rteLastRange=(window.getSelection().rangeCount>0)?window.getSelection().getRangeAt(0).cloneRange():null;
+  rtePopupMode=mode;
+  var existing=document.getElementById('rte-popup');if(existing)existing.remove();
+  var pop=document.createElement('div');pop.className='rte-popup';pop.id='rte-popup';
+  var isImg=(mode==='img');
+  var textRow=isImg?'':'<input type="text" id="rte-pop-text" placeholder="顯示文字（選填）">';
+  var urlPh=isImg?'圖片或圖標 URL':'連結 URL（https://...）';
+  pop.innerHTML='<div class="rte-popup-title">'+(isImg?'插入圖片/圖標':'插入連結')+'</div>'
+    +textRow+'<input type="text" id="rte-pop-url" placeholder="'+urlPh+'">'
+    +'<div class="rte-popup-btns"><button class="btn-sm" onclick="closeRtePopup()">取消</button>'
+    +'<button class="btn-primary" style="padding:5px 14px;font-size:14px;" onclick="confirmRtePopup()">插入</button></div>';
+  var rect=evt.target.getBoundingClientRect();
+  pop.style.top=(rect.bottom+6)+'px';
+  pop.style.left=Math.min(rect.left,window.innerWidth-330)+'px';
+  document.body.appendChild(pop);
+  setTimeout(function(){document.addEventListener('mousedown',outsidePopupClose,{once:true})},10);
+}
+function outsidePopupClose(e){var pop=document.getElementById('rte-popup');if(pop&&!pop.contains(e.target))pop.remove()}
+function closeRtePopup(){var p=document.getElementById('rte-popup');if(p)p.remove()}
+function confirmRtePopup(){
+  var urlEl=document.getElementById('rte-pop-url');var url=urlEl?urlEl.value.trim():'';
+  if(!url){closeRtePopup();return}
+  var ed=document.getElementById('lineup-desc-rte');ed.focus();
+  if(rteLastRange){var sel=window.getSelection();sel.removeAllRanges();sel.addRange(rteLastRange);}
+  if(rtePopupMode==='img'){
+    document.execCommand('insertHTML',false,'<img src="'+url+'" style="max-height:22px;vertical-align:middle;" alt="icon">');
+  } else {
+    var textEl=document.getElementById('rte-pop-text');
+    var text=textEl&&textEl.value.trim()?textEl.value.trim():url;
+    document.execCommand('insertHTML',false,'<a href="'+url+'" target="_blank">'+text+'</a>');
+  }
+  closeRtePopup();
+}
+var EMOJIS=['😀','😎','🔥','⚡','🛡','💪','🎯','🏆','💥','🌟','🚗','🔫','👊','💣','🎖','👑','🦅','🦁','🐉','⭐','🌙','💠','🔰','🎭','🧠','👁','🔮','⚔','🏹','💰','💎','🔴','🟠','🟡','🟢','🔵','🟣'];
+function toggleEmojiPicker(evt){
+  var existing=document.getElementById('emoji-picker');if(existing){existing.remove();return}
+  rteLastRange=(window.getSelection().rangeCount>0)?window.getSelection().getRangeAt(0).cloneRange():null;
+  var pick=document.createElement('div');pick.className='emoji-picker';pick.id='emoji-picker';
+  var grid='<div class="emoji-picker-grid">';
+  EMOJIS.forEach(function(em){grid+='<span onclick="insertEmoji(this.textContent)">'+em+'</span>'});
+  grid+='</div>';pick.innerHTML=grid;
+  var rect=evt.target.getBoundingClientRect();
+  pick.style.top=(rect.bottom+6)+'px';pick.style.left=Math.min(rect.left,window.innerWidth-270)+'px';
+  document.body.appendChild(pick);
+  setTimeout(function(){document.addEventListener('mousedown',outsideEmojiClose,{once:true})},10);
+}
+function outsideEmojiClose(e){var p=document.getElementById('emoji-picker');if(p&&!p.contains(e.target))p.remove()}
+function insertEmoji(em){
+  var ed=document.getElementById('lineup-desc-rte');ed.focus();
+  if(rteLastRange){var sel=window.getSelection();sel.removeAllRanges();sel.addRange(rteLastRange);}
+  document.execCommand('insertText',false,em);
+  var p=document.getElementById('emoji-picker');if(p)p.remove();rteLastRange=null;
+}
+
+
+/* DATA ARCHIVE */
+var ARCHIVE_KEY='hdfy_lineup_v1';
+
+function archiveUpdateInfo(){
+  var el=document.getElementById('archive-info');if(!el)return;
+  try{
+    var raw=localStorage.getItem(ARCHIVE_KEY);
+    if(!raw){el.textContent='尚未存檔（操作後自動存入瀏覽器）';return;}
+    var d=JSON.parse(raw);
+    var ts=d._savedAt?new Date(d._savedAt).toLocaleString('zh-TW'):'';
+    el.textContent='最後存檔：'+ts
+      +' · 英雄 '+d.heroes.length
+      +' / 武器 '+d.weapons.length
+      +' / 戰徽 '+d.emblems.length
+      +' / 陣容 '+d.lineups.length;
+  }catch(e){el.textContent='存檔讀取異常'}
+}
+
+function _migrateData(d){
+  // weapons schema migration
+  d.weapons=(d.weapons||[]).map(function(w){
+    if(!w.displayName)w.displayName=w.name||'';
+    if(!w.hasOwnProperty('parentId'))w.parentId=null;
+    if(!w.variantLabel)w.variantLabel='';
+    return w;
+  });
+  // emblems schema migration
+  d.emblems=(d.emblems||[]).map(function(em){
+    if(!em.displayName)em.displayName=em.name||'';
+    if(!em.hasOwnProperty('parentId'))em.parentId=null;
+    if(!em.variantLabel)em.variantLabel='';
+    return em;
+  });
+  // heroes migration
+  d.heroes=(d.heroes||[]).map(function(h){
+    if(!h.hasOwnProperty('imgUrl'))h.imgUrl='';
+    return h;
+  });
+  // lineups migration
+  d.lineups=(d.lineups||[]).map(function(l){
+    if(!l.badgeIds)l.badgeIds=[];
+    if(!l.hasOwnProperty('bgUrl'))l.bgUrl='';
+    return l;
+  });
+  // ensure all top-level keys exist
+  if(!d.statNames)d.statNames={force:'力量',skill:'技術',physique:'體魄',defense:'防護',speed:'速度'};
+  if(!d.styleNames)d.styleNames={迅捷:'迅捷',智謀:'智謀',無畏:'無畏',穩重:'穩重'};
+  if(!d.styleIcons)d.styleIcons=[
+    {id:'si-xunjie',style:'迅捷',imgUrl:''},{id:'si-zhimou',style:'智謀',imgUrl:''},
+    {id:'si-wuwei',style:'無畏',imgUrl:''},{id:'si-wenzhong',style:'穩重',imgUrl:''}
+  ];
+  if(!d.statIcons)d.statIcons=[
+    {id:'sti1',key:'force',imgUrl:''},{id:'sti2',key:'skill',imgUrl:''},
+    {id:'sti3',key:'physique',imgUrl:''},{id:'sti4',key:'defense',imgUrl:''},
+    {id:'sti5',key:'speed',imgUrl:''}
+  ];
+  if(!d.badges)d.badges=[
+    {id:'b-hot',name:'HOT',imgUrl:'',color:'#fff',bg:'',builtIn:true,builtInCls:'badge-hot'},
+    {id:'b-new',name:'NEW',imgUrl:'',color:'#fff',bg:'',builtIn:true,builtInCls:'badge-new'},
+    {id:'b-rec',name:'推薦',imgUrl:'',color:'#000',bg:'',builtIn:true,builtInCls:'badge-recommend'}
+  ];
+  if(!d.genres)d.genres=[];
+  if(!d.heroes)d.heroes=[];
+  if(!d.lineups)d.lineups=[];
+  if(!d.pageConfig)d.pageConfig={
+    eyebrow:'MAFIA CITY · TACTICAL GUIDE',
+    title:'豪傑最強陣容',
+    showTime:false,timeText:'',showFilterBar:true
+  };
+  if(!d.roleLabels)d.roleLabels={
+    main:{text:'主力',emoji:'⚔️',imgUrl:''},
+    sub1:{text:'輔助1',emoji:'🛡',imgUrl:''},
+    sub2:{text:'輔助2',emoji:'🛡',imgUrl:''}
+  };
+  // clean orphan refs after migration
+  var _wIds=new Set((d.weapons||[]).map(function(w){return w.id}));
+  var _eIds=new Set((d.emblems||[]).map(function(e){return e.id}));
+  var _hIds=new Set((d.heroes||[]).map(function(h){return h.id}));
+  d.lineups=(d.lineups||[]).map(function(l){
+    ['mainWeaponId','sub1WeaponId','sub2WeaponId'].forEach(function(k){if(l[k]&&!_wIds.has(l[k]))l[k]='';});
+    ['mainEmblemId','sub1EmblemId','sub2EmblemId'].forEach(function(k){if(l[k]&&!_eIds.has(l[k]))l[k]='';});
+    ['mainHeroId','subHero1Id','subHero2Id'].forEach(function(k){if(l[k]&&!_hIds.has(l[k]))l[k]='';});
+    return l;
+  });
+  return d;
+}
+
+function archiveAutoSave(){
+  try{
+    var snap=JSON.parse(JSON.stringify(appData));
+    snap._savedAt=new Date().toISOString();
+    localStorage.setItem(ARCHIVE_KEY,JSON.stringify(snap));
+    archiveUpdateInfo();
+  }catch(e){}
+}
+
+function archiveSave(){
+  var snap=JSON.parse(JSON.stringify(appData));
+  snap._savedAt=new Date().toISOString();
+  var json=JSON.stringify(snap,null,2);
+  try{localStorage.setItem(ARCHIVE_KEY,json)}catch(e){}
+  var blob=new Blob([json],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  var ts=new Date().toISOString().slice(0,16).replace('T','_').replace(/:/g,'-');
+  a.download='黑道風雲_搭配存檔_'+ts+'.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  archiveUpdateInfo();
+  toast('存檔已下載 ✓');
+}
+
+function archiveLoad(input){
+  var file=input.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var d=JSON.parse(e.target.result);
+      if(!d.heroes&&!d.weapons&&!d.emblems&&!d.lineups){toast('存檔格式錯誤');return;}
+      d=_migrateData(d);
+      appData=d;
+      try{localStorage.setItem(ARCHIVE_KEY,JSON.stringify(d))}catch(ex){}
+      refreshAll();renderFrontend();archiveUpdateInfo();
+      toast('存檔載入成功 ✓');
+    }catch(err){toast('載入失敗：'+err.message);}
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+
+function archiveReset(){
+  if(!confirm('確定要重置所有資料？\n此操作將清除所有豪傑、武器、戰徽、陣容設定，無法復原。'))return;
+  try{localStorage.removeItem(ARCHIVE_KEY)}catch(e){}
+  location.reload();
+}
+
+function archiveAutoRestore(){
+  try{
+    var raw=localStorage.getItem(ARCHIVE_KEY);
+    if(!raw)return false;
+    var d=JSON.parse(raw);
+    if(!d.heroes&&!d.weapons&&!d.emblems&&!d.lineups)return false;
+    d=_migrateData(d);
+    appData=d;
+    return true;
+  }catch(e){return false;}
+}
+
+/* ───────── 從 Supabase 讀取線上素材（只讀，用 anon 公鑰） ─────────
+   讓拿到本檔案的人不必匯入 JSON 存檔，打開就有全套素材可以配隊做圖。
+   需在 Supabase 執行 2026-07-tool-readonly-access.sql 放行 anon SELECT。 */
+var CLOUD_URL='https://uxkghhzeclabyotfgdvl.supabase.co';
+var CLOUD_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV4a2doaHplY2xhYnlvdGZnZHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0ODg3ODQsImV4cCI6MjA5NDA2NDc4NH0.zn0M03rx8MINSSboC8l_U4AcB8ZZKn7gjrOW3q-OUzQ';
+
+function _cloudGet(path){
+  return fetch(CLOUD_URL+'/rest/v1/'+path,{
+    headers:{apikey:CLOUD_KEY,Authorization:'Bearer '+CLOUD_KEY}
+  }).then(function(r){
+    if(!r.ok)return r.text().then(function(t){throw new Error('HTTP '+r.status+' '+t)});
+    return r.json();
+  });
+}
+function _pArr(v){ if(Array.isArray(v))return v; try{var x=JSON.parse(v||'[]');return Array.isArray(x)?x:[]}catch(e){return []} }
+
+function cloudLoad(withLineups){
+  var info=document.getElementById('archive-info');
+  if(info)info.textContent='正在載入線上素材...';
+  Promise.all([
+    _cloudGet('LineupHero?characterKind=eq.haojie&select=*&order=sortOrder'),
+    _cloudGet('LineupWeapon?select=*&order=sortOrder'),
+    _cloudGet('LineupEmblem?select=*&order=sortOrder'),
+    _cloudGet('LineupGenre?select=*&order=sortOrder'),
+    _cloudGet('SiteConfig?key=eq.lineupConfig&select=value')
+  ]).then(function(res){
+    var heroes=res[0],weapons=res[1],emblems=res[2],genres=res[3],cfgRow=res[4];
+
+    appData.heroes=heroes.map(function(h){return {id:h.id,name:h.name,style:h.style||'迅捷',imgUrl:h.imgUrl||''}});
+    appData.weapons=weapons.map(function(w){return {id:w.id,parentId:w.parentId||null,displayName:w.displayName||'',
+      variantLabel:w.variantLabel||'',quality:w.quality||'gold',isExclusive:!!w.isExclusive,
+      exclusiveHeroId:w.exclusiveHeroId||null,imgUrl:w.imgUrl||'',attrs:_pArr(w.attrs)}});
+    appData.emblems=emblems.map(function(e){return {id:e.id,parentId:e.parentId||null,displayName:e.displayName||'',
+      variantLabel:e.variantLabel||'',quality:e.quality||'gold',imgUrl:e.imgUrl||'',attrs:_pArr(e.attrs)}});
+    appData.genres=genres.map(function(g){return {id:g.id,name:g.name,color:g.color||'#A6822B',imgUrl:g.imgUrl||''}});
+
+    // 全域配置（圖標 / 標籤 / 名稱 / 角色標識 / 頁面標題）
+    var cfg={};
+    if(cfgRow&&cfgRow[0]&&cfgRow[0].value){ try{cfg=JSON.parse(cfgRow[0].value)}catch(e){cfg={}} }
+    if(cfg.styleNames) appData.styleNames=Object.assign({},appData.styleNames,cfg.styleNames);
+    if(cfg.statNames)  appData.statNames =Object.assign({},appData.statNames, cfg.statNames);
+    if(cfg.styleIcons&&cfg.styleIcons.length) appData.styleIcons=appData.styleIcons.map(function(si){
+      var m=cfg.styleIcons.filter(function(x){return x.style===si.style})[0];
+      return m?{id:si.id,style:si.style,imgUrl:m.imgUrl||''}:si;
+    });
+    if(cfg.statIcons&&cfg.statIcons.length) appData.statIcons=appData.statIcons.map(function(si){
+      var m=cfg.statIcons.filter(function(x){return x.key===si.key})[0];
+      return m?{key:si.key,imgUrl:m.imgUrl||''}:si;
+    });
+    if(cfg.badges&&cfg.badges.length){
+      var custom=cfg.badges.filter(function(b){return !b.builtIn});
+      appData.badges=appData.badges.filter(function(b){return b.builtIn}).concat(custom);
+    }
+    if(cfg.roleLabels) appData.roleLabels=Object.assign({},appData.roleLabels,cfg.roleLabels);
+    if(cfg.pageConfig) appData.pageConfig=Object.assign({},appData.pageConfig,cfg.pageConfig);
+
+    if(withLineups){
+      return _cloudGet('Lineup?characterKind=eq.haojie&isPublished=eq.true&select=*&order=sortOrder')
+        .then(function(ls){
+          appData.lineups=ls.map(function(l){
+            var s=_pArr(l.slots), g=function(role){return s.filter(function(x){return x.role===role})[0]||{}};
+            var m=g('main'),a=g('sub1'),b=g('sub2');
+            return {id:l.id,title:l.title||'',description:l.description||'',genreId:l.genreId||'',
+              bgUrl:l.bgUrl||'',badgeIds:_pArr(l.badgeIds),
+              mainHeroId:m.heroId||'',subHero1Id:a.heroId||'',subHero2Id:b.heroId||'',
+              mainStat:m.stat||'',sub1Stat:a.stat||'',sub2Stat:b.stat||'',
+              mainWeaponId:m.weaponId||'',mainEmblemId:m.emblemId||'',
+              sub1WeaponId:a.weaponId||'',sub1EmblemId:a.emblemId||'',
+              sub2WeaponId:b.weaponId||'',sub2EmblemId:b.emblemId||''};
+          });
+        });
+    }
+  }).then(function(){
+    cleanStaleRefs();
+    // 重繪全部
+    populateSel();renderFrontend();
+    renderHeroList();renderWeaponList();renderEmblemList();renderGenreList();
+    renderLineupList();renderStyleIconList();renderStatIconList();renderBadgeList();
+    renderStyleNamesGrid();renderStatNamesGrid();renderRoleLabelCards();
+    renderBadgeSelector('lineup-badge-selector',[]);
+    ['cfg-eyebrow','cfg-title','cfg-time-text'].forEach(function(id){
+      var el=document.getElementById(id);if(!el)return;
+      el.value=(id==='cfg-eyebrow'?appData.pageConfig.eyebrow:id==='cfg-title'?appData.pageConfig.title:appData.pageConfig.timeText)||'';
+    });
+    var st=document.getElementById('cfg-show-time');if(st)st.checked=!!appData.pageConfig.showTime;
+    archiveAutoSave();
+    toast('線上素材已載入 ✓');
+  }).catch(function(e){
+    archiveUpdateInfo();
+    alert('載入線上素材失敗：\n'+(e.message||e)+'\n\n請確認：\n1. 已連網\n2. Supabase 已執行 2026-07-tool-readonly-access.sql 放行 anon 讀取');
+  });
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  var hasLocal=archiveAutoRestore();
+  populateSel();renderFrontend();
+  archiveUpdateInfo();
+  // 首次打開（本機無存檔）→ 自動載入線上素材與已發佈陣容，開箱即用
+  if(!hasLocal) cloudLoad(true);
+});
+
+</script>
+
+<!-- ────────── Supabase 快速上傳（本地工具直傳，無需登入官網後台） ──────────
+     anon 公開金鑰為前端設計公開，內嵌於此檔案屬正常用法。
+     依賴：Supabase 已建立 public 桶 'tool-uploads' 並開放匿名 INSERT 策略。 -->
+<script>
+(function(){
+  var SB_URL = 'https://uxkghhzeclabyotfgdvl.supabase.co';
+  var SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV4a2doaHplY2xhYnlvdGZnZHZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0ODg3ODQsImV4cCI6MjA5NDA2NDc4NH0.zn0M03rx8MINSSboC8l_U4AcB8ZZKn7gjrOW3q-OUzQ';
+  var BUCKET = 'tool-uploads';
+
+  function safeName(name){
+    var ext = (name.split('.').pop() || 'png').toLowerCase().replace(/[^a-z0-9]/g,'') || 'png';
+    var base = name.replace(/\.[^.]+$/,'')
+      .replace(/[^\x00-\x7F]/g,'')       // 去非 ASCII（中文）
+      .replace(/[^a-zA-Z0-9_-]/g,'_')
+      .replace(/^_+|_+$/g,'').slice(0,60) || 'image';
+    return Date.now() + '-' + base + '.' + ext;
+  }
+
+  function uploadFile(file, onOk, onErr){
+    if(!file || !/^image\//.test(file.type)){ onErr && onErr('僅支援圖片檔案'); return; }
+    if(file.size > 50*1024*1024){ onErr && onErr('檔案過大（上限 50MB）'); return; }
+    var path = 'uploads/' + safeName(file.name);
+    fetch(SB_URL + '/storage/v1/object/' + BUCKET + '/' + path, {
+      method: 'POST',
+      headers: {
+        'apikey': SB_ANON,
+        'Authorization': 'Bearer ' + SB_ANON,
+        'Content-Type': file.type,
+        'x-upsert': 'false'
+      },
+      body: file
+    }).then(function(res){
+      if(!res.ok) return res.text().then(function(t){ throw new Error('HTTP '+res.status+' '+t); });
+      onOk(SB_URL + '/storage/v1/object/public/' + BUCKET + '/' + path);
+    }).catch(function(e){ onErr && onErr(e.message || '上傳失敗'); });
+  }
+
+  function attachTo(input){
+    if(input.dataset.sbAttached) return;
+    input.dataset.sbAttached = '1';
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;gap:6px;margin-top:5px;align-items:center;';
+    var btn = document.createElement('button');
+    btn.type = 'button'; btn.textContent = '📤 快速上傳';
+    btn.className = 'btn-sm';
+    var status = document.createElement('span');
+    status.style.cssText = 'font-size:13px;color:var(--c-text-dim);';
+    var fileInput = document.createElement('input');
+    fileInput.type = 'file'; fileInput.accept = 'image/*'; fileInput.style.display = 'none';
+    btn.onclick = function(){ fileInput.click(); };
+    fileInput.onchange = function(){
+      var f = fileInput.files && fileInput.files[0];
+      if(!f) return;
+      status.textContent = '上傳中...'; btn.disabled = true;
+      uploadFile(f, function(url){
+        input.value = url;
+        input.dispatchEvent(new Event('input', { bubbles:true }));
+        input.dispatchEvent(new Event('change', { bubbles:true }));
+        status.textContent = '✓ 已上傳'; btn.disabled = false;
+        setTimeout(function(){ status.textContent=''; }, 3000);
+      }, function(err){
+        status.textContent = '✗ ' + err; btn.disabled = false;
+      });
+      fileInput.value = '';
+    };
+    wrap.appendChild(btn); wrap.appendChild(fileInput); wrap.appendChild(status);
+    input.parentNode.appendChild(wrap);
+  }
+
+  function scan(){
+    document.querySelectorAll('input[placeholder^="https://"]').forEach(attachTo);
+  }
+  document.addEventListener('DOMContentLoaded', scan);
+  // 後台切換分頁時再補掃一次（新出現的輸入框）
+  document.addEventListener('click', function(e){
+    if(e.target && e.target.classList && e.target.classList.contains('admin-nav-item')){ setTimeout(scan, 50); }
+  });
+})();
+</script>
+</body>
+</html>
