@@ -121,6 +121,122 @@ export default function LineupAdminApp() {
     finally { setSaving(false); setTimeout(() => setMsg(''), 4000) }
   }
 
+  // ───────── 匯入線下工具的存檔 JSON ─────────
+  // 工具的資料形狀與站點略有差異：豪傑陣容是扁平欄位、詞條掛在武器/戰徽上。
+  // 這裡做結構轉換，並把武器/戰徽上的詞條抽成獨立詞條庫再按槽位掛回，避免資訊遺失。
+  const importArchive = (raw: any) => {
+    const pArr = (v: any): any[] => Array.isArray(v) ? v : (() => { try { const x = JSON.parse(v || '[]'); return Array.isArray(x) ? x : [] } catch { return [] } })()
+
+    const tHeroes = pArr(raw.heroes)
+    const tWeapons = pArr(raw.weapons)
+    const tEmblems = pArr(raw.emblems)
+    const tGenres = pArr(raw.genres)
+    const tPets = pArr(raw.pets)
+    const tHeroEquips = pArr(raw.heroEquips)
+    const tEquipSets = pArr(raw.equipSets)
+    const tLineups = pArr(raw.lineups)
+
+    // 1) 詞條庫：從武器/戰徽的 attrs 收集並去重（同名同類型只留一筆）
+    const attrList: LineupAttrT[] = []
+    const attrKey = new Map<string, string>() // kind|name -> id
+    const ensureAttr = (name: string, kind: 'weapon' | 'emblem') => {
+      const k = kind + '|' + name
+      if (attrKey.has(k)) return attrKey.get(k)!
+      const id = uid()
+      attrKey.set(k, id)
+      attrList.push({ id, name, kind, sortOrder: attrList.length })
+      return id
+    }
+    const weaponAttrIdsOf = (wid?: string) => {
+      const w = tWeapons.find((x: any) => x.id === wid)
+      return w ? pArr(w.attrs).filter(Boolean).map((a: string) => ensureAttr(a, 'weapon')) : []
+    }
+    const emblemAttrIdsOf = (eid?: string) => {
+      const e = tEmblems.find((x: any) => x.id === eid)
+      return e ? pArr(e.attrs).filter(Boolean).map((a: string) => ensureAttr(a, 'emblem')) : []
+    }
+
+    // 2) 陣容：豪傑扁平欄位 → slots；英雄沿用 slots
+    const newLineups: LineupT[] = tLineups.map((l: any, i: number) => {
+      const kind = l.characterKind || 'haojie'
+      const base: LineupT = {
+        id: l.id || uid(), title: l.title || '未命名', slug: l.slug || l.id || uid(),
+        characterKind: kind, genreId: l.genreId || null, bgUrl: l.bgUrl || '',
+        badgeIds: pArr(l.badgeIds), description: l.description || '',
+        updateText: l.updateText || '', isPinned: !!l.isPinned,
+        isPublished: l.isPublished !== false, sortOrder: l.sortOrder ?? i, slots: [],
+      }
+      if (kind === 'hero') {
+        base.slots = ROLE_KEYS.map(role => {
+          const s = pArr(l.slots).find((x: any) => x.role === role) || {}
+          const eq = [...pArr(s.equipIds)].slice(0, 6)
+          while (eq.length < 6) eq.push('')
+          return { role, heroId: s.heroId || '', petIds: pArr(s.petIds), setId: s.setId || '', equipIds: eq }
+        })
+      } else {
+        const fh: any = { main: 'mainHeroId', sub1: 'subHero1Id', sub2: 'subHero2Id' }
+        const fs: any = { main: 'mainStat', sub1: 'sub1Stat', sub2: 'sub2Stat' }
+        const fw: any = { main: 'mainWeaponId', sub1: 'sub1WeaponId', sub2: 'sub2WeaponId' }
+        const fe: any = { main: 'mainEmblemId', sub1: 'sub1EmblemId', sub2: 'sub2EmblemId' }
+        base.slots = ROLE_KEYS.map(role => ({
+          role,
+          heroId: l[fh[role]] || '',
+          stat: l[fs[role]] || '',
+          weaponId: l[fw[role]] || '',
+          weaponAttrIds: weaponAttrIdsOf(l[fw[role]]),
+          emblemId: l[fe[role]] || '',
+          emblemAttrIds: emblemAttrIdsOf(l[fe[role]]),
+        }))
+      }
+      return base
+    })
+
+    // 3) 素材（武器/戰徽的 attrs 已轉入詞條庫，這裡清空以符合「解綁」）
+    const dc = defaultConfig()
+    const c = raw || {}
+    setHeroes(tHeroes.map((h: any, i: number) => ({ id: h.id || uid(), name: h.name || '', style: h.style || '迅捷', imgUrl: h.imgUrl || '', characterKind: h.characterKind || 'haojie', sortOrder: i })))
+    setWeapons(tWeapons.map((w: any, i: number) => ({ id: w.id || uid(), parentId: w.parentId || null, displayName: w.displayName || w.name || '', variantLabel: w.variantLabel || '', quality: w.quality || 'gold', isExclusive: !!w.isExclusive, exclusiveHeroId: w.exclusiveHeroId || null, imgUrl: w.imgUrl || '', attrs: [], sortOrder: i })))
+    setEmblems(tEmblems.map((e: any, i: number) => ({ id: e.id || uid(), parentId: e.parentId || null, displayName: e.displayName || e.name || '', variantLabel: e.variantLabel || '', quality: e.quality || 'gold', imgUrl: e.imgUrl || '', attrs: [], sortOrder: i })))
+    setGenres(tGenres.map((g: any, i: number) => ({ id: g.id || uid(), name: g.name || '', color: g.color || '#C9A227', imgUrl: g.imgUrl || '', sortOrder: i })))
+    setPets(tPets.map((p: any, i: number) => ({ id: p.id || uid(), name: p.name || '', kind: p.kind || 'pet', quality: p.quality || 'gold', imgUrl: p.imgUrl || '', attrs: pArr(p.attrs), sortOrder: i })))
+    setHeroEquips(tHeroEquips.map((e: any, i: number) => ({ id: e.id || uid(), name: e.name || '', slotIndex: e.slotIndex || 1, quality: e.quality || 'gold', imgUrl: e.imgUrl || '', setId: e.setId || null, attrs: pArr(e.attrs), sortOrder: i })))
+    setEquipSets(tEquipSets.map((s: any, i: number) => ({ id: s.id || uid(), name: s.name || '', imgUrl: s.imgUrl || '', bonus: pArr(s.bonus), genreIds: pArr(s.genreIds), sortOrder: i })))
+    setAttrs(attrList)
+    setLineups(newLineups)
+    setConfig({
+      styleNames: { ...dc.styleNames, ...(c.styleNames || {}) },
+      styleIcons: STYLE_KEYS.map(s => (c.styleIcons || []).find((x: any) => x.style === s) || { style: s, imgUrl: '' }),
+      statNames: { ...dc.statNames, ...(c.statNames || {}) },
+      statIcons: STAT_KEYS.map(k => (c.statIcons || []).find((x: any) => x.key === k) || { key: k, imgUrl: '' }),
+      badges: [...BUILTIN_BADGES, ...((c.badges || []).filter((b: BadgeT) => !b.builtIn))],
+      roleLabels: { ...dc.roleLabels, ...(c.roleLabels || {}) },
+      pageConfig: { ...dc.pageConfig, ...(c.pageConfig || {}) },
+    })
+
+    markDirty()
+    const n = newLineups.length
+    const nh = newLineups.filter(l => l.characterKind === 'hero').length
+    setMsg(`✓ 已載入存檔：陣容 ${n} 套（豪傑 ${n - nh} / 英雄 ${nh}）· 角色 ${tHeroes.length} · 詞條 ${attrList.length} —— 請確認後點「保存全部」寫入資料庫`)
+  }
+
+  const onArchiveFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]
+    e.target.value = ''
+    if (!f) return
+    if (!confirm('匯入存檔會「整組取代」目前後台的陣容資料（陣容 / 角色 / 武器 / 戰徽 / 詞條 / 戰寵 / 裝備 / 套裝 / 流派 / 圖標配置）。\n\n匯入後仍需點「保存全部」才會寫入資料庫，屆時可先檢查。\n\n確定繼續？')) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(String(reader.result || '{}'))
+        if (!data || (!data.lineups && !data.heroes)) { setMsg('匯入失敗：這不像是工具的存檔檔案'); return }
+        importArchive(data)
+      } catch (err: any) {
+        setMsg('匯入失敗：JSON 解析錯誤 ' + (err?.message || ''))
+      }
+    }
+    reader.readAsText(f)
+  }
+
   const styleName = (s?: string) => (s && config.styleNames?.[s]) || s || ''
   const statName = (k?: string) => (k && config.statNames?.[k]) || k || ''
   const weaponLabel = (w: LineupWeaponT) => (w.displayName || '') + (w.variantLabel ? ' · ' + w.variantLabel : '') + ' [' + (QUALITY_LABEL[w.quality || 'gold']) + ']'
@@ -151,8 +267,12 @@ export default function LineupAdminApp() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {msg && <span className="text-sm text-wiki-text-muted">{msg}</span>}
-            {dirty && <span className="text-xs text-orange-500">● 未保存</span>}
+            {dirty && <span className="text-xs text-orange-500 whitespace-nowrap">● 未保存</span>}
+            {/* 匯入線下 HTML 工具的存檔 JSON */}
+            <label className={btnSec + ' cursor-pointer whitespace-nowrap'} title="匯入線下工具下載的存檔 JSON">
+              ⬆ 匯入工具存檔
+              <input type="file" accept=".json,application/json" className="hidden" onChange={onArchiveFile} />
+            </label>
             <button className={btnPri} onClick={save} disabled={saving}>{saving ? '保存中...' : '保存全部'}</button>
           </div>
         </div>
@@ -164,6 +284,12 @@ export default function LineupAdminApp() {
             </button>
           ))}
         </div>
+        {/* 訊息條（匯入結果／保存結果，文字較長單獨一行） */}
+        {msg && (
+          <div className="max-w-6xl mx-auto px-4 pb-2">
+            <div className="text-sm text-wiki-text bg-wiki-accent/10 border border-wiki-accent/40 rounded px-3 py-2">{msg}</div>
+          </div>
+        )}
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-6">
