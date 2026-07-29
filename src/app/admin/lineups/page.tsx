@@ -128,7 +128,7 @@ export default function LineupsAdminPage() {
 
       <div className="max-w-6xl mx-auto px-4 py-6">
         {tab === 'lineups' && (
-          <LineupsTab {...{ lineups, setLineups, heroes, weapons, emblems, genres, config, setConfig, markDirty, styleName, statName, weaponLabel, emblemLabel }} />
+          <LineupsTab {...{ lineups, setLineups, heroes, weapons, emblems, genres, config, setConfig, markDirty, styleName, statName, weaponLabel, emblemLabel, save, saving, dirty }} />
         )}
         {tab === 'heroes' && (
           <HeroesTab {...{ heroes, setHeroes, config, markDirty, styleName }} />
@@ -151,7 +151,7 @@ export default function LineupsAdminPage() {
 }
 
 /* ───────────── 陣容 Tab ───────────── */
-function LineupsTab({ lineups, setLineups, heroes, weapons, emblems, genres, config, setConfig, markDirty, styleName, statName, weaponLabel, emblemLabel }: any) {
+function LineupsTab({ lineups, setLineups, heroes, weapons, emblems, genres, config, setConfig, markDirty, styleName, statName, weaponLabel, emblemLabel, save, saving, dirty }: any) {
   // 只存 id：編輯中的改動**直接寫回 lineups**，避免「忘記按套用 → 改動丟失」
   const [editingId, setEditingId] = useState<string | null>(null)
   const editing: LineupT | undefined = lineups.find((l: LineupT) => l.id === editingId)
@@ -211,9 +211,13 @@ function LineupsTab({ lineups, setLineups, heroes, weapons, emblems, genres, con
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-lg font-bold text-wiki-text">編輯陣容</h2>
-            <p className="text-xs text-wiki-text-muted mt-1">改動即時生效，完成後點右上「保存全部」寫入資料庫</p>
+            <p className="text-xs text-wiki-text-muted mt-1">改動即時記錄，點「保存」寫入資料庫</p>
           </div>
-          <button className={btnSec} onClick={() => setEditingId(null)}>← 返回列表</button>
+          <div className="flex items-center gap-2">
+            {dirty && <span className="text-xs text-orange-500">● 未保存</span>}
+            <button className={btnSec} onClick={() => setEditingId(null)}>← 返回列表</button>
+            <button className={btnPri} onClick={save} disabled={saving}>{saving ? '保存中...' : '💾 保存'}</button>
+          </div>
         </div>
 
         {/* ▸ 選擇豪傑 & 各自加點（對照線下工具：立繪預覽 + 角色 + 加點） */}
@@ -323,6 +327,13 @@ function LineupsTab({ lineups, setLineups, heroes, weapons, emblems, genres, con
           <label className="flex items-center gap-2 text-wiki-text"><input type="checkbox" checked={!!editing.isPinned} onChange={e => set({ isPinned: e.target.checked })} /> 置頂</label>
           <label className="flex items-center gap-2 text-wiki-text"><input type="checkbox" checked={editing.isPublished !== false} onChange={e => set({ isPublished: e.target.checked })} /> 發佈</label>
           <div className="flex items-center gap-2 text-wiki-text"><span>排序</span><input type="number" className="w-20 bg-wiki-gray border border-wiki-border px-2 py-1" value={editing.sortOrder ?? 0} onChange={e => set({ sortOrder: parseInt(e.target.value) || 0 })} /></div>
+        </div>
+
+        {/* 底部保存（免得滾回頂部） */}
+        <div className="flex items-center gap-3 mt-6 pt-4 border-t border-wiki-border">
+          <button className={btnPri} onClick={save} disabled={saving}>{saving ? '保存中...' : '💾 保存'}</button>
+          <button className={btnSec} onClick={() => setEditingId(null)}>← 返回列表</button>
+          {dirty && <span className="text-xs text-orange-500">● 有未保存的改動</span>}
         </div>
       </div>
     )
