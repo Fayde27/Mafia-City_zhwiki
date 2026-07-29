@@ -32,7 +32,8 @@ const NAV_SECTIONS = [
   {
     title: '內容模塊',
     links: [
-      { label: '陣容搭配', href: '/admin/lineups', icon: '🎯', desc: '豪傑陣容 · 角色/武器/戰徽/流派' },
+      { label: '豪傑陣容', href: '/admin/lineups', icon: '🎯', desc: '豪傑陣容 · 武器/戰徽/詞條/流派' },
+      { label: '英雄陣容', href: '/admin/hero-lineups', icon: '🦸', desc: '英雄陣容 · 戰寵/裝備/套裝/流派' },
       { label: '道具介紹', href: '/admin/items', icon: '🎒', desc: '稀有道具列表、分類、篩選' },
       { label: '活動一覽', href: '/admin/events', icon: '🎉', desc: '活動列表、分類管理' },
     ],

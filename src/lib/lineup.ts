@@ -39,7 +39,7 @@ export interface BadgeT { id: string; name: string; imgUrl?: string; color?: str
 export interface StyleIconT { id?: string; style: string; imgUrl?: string }
 export interface StatIconT { key: string; imgUrl?: string }
 export interface RoleLabelT { text: string; emoji?: string; imgUrl?: string }
-export interface PageConfigT { eyebrow?: string; title?: string; showTime?: boolean; timeText?: string; showFilterBar?: boolean }
+export interface PageConfigT { eyebrow?: string; title?: string; heroTitle?: string; showTime?: boolean; timeText?: string; showFilterBar?: boolean }
 
 export interface LineupConfigT {
   styleNames?: Record<string, string>
