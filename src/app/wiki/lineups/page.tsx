@@ -8,13 +8,17 @@ import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import {
   QUALITY_COLOR, STAT_DEFAULT_ICON, STAT_DEFAULT_NAME, STAT_COLOR, STYLE_DEFAULT_ICON,
-  parseArr, type LineupT, type LineupHeroT, type LineupWeaponT, type LineupEmblemT,
+  HERO_EQUIP_SLOTS, parseArr, badgeStyle,
+  type LineupT, type LineupHeroT, type LineupWeaponT, type LineupEmblemT,
   type LineupGenreT, type LineupConfigT, type BadgeT, type LineupSlotT,
+  type LineupAttrT, type LineupPetT, type LineupHeroEquipT, type LineupEquipSetT,
 } from '@/lib/lineup'
 
 interface DataT {
   lineups: LineupT[]; heroes: LineupHeroT[]; weapons: LineupWeaponT[]
   emblems: LineupEmblemT[]; genres: LineupGenreT[]; config: LineupConfigT
+  attrs: LineupAttrT[]; pets: LineupPetT[]
+  heroEquips: LineupHeroEquipT[]; equipSets: LineupEquipSetT[]
 }
 
 export default function LineupsWikiPage() {
@@ -22,19 +26,26 @@ export default function LineupsWikiPage() {
   const [loading, setLoading] = useState(true)
   const [genreFilter, setGenreFilter] = useState('')
   const [heroFilter, setHeroFilter] = useState('')
+  const [kind, setKind] = useState<'haojie' | 'hero'>('haojie')
 
   useEffect(() => {
-    fetch('/api/wiki/lineups?characterKind=haojie')
+    setLoading(true)
+    setHeroFilter('')
+    fetch(`/api/wiki/lineups?characterKind=${kind}`)
       .then(r => r.json())
       .then(d => { setData(d); setLoading(false) })
       .catch(() => setLoading(false))
-  }, [])
+  }, [kind])
 
   const heroMap = useMemo(() => Object.fromEntries((data?.heroes || []).map(h => [h.id, h])), [data])
   const weaponMap = useMemo(() => Object.fromEntries((data?.weapons || []).map(w => [w.id, w])), [data])
   const emblemMap = useMemo(() => Object.fromEntries((data?.emblems || []).map(e => [e.id, e])), [data])
   const genreMap = useMemo(() => Object.fromEntries((data?.genres || []).map(g => [g.id, g])), [data])
   const badgeMap = useMemo(() => Object.fromEntries((data?.config?.badges || []).map(b => [b.id, b])), [data])
+  const attrMap = useMemo(() => Object.fromEntries((data?.attrs || []).map(a => [a.id, a])), [data])
+  const petMap = useMemo(() => Object.fromEntries((data?.pets || []).map(p => [p.id, p])), [data])
+  const equipMap = useMemo(() => Object.fromEntries((data?.heroEquips || []).map(e => [e.id, e])), [data])
+  const setMap = useMemo(() => Object.fromEntries((data?.equipSets || []).map(s => [s.id, s])), [data])
 
   const styleName = (s?: string) => (s && data?.config?.styleNames?.[s]) || s || ''
   const statName = (k?: string) => (k && data?.config?.statNames?.[k]) || (k && STAT_DEFAULT_NAME[k]) || ''
@@ -64,6 +75,16 @@ export default function LineupsWikiPage() {
           {pageCfg?.eyebrow && <div className="text-xs tracking-[0.3em] text-wiki-accent/70 uppercase mb-1">{pageCfg.eyebrow}</div>}
           <h1 className="text-3xl md:text-4xl font-heading font-bold text-wiki-accent heading-hard">{pageCfg?.title || '豪傑陣容搭配'}</h1>
           {pageCfg?.showTime && pageCfg?.timeText && <div className="text-wiki-text-muted text-sm mt-2 tracking-widest">{pageCfg.timeText}</div>}
+        </div>
+
+        {/* 豪傑 / 英雄 切換 */}
+        <div className="flex gap-2 justify-center mb-4">
+          {[{ k: 'haojie', label: '豪傑陣容' }, { k: 'hero', label: '英雄陣容' }].map(t => (
+            <button key={t.k} onClick={() => { setKind(t.k as any); setGenreFilter('') }}
+              className={`px-5 py-2 rounded-full text-sm border transition-colors ${kind === t.k ? 'border-wiki-accent bg-wiki-accent/10 text-wiki-accent font-bold' : 'border-wiki-border text-wiki-text-muted hover:border-wiki-accent/50'}`}>
+              {t.label}
+            </button>
+          ))}
         </div>
 
         {/* 篩選 */}
@@ -102,7 +123,13 @@ export default function LineupsWikiPage() {
                   <div className="relative flex items-center justify-between gap-2 px-4 py-2.5 border-b border-wiki-border">
                     <div className="flex items-center gap-2 flex-wrap">
                       {genre && <span className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-wiki-border text-xs font-bold text-wiki-text"><span className="w-2 h-2 rounded-full" style={{ background: genre.color }} />{genre.name}</span>}
-                      {badges.map(bid => { const b = badgeMap[bid]; return b ? <span key={bid} className="px-2 py-0.5 rounded text-[10px] font-bold tracking-wider bg-wiki-accent/15 text-wiki-accent border border-wiki-accent/40">{b.name}</span> : null })}
+                      {badges.map(bid => {
+                        const b = badgeMap[bid]
+                        if (!b) return null
+                        return b.imgUrl
+                          ? <img key={bid} src={b.imgUrl} alt={b.name} className="h-5 max-w-[80px] object-contain" />
+                          : <span key={bid} className="px-2 py-0.5 rounded text-[10px] font-bold tracking-wider" style={badgeStyle(b)}>{b.name}</span>
+                      })}
                     </div>
                     {l.updateText && <span className="text-xs text-wiki-text-muted whitespace-nowrap">更新 {l.updateText}</span>}
                   </div>
@@ -131,31 +158,94 @@ export default function LineupsWikiPage() {
                             {styleIcon(hero?.style) ? <img src={styleIcon(hero?.style)} className="w-5 h-5 rounded-full object-cover" alt="" /> : <span className="text-sm">{hero?.style ? STYLE_DEFAULT_ICON[hero.style] : ''}</span>}
                             <span className="font-bold text-wiki-text truncate">{hero?.name || '—'}</span>
                           </div>
-                          {/* 武器 */}
-                          {weapon && (
-                            <div className="flex items-start gap-2 px-3 py-2 border-t border-wiki-border">
-                              <div className="w-9 h-9 rounded overflow-hidden flex-shrink-0 bg-wiki-gray flex items-center justify-center border" style={{ borderColor: QUALITY_COLOR[weapon.quality || 'gold'] }}>
-                                {weapon.imgUrl ? <img src={weapon.imgUrl} className="w-full h-full object-cover" alt="" /> : <span>⚔</span>}
-                              </div>
-                              <div className="min-w-0">
-                                <div className="text-xs text-wiki-text-muted">武器</div>
-                                <div className="text-sm font-bold text-wiki-text truncate">{weapon.displayName}</div>
-                                {parseArr<string>(weapon.attrs).map((a, i) => <div key={i} className="text-[11px] text-wiki-accent/90 leading-snug">⭐ {a}</div>)}
-                              </div>
-                            </div>
-                          )}
-                          {/* 戰徽 */}
-                          {emblem && (
-                            <div className="flex items-start gap-2 px-3 py-2 border-t border-wiki-border">
-                              <div className="w-9 h-9 rounded overflow-hidden flex-shrink-0 bg-wiki-gray flex items-center justify-center border" style={{ borderColor: QUALITY_COLOR[emblem.quality || 'gold'] }}>
-                                {emblem.imgUrl ? <img src={emblem.imgUrl} className="w-full h-full object-cover" alt="" /> : <span>🛡</span>}
-                              </div>
-                              <div className="min-w-0">
-                                <div className="text-xs text-wiki-text-muted">戰徽</div>
-                                <div className="text-sm font-bold text-wiki-text truncate">{emblem.displayName}</div>
-                                <div className="text-[11px] text-wiki-text-muted">{parseArr<string>(emblem.attrs).join(' · ')}</div>
-                              </div>
-                            </div>
+                          {kind === 'haojie' ? (
+                            <>
+                              {/* 武器 + 該槽位挑選的武器詞條 */}
+                              {weapon && (
+                                <div className="flex items-start gap-2 px-3 py-2 border-t border-wiki-border">
+                                  <div className="w-9 h-9 rounded overflow-hidden flex-shrink-0 bg-wiki-gray flex items-center justify-center border" style={{ borderColor: QUALITY_COLOR[weapon.quality || 'gold'] }}>
+                                    {weapon.imgUrl ? <img src={weapon.imgUrl} className="w-full h-full object-contain" alt="" /> : <span>⚔</span>}
+                                  </div>
+                                  <div className="min-w-0">
+                                    <div className="text-xs text-wiki-text-muted">武器</div>
+                                    <div className="text-sm font-bold text-wiki-text truncate">{weapon.displayName}</div>
+                                    {(s.weaponAttrIds || []).map(id => attrMap[id]).filter(Boolean)
+                                      .map((a, i) => <div key={i} className="text-[11px] text-wiki-accent/90 leading-snug">⭐ {a.name}</div>)}
+                                  </div>
+                                </div>
+                              )}
+                              {/* 戰徽 + 該槽位挑選的戰徽詞條 */}
+                              {emblem && (
+                                <div className="flex items-start gap-2 px-3 py-2 border-t border-wiki-border">
+                                  <div className="w-9 h-9 rounded overflow-hidden flex-shrink-0 bg-wiki-gray flex items-center justify-center border" style={{ borderColor: QUALITY_COLOR[emblem.quality || 'gold'] }}>
+                                    {emblem.imgUrl ? <img src={emblem.imgUrl} className="w-full h-full object-contain" alt="" /> : <span>🛡</span>}
+                                  </div>
+                                  <div className="min-w-0">
+                                    <div className="text-xs text-wiki-text-muted">戰徽</div>
+                                    <div className="text-sm font-bold text-wiki-text truncate">{emblem.displayName}</div>
+                                    <div className="text-[11px] text-wiki-text-muted leading-snug">
+                                      {(s.emblemAttrIds || []).map(id => attrMap[id]?.name).filter(Boolean).join(' · ')}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              {/* 戰寵 / 異獸 */}
+                              {(s.petIds || []).length > 0 && (
+                                <div className="px-3 py-2 border-t border-wiki-border">
+                                  <div className="text-xs text-wiki-text-muted mb-1.5">戰寵 / 異獸</div>
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {(s.petIds || []).map(id => petMap[id]).filter(Boolean).map(p => (
+                                      <div key={p.id} className="flex items-center gap-1 px-1.5 py-1 rounded border bg-wiki-gray/50" style={{ borderColor: QUALITY_COLOR[p.quality || 'gold'] + '99' }}>
+                                        {p.imgUrl ? <img src={p.imgUrl} className="w-6 h-6 object-contain" alt="" /> : <span className="text-sm">🐾</span>}
+                                        <span className="text-[11px] font-bold text-wiki-text">{p.name}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                              {/* 套裝 + 加成 */}
+                              {setMap[s.setId || ''] && (
+                                <div className="px-3 py-2 border-t border-wiki-border">
+                                  <div className="flex items-center gap-2">
+                                    {setMap[s.setId!].imgUrl && <img src={setMap[s.setId!].imgUrl} className="w-6 h-6 object-contain" alt="" />}
+                                    <div className="text-xs text-wiki-text-muted">套裝</div>
+                                    <div className="text-sm font-bold text-wiki-accent truncate">{setMap[s.setId!].name}</div>
+                                  </div>
+                                  {parseArr<string>(setMap[s.setId!].bonus).map((b, i) => (
+                                    <div key={i} className="text-[11px] text-wiki-accent/90 leading-snug">✨ {b}</div>
+                                  ))}
+                                </div>
+                              )}
+                              {/* 6 格裝備 */}
+                              {(s.equipIds || []).some(Boolean) && (
+                                <div className="px-3 py-2 border-t border-wiki-border">
+                                  <div className="text-xs text-wiki-text-muted mb-1.5">裝備</div>
+                                  <div className="space-y-1">
+                                    {HERO_EQUIP_SLOTS.map((sl, i) => {
+                                      const eq = equipMap[(s.equipIds || [])[i] || '']
+                                      return (
+                                        <div key={sl.index} className="flex items-center gap-2">
+                                          <span className="text-[10px] text-wiki-text-muted w-8 flex-shrink-0">{sl.label}</span>
+                                          {eq ? (
+                                            <>
+                                              <div className="w-6 h-6 rounded overflow-hidden flex-shrink-0 bg-wiki-gray flex items-center justify-center border" style={{ borderColor: QUALITY_COLOR[eq.quality || 'gold'] }}>
+                                                {eq.imgUrl ? <img src={eq.imgUrl} className="w-full h-full object-contain" alt="" /> : <span className="text-[10px]">🛡</span>}
+                                              </div>
+                                              <span className="text-[11px] text-wiki-text truncate">{eq.name}</span>
+                                            </>
+                                          ) : (
+                                            <span className="text-[11px] text-wiki-text-muted/60">—</span>
+                                          )}
+                                        </div>
+                                      )
+                                    })}
+                                  </div>
+                                </div>
+                              )}
+                            </>
                           )}
                         </div>
                       )

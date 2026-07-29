@@ -9,12 +9,16 @@ const CONFIG_KEY = 'lineupConfig'
 // GET：一次性返回整個陣容資料集（後台單頁編輯用）
 export async function GET() {
   try {
-    const [lineups, heroes, weapons, emblems, genres, cfgRow] = await Promise.all([
+    const [lineups, heroes, weapons, emblems, genres, attrs, pets, heroEquips, equipSets, cfgRow] = await Promise.all([
       supabaseAdmin.from('Lineup').select('*').order('sortOrder', { ascending: true }),
       supabaseAdmin.from('LineupHero').select('*').order('sortOrder', { ascending: true }),
       supabaseAdmin.from('LineupWeapon').select('*').order('sortOrder', { ascending: true }),
       supabaseAdmin.from('LineupEmblem').select('*').order('sortOrder', { ascending: true }),
       supabaseAdmin.from('LineupGenre').select('*').order('sortOrder', { ascending: true }),
+      supabaseAdmin.from('LineupAttr').select('*').order('sortOrder', { ascending: true }),
+      supabaseAdmin.from('LineupPet').select('*').order('sortOrder', { ascending: true }),
+      supabaseAdmin.from('LineupHeroEquip').select('*').order('sortOrder', { ascending: true }),
+      supabaseAdmin.from('LineupEquipSet').select('*').order('sortOrder', { ascending: true }),
       supabaseAdmin.from('SiteConfig').select('value').eq('key', CONFIG_KEY).maybeSingle(),
     ])
 
@@ -29,7 +33,16 @@ export async function GET() {
       weapons: weapons.data || [],
       emblems: emblems.data || [],
       genres: genres.data || [],
+      attrs: attrs.data || [],
+      pets: pets.data || [],
+      heroEquips: heroEquips.data || [],
+      equipSets: equipSets.data || [],
       config,
+      // 新表若尚未建立，前端提示先跑 SQL 遷移（避免誤以為資料遺失）
+      missingTables: [
+        ['LineupAttr', attrs.error], ['LineupPet', pets.error],
+        ['LineupHeroEquip', heroEquips.error], ['LineupEquipSet', equipSets.error],
+      ].filter(([, e]) => !!e).map(([t]) => t),
     })
   } catch (e: any) {
     return NextResponse.json({ error: e.message || '獲取陣容資料失敗' }, { status: 500 })
@@ -77,9 +90,42 @@ export async function PUT(request: Request) {
       id: g.id, name: g.name, color: g.color || '#C9A227', imgUrl: g.imgUrl || null,
       sortOrder: g.sortOrder ?? i, updatedAt: now,
     }))
+    const attrs = (body.attrs || []).map((a: any, i: number) => ({
+      id: a.id, name: a.name, kind: a.kind || 'weapon', sortOrder: a.sortOrder ?? i, updatedAt: now,
+    }))
+    const pets = (body.pets || []).map((p: any, i: number) => ({
+      id: p.id, name: p.name, kind: p.kind || 'pet', quality: p.quality || 'gold',
+      imgUrl: p.imgUrl || null, attrs: JSON.stringify(p.attrs || []), sortOrder: p.sortOrder ?? i, updatedAt: now,
+    }))
+    const heroEquips = (body.heroEquips || []).map((e: any, i: number) => ({
+      id: e.id, name: e.name, slotIndex: e.slotIndex ?? 1, quality: e.quality || 'gold',
+      imgUrl: e.imgUrl || null, setId: e.setId || null, attrs: JSON.stringify(e.attrs || []),
+      sortOrder: e.sortOrder ?? i, updatedAt: now,
+    }))
+    const equipSets = (body.equipSets || []).map((s: any, i: number) => ({
+      id: s.id, name: s.name, imgUrl: s.imgUrl || null,
+      bonus: JSON.stringify(s.bonus || []), genreIds: JSON.stringify(s.genreIds || []),
+      sortOrder: s.sortOrder ?? i, updatedAt: now,
+    }))
 
     // 刪舊插新
-    const tables = ['Lineup', 'LineupHero', 'LineupWeapon', 'LineupEmblem', 'LineupGenre']
+    const tables = ['Lineup', 'LineupHero', 'LineupWeapon', 'LineupEmblem', 'LineupGenre',
+      'LineupAttr', 'LineupPet', 'LineupHeroEquip', 'LineupEquipSet']
+
+    // ⚠️ 前置檢查：本 API 是「刪舊插新」，若中途某張表不存在而拋錯，
+    // 先前已刪除的資料將無法復原（曾因此清空過資料）。
+    // 因此先確認所有表都可讀，任何一張缺失就直接失敗，不動任何資料。
+    const missing: string[] = []
+    for (const t of tables) {
+      const probe = await supabaseAdmin.from(t).select('id').limit(1)
+      if (probe.error) missing.push(t)
+    }
+    if (missing.length) {
+      return NextResponse.json({
+        error: `資料表尚未建立：${missing.join('、')}。請先在 Supabase SQL Editor 執行 supabase-migrations/2026-07-hero-lineup.sql，再重新保存（本次未修改任何資料）。`,
+      }, { status: 400 })
+    }
+
     for (const t of tables) {
       const del = await supabaseAdmin.from(t).delete().not('id', 'is', null)
       if (del.error) throw del.error
@@ -89,6 +135,10 @@ export async function PUT(request: Request) {
     if (weapons.length) { const r = await supabaseAdmin.from('LineupWeapon').insert(weapons); if (r.error) throw r.error }
     if (emblems.length) { const r = await supabaseAdmin.from('LineupEmblem').insert(emblems); if (r.error) throw r.error }
     if (genres.length)  { const r = await supabaseAdmin.from('LineupGenre').insert(genres); if (r.error) throw r.error }
+    if (attrs.length)      { const r = await supabaseAdmin.from('LineupAttr').insert(attrs); if (r.error) throw r.error }
+    if (pets.length)       { const r = await supabaseAdmin.from('LineupPet').insert(pets); if (r.error) throw r.error }
+    if (heroEquips.length) { const r = await supabaseAdmin.from('LineupHeroEquip').insert(heroEquips); if (r.error) throw r.error }
+    if (equipSets.length)  { const r = await supabaseAdmin.from('LineupEquipSet').insert(equipSets); if (r.error) throw r.error }
 
     // 配置
     if (body.config !== undefined) {

@@ -530,6 +530,51 @@ model LineupEmblem {
   updatedAt    DateTime @updatedAt
 }
 
+model LineupAttr {
+  id        String   @id @default(cuid())
+  name      String
+  kind      String   @default("weapon") // weapon | emblem
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LineupPet {
+  id        String   @id @default(cuid())
+  name      String
+  kind      String?  @default("pet") // pet(戰寵) | beast(異獸)
+  quality   String?  @default("gold")
+  imgUrl    String?
+  attrs     String?  @default("[]")
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LineupHeroEquip {
+  id        String   @id @default(cuid())
+  name      String
+  slotIndex Int      @default(1) // 1~6 部位
+  quality   String?  @default("gold")
+  imgUrl    String?
+  setId     String?
+  attrs     String?  @default("[]")
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LineupEquipSet {
+  id        String   @id @default(cuid())
+  name      String
+  imgUrl    String?
+  bonus     String?  @default("[]") // JSON：套裝加成
+  genreIds  String?  @default("[]") // JSON：適配流派
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model LineupGenre {
   id        String   @id @default(cuid())
   name      String

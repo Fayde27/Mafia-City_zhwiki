@@ -9,9 +9,11 @@ import RichTextEditor from '@/components/RichTextEditor'
 import {
   QUALITY_COLOR, QUALITY_LABEL, QUALITY_KEYS, STYLE_KEYS, STYLE_DEFAULT_ICON,
   STAT_KEYS, STAT_DEFAULT_NAME, STAT_DEFAULT_ICON, ROLE_KEYS, BUILTIN_BADGES,
+  HERO_EQUIP_SLOTS, heroEquipSlotLabel, PET_MAX,
   parseArr, uid, defaultConfig, badgeStyle,
   type LineupT, type LineupHeroT, type LineupWeaponT, type LineupEmblemT,
   type LineupGenreT, type LineupConfigT, type BadgeT, type LineupSlotT,
+  type LineupAttrT, type LineupPetT, type LineupHeroEquipT, type LineupEquipSetT,
 } from '@/lib/lineup'
 
 const cardCls = 'bg-wiki-gray-light border border-wiki-border rounded-lg p-6'
@@ -21,18 +23,22 @@ const btnPri = 'px-5 py-2.5 bg-wiki-accent text-black font-bold rounded hover:op
 const btnSec = 'px-4 py-2 bg-wiki-gray border border-wiki-border text-wiki-text rounded hover:border-wiki-accent'
 const btnDanger = 'px-3 py-1.5 text-sm bg-wiki-gray border border-wiki-border text-red-500 rounded hover:border-red-500'
 
-type Tab = 'lineups' | 'heroes' | 'styleicons' | 'badges' | 'staticons' | 'weapons' | 'emblems' | 'genres'
+type Tab = 'lineups' | 'heroes' | 'styleicons' | 'badges' | 'staticons'
+  | 'weapons' | 'emblems' | 'attrs' | 'pets' | 'heroequips' | 'equipsets' | 'genres'
 
-// 對照線下工具的側邊欄 8 項
-const TABS: { key: Tab; label: string }[] = [
+const TABS: { key: Tab; label: string; group?: string }[] = [
   { key: 'lineups', label: '陣容搭配' },
-  { key: 'heroes', label: '豪傑管理' },
-  { key: 'styleicons', label: '風格圖標' },
-  { key: 'badges', label: '標籤管理' },
-  { key: 'staticons', label: '加點圖標' },
+  { key: 'heroes', label: '角色管理' },
   { key: 'weapons', label: '武器管理' },
   { key: 'emblems', label: '戰徽管理' },
+  { key: 'attrs', label: '詞條管理' },
+  { key: 'pets', label: '戰寵/異獸' },
+  { key: 'heroequips', label: '英雄裝備' },
+  { key: 'equipsets', label: '套裝管理' },
   { key: 'genres', label: '流派管理' },
+  { key: 'styleicons', label: '風格圖標' },
+  { key: 'staticons', label: '加點圖標' },
+  { key: 'badges', label: '標籤管理' },
 ]
 
 export default function LineupsAdminPage() {
@@ -47,6 +53,10 @@ export default function LineupsAdminPage() {
   const [weapons, setWeapons] = useState<LineupWeaponT[]>([])
   const [emblems, setEmblems] = useState<LineupEmblemT[]>([])
   const [genres, setGenres] = useState<LineupGenreT[]>([])
+  const [attrs, setAttrs] = useState<LineupAttrT[]>([])
+  const [pets, setPets] = useState<LineupPetT[]>([])
+  const [heroEquips, setHeroEquips] = useState<LineupHeroEquipT[]>([])
+  const [equipSets, setEquipSets] = useState<LineupEquipSetT[]>([])
   const [config, setConfig] = useState<LineupConfigT>(defaultConfig())
 
   const markDirty = useCallback(() => setDirty(true), [])
@@ -60,6 +70,13 @@ export default function LineupsAdminPage() {
         setWeapons((d.weapons || []).map((w: any) => ({ ...w, attrs: parseArr(w.attrs) })))
         setEmblems((d.emblems || []).map((e: any) => ({ ...e, attrs: parseArr(e.attrs) })))
         setGenres(d.genres || [])
+        setAttrs(d.attrs || [])
+        setPets((d.pets || []).map((p: any) => ({ ...p, attrs: parseArr(p.attrs) })))
+        setHeroEquips((d.heroEquips || []).map((e: any) => ({ ...e, attrs: parseArr(e.attrs) })))
+        setEquipSets((d.equipSets || []).map((s: any) => ({ ...s, bonus: parseArr(s.bonus), genreIds: parseArr(s.genreIds) })))
+        if (Array.isArray(d.missingTables) && d.missingTables.length) {
+          setMsg(`⚠️ 資料表未建立：${d.missingTables.join('、')} — 請先在 Supabase 執行 2026-07-hero-lineup.sql，否則無法保存`)
+        }
         const c = d.config && Object.keys(d.config).length ? d.config : defaultConfig()
         // 合併預設，保證圖標槽位齊全
         const dc = defaultConfig()
@@ -85,7 +102,7 @@ export default function LineupsAdminPage() {
     try {
       const payload = {
         lineups: lineups.map((l, i) => ({ ...l, sortOrder: l.sortOrder ?? i, slug: l.slug || l.id })),
-        heroes, weapons, emblems, genres, config,
+        heroes, weapons, emblems, genres, attrs, pets, heroEquips, equipSets, config,
       }
       const res = await fetch('/api/admin/lineups', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
       const d = await res.json()
@@ -128,11 +145,15 @@ export default function LineupsAdminPage() {
 
       <div className="max-w-6xl mx-auto px-4 py-6">
         {tab === 'lineups' && (
-          <LineupsTab {...{ lineups, setLineups, heroes, weapons, emblems, genres, config, setConfig, markDirty, styleName, statName, weaponLabel, emblemLabel, save, saving, dirty }} />
+          <LineupsTab {...{ lineups, setLineups, heroes, weapons, emblems, genres, attrs, pets, heroEquips, equipSets, config, setConfig, markDirty, styleName, statName, weaponLabel, emblemLabel, save, saving, dirty }} />
         )}
         {tab === 'heroes' && (
           <HeroesTab {...{ heroes, setHeroes, config, markDirty, styleName }} />
         )}
+        {tab === 'attrs' && <AttrsTab {...{ attrs, setAttrs, markDirty }} />}
+        {tab === 'pets' && <PetsTab {...{ pets, setPets, markDirty }} />}
+        {tab === 'heroequips' && <HeroEquipsTab {...{ heroEquips, setHeroEquips, equipSets, markDirty }} />}
+        {tab === 'equipsets' && <EquipSetsTab {...{ equipSets, setEquipSets, genres, markDirty }} />}
         {(tab === 'styleicons' || tab === 'badges' || tab === 'staticons') && (
           <ConfigTab section={tab} {...{ config, setConfig, markDirty }} />
         )}
@@ -150,11 +171,32 @@ export default function LineupsAdminPage() {
   )
 }
 
+/* 詞條多選器（配隊槽位用） */
+function AttrPicker({ list, selected, onToggle }: { list: LineupAttrT[]; selected: string[]; onToggle: (id: string) => void }) {
+  if (!list.length) return <div className="text-xs text-wiki-text-muted">尚無詞條，請先到「詞條管理」新增</div>
+  return (
+    <div className="max-h-32 overflow-y-auto space-y-1 border border-wiki-border rounded p-2 bg-wiki-gray/40">
+      {list.map(a => {
+        const sel = selected.includes(a.id)
+        return (
+          <label key={a.id} className={`flex items-start gap-2 text-xs cursor-pointer px-1 py-0.5 rounded ${sel ? 'text-wiki-accent' : 'text-wiki-text-muted hover:text-wiki-text'}`}>
+            <input type="checkbox" className="mt-0.5 accent-wiki-accent flex-shrink-0" checked={sel} onChange={() => onToggle(a.id)} />
+            <span className="leading-snug">{a.name}</span>
+          </label>
+        )
+      })}
+    </div>
+  )
+}
+
 /* ───────────── 陣容 Tab ───────────── */
-function LineupsTab({ lineups, setLineups, heroes, weapons, emblems, genres, config, setConfig, markDirty, styleName, statName, weaponLabel, emblemLabel, save, saving, dirty }: any) {
+function LineupsTab({ lineups, setLineups, heroes, weapons, emblems, genres, attrs, pets, heroEquips, equipSets, config, setConfig, markDirty, styleName, statName, weaponLabel, emblemLabel, save, saving, dirty }: any) {
   // 只存 id：編輯中的改動**直接寫回 lineups**，避免「忘記按套用 → 改動丟失」
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [kind, setKind] = useState<'haojie' | 'hero'>('haojie')
   const editing: LineupT | undefined = lineups.find((l: LineupT) => l.id === editingId)
+  const editKind = (editing?.characterKind || 'haojie') as 'haojie' | 'hero'
+  const kindHeroes = heroes.filter((h: LineupHeroT) => (h.characterKind || 'haojie') === editKind)
 
   // 全域配置（函數式更新，避免異步/連續修改互相覆蓋）
   const updCfg = (fn: (c: LineupConfigT) => Partial<LineupConfigT>) => {
@@ -164,8 +206,10 @@ function LineupsTab({ lineups, setLineups, heroes, weapons, emblems, genres, con
   const setPage = (patch: any) => updCfg(c => ({ pageConfig: { ...c.pageConfig, ...patch } }))
   const setRole = (r: string, patch: any) => updCfg(c => ({ roleLabels: { ...c.roleLabels, [r]: { ...(c.roleLabels as any)[r], ...patch } } }))
 
-  const blankSlots = (): LineupSlotT[] => ROLE_KEYS.map(r => ({ role: r }))
-  const newLineup = (): LineupT => ({ id: uid(), title: '', characterKind: 'haojie', badgeIds: [], slots: blankSlots(), isPublished: true, isPinned: false, sortOrder: lineups.length })
+  const blankSlots = (): LineupSlotT[] => ROLE_KEYS.map(r => ({
+    role: r, weaponAttrIds: [], emblemAttrIds: [], petIds: [], equipIds: Array(6).fill(undefined),
+  }))
+  const newLineup = (): LineupT => ({ id: uid(), title: '', characterKind: kind, badgeIds: [], slots: blankSlots(), isPublished: true, isPinned: false, sortOrder: lineups.length })
 
   // 對當前編輯中的陣容做局部更新（函數式，直接寫回 lineups）
   const patch = (fn: (l: LineupT) => Partial<LineupT>) => {
@@ -202,6 +246,26 @@ function LineupsTab({ lineups, setLineups, heroes, weapons, emblems, genres, con
     const cur: string[] = parseArr(l.badgeIds)
     return { badgeIds: cur.includes(bid) ? cur.filter(x => x !== bid) : [...cur, bid] }
   })
+  // 槽位裡的多選（詞條 / 戰寵）
+  const toggleSlotList = (role: string, key: 'weaponAttrIds' | 'emblemAttrIds' | 'petIds', id: string, max?: number) =>
+    patch(l => ({
+      slots: (parseArr<LineupSlotT>(l.slots).length ? parseArr<LineupSlotT>(l.slots) : blankSlots()).map(s => {
+        if (s.role !== role) return s
+        const cur: string[] = Array.isArray(s[key]) ? (s[key] as string[]) : []
+        if (cur.includes(id)) return { ...s, [key]: cur.filter(x => x !== id) }
+        if (max && cur.length >= max) return s // 超過上限不再加
+        return { ...s, [key]: [...cur, id] }
+      }),
+    }))
+  // 英雄 6 格裝備
+  const setSlotEquip = (role: string, idx: number, equipId: string) => patch(l => ({
+    slots: (parseArr<LineupSlotT>(l.slots).length ? parseArr<LineupSlotT>(l.slots) : blankSlots()).map(s => {
+      if (s.role !== role) return s
+      const arr = Array.isArray(s.equipIds) ? [...s.equipIds] : Array(6).fill(undefined)
+      arr[idx] = equipId || undefined
+      return { ...s, equipIds: arr }
+    }),
+  }))
 
   if (editing) {
     const slots: LineupSlotT[] = parseArr<LineupSlotT>(editing.slots).length ? parseArr<LineupSlotT>(editing.slots) : blankSlots()
@@ -210,7 +274,7 @@ function LineupsTab({ lineups, setLineups, heroes, weapons, emblems, genres, con
       <div className={cardCls}>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-lg font-bold text-wiki-text">編輯陣容</h2>
+            <h2 className="text-lg font-bold text-wiki-text">編輯{editKind === 'hero' ? '英雄' : '豪傑'}陣容</h2>
             <p className="text-xs text-wiki-text-muted mt-1">改動即時記錄，點「保存」寫入資料庫</p>
           </div>
           <div className="flex items-center gap-2">
@@ -225,7 +289,7 @@ function LineupsTab({ lineups, setLineups, heroes, weapons, emblems, genres, con
         <div className="flex flex-wrap gap-4 mb-6">
           {ROLE_KEYS.map((role, idx) => {
             const s = slots.find(x => x.role === role)!
-            const hero = heroes.find((h: LineupHeroT) => h.id === s.heroId)
+            const hero = kindHeroes.find((h: LineupHeroT) => h.id === s.heroId)
             const roleLabel = config.roleLabels?.[role]?.text || (idx === 0 ? '主力' : '輔助' + idx)
             return (
               <div key={role} className="flex flex-col gap-1.5 items-center">
@@ -239,7 +303,7 @@ function LineupsTab({ lineups, setLineups, heroes, weapons, emblems, genres, con
                 <select className="w-28 bg-wiki-gray border border-wiki-border px-2 py-1.5 text-xs text-wiki-text focus:border-wiki-accent focus:outline-none"
                   value={s.heroId || ''} onChange={e => setSlot(role, { heroId: e.target.value })}>
                   <option value="">— 選擇 —</option>
-                  {heroes.map((h: LineupHeroT) => <option key={h.id} value={h.id}>{h.name}</option>)}
+                  {kindHeroes.map((h: LineupHeroT) => <option key={h.id} value={h.id}>{h.name}</option>)}
                 </select>
                 <select className="w-28 bg-wiki-gray border border-wiki-border px-2 py-1.5 text-xs text-wiki-text focus:border-wiki-accent focus:outline-none"
                   value={s.stat || ''} onChange={e => setSlot(role, { stat: e.target.value })}>
@@ -251,28 +315,90 @@ function LineupsTab({ lineups, setLineups, heroes, weapons, emblems, genres, con
           })}
         </div>
 
-        {/* ▸ 選擇裝備：每一豎列 = 一個角色的武器 + 戰徽 */}
-        <div className="text-sm font-bold text-wiki-accent mb-3">▸ 選擇裝備</div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        {/* ▸ 選擇裝備：每一豎列 = 一個角色 */}
+        <div className="text-sm font-bold text-wiki-accent mb-3">
+          ▸ {editKind === 'hero' ? '戰寵 · 裝備 · 套裝' : '選擇裝備與詞條'}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
           {ROLE_KEYS.map((role, idx) => {
             const s = slots.find(x => x.role === role)!
-            const hero = heroes.find((h: LineupHeroT) => h.id === s.heroId)
+            const hero = kindHeroes.find((h: LineupHeroT) => h.id === s.heroId)
             const prefix = config.roleLabels?.[role]?.text || (idx === 0 ? '主力' : '輔助' + idx)
+            const selPets: string[] = Array.isArray(s.petIds) ? s.petIds : []
+            const equipIds = Array.isArray(s.equipIds) ? s.equipIds : Array(6).fill(undefined)
+            const set = equipSets.find((x: LineupEquipSetT) => x.id === s.setId)
             return (
               <div key={role} className="border border-wiki-border rounded-lg p-4">
                 <div className="text-sm font-bold text-wiki-accent mb-3">
                   {prefix}{hero ? <span className="text-wiki-text-muted font-normal">（{hero.name}）</span> : null}
                 </div>
-                <label className={labelCls}>武器</label>
-                <select className={inputCls + ' mb-3'} value={s.weaponId || ''} onChange={e => setSlot(role, { weaponId: e.target.value })}>
-                  <option value="">— 武器 —</option>
-                  {weapons.map((w: LineupWeaponT) => <option key={w.id} value={w.id}>{weaponLabel(w)}</option>)}
-                </select>
-                <label className={labelCls}>戰徽</label>
-                <select className={inputCls} value={s.emblemId || ''} onChange={e => setSlot(role, { emblemId: e.target.value })}>
-                  <option value="">— 戰徽 —</option>
-                  {emblems.map((em: LineupEmblemT) => <option key={em.id} value={em.id}>{emblemLabel(em)}</option>)}
-                </select>
+
+                {editKind === 'haojie' ? (
+                  <>
+                    <label className={labelCls}>武器</label>
+                    <select className={inputCls + ' mb-2'} value={s.weaponId || ''} onChange={e => setSlot(role, { weaponId: e.target.value })}>
+                      <option value="">— 武器 —</option>
+                      {weapons.map((w: LineupWeaponT) => <option key={w.id} value={w.id}>{weaponLabel(w)}</option>)}
+                    </select>
+                    <label className={labelCls}>武器詞條 <span className="normal-case font-normal text-wiki-text-muted">（可多選）</span></label>
+                    <AttrPicker list={attrs.filter((a: LineupAttrT) => (a.kind || 'weapon') === 'weapon')}
+                      selected={Array.isArray(s.weaponAttrIds) ? s.weaponAttrIds : []}
+                      onToggle={id => toggleSlotList(role, 'weaponAttrIds', id)} />
+
+                    <label className={labelCls + ' mt-3'}>戰徽</label>
+                    <select className={inputCls + ' mb-2'} value={s.emblemId || ''} onChange={e => setSlot(role, { emblemId: e.target.value })}>
+                      <option value="">— 戰徽 —</option>
+                      {emblems.map((em: LineupEmblemT) => <option key={em.id} value={em.id}>{emblemLabel(em)}</option>)}
+                    </select>
+                    <label className={labelCls}>戰徽詞條 <span className="normal-case font-normal text-wiki-text-muted">（可多選）</span></label>
+                    <AttrPicker list={attrs.filter((a: LineupAttrT) => a.kind === 'emblem')}
+                      selected={Array.isArray(s.emblemAttrIds) ? s.emblemAttrIds : []}
+                      onToggle={id => toggleSlotList(role, 'emblemAttrIds', id)} />
+                  </>
+                ) : (
+                  <>
+                    <label className={labelCls}>戰寵 / 異獸 <span className="normal-case font-normal text-wiki-text-muted">（最多 {PET_MAX} 個）</span></label>
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {pets.map((p: LineupPetT) => {
+                        const sel = selPets.includes(p.id)
+                        const disabled = !sel && selPets.length >= PET_MAX
+                        return (
+                          <button key={p.id} type="button" disabled={disabled}
+                            onClick={() => toggleSlotList(role, 'petIds', p.id, PET_MAX)}
+                            className={`flex items-center gap-1.5 px-2 py-1 rounded border text-xs transition-colors ${sel ? 'border-wiki-accent bg-wiki-accent/10 text-wiki-accent' : disabled ? 'border-wiki-border text-wiki-text-muted opacity-40 cursor-not-allowed' : 'border-wiki-border text-wiki-text-muted hover:border-wiki-accent/50'}`}>
+                            {p.imgUrl && <img src={p.imgUrl} alt="" className="w-5 h-5 object-contain" />}
+                            {p.name}
+                          </button>
+                        )
+                      })}
+                      {!pets.length && <span className="text-xs text-wiki-text-muted">尚無戰寵，請先到「戰寵/異獸」新增</span>}
+                    </div>
+
+                    <label className={labelCls}>套裝</label>
+                    <select className={inputCls + ' mb-1'} value={s.setId || ''} onChange={e => setSlot(role, { setId: e.target.value })}>
+                      <option value="">— 套裝 —</option>
+                      {equipSets.map((x: LineupEquipSetT) => <option key={x.id} value={x.id}>{x.name}</option>)}
+                    </select>
+                    {set && parseArr<string>(set.bonus).length > 0 && (
+                      <div className="text-[11px] text-wiki-accent mb-3">{parseArr<string>(set.bonus).map((b, i) => <div key={i}>· {b}</div>)}</div>
+                    )}
+
+                    <label className={labelCls + ' mt-2'}>裝備 6 格</label>
+                    <div className="space-y-1.5">
+                      {HERO_EQUIP_SLOTS.map((sl, i) => (
+                        <div key={sl.index} className="flex items-center gap-2">
+                          <span className="text-xs text-wiki-text-muted w-10 flex-shrink-0">{sl.label}</span>
+                          <select className="flex-1 bg-wiki-gray border border-wiki-border px-2 py-1.5 text-xs text-wiki-text focus:border-wiki-accent focus:outline-none"
+                            value={equipIds[i] || ''} onChange={e => setSlotEquip(role, i, e.target.value)}>
+                            <option value="">— 未設置 —</option>
+                            {heroEquips.filter((eq: LineupHeroEquipT) => (eq.slotIndex ?? 1) === sl.index)
+                              .map((eq: LineupHeroEquipT) => <option key={eq.id} value={eq.id}>{eq.name} [{QUALITY_LABEL[eq.quality || 'gold']}]</option>)}
+                          </select>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             )
           })}
@@ -366,12 +492,25 @@ function LineupsTab({ lineups, setLineups, heroes, weapons, emblems, genres, con
         </div>
       </div>
 
+      {/* 豪傑 / 英雄 切換 */}
+      <div className="flex gap-2 mb-4">
+        {[{ k: 'haojie', label: '豪傑陣容' }, { k: 'hero', label: '英雄陣容' }].map(t => {
+          const n = lineups.filter((l: LineupT) => (l.characterKind || 'haojie') === t.k).length
+          return (
+            <button key={t.k} onClick={() => setKind(t.k as any)}
+              className={`px-4 py-2 rounded border text-sm ${kind === t.k ? 'border-wiki-accent bg-wiki-accent/10 text-wiki-accent font-bold' : 'border-wiki-border text-wiki-text-muted hover:border-wiki-accent/50'}`}>
+              {t.label}（{n}）
+            </button>
+          )
+        })}
+      </div>
+
       <div className="flex items-center justify-between mb-4">
-        <p className="text-sm text-wiki-text-muted">共 {lineups.length} 套陣容 · 修改後記得點右上「保存全部」</p>
-        <button className={btnPri} onClick={startNew}>+ 新增陣容</button>
+        <p className="text-sm text-wiki-text-muted">修改後記得點「保存」寫入資料庫</p>
+        <button className={btnPri} onClick={startNew}>+ 新增{kind === 'hero' ? '英雄' : '豪傑'}陣容</button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {lineups.map((l: LineupT) => {
+        {lineups.filter((l: LineupT) => (l.characterKind || 'haojie') === kind).map((l: LineupT) => {
           const g = genres.find((x: LineupGenreT) => x.id === l.genreId)
           return (
             <div key={l.id} className="bg-wiki-gray-light border border-wiki-border rounded-lg p-4 flex items-center justify-between">
@@ -386,7 +525,9 @@ function LineupsTab({ lineups, setLineups, heroes, weapons, emblems, genres, con
             </div>
           )
         })}
-        {!lineups.length && <div className="text-wiki-text-muted text-sm">尚無陣容</div>}
+        {!lineups.filter((l: LineupT) => (l.characterKind || 'haojie') === kind).length && (
+          <div className="text-wiki-text-muted text-sm">尚無{kind === 'hero' ? '英雄' : '豪傑'}陣容</div>
+        )}
       </div>
     </div>
   )
@@ -395,7 +536,8 @@ function LineupsTab({ lineups, setLineups, heroes, weapons, emblems, genres, con
 /* ───────────── 角色池 Tab ───────────── */
 function HeroesTab({ heroes, setHeroes, config, markDirty, styleName }: any) {
   const [editing, setEditing] = useState<LineupHeroT | null>(null)
-  const start = () => setEditing({ id: uid(), name: '', style: '迅捷', imgUrl: '', characterKind: 'haojie' })
+  const [kind, setKind] = useState<'haojie' | 'hero'>('haojie')
+  const start = () => setEditing({ id: uid(), name: '', style: '迅捷', imgUrl: '', characterKind: kind })
   const commit = () => {
     if (!editing || !editing.name) return
     setHeroes((p: LineupHeroT[]) => { const i = p.findIndex(x => x.id === editing.id); if (i >= 0) { const c = [...p]; c[i] = editing; return c } return [...p, editing] })
@@ -411,6 +553,11 @@ function HeroesTab({ heroes, setHeroes, config, markDirty, styleName }: any) {
             <div>
               <label className={labelCls}>角色名稱</label>
               <input className={inputCls} value={editing.name} onChange={e => setEditing({ ...editing, name: e.target.value })} />
+              <label className={labelCls + ' mt-4'}>角色類型</label>
+              <select className={inputCls} value={editing.characterKind || 'haojie'} onChange={e => setEditing({ ...editing, characterKind: e.target.value })}>
+                <option value="haojie">豪傑</option>
+                <option value="hero">英雄</option>
+              </select>
               <label className={labelCls + ' mt-4'}>風格</label>
               <select className={inputCls} value={editing.style} onChange={e => setEditing({ ...editing, style: e.target.value })}>
                 {STYLE_KEYS.map(s => <option key={s} value={s}>{styleName(s)}</option>)}
@@ -421,10 +568,23 @@ function HeroesTab({ heroes, setHeroes, config, markDirty, styleName }: any) {
           <div className="flex gap-2 mt-4"><button className={btnPri} onClick={commit}>套用</button><button className={btnSec} onClick={() => setEditing(null)}>取消</button></div>
         </div>
       ) : (
-        <button className={btnPri + ' mb-4'} onClick={start}>+ 新增角色</button>
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+          <div className="flex gap-2">
+            {[{ k: 'haojie', label: '豪傑' }, { k: 'hero', label: '英雄' }].map(t => {
+              const n = heroes.filter((h: LineupHeroT) => (h.characterKind || 'haojie') === t.k).length
+              return (
+                <button key={t.k} onClick={() => setKind(t.k as any)}
+                  className={`px-4 py-2 rounded border text-sm ${kind === t.k ? 'border-wiki-accent bg-wiki-accent/10 text-wiki-accent font-bold' : 'border-wiki-border text-wiki-text-muted hover:border-wiki-accent/50'}`}>
+                  {t.label}（{n}）
+                </button>
+              )
+            })}
+          </div>
+          <button className={btnPri} onClick={start}>+ 新增{kind === 'hero' ? '英雄' : '豪傑'}</button>
+        </div>
       )}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-        {heroes.map((h: LineupHeroT) => (
+        {heroes.filter((h: LineupHeroT) => (h.characterKind || 'haojie') === kind).map((h: LineupHeroT) => (
           <div key={h.id} className="bg-wiki-gray-light border border-wiki-border rounded-lg p-2">
             <div className="aspect-[2/3] bg-wiki-gray rounded overflow-hidden mb-2">
               {h.imgUrl ? <img src={h.imgUrl} alt={h.name} className="w-full h-full object-cover" style={{ objectPosition: 'top' }} /> : <div className="w-full h-full flex items-center justify-center text-wiki-text-muted text-xs">無圖</div>}
@@ -437,7 +597,9 @@ function HeroesTab({ heroes, setHeroes, config, markDirty, styleName }: any) {
             </div>
           </div>
         ))}
-        {!heroes.length && <div className="text-wiki-text-muted text-sm">尚無角色</div>}
+        {!heroes.filter((h: LineupHeroT) => (h.characterKind || 'haojie') === kind).length && (
+          <div className="text-wiki-text-muted text-sm">尚無{kind === 'hero' ? '英雄' : '豪傑'}</div>
+        )}
       </div>
     </div>
   )
@@ -456,9 +618,6 @@ function EquipTab({ kind, items, setItems, heroes, markDirty, label }: any) {
     markDirty(); setEditing(null)
   }
   const remove = (id: string) => { if (!confirm('刪除？（其變體也會受影響）')) return; setItems((p: any[]) => p.filter(x => x.id !== id && x.parentId !== id)); markDirty() }
-  const setAttr = (idx: number, v: string) => setEditing((e: any) => ({ ...e, attrs: e.attrs.map((a: string, i: number) => i === idx ? v : a) }))
-  const addAttr = () => setEditing((e: any) => ({ ...e, attrs: [...(e.attrs || []), ''] }))
-  const delAttr = (idx: number) => setEditing((e: any) => ({ ...e, attrs: e.attrs.filter((_: any, i: number) => i !== idx) }))
 
   return (
     <div>
@@ -501,15 +660,10 @@ function EquipTab({ kind, items, setItems, heroes, markDirty, label }: any) {
               )}
             </div>
             <div>
-              <ImageUploadInput label="圖標" value={editing.imgUrl || ''} position="50% 50%" onChange={url => setEditing({ ...editing, imgUrl: url })} onPositionChange={() => {}} compact />
-              <label className={labelCls + ' mt-4'}>{isWeapon ? '武器技能 / 詞條' : '戰徽詞條'}</label>
-              {(editing.attrs || []).map((a: string, i: number) => (
-                <div key={i} className="flex gap-2 mb-2">
-                  <input className="flex-1 bg-wiki-gray border border-wiki-border px-3 py-2 text-wiki-text" value={a} onChange={e => setAttr(i, e.target.value)} placeholder={isWeapon ? '如：隊伍每有一位智謀豪傑，技術+7' : '如：豪傑技術'} />
-                  <button className={btnDanger} onClick={() => delAttr(i)}>×</button>
-                </div>
-              ))}
-              <button className={btnSec} onClick={addAttr}>+ 新增一條</button>
+              <ImageUploadInput label="圖標" value={editing.imgUrl || ''} position="50% 50%" onChange={url => setEditing({ ...editing, imgUrl: url })} onPositionChange={() => {}} compact objectFit="contain" />
+              <p className="text-xs text-wiki-text-muted mt-4 leading-relaxed">
+                💡 詞條已與{label}解綁：請到「詞條管理」維護詞條庫，配隊時在每個槽位單獨挑選。
+              </p>
             </div>
           </div>
           <div className="flex gap-2 mt-4"><button className={btnPri} onClick={commit}>套用</button><button className={btnSec} onClick={() => setEditing(null)}>取消</button></div>
@@ -536,6 +690,297 @@ function EquipTab({ kind, items, setItems, heroes, markDirty, label }: any) {
           )
         })}
         {!items.length && <div className="text-wiki-text-muted text-sm">尚無{label}</div>}
+      </div>
+    </div>
+  )
+}
+
+/* ───────────── 詞條管理 Tab（與武器/戰徽解綁的獨立詞條庫） ───────────── */
+function AttrsTab({ attrs, setAttrs, markDirty }: any) {
+  const [name, setName] = useState('')
+  const [kind, setKind] = useState<'weapon' | 'emblem'>('weapon')
+  const KINDS = [{ key: 'weapon', label: '武器詞條' }, { key: 'emblem', label: '戰徽詞條' }]
+
+  const add = () => {
+    if (!name.trim()) return
+    setAttrs((p: LineupAttrT[]) => [...p, { id: uid(), name: name.trim(), kind, sortOrder: p.length }])
+    markDirty(); setName('')
+  }
+  const rename = (id: string, v: string) => { setAttrs((p: LineupAttrT[]) => p.map(a => a.id === id ? { ...a, name: v } : a)); markDirty() }
+  const remove = (id: string) => { if (!confirm('刪除此詞條？（已選用它的陣容會自動忽略）')) return; setAttrs((p: LineupAttrT[]) => p.filter(a => a.id !== id)); markDirty() }
+
+  return (
+    <div className={cardCls}>
+      <h3 className="font-bold text-wiki-accent mb-1">詞條管理</h3>
+      <p className="text-xs text-wiki-text-muted mb-4">詞條已與武器/戰徽解綁 —— 在此維護詞條庫，配隊時每個槽位單獨挑選武器與詞條。</p>
+
+      <div className="flex flex-wrap gap-2 items-end mb-6 pb-4 border-b border-wiki-border">
+        <div>
+          <label className={labelCls}>詞條類型</label>
+          <select className={inputCls} value={kind} onChange={e => setKind(e.target.value as any)}>
+            {KINDS.map(k => <option key={k.key} value={k.key}>{k.label}</option>)}
+          </select>
+        </div>
+        <div className="flex-1 min-w-[240px]">
+          <label className={labelCls}>詞條內容</label>
+          <input className={inputCls} value={name} onChange={e => setName(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') add() }}
+            placeholder={kind === 'weapon' ? '如：隊伍內每有一位智謀豪傑，技術+7' : '如：豪傑技術'} />
+        </div>
+        <button className={btnPri} onClick={add}>+ 新增詞條</button>
+      </div>
+
+      {KINDS.map(k => {
+        const list = attrs.filter((a: LineupAttrT) => (a.kind || 'weapon') === k.key)
+        return (
+          <div key={k.key} className="mb-5">
+            <h4 className="text-sm font-bold text-wiki-text mb-2">{k.label}<span className="text-wiki-text-muted font-normal">（{list.length}）</span></h4>
+            <div className="space-y-2">
+              {list.map((a: LineupAttrT) => (
+                <div key={a.id} className="flex gap-2">
+                  <input className="flex-1 bg-wiki-gray border border-wiki-border px-3 py-2 text-wiki-text text-sm" value={a.name} onChange={e => rename(a.id, e.target.value)} />
+                  <button className={btnDanger} onClick={() => remove(a.id)}>刪</button>
+                </div>
+              ))}
+              {!list.length && <div className="text-xs text-wiki-text-muted">尚無{k.label}</div>}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+/* ───────────── 戰寵 / 異獸 Tab ───────────── */
+function PetsTab({ pets, setPets, markDirty }: any) {
+  const [editing, setEditing] = useState<any | null>(null)
+  const start = () => setEditing({ id: uid(), name: '', kind: 'pet', quality: 'gold', imgUrl: '', attrs: [] })
+  const commit = () => {
+    if (!editing || !editing.name) return
+    setPets((p: LineupPetT[]) => { const i = p.findIndex(x => x.id === editing.id); if (i >= 0) { const c = [...p]; c[i] = editing; return c } return [...p, editing] })
+    markDirty(); setEditing(null)
+  }
+  const remove = (id: string) => { if (!confirm('刪除？')) return; setPets((p: LineupPetT[]) => p.filter(x => x.id !== id)); markDirty() }
+  const setA = (i: number, v: string) => setEditing((e: any) => ({ ...e, attrs: e.attrs.map((a: string, idx: number) => idx === i ? v : a) }))
+  const addA = () => setEditing((e: any) => ({ ...e, attrs: [...(e.attrs || []), ''] }))
+  const delA = (i: number) => setEditing((e: any) => ({ ...e, attrs: e.attrs.filter((_: any, idx: number) => idx !== i) }))
+
+  return (
+    <div>
+      {editing ? (
+        <div className={cardCls + ' mb-6'}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+            <div>
+              <label className={labelCls}>名稱</label>
+              <input className={inputCls + ' mb-3'} value={editing.name} onChange={e => setEditing({ ...editing, name: e.target.value })} placeholder="如：赤炎虎" />
+              <label className={labelCls}>類型</label>
+              <select className={inputCls + ' mb-3'} value={editing.kind} onChange={e => setEditing({ ...editing, kind: e.target.value })}>
+                <option value="pet">戰寵</option>
+                <option value="beast">異獸</option>
+              </select>
+              <label className={labelCls}>品質</label>
+              <select className={inputCls} value={editing.quality} onChange={e => setEditing({ ...editing, quality: e.target.value })}>
+                {QUALITY_KEYS.map(q => <option key={q} value={q}>{QUALITY_LABEL[q]}</option>)}
+              </select>
+            </div>
+            <div>
+              <ImageUploadInput label="圖片" value={editing.imgUrl || ''} position="50% 50%" onChange={url => setEditing({ ...editing, imgUrl: url })} onPositionChange={() => {}} compact objectFit="contain" />
+              <label className={labelCls + ' mt-4'}>技能 / 加成說明</label>
+              {(editing.attrs || []).map((a: string, i: number) => (
+                <div key={i} className="flex gap-2 mb-2">
+                  <input className="flex-1 bg-wiki-gray border border-wiki-border px-3 py-2 text-wiki-text text-sm" value={a} onChange={e => setA(i, e.target.value)} placeholder="如：出征部隊攻擊 +8%" />
+                  <button className={btnDanger} onClick={() => delA(i)}>×</button>
+                </div>
+              ))}
+              <button className={btnSec} onClick={addA}>+ 新增一條</button>
+            </div>
+          </div>
+          <div className="flex gap-2 mt-4"><button className={btnPri} onClick={commit}>套用</button><button className={btnSec} onClick={() => setEditing(null)}>取消</button></div>
+        </div>
+      ) : (
+        <button className={btnPri + ' mb-4'} onClick={start}>+ 新增戰寵/異獸</button>
+      )}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+        {pets.map((p: LineupPetT) => (
+          <div key={p.id} className="bg-wiki-gray-light border rounded-lg p-2" style={{ borderColor: (QUALITY_COLOR[p.quality || 'gold']) + '55' }}>
+            <div className="aspect-square bg-wiki-gray rounded overflow-hidden mb-2 flex items-center justify-center">
+              {p.imgUrl ? <img src={p.imgUrl} alt={p.name} className="w-full h-full object-contain" /> : <span className="text-2xl">🐾</span>}
+            </div>
+            <div className="text-sm font-bold text-wiki-text truncate">{p.name}</div>
+            <div className="text-xs text-wiki-text-muted">{p.kind === 'beast' ? '異獸' : '戰寵'} · {QUALITY_LABEL[p.quality || 'gold']}</div>
+            <div className="flex gap-1 mt-2">
+              <button className="flex-1 text-xs py-1 bg-wiki-gray border border-wiki-border rounded hover:border-wiki-accent" onClick={() => setEditing({ ...p, attrs: parseArr(p.attrs) })}>編輯</button>
+              <button className="text-xs py-1 px-2 bg-wiki-gray border border-wiki-border rounded text-red-500 hover:border-red-500" onClick={() => remove(p.id)}>×</button>
+            </div>
+          </div>
+        ))}
+        {!pets.length && <div className="text-wiki-text-muted text-sm">尚無戰寵/異獸</div>}
+      </div>
+    </div>
+  )
+}
+
+/* ───────────── 英雄裝備 Tab（6 部位） ───────────── */
+function HeroEquipsTab({ heroEquips, setHeroEquips, equipSets, markDirty }: any) {
+  const [editing, setEditing] = useState<any | null>(null)
+  const start = () => setEditing({ id: uid(), name: '', slotIndex: 1, quality: 'gold', imgUrl: '', setId: '', attrs: [] })
+  const commit = () => {
+    if (!editing || !editing.name) return
+    setHeroEquips((p: LineupHeroEquipT[]) => { const i = p.findIndex(x => x.id === editing.id); if (i >= 0) { const c = [...p]; c[i] = editing; return c } return [...p, editing] })
+    markDirty(); setEditing(null)
+  }
+  const remove = (id: string) => { if (!confirm('刪除？')) return; setHeroEquips((p: LineupHeroEquipT[]) => p.filter(x => x.id !== id)); markDirty() }
+  const setA = (i: number, v: string) => setEditing((e: any) => ({ ...e, attrs: e.attrs.map((a: string, idx: number) => idx === i ? v : a) }))
+  const addA = () => setEditing((e: any) => ({ ...e, attrs: [...(e.attrs || []), ''] }))
+  const delA = (i: number) => setEditing((e: any) => ({ ...e, attrs: e.attrs.filter((_: any, idx: number) => idx !== i) }))
+
+  return (
+    <div>
+      {editing ? (
+        <div className={cardCls + ' mb-6'}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+            <div>
+              <label className={labelCls}>裝備名稱</label>
+              <input className={inputCls + ' mb-3'} value={editing.name} onChange={e => setEditing({ ...editing, name: e.target.value })} />
+              <label className={labelCls}>部位</label>
+              <select className={inputCls + ' mb-3'} value={editing.slotIndex} onChange={e => setEditing({ ...editing, slotIndex: parseInt(e.target.value) })}>
+                {HERO_EQUIP_SLOTS.map(s => <option key={s.index} value={s.index}>{s.index}. {s.label}</option>)}
+              </select>
+              <label className={labelCls}>品質</label>
+              <select className={inputCls + ' mb-3'} value={editing.quality} onChange={e => setEditing({ ...editing, quality: e.target.value })}>
+                {QUALITY_KEYS.map(q => <option key={q} value={q}>{QUALITY_LABEL[q]}</option>)}
+              </select>
+              <label className={labelCls}>所屬套裝（選填）</label>
+              <select className={inputCls} value={editing.setId || ''} onChange={e => setEditing({ ...editing, setId: e.target.value })}>
+                <option value="">— 無套裝 —</option>
+                {equipSets.map((s: LineupEquipSetT) => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <ImageUploadInput label="圖標" value={editing.imgUrl || ''} position="50% 50%" onChange={url => setEditing({ ...editing, imgUrl: url })} onPositionChange={() => {}} compact objectFit="contain" />
+              <label className={labelCls + ' mt-4'}>屬性 / 詞條</label>
+              {(editing.attrs || []).map((a: string, i: number) => (
+                <div key={i} className="flex gap-2 mb-2">
+                  <input className="flex-1 bg-wiki-gray border border-wiki-border px-3 py-2 text-wiki-text text-sm" value={a} onChange={e => setA(i, e.target.value)} placeholder="如：攻擊 +120" />
+                  <button className={btnDanger} onClick={() => delA(i)}>×</button>
+                </div>
+              ))}
+              <button className={btnSec} onClick={addA}>+ 新增一條</button>
+            </div>
+          </div>
+          <div className="flex gap-2 mt-4"><button className={btnPri} onClick={commit}>套用</button><button className={btnSec} onClick={() => setEditing(null)}>取消</button></div>
+        </div>
+      ) : (
+        <button className={btnPri + ' mb-4'} onClick={start}>+ 新增英雄裝備</button>
+      )}
+      {HERO_EQUIP_SLOTS.map(slot => {
+        const list = heroEquips.filter((e: LineupHeroEquipT) => (e.slotIndex ?? 1) === slot.index)
+        return (
+          <div key={slot.index} className="mb-5">
+            <h4 className="text-sm font-bold text-wiki-text mb-2">{slot.index}. {slot.label}<span className="text-wiki-text-muted font-normal">（{list.length}）</span></h4>
+            <div className="flex flex-wrap gap-2">
+              {list.map((e: LineupHeroEquipT) => {
+                const set = equipSets.find((s: LineupEquipSetT) => s.id === e.setId)
+                return (
+                  <div key={e.id} className="flex items-center gap-2 bg-wiki-gray-light border rounded-lg p-2" style={{ borderColor: (QUALITY_COLOR[e.quality || 'gold']) + '55' }}>
+                    <div className="w-9 h-9 rounded bg-wiki-gray overflow-hidden flex items-center justify-center flex-shrink-0">
+                      {e.imgUrl ? <img src={e.imgUrl} alt={e.name} className="w-full h-full object-contain" /> : <span>🛡</span>}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-sm font-bold text-wiki-text truncate">{e.name}</div>
+                      <div className="text-xs text-wiki-text-muted">{QUALITY_LABEL[e.quality || 'gold']}{set ? ' · ' + set.name : ''}</div>
+                    </div>
+                    <button className={btnSec} onClick={() => setEditing({ ...e, attrs: parseArr(e.attrs) })}>編輯</button>
+                    <button className={btnDanger} onClick={() => remove(e.id)}>刪</button>
+                  </div>
+                )
+              })}
+              {!list.length && <div className="text-xs text-wiki-text-muted">尚無</div>}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+/* ───────────── 套裝 Tab（加成 + 適配流派） ───────────── */
+function EquipSetsTab({ equipSets, setEquipSets, genres, markDirty }: any) {
+  const [editing, setEditing] = useState<any | null>(null)
+  const start = () => setEditing({ id: uid(), name: '', imgUrl: '', bonus: [], genreIds: [] })
+  const commit = () => {
+    if (!editing || !editing.name) return
+    setEquipSets((p: LineupEquipSetT[]) => { const i = p.findIndex(x => x.id === editing.id); if (i >= 0) { const c = [...p]; c[i] = editing; return c } return [...p, editing] })
+    markDirty(); setEditing(null)
+  }
+  const remove = (id: string) => { if (!confirm('刪除此套裝？')) return; setEquipSets((p: LineupEquipSetT[]) => p.filter(x => x.id !== id)); markDirty() }
+  const setB = (i: number, v: string) => setEditing((e: any) => ({ ...e, bonus: e.bonus.map((b: string, idx: number) => idx === i ? v : b) }))
+  const addB = () => setEditing((e: any) => ({ ...e, bonus: [...(e.bonus || []), ''] }))
+  const delB = (i: number) => setEditing((e: any) => ({ ...e, bonus: e.bonus.filter((_: any, idx: number) => idx !== i) }))
+  const toggleGenre = (gid: string) => setEditing((e: any) => {
+    const cur: string[] = parseArr(e.genreIds)
+    return { ...e, genreIds: cur.includes(gid) ? cur.filter(x => x !== gid) : [...cur, gid] }
+  })
+
+  return (
+    <div>
+      {editing ? (
+        <div className={cardCls + ' mb-6'}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+            <div>
+              <label className={labelCls}>套裝名稱</label>
+              <input className={inputCls + ' mb-3'} value={editing.name} onChange={e => setEditing({ ...editing, name: e.target.value })} placeholder="如：狂暴之怒" />
+              <label className={labelCls}>適配流派 <span className="normal-case font-normal text-wiki-text-muted">（可多選）</span></label>
+              <div className="flex flex-wrap gap-2">
+                {genres.map((g: LineupGenreT) => {
+                  const sel = parseArr<string>(editing.genreIds).includes(g.id)
+                  return (
+                    <button key={g.id} type="button" onClick={() => toggleGenre(g.id)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm border ${sel ? 'border-wiki-accent bg-wiki-accent/10 text-wiki-accent' : 'border-wiki-border text-wiki-text-muted'}`}>
+                      <span className="w-2 h-2 rounded-full" style={{ background: g.color }} />{g.name}
+                    </button>
+                  )
+                })}
+                {!genres.length && <span className="text-xs text-wiki-text-muted">尚無流派，請先到「流派管理」新增</span>}
+              </div>
+            </div>
+            <div>
+              <ImageUploadInput label="套裝圖標（選填）" value={editing.imgUrl || ''} position="50% 50%" onChange={url => setEditing({ ...editing, imgUrl: url })} onPositionChange={() => {}} compact objectFit="contain" />
+              <label className={labelCls + ' mt-4'}>套裝額外加成</label>
+              {(editing.bonus || []).map((b: string, i: number) => (
+                <div key={i} className="flex gap-2 mb-2">
+                  <input className="flex-1 bg-wiki-gray border border-wiki-border px-3 py-2 text-wiki-text text-sm" value={b} onChange={e => setB(i, e.target.value)} placeholder="如：集滿 4 件：暴擊率 +10%" />
+                  <button className={btnDanger} onClick={() => delB(i)}>×</button>
+                </div>
+              ))}
+              <button className={btnSec} onClick={addB}>+ 新增加成</button>
+            </div>
+          </div>
+          <div className="flex gap-2 mt-4"><button className={btnPri} onClick={commit}>套用</button><button className={btnSec} onClick={() => setEditing(null)}>取消</button></div>
+        </div>
+      ) : (
+        <button className={btnPri + ' mb-4'} onClick={start}>+ 新增套裝</button>
+      )}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {equipSets.map((s: LineupEquipSetT) => (
+          <div key={s.id} className="bg-wiki-gray-light border border-wiki-border rounded-lg p-3">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded bg-wiki-gray overflow-hidden flex items-center justify-center flex-shrink-0">
+                {s.imgUrl ? <img src={s.imgUrl} alt={s.name} className="w-full h-full object-contain" /> : <span>✨</span>}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-bold text-wiki-text truncate">{s.name}</div>
+                <div className="text-xs text-wiki-text-muted truncate">
+                  適配：{parseArr<string>(s.genreIds).map(id => genres.find((g: LineupGenreT) => g.id === id)?.name).filter(Boolean).join('、') || '未設定'}
+                </div>
+              </div>
+              <button className={btnSec} onClick={() => setEditing({ ...s, bonus: parseArr(s.bonus), genreIds: parseArr(s.genreIds) })}>編輯</button>
+              <button className={btnDanger} onClick={() => remove(s.id)}>刪</button>
+            </div>
+            {parseArr<string>(s.bonus).map((b, i) => <div key={i} className="text-xs text-wiki-accent">· {b}</div>)}
+          </div>
+        ))}
+        {!equipSets.length && <div className="text-wiki-text-muted text-sm">尚無套裝</div>}
       </div>
     </div>
   )

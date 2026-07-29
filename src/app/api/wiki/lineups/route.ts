@@ -21,12 +21,16 @@ export async function GET(request: Request) {
       .eq('characterKind', characterKind)
     if (genreId) lq = lq.eq('genreId', genreId)
 
-    const [lineupsRes, heroes, weapons, emblems, genres, cfgRow] = await Promise.all([
+    const [lineupsRes, heroes, weapons, emblems, genres, attrs, pets, heroEquips, equipSets, cfgRow] = await Promise.all([
       lq.order('isPinned', { ascending: false }).order('sortOrder', { ascending: true }),
       supabaseAdmin.from('LineupHero').select('*'),
       supabaseAdmin.from('LineupWeapon').select('*'),
       supabaseAdmin.from('LineupEmblem').select('*'),
       supabaseAdmin.from('LineupGenre').select('*').order('sortOrder', { ascending: true }),
+      supabaseAdmin.from('LineupAttr').select('*').order('sortOrder', { ascending: true }),
+      supabaseAdmin.from('LineupPet').select('*'),
+      supabaseAdmin.from('LineupHeroEquip').select('*'),
+      supabaseAdmin.from('LineupEquipSet').select('*'),
       supabaseAdmin.from('SiteConfig').select('value').eq('key', CONFIG_KEY).maybeSingle(),
     ])
 
@@ -49,6 +53,10 @@ export async function GET(request: Request) {
       weapons: weapons.data || [],
       emblems: emblems.data || [],
       genres: genres.data || [],
+      attrs: attrs.data || [],
+      pets: pets.data || [],
+      heroEquips: heroEquips.data || [],
+      equipSets: equipSets.data || [],
       config,
     })
   } catch (e: any) {
