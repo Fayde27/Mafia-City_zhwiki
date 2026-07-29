@@ -276,6 +276,9 @@ export default function AdminEventEditPage() {
               <h2 className="text-wiki-text font-bold text-base mb-5 flex items-center gap-2">
                 <span className="text-wiki-accent">◆</span>活動獎勵
               </h2>
+              <p className="text-wiki-text-muted text-xs mb-3">
+                💡 想連到道具：<b>選取文字 → 點工具欄 🔗 → 切到「道具」分頁搜索</b>，即可插入可點擊的道具連結
+              </p>
               <RichTextEditor value={form.rewards} onChange={html => set('rewards', html)} minHeight="min-h-[120px]" placeholder="獎勵一覽" />
             </section>
 

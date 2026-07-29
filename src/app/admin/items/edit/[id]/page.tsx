@@ -363,7 +363,9 @@ export default function AdminItemEditPage() {
               <h2 className="text-wiki-text font-bold text-base mb-5 flex items-center gap-2">
                 <span className="text-wiki-accent">◆</span>獲得途徑
               </h2>
-              <p className="text-wiki-text-muted text-xs mb-3">可填寫文字描述，支持富文本（包含鏈接）</p>
+              <p className="text-wiki-text-muted text-xs mb-3">
+                可填寫文字描述，支持富文本。💡 想連到活動：<b>選取文字 → 點工具欄 🔗 → 切到「活動」分頁搜索</b>，即可插入可點擊的活動連結
+              </p>
               <RichTextEditor
                 value={form.source}
                 onChange={html => set('source', html)}

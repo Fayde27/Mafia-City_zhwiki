@@ -13,12 +13,10 @@ interface SearchResult {
 
 const TABS: { key: string; label: string }[] = [
   { key: '', label: '全部' },
-  { key: 'article', label: '文章' },
-  { key: 'character', label: '角色' },
-  { key: 'building', label: '建築' },
   { key: 'item', label: '道具' },
-  { key: 'equipment', label: '裝備' },
-  { key: 'troop', label: '兵種' },
+  { key: 'event', label: '活動' },
+  { key: 'lineup', label: '陣容' },
+  { key: 'article', label: '攻略' },
 ]
 
 interface LinkPickerModalProps {
@@ -94,7 +92,7 @@ export default function LinkPickerModal({ open, onClose, onConfirm }: LinkPicker
             ref={inputRef}
             value={q}
             onChange={e => setQ(e.target.value)}
-            placeholder="搜索站內條目（文章 / 角色 / 建築 / 道具 / 裝備 / 兵種）"
+            placeholder="搜索站內條目（道具 / 活動 / 陣容 / 攻略）"
             className="w-full bg-wiki-gray border border-wiki-border rounded px-3 py-2 text-sm text-wiki-text focus:border-wiki-accent focus:outline-none"
           />
 
