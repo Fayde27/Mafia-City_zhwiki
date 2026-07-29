@@ -13,8 +13,7 @@ interface WikiSection {
 
 const navSections: WikiSection[] = [
   { label: '首頁', href: '/' },
-  { label: '豪傑陣容', href: '/wiki/lineups' },
-  { label: '英雄陣容', href: '/wiki/hero-lineups' },
+  { label: '陣容搭配', href: '/wiki/lineups' },
   { label: '道具介紹', href: '/wiki/items' },
   { label: '活動一覽', href: '/wiki/events' },
   { label: '玩法攻略', href: '/wiki/guides' },

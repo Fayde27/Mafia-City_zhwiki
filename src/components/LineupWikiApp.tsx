@@ -19,13 +19,14 @@ interface DataT {
   heroEquips: LineupHeroEquipT[]; equipSets: LineupEquipSetT[]
 }
 
-export default function LineupWikiApp({ kind }: { kind: 'haojie' | 'hero' }) {
+export default function LineupWikiApp() {
   const [data, setData] = useState<DataT | null>(null)
   const [loading, setLoading] = useState(true)
   const [genreFilter, setGenreFilter] = useState('')
   const [heroFilter, setHeroFilter] = useState('')
+  // 豪傑 / 英雄 在頁內切換（單一入口）
+  const [kind, setKind] = useState<'haojie' | 'hero'>('haojie')
   const isHero = kind === 'hero'
-  const kindLabel = isHero ? '英雄' : '豪傑'
 
   useEffect(() => {
     setLoading(true)
@@ -67,7 +68,7 @@ export default function LineupWikiApp({ kind }: { kind: 'haojie' | 'hero' }) {
         <div className="text-sm text-wiki-text-muted mb-4">
           <Link href="/" className="hover:text-wiki-accent">首頁</Link>
           <span className="mx-2">/</span>
-          <span className="text-wiki-text">{kindLabel}陣容搭配</span>
+          <span className="text-wiki-text">陣容搭配</span>
         </div>
 
         <div className="text-center mb-8">
@@ -78,12 +79,14 @@ export default function LineupWikiApp({ kind }: { kind: 'haojie' | 'hero' }) {
           {pageCfg?.showTime && pageCfg?.timeText && <div className="text-wiki-text-muted text-sm mt-2 tracking-widest">{pageCfg.timeText}</div>}
         </div>
 
-        {/* 另一個陣容入口（豪傑 / 英雄 為兩個獨立頁面） */}
-        <div className="flex justify-center mb-5">
-          <Link href={isHero ? '/wiki/lineups' : '/wiki/hero-lineups'}
-            className="px-5 py-2 rounded-full text-sm border border-wiki-border text-wiki-text-muted hover:border-wiki-accent hover:text-wiki-accent transition-colors">
-            前往{isHero ? '豪傑' : '英雄'}陣容搭配 →
-          </Link>
+        {/* 豪傑 / 英雄 切換 */}
+        <div className="flex gap-2 justify-center mb-5">
+          {([{ k: 'haojie', label: '豪傑陣容' }, { k: 'hero', label: '英雄陣容' }] as const).map(t => (
+            <button key={t.k} onClick={() => { setKind(t.k); setGenreFilter('') }}
+              className={`px-5 py-2 rounded-full text-sm border transition-colors ${kind === t.k ? 'border-wiki-accent bg-wiki-accent/10 text-wiki-accent font-bold' : 'border-wiki-border text-wiki-text-muted hover:border-wiki-accent/50'}`}>
+              {t.label}
+            </button>
+          ))}
         </div>
 
         {/* 篩選 */}

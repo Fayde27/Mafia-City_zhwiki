@@ -114,8 +114,7 @@ export async function GET(request: Request) {
               type: 'lineup' as const,
               id: l.id,
               name: l.title,
-              // 豪傑/英雄為兩個獨立頁面
-              url: l.characterKind === 'hero' ? '/wiki/hero-lineups' : '/wiki/lineups',
+              url: '/wiki/lineups',
               category: (l.characterKind === 'hero' ? '英雄' : '豪傑') + TYPE_LABELS.lineup,
               icon: '',
             }))

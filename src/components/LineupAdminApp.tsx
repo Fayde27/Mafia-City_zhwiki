@@ -24,33 +24,34 @@ const btnDanger = 'px-3 py-1.5 text-sm bg-wiki-gray border border-wiki-border te
 type Tab = 'lineups' | 'heroes' | 'styleicons' | 'badges' | 'staticons'
   | 'weapons' | 'emblems' | 'attrs' | 'pets' | 'heroequips' | 'equipsets' | 'genres'
 
-// 豪傑 / 英雄 各自的 Tab 組成（兩套獨立後台，互不干擾）
-const HAOJIE_TABS: { key: Tab; label: string }[] = [
-  { key: 'lineups', label: '陣容搭配' },
-  { key: 'heroes', label: '豪傑管理' },
-  { key: 'weapons', label: '武器管理' },
-  { key: 'emblems', label: '戰徽管理' },
-  { key: 'attrs', label: '詞條管理' },
-  { key: 'genres', label: '流派管理' },
-  { key: 'styleicons', label: '風格圖標' },
-  { key: 'staticons', label: '加點圖標' },
-  { key: 'badges', label: '標籤管理' },
-]
-const HERO_TABS: { key: Tab; label: string }[] = [
-  { key: 'lineups', label: '陣容搭配' },
-  { key: 'heroes', label: '英雄管理' },
-  { key: 'pets', label: '戰寵/異獸' },
-  { key: 'heroequips', label: '英雄裝備' },
-  { key: 'equipsets', label: '套裝管理' },
-  { key: 'genres', label: '流派管理' },
-  { key: 'styleicons', label: '風格圖標' },
-  { key: 'badges', label: '標籤管理' },
-]
+// 單一入口：豪傑/英雄在「陣容搭配」頁內切換；管理項按類型顯示對應的那幾個
+const TABS_FOR = (kind: 'haojie' | 'hero'): { key: Tab; label: string }[] => kind === 'hero'
+  ? [
+      { key: 'lineups', label: '陣容搭配' },
+      { key: 'heroes', label: '英雄管理' },
+      { key: 'pets', label: '戰寵/異獸' },
+      { key: 'heroequips', label: '英雄裝備' },
+      { key: 'equipsets', label: '套裝管理' },
+      { key: 'genres', label: '流派管理' },
+      { key: 'styleicons', label: '風格圖標' },
+      { key: 'badges', label: '標籤管理' },
+    ]
+  : [
+      { key: 'lineups', label: '陣容搭配' },
+      { key: 'heroes', label: '豪傑管理' },
+      { key: 'weapons', label: '武器管理' },
+      { key: 'emblems', label: '戰徽管理' },
+      { key: 'attrs', label: '詞條管理' },
+      { key: 'genres', label: '流派管理' },
+      { key: 'styleicons', label: '風格圖標' },
+      { key: 'staticons', label: '加點圖標' },
+      { key: 'badges', label: '標籤管理' },
+    ]
 
-export default function LineupAdminApp({ kind }: { kind: 'haojie' | 'hero' }) {
-  const isHero = kind === 'hero'
-  const TABS = isHero ? HERO_TABS : HAOJIE_TABS
-  const kindLabel = isHero ? '英雄' : '豪傑'
+export default function LineupAdminApp() {
+  // 豪傑 / 英雄 在頁內切換（單一入口）
+  const [kind, setKind] = useState<'haojie' | 'hero'>('haojie')
+  const TABS = TABS_FOR(kind)
   const [tab, setTab] = useState<Tab>('lineups')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -134,11 +135,20 @@ export default function LineupAdminApp({ kind }: { kind: 'haojie' | 'hero' }) {
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Link href="/admin/dashboard" className="text-wiki-text-muted hover:text-wiki-accent text-sm">← 後台</Link>
-            <h1 className="text-xl font-bold text-wiki-accent">{kindLabel}陣容搭配</h1>
-            <Link href={isHero ? '/admin/lineups' : '/admin/hero-lineups'}
-              className="text-xs text-wiki-text-muted hover:text-wiki-accent border border-wiki-border rounded px-2 py-1">
-              切換到{isHero ? '豪傑' : '英雄'}陣容 →
-            </Link>
+            <h1 className="text-xl font-bold text-wiki-accent">陣容搭配</h1>
+            {/* 豪傑 / 英雄 切換（切換後若當前 Tab 不適用，自動回到「陣容搭配」） */}
+            <div className="flex gap-1 bg-wiki-gray rounded p-0.5">
+              {([{ k: 'haojie', label: '豪傑' }, { k: 'hero', label: '英雄' }] as const).map(t => (
+                <button key={t.k}
+                  onClick={() => {
+                    setKind(t.k)
+                    if (!TABS_FOR(t.k).some(x => x.key === tab)) setTab('lineups')
+                  }}
+                  className={`px-3 py-1 text-sm rounded transition-colors ${kind === t.k ? 'bg-wiki-accent text-black font-bold' : 'text-wiki-text-muted hover:text-wiki-text'}`}>
+                  {t.label}
+                </button>
+              ))}
+            </div>
           </div>
           <div className="flex items-center gap-3">
             {msg && <span className="text-sm text-wiki-text-muted">{msg}</span>}

@@ -4,7 +4,7 @@ export const runtime = 'edge'
 
 import LineupAdminApp from '@/components/LineupAdminApp'
 
-// 豪傑陣容搭配後台（英雄在 /admin/hero-lineups）
-export default function HaojieLineupsAdminPage() {
-  return <LineupAdminApp kind="haojie" />
+// 陣容搭配後台（單一入口，內含豪傑 / 英雄 切換）
+export default function LineupsAdminPage() {
+  return <LineupAdminApp />
 }

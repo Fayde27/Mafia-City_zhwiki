@@ -4,7 +4,7 @@ export const runtime = 'edge'
 
 import LineupWikiApp from '@/components/LineupWikiApp'
 
-// 豪傑陣容搭配（英雄在 /wiki/hero-lineups）
-export default function HaojieLineupsWikiPage() {
-  return <LineupWikiApp kind="haojie" />
+// 陣容搭配（單一入口，內含豪傑 / 英雄 切換）
+export default function LineupsWikiPage() {
+  return <LineupWikiApp />
 }

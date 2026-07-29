@@ -12,7 +12,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '',
     '/wiki',
     '/wiki/lineups',
-    '/wiki/hero-lineups',
     '/wiki/items',
     '/wiki/events',
     '/wiki/guides',

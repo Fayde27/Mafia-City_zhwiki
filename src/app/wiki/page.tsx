@@ -23,21 +23,11 @@ interface WikiCategory {
 const wikiCategories: WikiCategory[] = [
   {
     id: 'lineups',
-    name: '豪傑陣容',
+    name: '陣容搭配',
     slug: 'lineups',
-    description: '運營精選的豪傑陣容方案：武器、戰徽、詞條搭配',
+    description: '豪傑與英雄的配隊方案，按流派篩選、按角色反查',
     icon: '🎯',
     route: '/wiki/lineups',
-    count: 0,
-    countLabel: '套陣容',
-  },
-  {
-    id: 'hero-lineups',
-    name: '英雄陣容',
-    slug: 'hero-lineups',
-    description: '英雄配隊方案：戰寵/異獸、6 格裝備與套裝加成',
-    icon: '🦸',
-    route: '/wiki/hero-lineups',
     count: 0,
     countLabel: '套陣容',
   },
