@@ -564,13 +564,13 @@ function HeroesTab({ kind, heroes, setHeroes, config, markDirty, styleName }: an
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className={labelCls}>角色名稱</label>
-              <input className={inputCls} value={editing.name} onChange={e => setEditing({ ...editing, name: e.target.value })} />
+              <input className={inputCls} value={editing.name} onChange={e => setEditing((prev: any) => ({ ...prev, name: e.target.value }))} />
               <label className={labelCls + ' mt-4'}>風格</label>
-              <select className={inputCls} value={editing.style} onChange={e => setEditing({ ...editing, style: e.target.value })}>
+              <select className={inputCls} value={editing.style} onChange={e => setEditing((prev: any) => ({ ...prev, style: e.target.value }))}>
                 {STYLE_KEYS.map(s => <option key={s} value={s}>{styleName(s)}</option>)}
               </select>
             </div>
-            <ImageUploadInput label="半身像（推薦 2:3）" value={editing.imgUrl || ''} position="50% 50%" onChange={url => setEditing({ ...editing, imgUrl: url })} onPositionChange={() => {}} previewHeight="h-48" />
+            <ImageUploadInput label="半身像（推薦 2:3）" value={editing.imgUrl || ''} position="50% 50%" onChange={url => setEditing((prev: any) => ({ ...prev, imgUrl: url }))} onPositionChange={() => {}} previewHeight="h-48" />
           </div>
           <div className="flex gap-2 mt-4"><button className={btnPri} onClick={commit}>套用</button><button className={btnSec} onClick={() => setEditing(null)}>取消</button></div>
         </div>
@@ -624,31 +624,31 @@ function EquipTab({ kind, items, setItems, heroes, markDirty, label }: any) {
             <div>
               <label className={labelCls}>類型</label>
               <div className="flex gap-2 mb-3">
-                <button type="button" className={`px-4 py-2 rounded border text-sm ${!editing.parentId ? 'border-wiki-accent bg-wiki-accent/10 text-wiki-accent' : 'border-wiki-border text-wiki-text-muted'}`} onClick={() => setEditing({ ...editing, parentId: null, variantLabel: '' })}>父類</button>
-                <button type="button" className={`px-4 py-2 rounded border text-sm ${editing.parentId !== null && editing.parentId !== undefined ? 'border-wiki-accent bg-wiki-accent/10 text-wiki-accent' : 'border-wiki-border text-wiki-text-muted'}`} onClick={() => setEditing({ ...editing, parentId: parents[0]?.id || '' })}>變體</button>
+                <button type="button" className={`px-4 py-2 rounded border text-sm ${!editing.parentId ? 'border-wiki-accent bg-wiki-accent/10 text-wiki-accent' : 'border-wiki-border text-wiki-text-muted'}`} onClick={() => setEditing((prev: any) => ({ ...prev, parentId: null, variantLabel: '' }))}>父類</button>
+                <button type="button" className={`px-4 py-2 rounded border text-sm ${editing.parentId !== null && editing.parentId !== undefined ? 'border-wiki-accent bg-wiki-accent/10 text-wiki-accent' : 'border-wiki-border text-wiki-text-muted'}`} onClick={() => setEditing((prev: any) => ({ ...prev, parentId: parents[0]?.id || '' }))}>變體</button>
               </div>
               {editing.parentId !== null && editing.parentId !== undefined && (
                 <>
                   <label className={labelCls}>父類</label>
-                  <select className={inputCls + ' mb-3'} value={editing.parentId || ''} onChange={e => { const p = parents.find((x: any) => x.id === e.target.value); setEditing({ ...editing, parentId: e.target.value, displayName: editing.displayName || p?.displayName || '', quality: p?.quality || editing.quality }) }}>
+                  <select className={inputCls + ' mb-3'} value={editing.parentId || ''} onChange={e => { const p = parents.find((x: any) => x.id === e.target.value); setEditing((prev: any) => ({ ...prev, parentId: e.target.value, displayName: prev.displayName || p?.displayName || '', quality: p?.quality || prev.quality })) }}>
                     <option value="">— 選擇父類 —</option>
                     {parents.map((p: any) => <option key={p.id} value={p.id}>{p.displayName}</option>)}
                   </select>
                   <label className={labelCls}>變體標籤</label>
-                  <input className={inputCls + ' mb-3'} value={editing.variantLabel || ''} onChange={e => setEditing({ ...editing, variantLabel: e.target.value })} placeholder="如：橙品 / 專屬版" />
+                  <input className={inputCls + ' mb-3'} value={editing.variantLabel || ''} onChange={e => setEditing((prev: any) => ({ ...prev, variantLabel: e.target.value }))} placeholder="如：橙品 / 專屬版" />
                 </>
               )}
               <label className={labelCls}>名稱</label>
-              <input className={inputCls + ' mb-3'} value={editing.displayName} onChange={e => setEditing({ ...editing, displayName: e.target.value })} />
+              <input className={inputCls + ' mb-3'} value={editing.displayName} onChange={e => setEditing((prev: any) => ({ ...prev, displayName: e.target.value }))} />
               <label className={labelCls}>品質</label>
-              <select className={inputCls} value={editing.quality} onChange={e => setEditing({ ...editing, quality: e.target.value })}>
+              <select className={inputCls} value={editing.quality} onChange={e => setEditing((prev: any) => ({ ...prev, quality: e.target.value }))}>
                 {QUALITY_KEYS.map(q => <option key={q} value={q}>{QUALITY_LABEL[q]}</option>)}
               </select>
               {isWeapon && (
                 <div className="mt-3">
-                  <label className="flex items-center gap-2 text-wiki-text mb-2"><input type="checkbox" checked={!!editing.isExclusive} onChange={e => setEditing({ ...editing, isExclusive: e.target.checked })} /> 專屬武器</label>
+                  <label className="flex items-center gap-2 text-wiki-text mb-2"><input type="checkbox" checked={!!editing.isExclusive} onChange={e => setEditing((prev: any) => ({ ...prev, isExclusive: e.target.checked }))} /> 專屬武器</label>
                   {editing.isExclusive && (
-                    <select className={inputCls} value={editing.exclusiveHeroId || ''} onChange={e => setEditing({ ...editing, exclusiveHeroId: e.target.value })}>
+                    <select className={inputCls} value={editing.exclusiveHeroId || ''} onChange={e => setEditing((prev: any) => ({ ...prev, exclusiveHeroId: e.target.value }))}>
                       <option value="">— 專屬角色 —</option>
                       {heroes.map((h: LineupHeroT) => <option key={h.id} value={h.id}>{h.name}</option>)}
                     </select>
@@ -657,7 +657,7 @@ function EquipTab({ kind, items, setItems, heroes, markDirty, label }: any) {
               )}
             </div>
             <div>
-              <ImageUploadInput label="圖標" value={editing.imgUrl || ''} position="50% 50%" onChange={url => setEditing({ ...editing, imgUrl: url })} onPositionChange={() => {}} compact objectFit="contain" />
+              <ImageUploadInput label="圖標" value={editing.imgUrl || ''} position="50% 50%" onChange={url => setEditing((prev: any) => ({ ...prev, imgUrl: url }))} onPositionChange={() => {}} compact objectFit="contain" />
               <p className="text-xs text-wiki-text-muted mt-4 leading-relaxed">
                 💡 詞條已與{label}解綁：請到「詞條管理」維護詞條庫，配隊時在每個槽位單獨挑選。
               </p>
@@ -769,19 +769,19 @@ function PetsTab({ pets, setPets, markDirty }: any) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
             <div>
               <label className={labelCls}>名稱</label>
-              <input className={inputCls + ' mb-3'} value={editing.name} onChange={e => setEditing({ ...editing, name: e.target.value })} placeholder="如：赤炎虎" />
+              <input className={inputCls + ' mb-3'} value={editing.name} onChange={e => setEditing((prev: any) => ({ ...prev, name: e.target.value }))} placeholder="如：赤炎虎" />
               <label className={labelCls}>類型</label>
-              <select className={inputCls + ' mb-3'} value={editing.kind} onChange={e => setEditing({ ...editing, kind: e.target.value })}>
+              <select className={inputCls + ' mb-3'} value={editing.kind} onChange={e => setEditing((prev: any) => ({ ...prev, kind: e.target.value }))}>
                 <option value="pet">戰寵</option>
                 <option value="beast">異獸</option>
               </select>
               <label className={labelCls}>品質</label>
-              <select className={inputCls} value={editing.quality} onChange={e => setEditing({ ...editing, quality: e.target.value })}>
+              <select className={inputCls} value={editing.quality} onChange={e => setEditing((prev: any) => ({ ...prev, quality: e.target.value }))}>
                 {QUALITY_KEYS.map(q => <option key={q} value={q}>{QUALITY_LABEL[q]}</option>)}
               </select>
             </div>
             <div>
-              <ImageUploadInput label="圖片" value={editing.imgUrl || ''} position="50% 50%" onChange={url => setEditing({ ...editing, imgUrl: url })} onPositionChange={() => {}} compact objectFit="contain" />
+              <ImageUploadInput label="圖片" value={editing.imgUrl || ''} position="50% 50%" onChange={url => setEditing((prev: any) => ({ ...prev, imgUrl: url }))} onPositionChange={() => {}} compact objectFit="contain" />
               <label className={labelCls + ' mt-4'}>技能 / 加成說明</label>
               {(editing.attrs || []).map((a: string, i: number) => (
                 <div key={i} className="flex gap-2 mb-2">
@@ -838,23 +838,23 @@ function HeroEquipsTab({ heroEquips, setHeroEquips, equipSets, markDirty }: any)
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
             <div>
               <label className={labelCls}>裝備名稱</label>
-              <input className={inputCls + ' mb-3'} value={editing.name} onChange={e => setEditing({ ...editing, name: e.target.value })} />
+              <input className={inputCls + ' mb-3'} value={editing.name} onChange={e => setEditing((prev: any) => ({ ...prev, name: e.target.value }))} />
               <label className={labelCls}>部位</label>
-              <select className={inputCls + ' mb-3'} value={editing.slotIndex} onChange={e => setEditing({ ...editing, slotIndex: parseInt(e.target.value) })}>
+              <select className={inputCls + ' mb-3'} value={editing.slotIndex} onChange={e => setEditing((prev: any) => ({ ...prev, slotIndex: parseInt(e.target.value) }))}>
                 {HERO_EQUIP_SLOTS.map(s => <option key={s.index} value={s.index}>{s.index}. {s.label}</option>)}
               </select>
               <label className={labelCls}>品質</label>
-              <select className={inputCls + ' mb-3'} value={editing.quality} onChange={e => setEditing({ ...editing, quality: e.target.value })}>
+              <select className={inputCls + ' mb-3'} value={editing.quality} onChange={e => setEditing((prev: any) => ({ ...prev, quality: e.target.value }))}>
                 {QUALITY_KEYS.map(q => <option key={q} value={q}>{QUALITY_LABEL[q]}</option>)}
               </select>
               <label className={labelCls}>所屬套裝（選填）</label>
-              <select className={inputCls} value={editing.setId || ''} onChange={e => setEditing({ ...editing, setId: e.target.value })}>
+              <select className={inputCls} value={editing.setId || ''} onChange={e => setEditing((prev: any) => ({ ...prev, setId: e.target.value }))}>
                 <option value="">— 無套裝 —</option>
                 {equipSets.map((s: LineupEquipSetT) => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             </div>
             <div>
-              <ImageUploadInput label="圖標" value={editing.imgUrl || ''} position="50% 50%" onChange={url => setEditing({ ...editing, imgUrl: url })} onPositionChange={() => {}} compact objectFit="contain" />
+              <ImageUploadInput label="圖標" value={editing.imgUrl || ''} position="50% 50%" onChange={url => setEditing((prev: any) => ({ ...prev, imgUrl: url }))} onPositionChange={() => {}} compact objectFit="contain" />
               <label className={labelCls + ' mt-4'}>屬性 / 詞條</label>
               {(editing.attrs || []).map((a: string, i: number) => (
                 <div key={i} className="flex gap-2 mb-2">
@@ -926,7 +926,7 @@ function EquipSetsTab({ equipSets, setEquipSets, genres, markDirty }: any) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
             <div>
               <label className={labelCls}>套裝名稱</label>
-              <input className={inputCls + ' mb-3'} value={editing.name} onChange={e => setEditing({ ...editing, name: e.target.value })} placeholder="如：狂暴之怒" />
+              <input className={inputCls + ' mb-3'} value={editing.name} onChange={e => setEditing((prev: any) => ({ ...prev, name: e.target.value }))} placeholder="如：狂暴之怒" />
               <label className={labelCls}>適配流派 <span className="normal-case font-normal text-wiki-text-muted">（可多選）</span></label>
               <div className="flex flex-wrap gap-2">
                 {genres.map((g: LineupGenreT) => {
@@ -942,7 +942,7 @@ function EquipSetsTab({ equipSets, setEquipSets, genres, markDirty }: any) {
               </div>
             </div>
             <div>
-              <ImageUploadInput label="套裝圖標（選填）" value={editing.imgUrl || ''} position="50% 50%" onChange={url => setEditing({ ...editing, imgUrl: url })} onPositionChange={() => {}} compact objectFit="contain" />
+              <ImageUploadInput label="套裝圖標（選填）" value={editing.imgUrl || ''} position="50% 50%" onChange={url => setEditing((prev: any) => ({ ...prev, imgUrl: url }))} onPositionChange={() => {}} compact objectFit="contain" />
               <label className={labelCls + ' mt-4'}>套裝額外加成</label>
               {(editing.bonus || []).map((b: string, i: number) => (
                 <div key={i} className="flex gap-2 mb-2">
@@ -998,9 +998,9 @@ function GenresTab({ genres, setGenres, markDirty }: any) {
       {editing ? (
         <div className={cardCls + ' mb-6'}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
-            <div><label className={labelCls}>流派名稱</label><input className={inputCls} value={editing.name} onChange={e => setEditing({ ...editing, name: e.target.value })} placeholder="如：飛車黨" /></div>
-            <div><label className={labelCls}>代表色</label><input type="color" className="w-full h-12 bg-wiki-gray border border-wiki-border" value={editing.color} onChange={e => setEditing({ ...editing, color: e.target.value })} /></div>
-            <ImageUploadInput label="流派圖標（選填）" value={editing.imgUrl || ''} position="50% 50%" onChange={url => setEditing({ ...editing, imgUrl: url })} onPositionChange={() => {}} compact objectFit="contain" />
+            <div><label className={labelCls}>流派名稱</label><input className={inputCls} value={editing.name} onChange={e => setEditing((prev: any) => ({ ...prev, name: e.target.value }))} placeholder="如：飛車黨" /></div>
+            <div><label className={labelCls}>代表色</label><input type="color" className="w-full h-12 bg-wiki-gray border border-wiki-border" value={editing.color} onChange={e => setEditing((prev: any) => ({ ...prev, color: e.target.value }))} /></div>
+            <ImageUploadInput label="流派圖標（選填）" value={editing.imgUrl || ''} position="50% 50%" onChange={url => setEditing((prev: any) => ({ ...prev, imgUrl: url }))} onPositionChange={() => {}} compact objectFit="contain" />
           </div>
           <div className="flex gap-2 mt-4"><button className={btnPri} onClick={commit}>套用</button><button className={btnSec} onClick={() => setEditing(null)}>取消</button></div>
         </div>
