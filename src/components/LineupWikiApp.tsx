@@ -74,7 +74,7 @@ export default function LineupWikiApp() {
         <div className="text-center mb-8">
           {pageCfg?.eyebrow && <div className="text-xs tracking-[0.3em] text-wiki-accent/70 uppercase mb-1">{pageCfg.eyebrow}</div>}
           <h1 className="text-3xl md:text-4xl font-heading font-bold text-wiki-accent heading-hard">
-            {isHero ? (pageCfg?.heroTitle || '英雄陣容搭配') : (pageCfg?.title || '豪傑陣容搭配')}
+            {isHero ? (pageCfg?.heroTitle || '英雄陣容推薦') : (pageCfg?.title || '豪傑陣容推薦')}
           </h1>
           {pageCfg?.showTime && pageCfg?.timeText && <div className="text-wiki-text-muted text-sm mt-2 tracking-widest">{pageCfg.timeText}</div>}
         </div>

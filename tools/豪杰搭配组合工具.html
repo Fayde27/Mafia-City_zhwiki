@@ -116,6 +116,11 @@ body{background:var(--c-black);color:var(--c-text);font-family:var(--ff-body);mi
 .admin-wrap{display:flex;min-height:calc(100vh - 56px)}
 .admin-sidebar{width:188px;flex-shrink:0;background:var(--c-dark);border-right:1px solid var(--c-border);padding:18px 0}
 .admin-sidebar-title{font-family:var(--ff-display);font-size:13px;letter-spacing:1.2px;color:var(--c-text-dim);text-transform:uppercase;padding:0 16px 10px;border-bottom:1px solid var(--c-border);margin-bottom:6px}
+/* 左側欄的 豪傑/英雄 切換 */
+.admin-kind-switch{display:flex;flex-direction:column;gap:4px;padding:0 12px 14px;margin-bottom:10px;border-bottom:1px solid var(--c-border)}
+.admin-kind-btn{padding:8px 10px;border:1px solid var(--c-border);background:transparent;color:var(--c-text-dim);font-family:var(--ff-body);font-size:14px;cursor:pointer;border-radius:3px;transition:all .15s;text-align:center}
+.admin-kind-btn:hover{border-color:var(--c-gold);color:var(--c-gold)}
+.admin-kind-btn.active{background:linear-gradient(135deg,var(--c-gold),var(--c-gold-dark));border-color:transparent;color:#000;font-weight:700}
 .admin-nav-item{display:block;width:100%;padding:9px 16px;background:transparent;border:none;text-align:left;color:var(--c-text-dim);font-family:var(--ff-body);font-size:15px;cursor:pointer;transition:all .2s}
 .admin-nav-item:hover{color:var(--c-gold);background:rgba(201,162,39,.05)}
 .admin-nav-item.active{color:var(--c-gold);background:rgba(201,162,39,.1);border-left:2px solid var(--c-gold)}
@@ -217,6 +222,9 @@ body{background:var(--c-black);color:var(--c-text);font-family:var(--ff-body);mi
   .admin-wrap{flex-direction:column}
   .admin-sidebar{width:100%;padding:8px 0;display:flex;overflow-x:auto;border-right:none;border-bottom:1px solid var(--c-border)}
   .admin-sidebar-title{display:none}
+  /* 手機：側邊欄橫向滾動，切換鈕跟著改為橫排 */
+  .admin-kind-switch{flex-direction:row;padding:0 8px;margin-bottom:0;border-bottom:none;border-right:1px solid var(--c-border);margin-right:8px;flex-shrink:0}
+  .admin-kind-btn{white-space:nowrap}
   .admin-nav-item{white-space:nowrap;border-left:none!important;border-bottom:2px solid transparent}
   .admin-nav-item.active{border-bottom-color:var(--c-gold)!important}
   .admin-content{padding:14px}
@@ -323,6 +331,11 @@ body{background:var(--c-black);color:var(--c-text);font-family:var(--ff-body);mi
 <div id="page-admin" class="page">
   <div class="admin-wrap">
     <aside class="admin-sidebar">
+      <!-- 豪傑 / 英雄 切換（放在左側欄頂部，全域生效） -->
+      <div class="admin-kind-switch">
+        <button class="admin-kind-btn active" id="kind-btn-haojie" onclick="switchAdminKind('haojie')">豪傑陣容</button>
+        <button class="admin-kind-btn" id="kind-btn-hero" onclick="switchAdminKind('hero')">英雄陣容</button>
+      </div>
       <div class="admin-sidebar-title">管理項目</div>
       <button class="admin-nav-item active" data-section="lineups" onclick="switchAdmin('lineups')">陣容搭配</button>
       <button class="admin-nav-item" data-section="heroes" onclick="switchAdmin('heroes')">豪傑管理</button>
@@ -356,12 +369,6 @@ body{background:var(--c-black);color:var(--c-text);font-family:var(--ff-body);mi
       <div id="admin-lineups" class="admin-section active">
         <div class="admin-section-title">陣容搭配管理</div>
 
-        <!-- 豪傑 / 英雄 切換（後台） -->
-        <div class="variant-type-row" style="margin-bottom:14px;">
-          <button class="variant-type-btn active" id="kind-btn-haojie" onclick="switchAdminKind('haojie')">豪傑陣容</button>
-          <button class="variant-type-btn" id="kind-btn-hero" onclick="switchAdminKind('hero')">英雄陣容</button>
-        </div>
-
         <!-- PAGE CONFIG -->
         <div style="background:var(--c-dark);border:1px solid var(--c-border);border-radius:4px;padding:14px 16px;margin-bottom:16px;">
           <div style="font-family:var(--ff-display);font-size:14px;letter-spacing:1px;color:var(--c-gold);margin-bottom:12px;">&#9656; 展示頁標題設定</div>
@@ -372,11 +379,11 @@ body{background:var(--c-black);color:var(--c-text);font-family:var(--ff-body);mi
             </div>
             <div class="form-group" id="cfg-title-group">
               <label class="form-label">主標題（豪傑）</label>
-              <input class="form-input" id="cfg-title" type="text" placeholder="豪傑最強陣容" oninput="applyPageConfig()">
+              <input class="form-input" id="cfg-title" type="text" placeholder="豪傑陣容推薦" oninput="applyPageConfig()">
             </div>
             <div class="form-group" id="cfg-herotitle-group" style="display:none;">
               <label class="form-label">主標題（英雄）</label>
-              <input class="form-input" id="cfg-hero-title" type="text" placeholder="英雄最強陣容" oninput="applyPageConfig()">
+              <input class="form-input" id="cfg-hero-title" type="text" placeholder="英雄陣容推薦" oninput="applyPageConfig()">
             </div>
             <div class="form-group">
               <label class="form-label">時間文字 <small>（如：2025年第三賽季）</small></label>
@@ -794,7 +801,7 @@ var appData={
   ],
   pageConfig:{
     eyebrow:'MAFIA CITY · TACTICAL GUIDE',
-    title:'豪傑最強陣容',
+    title:'豪傑陣容推薦',
     showTime:false,
     timeText:'',
     showFilterBar:true,
@@ -2087,7 +2094,7 @@ function clearGenreForm(){['editing-genre-id','genre-name','genre-img'].forEach(
 function renderPageHeader(){
   var cfg=appData.pageConfig||{};
   var eyebrow=cfg.eyebrow||'MAFIA CITY · TACTICAL GUIDE';
-  var title=curKind==='hero'?(cfg.heroTitle||'英雄最強陣容'):(cfg.title||'豪傑最強陣容');
+  var title=curKind==='hero'?(cfg.heroTitle||'英雄陣容推薦'):(cfg.title||'豪傑陣容推薦');
   var showTime=cfg.showTime&&cfg.timeText;
   var wrap=document.getElementById('page-header-wrap');
   if(!wrap)return;
@@ -2306,6 +2313,11 @@ function _migrateData(d){
     if(l.characterKind==='hero'&&!Array.isArray(l.slots))l.slots=blankHeroSlots();
     return l;
   });
+  // 主標題文案更新：只改「仍是舊預設值」的，使用者自訂的標題不動
+  if(d.pageConfig){
+    if(d.pageConfig.title==='豪傑最強陣容')d.pageConfig.title='豪傑陣容推薦';
+    if(d.pageConfig.heroTitle==='英雄最強陣容')d.pageConfig.heroTitle='英雄陣容推薦';
+  }
   // 英雄配隊三張新表
   if(!Array.isArray(d.pets))d.pets=[];
   d.pets=d.pets.map(function(p){
@@ -2350,7 +2362,7 @@ function _migrateData(d){
   if(!d.lineups)d.lineups=[];
   if(!d.pageConfig)d.pageConfig={
     eyebrow:'MAFIA CITY · TACTICAL GUIDE',
-    title:'豪傑最強陣容',
+    title:'豪傑陣容推薦',
     showTime:false,timeText:'',showFilterBar:true
   };
   if(!d.roleLabels)d.roleLabels={

@@ -130,6 +130,6 @@ export function defaultConfig(): LineupConfigT {
     statIcons: STAT_KEYS.map(k => ({ key: k, imgUrl: '' })),
     badges: [...BUILTIN_BADGES],
     roleLabels: { ...ROLE_DEFAULT_LABEL },
-    pageConfig: { eyebrow: 'MAFIA CITY · TACTICAL GUIDE', title: '豪傑最強陣容', showTime: false, timeText: '', showFilterBar: true },
+    pageConfig: { eyebrow: 'MAFIA CITY · TACTICAL GUIDE', title: '豪傑陣容推薦', heroTitle: '英雄陣容推薦', showTime: false, timeText: '', showFilterBar: true },
   }
 }

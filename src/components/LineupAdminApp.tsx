@@ -496,8 +496,8 @@ function LineupsTab({ kind, lineups, setLineups, heroes, weapons, emblems, genre
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div><label className={labelCls}>副標題（小字）</label><input className={inputCls} value={config.pageConfig?.eyebrow || ''} onChange={e => setPage({ eyebrow: e.target.value })} placeholder="MAFIA CITY · TACTICAL GUIDE" /></div>
           {kind === 'hero'
-            ? <div><label className={labelCls}>主標題</label><input className={inputCls} value={config.pageConfig?.heroTitle || ''} onChange={e => setPage({ heroTitle: e.target.value })} placeholder="英雄最強陣容" /></div>
-            : <div><label className={labelCls}>主標題</label><input className={inputCls} value={config.pageConfig?.title || ''} onChange={e => setPage({ title: e.target.value })} placeholder="豪傑最強陣容" /></div>}
+            ? <div><label className={labelCls}>主標題</label><input className={inputCls} value={config.pageConfig?.heroTitle || ''} onChange={e => setPage({ heroTitle: e.target.value })} placeholder="英雄陣容推薦" /></div>
+            : <div><label className={labelCls}>主標題</label><input className={inputCls} value={config.pageConfig?.title || ''} onChange={e => setPage({ title: e.target.value })} placeholder="豪傑陣容推薦" /></div>}
           <div><label className={labelCls}>時間文字</label><input className={inputCls} value={config.pageConfig?.timeText || ''} onChange={e => setPage({ timeText: e.target.value })} placeholder="選填，如 2026 第三賽季" /></div>
           <label className="flex items-center gap-2 text-wiki-text mt-8"><input type="checkbox" checked={!!config.pageConfig?.showTime} onChange={e => setPage({ showTime: e.target.checked })} /> 顯示時間文字</label>
         </div>
