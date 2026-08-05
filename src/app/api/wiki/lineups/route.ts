@@ -2,6 +2,7 @@ export const runtime = 'edge'
 
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { normalizeLineupConfig } from '@/lib/lineup'
 
 const CONFIG_KEY = 'lineupConfig'
 
@@ -45,7 +46,7 @@ export async function GET(request: Request) {
     }
 
     let config: any = {}
-    if (cfgRow.data?.value) { try { config = JSON.parse(cfgRow.data.value) } catch {} }
+    if (cfgRow.data?.value) { try { config = normalizeLineupConfig(JSON.parse(cfgRow.data.value)) } catch {} }
 
     return NextResponse.json({
       lineups,

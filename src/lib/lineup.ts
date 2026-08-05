@@ -111,6 +111,22 @@ export function badgeStyle(b: BadgeT): Record<string, string> {
   return { background: b.bg || '#1A1408', color: b.color || '#C9A227', border: `1px solid ${b.color || '#C9A227'}55` }
 }
 
+// 舊文案升級：DB 裡存的仍是舊預設值時換成新文案；使用者自訂的標題不動。
+// 在 API 讀取 lineupConfig 時呼叫，前後台一致生效。
+const LEGACY_TITLES: Record<string, string> = {
+  '豪傑最強陣容': '豪傑陣容推薦',
+  '英雄最強陣容': '英雄陣容推薦',
+}
+export function normalizeLineupConfig(cfg: any): any {
+  if (!cfg || typeof cfg !== 'object') return cfg
+  const pc = cfg.pageConfig
+  if (pc && typeof pc === 'object') {
+    if (pc.title && LEGACY_TITLES[pc.title]) pc.title = LEGACY_TITLES[pc.title]
+    if (pc.heroTitle && LEGACY_TITLES[pc.heroTitle]) pc.heroTitle = LEGACY_TITLES[pc.heroTitle]
+  }
+  return cfg
+}
+
 // 安全解析 JSON 數組
 export function parseArr<T = any>(raw: any, fallback: T[] = []): T[] {
   if (Array.isArray(raw)) return raw

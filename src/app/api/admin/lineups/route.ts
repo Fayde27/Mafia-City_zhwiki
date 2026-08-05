@@ -2,6 +2,7 @@ export const runtime = 'edge'
 
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { normalizeLineupConfig } from '@/lib/lineup'
 
 // 全域配置存 SiteConfig，key = 'lineupConfig'（JSON 字串）
 const CONFIG_KEY = 'lineupConfig'
@@ -24,7 +25,7 @@ export async function GET() {
 
     let config: any = {}
     if (cfgRow.data?.value) {
-      try { config = JSON.parse(cfgRow.data.value) } catch { config = {} }
+      try { config = normalizeLineupConfig(JSON.parse(cfgRow.data.value)) } catch { config = {} }
     }
 
     return NextResponse.json({
