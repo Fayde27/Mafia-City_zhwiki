@@ -44,6 +44,8 @@ export async function POST(request: Request) {
       .upload(filePath, buffer, {
         contentType: file.type,
         upsert: false,
+        // 檔名帶時間戳、內容不會被覆寫 → 可長快取（預設只有 3600 秒，重訪就得重下）
+        cacheControl: '31536000',
       })
 
     if (error) {

@@ -46,6 +46,16 @@
 .rich-content pre { background: #1a1a1a; border-radius: 6px; padding: 12px; margin: 0.75rem 0; font-family: monospace; font-size: 0.875rem; overflow-x: auto; }
 .rich-content code { background: #2a2a2a; padding: 2px 6px; border-radius: 3px; font-family: monospace; font-size: 0.875rem; }
 .rich-content a { color: #b8960c; text-decoration: underline; }
+
+/* 窄欄位（陣容卡三欄）的中文斷行：
+   不在英數詞中間斷開（避免「技術+7」被拆成「技術+」/「7」），
+   套用行首禁則避免標點跑到行首，並讓各行長度更平均。 */
+.cjk-text {
+  word-break: normal;
+  overflow-wrap: normal;
+  line-break: strict;
+  text-wrap: pretty;
+}
 .rich-content hr { border: none; border-top: 1px solid #3a3a3a; margin: 1rem 0; }
 .rich-content strong { font-weight: 700; }
 .rich-content em { font-style: italic; }
