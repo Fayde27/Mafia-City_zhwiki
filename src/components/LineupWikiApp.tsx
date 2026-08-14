@@ -103,7 +103,9 @@ export default function LineupWikiApp() {
           <span className="text-sm text-wiki-text-muted">按角色反查：</span>
           <select value={heroFilter} onChange={e => setHeroFilter(e.target.value)} className="bg-wiki-gray border border-wiki-border rounded px-3 py-1.5 text-sm text-wiki-text">
             <option value="">— 全部角色 —</option>
-            {(data?.heroes || []).map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
+            {/* 只列出當前類型的角色（豪傑 / 英雄 分開） */}
+            {(data?.heroes || []).filter(h => (h.characterKind || 'haojie') === kind)
+              .map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
           </select>
           {heroFilter && <button onClick={() => setHeroFilter('')} className="text-xs text-wiki-accent">清除</button>}
         </div>
@@ -122,7 +124,7 @@ export default function LineupWikiApp() {
                 <div key={l.id} className="bg-wiki-card border border-wiki-border rounded-xl overflow-hidden relative">
                   {l.bgUrl && <div className="absolute inset-0 opacity-[0.06] bg-cover bg-center" style={{ backgroundImage: `url(${l.bgUrl})` }} />}
                   {/* 頂部欄 */}
-                  <div className="relative flex items-center justify-between gap-2 px-4 py-2.5 border-b border-wiki-border">
+                  <div className="relative flex items-center justify-between gap-2 px-3 sm:px-4 py-2 sm:py-2.5 border-b border-wiki-border">
                     <div className="flex items-center gap-2 flex-wrap">
                       {genre && <span className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-wiki-border text-xs font-bold text-wiki-text"><span className="w-2 h-2 rounded-full" style={{ background: genre.color }} />{genre.name}</span>}
                       {badges.map(bid => {
@@ -135,8 +137,8 @@ export default function LineupWikiApp() {
                     </div>
                     {l.updateText && <span className="text-xs text-wiki-text-muted whitespace-nowrap">更新 {l.updateText}</span>}
                   </div>
-                  {/* 3 槽位 */}
-                  <div className="relative grid grid-cols-1 sm:grid-cols-3 border-b border-wiki-border">
+                  {/* 3 槽位：手機也維持三欄並排，靠縮小字級/間距讓整套陣容能在一屏看完 */}
+                  <div className="relative grid grid-cols-3 border-b border-wiki-border">
                     {slots.map((s, idx) => {
                       const hero = heroMap[s.heroId || '']
                       const weapon = weaponMap[s.weaponId || '']
@@ -146,46 +148,48 @@ export default function LineupWikiApp() {
                         <div key={s.role} className="border-r border-wiki-border last:border-r-0">
                           {/* 立繪 */}
                           <div className="relative aspect-[3/4] bg-wiki-gray overflow-hidden">
-                            {hero?.imgUrl ? <img src={hero.imgUrl} alt={hero.name} className="w-full h-full object-cover" style={{ objectPosition: 'top center' }} /> : <div className="w-full h-full flex items-center justify-center text-wiki-text-muted text-xs">{hero?.name || '未設置'}</div>}
-                            {roleLabel && <span className="absolute top-2 right-2 px-2 py-0.5 rounded text-[10px] font-bold bg-black/60 text-wiki-accent border border-wiki-accent/50">{roleLabel.emoji} {roleLabel.text}</span>}
+                            {hero?.imgUrl ? <img src={hero.imgUrl} alt={hero.name} className="w-full h-full object-cover" style={{ objectPosition: 'top center' }} /> : <div className="w-full h-full flex items-center justify-center text-wiki-text-muted text-[10px] sm:text-xs">{hero?.name || '未設置'}</div>}
+                            {roleLabel && <span className="absolute top-1 right-1 sm:top-2 sm:right-2 px-1 sm:px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-bold bg-black/60 text-wiki-accent border border-wiki-accent/50 whitespace-nowrap">{roleLabel.emoji} {roleLabel.text}</span>}
                             {s.stat && (
-                              <span className="absolute bottom-2 left-2 flex items-center gap-1 px-2 py-1 rounded text-xs font-bold bg-black/70 text-white border" style={{ borderColor: STAT_COLOR[s.stat] + '99', color: STAT_COLOR[s.stat] }}>
-                                {statIcon(s.stat) ? <img src={statIcon(s.stat)} className="w-4 h-4 object-contain" alt="" /> : <span>{STAT_DEFAULT_ICON[s.stat]}</span>}
+                              <span className="absolute bottom-1 left-1 sm:bottom-2 sm:left-2 flex items-center gap-0.5 sm:gap-1 px-1 sm:px-2 py-0.5 sm:py-1 rounded text-[9px] sm:text-xs font-bold bg-black/70 text-white border whitespace-nowrap" style={{ borderColor: STAT_COLOR[s.stat] + '99', color: STAT_COLOR[s.stat] }}>
+                                {statIcon(s.stat) ? <img src={statIcon(s.stat)} className="w-3 h-3 sm:w-4 sm:h-4 object-contain" alt="" /> : <span>{STAT_DEFAULT_ICON[s.stat]}</span>}
                                 {statName(s.stat)}
                               </span>
                             )}
                           </div>
                           {/* 名字條 */}
-                          <div className="flex items-center gap-2 px-3 py-2 bg-black/5 border-t-2" style={{ borderColor: QUALITY_COLOR[weapon?.quality || 'gold'] }}>
-                            {styleIcon(hero?.style) ? <img src={styleIcon(hero?.style)} className="w-5 h-5 rounded-full object-cover" alt="" /> : <span className="text-sm">{hero?.style ? STYLE_DEFAULT_ICON[hero.style] : ''}</span>}
-                            <span className="font-bold text-wiki-text truncate">{hero?.name || '—'}</span>
+                          <div className="flex items-center gap-1 sm:gap-2 px-1.5 sm:px-3 py-1.5 sm:py-2 bg-black/5 border-t-2" style={{ borderColor: QUALITY_COLOR[weapon?.quality || 'gold'] }}>
+                            {kind !== 'hero' && (styleIcon(hero?.style)
+                              ? <img src={styleIcon(hero?.style)} className="w-4 h-4 sm:w-5 sm:h-5 rounded-full object-cover flex-shrink-0" alt="" />
+                              : <span className="text-xs sm:text-sm flex-shrink-0">{hero?.style ? STYLE_DEFAULT_ICON[hero.style] : ''}</span>)}
+                            <span className="font-bold text-wiki-text truncate text-[11px] sm:text-base">{hero?.name || '—'}</span>
                           </div>
                           {kind === 'haojie' ? (
                             <>
                               {/* 武器 + 該槽位挑選的武器詞條 */}
                               {weapon && (
-                                <div className="flex items-start gap-2 px-3 py-2 border-t border-wiki-border">
-                                  <div className="w-9 h-9 rounded overflow-hidden flex-shrink-0 bg-wiki-gray flex items-center justify-center border" style={{ borderColor: QUALITY_COLOR[weapon.quality || 'gold'] }}>
+                                <div className="flex items-start gap-1 sm:gap-2 px-1.5 sm:px-3 py-1.5 sm:py-2 border-t border-wiki-border">
+                                  <div className="w-6 h-6 sm:w-9 sm:h-9 rounded overflow-hidden flex-shrink-0 bg-wiki-gray flex items-center justify-center border" style={{ borderColor: QUALITY_COLOR[weapon.quality || 'gold'] }}>
                                     {weapon.imgUrl ? <img src={weapon.imgUrl} className="w-full h-full object-contain" alt="" /> : <span>⚔</span>}
                                   </div>
                                   <div className="min-w-0">
-                                    <div className="text-xs text-wiki-text-muted">武器</div>
-                                    <div className="text-sm font-bold text-wiki-text truncate">{weapon.displayName}</div>
+                                    <div className="text-[10px] sm:text-xs text-wiki-text-muted">武器</div>
+                                    <div className="text-[11px] sm:text-sm font-bold text-wiki-text truncate">{weapon.displayName}</div>
                                     {(s.weaponAttrIds || []).map(id => attrMap[id]).filter(Boolean)
-                                      .map((a, i) => <div key={i} className="text-[11px] text-wiki-accent/90 leading-snug">⭐ {a.name}</div>)}
+                                      .map((a, i) => <div key={i} className="text-[10px] sm:text-[11px] text-wiki-accent/90 leading-snug break-words">⭐ {a.name}</div>)}
                                   </div>
                                 </div>
                               )}
                               {/* 戰徽 + 該槽位挑選的戰徽詞條 */}
                               {emblem && (
-                                <div className="flex items-start gap-2 px-3 py-2 border-t border-wiki-border">
-                                  <div className="w-9 h-9 rounded overflow-hidden flex-shrink-0 bg-wiki-gray flex items-center justify-center border" style={{ borderColor: QUALITY_COLOR[emblem.quality || 'gold'] }}>
+                                <div className="flex items-start gap-1 sm:gap-2 px-1.5 sm:px-3 py-1.5 sm:py-2 border-t border-wiki-border">
+                                  <div className="w-6 h-6 sm:w-9 sm:h-9 rounded overflow-hidden flex-shrink-0 bg-wiki-gray flex items-center justify-center border" style={{ borderColor: QUALITY_COLOR[emblem.quality || 'gold'] }}>
                                     {emblem.imgUrl ? <img src={emblem.imgUrl} className="w-full h-full object-contain" alt="" /> : <span>🛡</span>}
                                   </div>
                                   <div className="min-w-0">
-                                    <div className="text-xs text-wiki-text-muted">戰徽</div>
-                                    <div className="text-sm font-bold text-wiki-text truncate">{emblem.displayName}</div>
-                                    <div className="text-[11px] text-wiki-text-muted leading-snug">
+                                    <div className="text-[10px] sm:text-xs text-wiki-text-muted">戰徽</div>
+                                    <div className="text-[11px] sm:text-sm font-bold text-wiki-text truncate">{emblem.displayName}</div>
+                                    <div className="text-[10px] sm:text-[11px] text-wiki-text-muted leading-snug break-words">
                                       {(s.emblemAttrIds || []).map(id => attrMap[id]?.name).filter(Boolean).join(' · ')}
                                     </div>
                                   </div>
@@ -196,13 +200,13 @@ export default function LineupWikiApp() {
                             <>
                               {/* 戰寵 / 異獸 */}
                               {(s.petIds || []).length > 0 && (
-                                <div className="px-3 py-2 border-t border-wiki-border">
-                                  <div className="text-xs text-wiki-text-muted mb-1.5">戰寵 / 異獸</div>
+                                <div className="px-1.5 sm:px-3 py-1.5 sm:py-2 border-t border-wiki-border">
+                                  <div className="text-[10px] sm:text-xs text-wiki-text-muted mb-1 sm:mb-1.5">戰寵 / 異獸</div>
                                   <div className="flex flex-wrap gap-1.5">
                                     {(s.petIds || []).map(id => petMap[id]).filter(Boolean).map(p => (
-                                      <div key={p.id} className="flex items-center gap-1 px-1.5 py-1 rounded border bg-wiki-gray/50" style={{ borderColor: QUALITY_COLOR[p.quality || 'gold'] + '99' }}>
-                                        {p.imgUrl ? <img src={p.imgUrl} className="w-6 h-6 object-contain" alt="" /> : <span className="text-sm">🐾</span>}
-                                        <span className="text-[11px] font-bold text-wiki-text">{p.name}</span>
+                                      <div key={p.id} className="flex items-center gap-1 px-1 sm:px-1.5 py-0.5 sm:py-1 rounded border bg-wiki-gray/50" style={{ borderColor: QUALITY_COLOR[p.quality || 'gold'] + '99' }}>
+                                        {p.imgUrl ? <img src={p.imgUrl} className="w-4 h-4 sm:w-6 sm:h-6 object-contain" alt="" /> : <span className="text-xs sm:text-sm">🐾</span>}
+                                        <span className="text-[10px] sm:text-[11px] font-bold text-wiki-text">{p.name}</span>
                                       </div>
                                     ))}
                                   </div>
@@ -210,36 +214,36 @@ export default function LineupWikiApp() {
                               )}
                               {/* 套裝 + 加成 */}
                               {setMap[s.setId || ''] && (
-                                <div className="px-3 py-2 border-t border-wiki-border">
+                                <div className="px-1.5 sm:px-3 py-1.5 sm:py-2 border-t border-wiki-border">
                                   <div className="flex items-center gap-2">
                                     {setMap[s.setId!].imgUrl && <img src={setMap[s.setId!].imgUrl} className="w-6 h-6 object-contain" alt="" />}
-                                    <div className="text-xs text-wiki-text-muted">套裝</div>
-                                    <div className="text-sm font-bold text-wiki-accent truncate">{setMap[s.setId!].name}</div>
+                                    <div className="text-[10px] sm:text-xs text-wiki-text-muted">套裝</div>
+                                    <div className="text-[11px] sm:text-sm font-bold text-wiki-accent truncate">{setMap[s.setId!].name}</div>
                                   </div>
                                   {parseArr<string>(setMap[s.setId!].bonus).map((b, i) => (
-                                    <div key={i} className="text-[11px] text-wiki-accent/90 leading-snug">✨ {b}</div>
+                                    <div key={i} className="text-[10px] sm:text-[11px] text-wiki-accent/90 leading-snug break-words">✨ {b}</div>
                                   ))}
                                 </div>
                               )}
                               {/* 6 格裝備 */}
                               {(s.equipIds || []).some(Boolean) && (
-                                <div className="px-3 py-2 border-t border-wiki-border">
-                                  <div className="text-xs text-wiki-text-muted mb-1.5">裝備</div>
+                                <div className="px-1.5 sm:px-3 py-1.5 sm:py-2 border-t border-wiki-border">
+                                  <div className="text-[10px] sm:text-xs text-wiki-text-muted mb-1 sm:mb-1.5">裝備</div>
                                   <div className="space-y-1">
                                     {HERO_EQUIP_SLOTS.map((sl, i) => {
                                       const eq = equipMap[(s.equipIds || [])[i] || '']
                                       return (
-                                        <div key={sl.index} className="flex items-center gap-2">
-                                          <span className="text-[10px] text-wiki-text-muted w-8 flex-shrink-0">{sl.label}</span>
+                                        <div key={sl.index} className="flex items-center gap-1 sm:gap-2">
+                                          <span className="text-[9px] sm:text-[10px] text-wiki-text-muted w-6 sm:w-8 flex-shrink-0">{sl.label}</span>
                                           {eq ? (
                                             <>
-                                              <div className="w-6 h-6 rounded overflow-hidden flex-shrink-0 bg-wiki-gray flex items-center justify-center border" style={{ borderColor: QUALITY_COLOR[eq.quality || 'gold'] }}>
+                                              <div className="w-4 h-4 sm:w-6 sm:h-6 rounded overflow-hidden flex-shrink-0 bg-wiki-gray flex items-center justify-center border" style={{ borderColor: QUALITY_COLOR[eq.quality || 'gold'] }}>
                                                 {eq.imgUrl ? <img src={eq.imgUrl} className="w-full h-full object-contain" alt="" /> : <span className="text-[10px]">🛡</span>}
                                               </div>
-                                              <span className="text-[11px] text-wiki-text truncate">{eq.name}</span>
+                                              <span className="text-[10px] sm:text-[11px] text-wiki-text truncate">{eq.name}</span>
                                             </>
                                           ) : (
-                                            <span className="text-[11px] text-wiki-text-muted/60">—</span>
+                                            <span className="text-[10px] sm:text-[11px] text-wiki-text-muted/60">—</span>
                                           )}
                                         </div>
                                       )
@@ -254,9 +258,9 @@ export default function LineupWikiApp() {
                     })}
                   </div>
                   {/* 底部解說 */}
-                  <div className="relative px-4 py-3">
-                    <h3 className="text-lg font-bold text-wiki-accent mb-1">{l.title}</h3>
-                    {l.description && <div className="text-sm text-wiki-text leading-relaxed prose-wiki" dangerouslySetInnerHTML={{ __html: l.description }} />}
+                  <div className="relative px-3 sm:px-4 py-2.5 sm:py-3">
+                    <h3 className="text-base sm:text-lg font-bold text-wiki-accent mb-1">{l.title}</h3>
+                    {l.description && <div className="text-[13px] sm:text-sm text-wiki-text leading-relaxed prose-wiki" dangerouslySetInnerHTML={{ __html: l.description }} />}
                   </div>
                 </div>
               )

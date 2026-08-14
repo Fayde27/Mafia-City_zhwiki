@@ -33,8 +33,7 @@ const TABS_FOR = (kind: 'haojie' | 'hero'): { key: Tab; label: string }[] => kin
       { key: 'heroequips', label: '英雄裝備' },
       { key: 'equipsets', label: '套裝管理' },
       { key: 'genres', label: '流派管理' },
-      { key: 'styleicons', label: '風格圖標' },
-      { key: 'badges', label: '標籤管理' },
+      { key: 'badges', label: '標籤管理' },   // 英雄不用風格，故不列「風格圖標」
     ]
   : [
       { key: 'lineups', label: '陣容搭配' },
@@ -675,7 +674,7 @@ function LineupsTab({ kind, lineups, setLineups, heroes, weapons, emblems, genre
 function HeroesTab({ kind, heroes, setHeroes, config, markDirty, styleName }: any) {
   const [editing, setEditing] = useState<LineupHeroT | null>(null)
   const kindHeroes = heroes.filter((h: LineupHeroT) => (h.characterKind || 'haojie') === kind)
-  const start = () => setEditing({ id: uid(), name: '', style: '迅捷', imgUrl: '', characterKind: kind })
+  const start = () => setEditing({ id: uid(), name: '', style: kind === 'hero' ? '' : '迅捷', imgUrl: '', characterKind: kind })
   const commit = () => {
     if (!editing || !editing.name) return
     setHeroes((p: LineupHeroT[]) => { const i = p.findIndex(x => x.id === editing.id); if (i >= 0) { const c = [...p]; c[i] = editing; return c } return [...p, editing] })
@@ -691,10 +690,15 @@ function HeroesTab({ kind, heroes, setHeroes, config, markDirty, styleName }: an
             <div>
               <label className={labelCls}>角色名稱</label>
               <input className={inputCls} value={editing.name} onChange={e => setEditing((prev: any) => ({ ...prev, name: e.target.value }))} />
-              <label className={labelCls + ' mt-4'}>風格</label>
-              <select className={inputCls} value={editing.style} onChange={e => setEditing((prev: any) => ({ ...prev, style: e.target.value }))}>
-                {STYLE_KEYS.map(s => <option key={s} value={s}>{styleName(s)}</option>)}
-              </select>
+              {/* 英雄沒有風格體系，僅豪傑需要 */}
+              {kind !== 'hero' && (
+                <>
+                  <label className={labelCls + ' mt-4'}>風格</label>
+                  <select className={inputCls} value={editing.style} onChange={e => setEditing((prev: any) => ({ ...prev, style: e.target.value }))}>
+                    {STYLE_KEYS.map(s => <option key={s} value={s}>{styleName(s)}</option>)}
+                  </select>
+                </>
+              )}
             </div>
             <ImageUploadInput label="半身像（推薦 2:3）" value={editing.imgUrl || ''} position="50% 50%" onChange={url => setEditing((prev: any) => ({ ...prev, imgUrl: url }))} onPositionChange={() => {}} previewHeight="h-48" />
           </div>
@@ -713,7 +717,7 @@ function HeroesTab({ kind, heroes, setHeroes, config, markDirty, styleName }: an
               {h.imgUrl ? <img src={h.imgUrl} alt={h.name} className="w-full h-full object-cover" style={{ objectPosition: 'top' }} /> : <div className="w-full h-full flex items-center justify-center text-wiki-text-muted text-xs">無圖</div>}
             </div>
             <div className="text-sm font-bold text-wiki-text truncate">{h.name}</div>
-            <div className="text-xs text-wiki-text-muted">{styleName(h.style)}</div>
+            <div className="text-xs text-wiki-text-muted">{kind === 'hero' ? '英雄' : styleName(h.style)}</div>
             <div className="flex gap-1 mt-2">
               <button className="flex-1 text-xs py-1 bg-wiki-gray border border-wiki-border rounded hover:border-wiki-accent" onClick={() => setEditing(h)}>編輯</button>
               <button className="text-xs py-1 px-2 bg-wiki-gray border border-wiki-border rounded text-red-500 hover:border-red-500" onClick={() => remove(h.id)}>×</button>
