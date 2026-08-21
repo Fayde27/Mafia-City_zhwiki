@@ -6,7 +6,7 @@ import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import {
   QUALITY_COLOR, STAT_DEFAULT_ICON, STAT_DEFAULT_NAME, STAT_COLOR, STYLE_DEFAULT_ICON,
-  HERO_EQUIP_SLOTS, parseArr, badgeStyle,
+  parseArr, badgeStyle,
   type LineupT, type LineupHeroT, type LineupWeaponT, type LineupEmblemT,
   type LineupGenreT, type LineupConfigT, type BadgeT, type LineupSlotT,
   type LineupAttrT, type LineupPetT, type LineupHeroEquipT, type LineupEquipSetT,
@@ -44,7 +44,6 @@ export default function LineupWikiApp() {
   const badgeMap = useMemo(() => Object.fromEntries((data?.config?.badges || []).map(b => [b.id, b])), [data])
   const attrMap = useMemo(() => Object.fromEntries((data?.attrs || []).map(a => [a.id, a])), [data])
   const petMap = useMemo(() => Object.fromEntries((data?.pets || []).map(p => [p.id, p])), [data])
-  const equipMap = useMemo(() => Object.fromEntries((data?.heroEquips || []).map(e => [e.id, e])), [data])
   const setMap = useMemo(() => Object.fromEntries((data?.equipSets || []).map(s => [s.id, s])), [data])
 
   const styleName = (s?: string) => (s && data?.config?.styleNames?.[s]) || s || ''
@@ -269,33 +268,6 @@ export default function LineupWikiApp() {
                             </div>
                           )
                         })}
-
-                        {/* ── 6 格裝備 ── */}
-                        {slots.map(s => (
-                          <div key={'eq-' + s.role} className="px-1.5 sm:px-3 py-1.5 sm:py-2 border-t border-wiki-border">
-                            <div className="text-[10px] sm:text-xs text-wiki-text-muted mb-1 sm:mb-1.5">裝備</div>
-                            <div className="space-y-1">
-                              {HERO_EQUIP_SLOTS.map((sl, i) => {
-                                const eq = equipMap[(s.equipIds || [])[i] || '']
-                                return (
-                                  <div key={sl.index} className="flex items-center gap-1 sm:gap-2">
-                                    <span className="text-[9px] sm:text-[10px] text-wiki-text-muted w-6 sm:w-8 flex-shrink-0">{sl.label}</span>
-                                    {eq ? (
-                                      <>
-                                        <div className="w-4 h-4 sm:w-6 sm:h-6 rounded overflow-hidden flex-shrink-0 bg-wiki-gray flex items-center justify-center border" style={{ borderColor: QUALITY_COLOR[eq.quality || 'gold'] }}>
-                                          {eq.imgUrl ? <img src={eq.imgUrl} loading="lazy" decoding="async" className="w-full h-full object-contain" alt="" /> : <span className="text-[10px]">🛡</span>}
-                                        </div>
-                                        <span className="text-[10px] sm:text-[11px] text-wiki-text truncate">{eq.name}</span>
-                                      </>
-                                    ) : (
-                                      <span className="text-[10px] sm:text-[11px] text-wiki-text-muted/60">—</span>
-                                    )}
-                                  </div>
-                                )
-                              })}
-                            </div>
-                          </div>
-                        ))}
                       </>
                     )}
                   </div>
