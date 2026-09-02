@@ -188,7 +188,7 @@ export default function LineupWikiApp() {
                                     </div>
                                     <div className="min-w-0">
                                       <div className="text-[10px] sm:text-xs text-wiki-text-muted leading-none mb-0.5">武器</div>
-                                      <div className="text-[11px] sm:text-sm font-bold text-wiki-text truncate">{weapon.displayName}{weapon.isExclusive ? `·專屬（${heroMap[weapon.exclusiveHeroId || '']?.name || '未設定'}）` : ''}</div>
+                                      <div className="text-[11px] sm:text-sm font-bold text-wiki-text leading-snug break-words">{weapon.displayName}{weapon.isExclusive ? `·專屬（${heroMap[weapon.exclusiveHeroId || '']?.name || '未設定'}）` : ''}</div>
                                     </div>
                                   </div>
                                   {(s.weaponAttrIds || []).map(id => attrMap[id]).filter(Boolean)
