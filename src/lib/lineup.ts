@@ -9,8 +9,6 @@ export interface LineupGenreT { id: string; name: string; color?: string; imgUrl
 export interface LineupAttrT { id: string; name: string; kind?: 'weapon' | 'emblem' | string; sortOrder?: number }
 // 戰寵 / 異獸
 export interface LineupPetT { id: string; name: string; kind?: string; quality?: string; imgUrl?: string; attrs?: string[] | string; sortOrder?: number }
-// 英雄裝備（6 部位）
-export interface LineupHeroEquipT { id: string; name: string; slotIndex?: number; quality?: string; imgUrl?: string; setId?: string | null; attrs?: string[] | string; sortOrder?: number }
 // 套裝（加成 + 適配流派）
 export interface LineupEquipSetT { id: string; name: string; imgUrl?: string; bonus?: string[] | string; genreIds?: string[] | string; sortOrder?: number }
 
@@ -23,14 +21,13 @@ export interface LineupSlotT {
   weaponAttrIds?: string[]
   emblemId?: string
   emblemAttrIds?: string[]
-  // 英雄：戰寵（2~3）+ 6 格裝備 + 套裝
+  // 英雄：戰寵（2~3）+ 套裝
   petIds?: string[]
-  equipIds?: (string | undefined)[]
   setId?: string
 }
 export interface LineupT {
   id: string; title: string; slug?: string; characterKind?: string
-  genreId?: string | null; bgUrl?: string; badgeIds?: string[] | string
+  genreId?: string | null; badgeIds?: string[] | string
   description?: string; slots?: LineupSlotT[] | string; updateText?: string
   isPinned?: boolean; isPublished?: boolean; sortOrder?: number
 }
@@ -70,17 +67,6 @@ export const STAT_KEYS = ['force', 'skill', 'physique', 'defense', 'speed']
 export const STAT_DEFAULT_NAME: Record<string, string> = { force: '力量', skill: '技術', physique: '體魄', defense: '防護', speed: '速度' }
 export const STAT_DEFAULT_ICON: Record<string, string> = { force: '💪', skill: '🎯', physique: '🫀', defense: '🛡', speed: '💨' }
 export const STAT_COLOR: Record<string, string> = { force: '#D4363A', skill: '#2196F3', physique: '#22c55e', defense: '#C9A227', speed: '#a855f7' }
-
-// 英雄裝備 6 個部位（slotIndex 1~6）
-export const HERO_EQUIP_SLOTS = [
-  { index: 1, label: '武器' },
-  { index: 2, label: '頭部' },
-  { index: 3, label: '衣服' },
-  { index: 4, label: '褲子' },
-  { index: 5, label: '鞋子' },
-  { index: 6, label: '飾品' },
-]
-export const heroEquipSlotLabel = (i?: number) => HERO_EQUIP_SLOTS.find(s => s.index === i)?.label || '部位' + (i ?? '')
 
 // 每個英雄槽位可掛的戰寵上限（可選 2~3）
 export const PET_MAX = 3

@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
     if (!current) return NextResponse.json({ success: true })
 
-    const increment = Math.floor(Math.random() * 6) + 5  // 隨機 5~10
+    const increment = Math.floor(Math.random() * 5) + 1  // 隨機 1~5
     const newViews = (current.views || 0) + increment
 
     await supabaseAdmin

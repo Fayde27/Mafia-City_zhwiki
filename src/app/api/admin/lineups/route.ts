@@ -10,7 +10,7 @@ const CONFIG_KEY = 'lineupConfig'
 // GET：一次性返回整個陣容資料集（後台單頁編輯用）
 export async function GET() {
   try {
-    const [lineups, heroes, weapons, emblems, genres, attrs, pets, heroEquips, equipSets, cfgRow] = await Promise.all([
+    const [lineups, heroes, weapons, emblems, genres, attrs, pets, equipSets, cfgRow] = await Promise.all([
       supabaseAdmin.from('Lineup').select('*').order('sortOrder', { ascending: true }),
       supabaseAdmin.from('LineupHero').select('*').order('sortOrder', { ascending: true }),
       supabaseAdmin.from('LineupWeapon').select('*').order('sortOrder', { ascending: true }),
@@ -18,7 +18,6 @@ export async function GET() {
       supabaseAdmin.from('LineupGenre').select('*').order('sortOrder', { ascending: true }),
       supabaseAdmin.from('LineupAttr').select('*').order('sortOrder', { ascending: true }),
       supabaseAdmin.from('LineupPet').select('*').order('sortOrder', { ascending: true }),
-      supabaseAdmin.from('LineupHeroEquip').select('*').order('sortOrder', { ascending: true }),
       supabaseAdmin.from('LineupEquipSet').select('*').order('sortOrder', { ascending: true }),
       supabaseAdmin.from('SiteConfig').select('value').eq('key', CONFIG_KEY).maybeSingle(),
     ])
@@ -36,13 +35,12 @@ export async function GET() {
       genres: genres.data || [],
       attrs: attrs.data || [],
       pets: pets.data || [],
-      heroEquips: heroEquips.data || [],
       equipSets: equipSets.data || [],
       config,
       // 新表若尚未建立，前端提示先跑 SQL 遷移（避免誤以為資料遺失）
       missingTables: [
         ['LineupAttr', attrs.error], ['LineupPet', pets.error],
-        ['LineupHeroEquip', heroEquips.error], ['LineupEquipSet', equipSets.error],
+        ['LineupEquipSet', equipSets.error],
       ].filter(([, e]) => !!e).map(([t]) => t),
     })
   } catch (e: any) {
@@ -62,7 +60,6 @@ export async function PUT(request: Request) {
       slug: l.slug || l.id,
       characterKind: l.characterKind || 'haojie',
       genreId: l.genreId || null,
-      bgUrl: l.bgUrl || null,
       badgeIds: JSON.stringify(l.badgeIds || []),
       description: l.description || null,
       slots: JSON.stringify(l.slots || []),
@@ -98,11 +95,6 @@ export async function PUT(request: Request) {
       id: p.id, name: p.name, kind: p.kind || 'pet', quality: p.quality || 'gold',
       imgUrl: p.imgUrl || null, attrs: JSON.stringify(p.attrs || []), sortOrder: p.sortOrder ?? i, updatedAt: now,
     }))
-    const heroEquips = (body.heroEquips || []).map((e: any, i: number) => ({
-      id: e.id, name: e.name, slotIndex: e.slotIndex ?? 1, quality: e.quality || 'gold',
-      imgUrl: e.imgUrl || null, setId: e.setId || null, attrs: JSON.stringify(e.attrs || []),
-      sortOrder: e.sortOrder ?? i, updatedAt: now,
-    }))
     const equipSets = (body.equipSets || []).map((s: any, i: number) => ({
       id: s.id, name: s.name, imgUrl: s.imgUrl || null,
       bonus: JSON.stringify(s.bonus || []), genreIds: JSON.stringify(s.genreIds || []),
@@ -111,7 +103,7 @@ export async function PUT(request: Request) {
 
     // 刪舊插新
     const tables = ['Lineup', 'LineupHero', 'LineupWeapon', 'LineupEmblem', 'LineupGenre',
-      'LineupAttr', 'LineupPet', 'LineupHeroEquip', 'LineupEquipSet']
+      'LineupAttr', 'LineupPet', 'LineupEquipSet']
 
     // ⚠️ 前置檢查：本 API 是「刪舊插新」，若中途某張表不存在而拋錯，
     // 先前已刪除的資料將無法復原（曾因此清空過資料）。
@@ -138,7 +130,6 @@ export async function PUT(request: Request) {
     if (genres.length)  { const r = await supabaseAdmin.from('LineupGenre').insert(genres); if (r.error) throw r.error }
     if (attrs.length)      { const r = await supabaseAdmin.from('LineupAttr').insert(attrs); if (r.error) throw r.error }
     if (pets.length)       { const r = await supabaseAdmin.from('LineupPet').insert(pets); if (r.error) throw r.error }
-    if (heroEquips.length) { const r = await supabaseAdmin.from('LineupHeroEquip').insert(heroEquips); if (r.error) throw r.error }
     if (equipSets.length)  { const r = await supabaseAdmin.from('LineupEquipSet').insert(equipSets); if (r.error) throw r.error }
 
     // 配置

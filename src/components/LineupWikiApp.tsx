@@ -9,14 +9,14 @@ import {
   parseArr, badgeStyle,
   type LineupT, type LineupHeroT, type LineupWeaponT, type LineupEmblemT,
   type LineupGenreT, type LineupConfigT, type BadgeT, type LineupSlotT,
-  type LineupAttrT, type LineupPetT, type LineupHeroEquipT, type LineupEquipSetT,
+  type LineupAttrT, type LineupPetT, type LineupEquipSetT,
 } from '@/lib/lineup'
 
 interface DataT {
   lineups: LineupT[]; heroes: LineupHeroT[]; weapons: LineupWeaponT[]
   emblems: LineupEmblemT[]; genres: LineupGenreT[]; config: LineupConfigT
   attrs: LineupAttrT[]; pets: LineupPetT[]
-  heroEquips: LineupHeroEquipT[]; equipSets: LineupEquipSetT[]
+  equipSets: LineupEquipSetT[]
 }
 
 export default function LineupWikiApp() {
@@ -121,7 +121,6 @@ export default function LineupWikiApp() {
               const badges: string[] = parseArr(l.badgeIds)
               return (
                 <div key={l.id} className="bg-wiki-card border border-wiki-border rounded-xl overflow-hidden relative">
-                  {l.bgUrl && <div className="absolute inset-0 opacity-[0.06] bg-cover bg-center" style={{ backgroundImage: `url(${l.bgUrl})` }} />}
                   {/* 頂部欄 */}
                   <div className="relative flex items-center justify-between gap-2 px-3 sm:px-4 py-2 sm:py-2.5 border-b border-wiki-border">
                     <div className="flex items-center gap-2 flex-wrap">
