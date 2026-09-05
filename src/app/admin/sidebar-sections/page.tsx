@@ -228,7 +228,7 @@ export default function AdminSidebarSectionsPage() {
                 <input
                   type="text"
                   value={formData.slug}
-                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                  onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
                   className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none font-mono"
                   placeholder="如: quick-entry"
                   required
@@ -240,7 +240,7 @@ export default function AdminSidebarSectionsPage() {
                 <input
                   type="number"
                   value={formData.sortOrder}
-                  onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value) || 0 })}
+                  onChange={(e) => setFormData(prev => ({ ...prev, sortOrder: parseInt(e.target.value) || 0 }))}
                   className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
                   placeholder="數字越大越靠前"
                 />
@@ -250,7 +250,7 @@ export default function AdminSidebarSectionsPage() {
                   <input
                     type="checkbox"
                     checked={formData.isActive}
-                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
                     className="w-5 h-5 accent-wiki-accent"
                   />
                   <span className="text-wiki-text font-bold">在側邊欄顯示</span>

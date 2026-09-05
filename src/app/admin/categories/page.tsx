@@ -262,7 +262,7 @@ export default function AdminCategoriesPage() {
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
                   required
                 />
@@ -272,7 +272,7 @@ export default function AdminCategoriesPage() {
                 <input
                   type="text"
                   value={formData.slug}
-                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                  onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
                   className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
                   required
                 />
@@ -282,7 +282,7 @@ export default function AdminCategoriesPage() {
                 <input
                   type="text"
                   value={formData.icon}
-                  onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+                  onChange={(e) => setFormData(prev => ({ ...prev, icon: e.target.value }))}
                   className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
                   placeholder="例如: "
                 />
@@ -291,7 +291,7 @@ export default function AdminCategoriesPage() {
                 <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">描述</label>
                 <textarea
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                   className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none h-20"
                 />
               </div>
@@ -300,7 +300,7 @@ export default function AdminCategoriesPage() {
                 <input
                   type="number"
                   value={formData.sortOrder}
-                  onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value) })}
+                  onChange={(e) => setFormData(prev => ({ ...prev, sortOrder: parseInt(e.target.value) }))}
                   className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
                 />
               </div>

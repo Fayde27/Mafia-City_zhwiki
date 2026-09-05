@@ -51,7 +51,7 @@ export default function AdminAnnouncementNewPage() {
       reader.onloadend = () => {
         const result = reader.result as string
         setBannerPreview(result)
-        setFormData({ ...formData, banner: result })
+        setFormData(prev => ({ ...prev, banner: result }))
       }
       reader.readAsDataURL(file)
     }
@@ -59,7 +59,7 @@ export default function AdminAnnouncementNewPage() {
 
   const handleBannerUrlChange = (url: string) => {
     setBannerPreview(url || null)
-    setFormData({ ...formData, banner: url })
+    setFormData(prev => ({ ...prev, banner: url }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -152,7 +152,7 @@ export default function AdminAnnouncementNewPage() {
                 <input
                   type="text"
                   value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                   className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
                   required
                 />
@@ -162,7 +162,7 @@ export default function AdminAnnouncementNewPage() {
                 <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">公告內容 *</label>
                 <textarea
                   value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
                   rows={6}
                   className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none resize-y"
                   required
@@ -198,7 +198,7 @@ export default function AdminAnnouncementNewPage() {
                       <img src={bannerPreview} alt="Banner 預覽" className="w-full h-48 object-cover" />
                       <button
                         type="button"
-                        onClick={() => { setBannerPreview(null); setFormData({ ...formData, banner: '' }) }}
+                        onClick={() => { setBannerPreview(null); setFormData(prev => ({ ...prev, banner: '' })) }}
                         className="absolute top-2 right-2 px-3 py-1 bg-wiki-danger text-white text-xs rounded hover:bg-wiki-danger/80"
                       >
                         移除
@@ -213,7 +213,7 @@ export default function AdminAnnouncementNewPage() {
                   <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">公告類型</label>
                   <select
                     value={formData.type}
-                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
                     className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none cursor-pointer"
                   >
                     <option value="info">公告</option>
@@ -228,7 +228,7 @@ export default function AdminAnnouncementNewPage() {
                   <input
                     type="number"
                     value={formData.sortOrder}
-                    onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value) })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, sortOrder: parseInt(e.target.value) }))}
                     className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
                   />
                 </div>
@@ -239,7 +239,7 @@ export default function AdminAnnouncementNewPage() {
                   <input
                     type="checkbox"
                     checked={formData.isActive}
-                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
                     className="w-5 h-5 accent-wiki-accent cursor-pointer"
                   />
                   <span className="font-bold">立即發佈</span>

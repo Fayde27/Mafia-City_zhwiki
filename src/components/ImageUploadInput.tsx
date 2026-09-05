@@ -12,6 +12,11 @@ interface ImageUploadInputProps {
   objectFit?: 'cover' | 'contain'
   /** compact=true 時，預覽框縮為方形小圖，整體寬度限制在 ~160px（適合圖標） */
   compact?: boolean
+  /**
+   * readOnlyImage=true：只用來調整顯示位置，不提供換圖／清除。
+   * 用於「重用另一個欄位的圖片來挑裁切焦點」的場景，避免出現按了沒反應的清除鈕。
+   */
+  readOnlyImage?: boolean
 }
 
 export default function ImageUploadInput({
@@ -23,6 +28,7 @@ export default function ImageUploadInput({
   previewHeight = 'h-40',
   objectFit = 'cover',
   compact = false,
+  readOnlyImage = false,
 }: ImageUploadInputProps) {
   const [uploading, setUploading] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
@@ -191,35 +197,44 @@ export default function ImageUploadInput({
         </div>
       )}
 
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onPaste={handlePaste}
-        className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none mb-2"
-        placeholder="直接輸入圖片 URL，或使用下方按鈕上傳"
-      />
+      {!readOnlyImage && (
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onPaste={handlePaste}
+          className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none mb-2"
+          placeholder="直接輸入圖片 URL，或使用下方按鈕上傳"
+        />
+      )}
 
       <div className="flex items-center gap-2 flex-wrap">
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
-          className="px-4 py-2 bg-wiki-gray border border-wiki-border text-wiki-text text-sm hover:border-wiki-accent disabled:opacity-50"
-        >
-          {uploading ? '上傳中...' : '選擇文件上傳'}
-        </button>
-        {value && (
-          <button
-            type="button"
-            onClick={() => { onChange(''); onPositionChange('50% 50%') }}
-            className="px-4 py-2 bg-wiki-gray border border-wiki-border text-wiki-text-muted text-sm hover:border-red-500 hover:text-red-500"
-          >
-            清除
-          </button>
+        {readOnlyImage && value && (
+          <span className="text-wiki-text-muted text-xs">拖動上方圖片調整裁切焦點 · 位置: {displayPosition}</span>
         )}
-        {value && (
-          <span className="text-wiki-text-muted text-xs">位置: {displayPosition}</span>
+        {!readOnlyImage && (
+          <>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="px-4 py-2 bg-wiki-gray border border-wiki-border text-wiki-text text-sm hover:border-wiki-accent disabled:opacity-50"
+            >
+              {uploading ? '上傳中...' : '選擇文件上傳'}
+            </button>
+            {value && (
+              <button
+                type="button"
+                onClick={() => { onChange(''); onPositionChange('50% 50%') }}
+                className="px-4 py-2 bg-wiki-gray border border-wiki-border text-wiki-text-muted text-sm hover:border-red-500 hover:text-red-500"
+              >
+                清除
+              </button>
+            )}
+            {value && (
+              <span className="text-wiki-text-muted text-xs">位置: {displayPosition}</span>
+            )}
+          </>
         )}
       </div>
 

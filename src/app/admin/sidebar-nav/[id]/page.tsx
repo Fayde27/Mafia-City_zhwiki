@@ -139,7 +139,7 @@ export default function EditSidebarNavPage() {
             <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">父級菜單</label>
             <select
               value={formData.parentId}
-              onChange={(e) => setFormData({ ...formData, parentId: e.target.value })}
+              onChange={(e) => setFormData(prev => ({ ...prev, parentId: e.target.value }))}
               className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
             >
               <option value="">無（頂級菜單）</option>
@@ -160,7 +160,7 @@ export default function EditSidebarNavPage() {
               <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">所屬分類 *</label>
               <select
                 value={formData.section}
-                onChange={(e) => setFormData({ ...formData, section: e.target.value })}
+                onChange={(e) => setFormData(prev => ({ ...prev, section: e.target.value }))}
                 className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
                 required
               >
@@ -177,7 +177,7 @@ export default function EditSidebarNavPage() {
             <input
               type="text"
               value={formData.label}
-              onChange={(e) => setFormData({ ...formData, label: e.target.value })}
+              onChange={(e) => setFormData(prev => ({ ...prev, label: e.target.value }))}
               className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
               placeholder="例如: 圖鑑、角色圖鑑"
               required
@@ -189,7 +189,7 @@ export default function EditSidebarNavPage() {
             <input
               type="text"
               value={formData.icon}
-              onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+              onChange={(e) => setFormData(prev => ({ ...prev, icon: e.target.value }))}
               className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
               placeholder="例如: 📚、👤、🏠"
             />
@@ -202,7 +202,7 @@ export default function EditSidebarNavPage() {
             <input
               type="text"
               value={formData.href}
-              onChange={(e) => setFormData({ ...formData, href: e.target.value })}
+              onChange={(e) => setFormData(prev => ({ ...prev, href: e.target.value }))}
               className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
               placeholder={formData.parentId ? '子菜單連結（可留空僅展示）' : '例如: /wiki、/wiki/guides'}
               required={!formData.parentId}
@@ -217,7 +217,7 @@ export default function EditSidebarNavPage() {
             <input
               type="number"
               value={formData.sortOrder}
-              onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value) || 0 })}
+              onChange={(e) => setFormData(prev => ({ ...prev, sortOrder: parseInt(e.target.value) || 0 }))}
               className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
               placeholder="數字越大越靠前"
             />
@@ -228,7 +228,7 @@ export default function EditSidebarNavPage() {
               <input
                 type="checkbox"
                 checked={formData.isActive}
-                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
                 className="w-5 h-5"
               />
               <span className="text-wiki-text font-bold">在側邊欄顯示</span>

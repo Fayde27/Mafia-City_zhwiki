@@ -15,7 +15,8 @@
       "Bash(head -20 echo --- grep -n \"object-cover\\\\|\\\\.icon\\\\|\\\\.image\\\\b\" 'c:\\\\Users\\\\86176\\\\Desktop\\\\Vibe Coding\\\\攻略站_Claude Code\\\\src\\\\app\\\\wiki\\\\buildings\\\\[slug]\\\\page.tsx')",
       "Bash(npx tsx:*)",
       "Bash(grep -E \"admin/[^/]+/?$\")",
-      "Bash(grep -E \"api/admin/[^/]+/?$\")"
+      "Bash(grep -E \"api/admin/[^/]+/?$\")",
+      "Bash(npx tsc *)"
     ]
   }
 }

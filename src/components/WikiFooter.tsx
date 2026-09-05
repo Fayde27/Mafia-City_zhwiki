@@ -2,11 +2,12 @@ import Link from 'next/link'
 
 const quickLinks = [
   { label: '首頁', href: '/' },
-  { label: '遊戲圖鑑', href: '/wiki' },
+  { label: '陣容搭配', href: '/wiki/lineups' },
   { label: '玩法攻略', href: '/wiki/guides' },
-  { label: '活動一覽', href: '/wiki/events' },
-  { label: '遊戲工具', href: '/wiki/tools' },
 ]
+
+// 儲值官網（站外連結，另開分頁）
+const PAY_URL = 'https://pay.game168.com.tw/zh/payment'
 
 function LineIcon() {
   return (
@@ -58,14 +59,14 @@ export default function WikiFooter() {
           <div>
             <h3 className="text-wiki-accent font-bold text-sm mb-2">黑道風雲 Wiki</h3>
             <p className="text-wiki-text-muted text-xs leading-relaxed">
-              最全面的遊戲攻略站，為玩家提供詳細的遊戲資訊、角色圖鑑、任務攻略等內容。
+              最全面的遊戲攻略站，為您提供詳細的遊戲資訊、陣容搭配、任務攻略等內容。
             </p>
           </div>
 
           {/* 快速連結 */}
           <div>
             <h3 className="text-wiki-accent font-bold text-sm mb-2">快速連結</h3>
-            <ul className="grid grid-cols-2 gap-x-5 gap-y-1.5 text-xs">
+            <ul className="space-y-1.5 text-xs">
               {quickLinks.map(link => (
                 <li key={link.href}>
                   <Link href={link.href} className="text-wiki-text-muted hover:text-wiki-accent transition-colors whitespace-nowrap">
@@ -73,12 +74,19 @@ export default function WikiFooter() {
                   </Link>
                 </li>
               ))}
+              <li className="flex flex-wrap items-center gap-1">
+                <span className="text-wiki-text-muted whitespace-nowrap">儲值官網：</span>
+                <a href={PAY_URL} target="_blank" rel="noopener noreferrer"
+                  className="text-wiki-text-muted hover:text-wiki-accent transition-colors break-all">
+                  pay.game168.com.tw/zh/payment
+                </a>
+              </li>
             </ul>
           </div>
 
           {/* 聯繫我們 */}
           <div>
-            <h3 className="text-wiki-accent font-bold text-sm mb-2">聯繫我們</h3>
+            <h3 className="text-wiki-accent font-bold text-sm mb-2">聯絡我們</h3>
             <ul className="space-y-2 text-xs">
               <li>
                 <a href="https://line.me/ti/p/@mafiaofgame" target="_blank" rel="noopener noreferrer"

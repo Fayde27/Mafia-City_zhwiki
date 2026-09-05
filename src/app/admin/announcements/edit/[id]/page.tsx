@@ -167,7 +167,7 @@ export default function AdminAnnouncementEditPage() {
                 <input
                   type="text"
                   value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                   className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
                   required
                 />
@@ -177,7 +177,7 @@ export default function AdminAnnouncementEditPage() {
                 <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">公告內容 *</label>
                 <RichTextEditor
                   value={formData.content}
-                  onChange={(html) => setFormData({ ...formData, content: html })}
+                  onChange={(html) => setFormData(prev => ({ ...prev, content: html }))}
                   placeholder="請輸入公告內容..."
                 />
               </div>
@@ -187,8 +187,8 @@ export default function AdminAnnouncementEditPage() {
                   label="BANNER 圖片"
                   value={formData.banner}
                   position={formData.bannerPosition}
-                  onChange={(url) => setFormData({ ...formData, banner: url })}
-                  onPositionChange={(pos) => setFormData({ ...formData, bannerPosition: pos })}
+                  onChange={(url) => setFormData(prev => ({ ...prev, banner: url }))}
+                  onPositionChange={(pos) => setFormData(prev => ({ ...prev, bannerPosition: pos }))}
                   previewHeight="w-full aspect-[3/1]"
                 />
               </div>
@@ -198,7 +198,7 @@ export default function AdminAnnouncementEditPage() {
                   <label className="block text-wiki-text text-sm font-bold uppercase tracking-wider mb-2">公告類型</label>
                   <select
                     value={formData.type}
-                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
                     className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none cursor-pointer"
                   >
                     <option value="info">公告</option>
@@ -212,7 +212,7 @@ export default function AdminAnnouncementEditPage() {
                   <input
                     type="number"
                     value={formData.sortOrder}
-                    onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value) })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, sortOrder: parseInt(e.target.value) }))}
                     className="w-full bg-wiki-gray border-2 border-wiki-border px-4 py-3 text-wiki-text focus:border-wiki-accent focus:outline-none"
                   />
                 </div>
@@ -223,7 +223,7 @@ export default function AdminAnnouncementEditPage() {
                   <input
                     type="checkbox"
                     checked={formData.isActive}
-                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
                     className="w-5 h-5 accent-wiki-accent cursor-pointer"
                   />
                   <span className="font-bold">立即發佈</span>
