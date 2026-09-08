@@ -66,7 +66,7 @@ export default function WikiFooter() {
           {/* 快速連結 */}
           <div>
             <h3 className="text-wiki-accent font-bold text-sm mb-2">快速連結</h3>
-            <ul className="space-y-1.5 text-xs">
+            <ul className="grid grid-cols-2 gap-x-5 gap-y-1.5 text-xs">
               {quickLinks.map(link => (
                 <li key={link.href}>
                   <Link href={link.href} className="text-wiki-text-muted hover:text-wiki-accent transition-colors whitespace-nowrap">
@@ -74,11 +74,10 @@ export default function WikiFooter() {
                   </Link>
                 </li>
               ))}
-              <li className="flex flex-wrap items-center gap-1">
-                <span className="text-wiki-text-muted whitespace-nowrap">儲值官網：</span>
+              <li>
                 <a href={PAY_URL} target="_blank" rel="noopener noreferrer"
-                  className="text-wiki-text-muted hover:text-wiki-accent transition-colors break-all">
-                  pay.game168.com.tw/zh/payment
+                  className="text-wiki-text-muted hover:text-wiki-accent transition-colors whitespace-nowrap">
+                  儲值官網
                 </a>
               </li>
             </ul>

@@ -43,7 +43,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { title, slug, content, summary, coverImage, coverImagePosition, thumbnailPosition, categoryId, tags, isPublished, isPinned, badges, sortOrder } = await request.json()
+    const { title, slug, content, summary, coverImage, coverImagePosition, thumbnailPosition, categoryId, tags, isPublished, isPinned, isFeatured, badges, sortOrder } = await request.json()
 
     // 若沒有指定 sortOrder，自動取當前最大值 +10，讓新文章排在最前面
     let finalSortOrder = sortOrder || 0
@@ -71,6 +71,7 @@ export async function POST(request: Request) {
         tags,
         isPublished: isPublished || false,
         isPinned: isPinned || false,
+        isFeatured: isFeatured || false,   // 首頁「熱門攻略」開關
         badges,
         sortOrder: finalSortOrder,
       })
