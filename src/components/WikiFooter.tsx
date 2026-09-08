@@ -66,9 +66,8 @@ export default function WikiFooter() {
           {/* 快速連結 */}
           <div>
             <h3 className="text-wiki-accent font-bold text-sm mb-2">快速連結</h3>
-            {/* 三個頁面連結並排一行，儲值官網獨占下一整行（網址不換行需 ~239px，
-                擠進子欄位放不下）。手機欄位較窄，維持兩欄。 */}
-            <ul className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1.5 text-xs">
+            {/* 兩欄排列；儲值官網只顯示名稱（網址不換行需 ~239px，攤開會擠爆欄位） */}
+            <ul className="grid grid-cols-2 gap-x-5 gap-y-1.5 text-xs">
               {quickLinks.map(link => (
                 <li key={link.href}>
                   <Link href={link.href} className="text-wiki-text-muted hover:text-wiki-accent transition-colors whitespace-nowrap">
@@ -76,14 +75,10 @@ export default function WikiFooter() {
                   </Link>
                 </li>
               ))}
-              <li className="col-span-2 sm:col-span-3 flex flex-wrap items-baseline gap-x-1">
-                <span className="text-wiki-text-muted whitespace-nowrap">儲值官網：</span>
-                {/* 手機欄寬僅 160px（此行不換行需 ~239px）必定換行。
-                    不用 break-all —— 它會把 payment 拆成 pay/ment；
-                    改用 <wbr> 只允許在路徑分隔處斷行。 */}
+              <li>
                 <a href={PAY_URL} target="_blank" rel="noopener noreferrer"
-                  className="text-wiki-text-muted hover:text-wiki-accent transition-colors">
-                  pay.game168.com.tw<wbr />/zh<wbr />/payment
+                  className="text-wiki-text-muted hover:text-wiki-accent transition-colors whitespace-nowrap">
+                  儲值官網
                 </a>
               </li>
             </ul>
