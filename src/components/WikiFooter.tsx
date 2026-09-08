@@ -74,10 +74,13 @@ export default function WikiFooter() {
                   </Link>
                 </li>
               ))}
-              <li>
+              {/* 儲值官網：網址較長，獨占整行（col-span-2）才放得下；
+                  擠在兩欄中的一欄（約 135px）會斷行斷得很難看 */}
+              <li className="col-span-2 flex flex-wrap items-baseline gap-x-1">
+                <span className="text-wiki-text-muted whitespace-nowrap">儲值官網：</span>
                 <a href={PAY_URL} target="_blank" rel="noopener noreferrer"
-                  className="text-wiki-text-muted hover:text-wiki-accent transition-colors whitespace-nowrap">
-                  儲值官網
+                  className="text-wiki-text-muted hover:text-wiki-accent transition-colors break-all">
+                  pay.game168.com.tw/zh/payment
                 </a>
               </li>
             </ul>
