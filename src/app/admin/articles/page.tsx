@@ -14,7 +14,8 @@ type Tab = 'list' | 'categories'
 interface Article {
   id: string; title: string; slug: string; summary: string
   isPublished: boolean; isFeatured: boolean; isPinned: boolean
-  sortOrder: number; viewCount: number; createdAt: string
+  // views = 對外展示數（注水）；realViews = 真實訪問數（僅後台）
+  sortOrder: number; views: number; realViews: number; createdAt: string
   category: { name: string; slug: string; icon: string } | null
 }
 interface Category {
@@ -137,11 +138,33 @@ export default function AdminArticlesPage() {
                   <button onClick={() => setFilterCatSlug('all')} className={`px-4 py-2 text-sm font-bold whitespace-nowrap ${filterCatSlug === 'all' ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>全部</button>
                   {categories.map(cat => <button key={cat.id} onClick={() => setFilterCatSlug(cat.slug)} className={`px-4 py-2 text-sm font-bold whitespace-nowrap ${filterCatSlug === cat.slug ? 'bg-wiki-accent text-wiki-darker' : 'bg-wiki-gray text-wiki-text-muted hover:text-wiki-text'}`}>{cat.icon} {cat.name}</button>)}
                 </div>
+                {/* 瀏覽概況（就地由已載入的清單計算，不額外請求） */}
+                {filtered.length > 0 && (() => {
+                  const realTotal = filtered.reduce((s, a) => s + (a.realViews ?? 0), 0)
+                  const shownTotal = filtered.reduce((s, a) => s + (a.views ?? 0), 0)
+                  const top = [...filtered].sort((a, b) => (b.realViews ?? 0) - (a.realViews ?? 0))[0]
+                  return (
+                    <div className="bg-wiki-gray-light border border-wiki-border rounded-lg px-4 py-3 mb-4 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
+                      <span className="text-wiki-text">
+                        真實總瀏覽 <b className="text-wiki-accent">{realTotal.toLocaleString()}</b>
+                      </span>
+                      <span className="text-wiki-text-muted text-xs">
+                        對外顯示總數 {shownTotal.toLocaleString()}（含隨機加成）
+                      </span>
+                      {top && (top.realViews ?? 0) > 0 && (
+                        <span className="text-wiki-text-muted text-xs">
+                          最高：{top.title}（{(top.realViews ?? 0).toLocaleString()}）
+                        </span>
+                      )}
+                      <span className="text-wiki-text-muted text-xs">共 {filtered.length} 篇</span>
+                    </div>
+                  )
+                })()}
                 {filtered.length === 0 ? <div className="bg-wiki-gray-light border border-wiki-border rounded-lg p-8 text-center text-wiki-text-muted">暫無文章</div> : (
                   <div className="bg-wiki-gray-light border border-wiki-border rounded-lg overflow-hidden">
                     <table className="w-full">
                       <thead className="bg-wiki-gray">
-                        <tr>{['標題', '分類', '狀態', '熱門', '置頂', '瀏覽', '日期', '排序', '操作'].map(h => <th key={h} className="text-left px-4 py-4 text-wiki-accent font-bold text-sm">{h}</th>)}</tr>
+                        <tr>{['標題', '分類', '狀態', '熱門', '置頂', '瀏覽（真實／顯示）', '日期', '排序', '操作'].map(h => <th key={h} className="text-left px-4 py-4 text-wiki-accent font-bold text-sm whitespace-nowrap">{h}</th>)}</tr>
                       </thead>
                       <tbody>
                         {filtered.map(art => (
@@ -160,7 +183,14 @@ export default function AdminArticlesPage() {
                             <td className="px-4 py-4">
                               <button onClick={() => handleToggle(art, 'isPinned')} className={`px-2 py-1 text-xs font-bold ${art.isPinned ? 'bg-blue-500/20 text-blue-400' : 'bg-wiki-gray text-wiki-text-muted'}`}>{art.isPinned ? '置頂' : '-'}</button>
                             </td>
-                            <td className="px-4 py-4 text-wiki-text-muted text-sm">{art.viewCount}</td>
+                            <td className="px-4 py-4 text-sm whitespace-nowrap">
+                              <div className="text-wiki-text font-bold" title="真實訪問次數（每次瀏覽 +1）">
+                                {(art.realViews ?? 0).toLocaleString()}
+                              </div>
+                              <div className="text-wiki-text-muted text-xs" title="前台顯示用的數字（每次瀏覽隨機 +1~5）">
+                                顯示 {(art.views ?? 0).toLocaleString()}
+                              </div>
+                            </td>
                             <td className="px-4 py-4 text-wiki-text-muted text-sm">{new Date(art.createdAt).toLocaleDateString('zh-TW')}</td>
                             <td className="px-4 py-4">
                               <div className="flex gap-1">

@@ -43,7 +43,8 @@ model Article {
   isPinned    Boolean  @default(false)
   badges      String?
   sortOrder   Int      @default(0)
-  views       Int      @default(0)
+  views       Int      @default(0) // 對外展示數（每次瀏覽隨機 +1~5）
+  realViews   Int      @default(0) // 真實訪問數（每次瀏覽 +1），僅後台可見
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   category    Category @relation(fields: [categoryId], references: [id])
