@@ -169,18 +169,23 @@ export default function AnalyticsPage() {
           <div className="space-y-6">
 
             {/* ① 總覽卡片 */}
-            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+            {/* 12 欄網格：前四張只放數字或短詞，各佔 2 欄；
+                「最熱內容」是文章標題，佔 4 欄才不會被截斷 */}
+            <div className="grid grid-cols-2 lg:grid-cols-12 gap-3">
               {[
                 { label: '總瀏覽', value: fmt(data.summary.totalPage), color: 'text-wiki-accent',
-                  hint: '每開一個頁面算一次' },
+                  span: 'lg:col-span-2', hint: '每開一個頁面算一次' },
                 { label: '造訪次數', value: fmt(data.summary.totalVisit), color: 'text-amber-500',
-                  hint: '從進站到關閉分頁算一次，中間看幾頁都算同一次' },
-                { label: '搜索次數', value: fmt(data.summary.totalSearch), color: 'text-blue-400', hint: '' },
-                { label: '最熱模塊', value: data.summary.topModule, color: 'text-purple-400', hint: '' },
+                  span: 'lg:col-span-2', hint: '從進站到關閉分頁算一次，中間看幾頁都算同一次' },
+                { label: '搜索次數', value: fmt(data.summary.totalSearch), color: 'text-blue-400',
+                  span: 'lg:col-span-2', hint: '' },
+                { label: '最熱模塊', value: data.summary.topModule, color: 'text-purple-400',
+                  span: 'lg:col-span-2', hint: '' },
                 { label: '最熱內容', value: data.summary.topContent, color: 'text-green-400',
-                  hint: '不含陣容，陣容是曝光數、口徑不同' },
+                  span: 'col-span-2 lg:col-span-4', hint: '不含陣容，陣容是曝光數、口徑不同' },
               ].map(c => (
-                <div key={c.label} className="bg-wiki-gray-light border border-wiki-border rounded-lg p-4"
+                <div key={c.label}
+                     className={`bg-wiki-gray-light border border-wiki-border rounded-lg p-4 ${c.span}`}
                      title={c.hint || undefined}>
                   <div className="text-wiki-text-muted text-xs mb-1">{c.label}</div>
                   <div className={`text-xl font-bold truncate ${c.color}`} title={c.value}>{c.value}</div>
