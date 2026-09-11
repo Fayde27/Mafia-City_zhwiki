@@ -19,7 +19,7 @@ interface SearchRow { keyword: string; count: number }
 
 interface AnalyticsData {
   range: { from: string; to: string }
-  summary: { totalPage: number; totalSearch: number; topModule: string; topContent: string }
+  summary: { totalPage: number; totalSearch: number; totalVisit: number; topModule: string; topContent: string }
   modules: ModuleRow[]
   trend: TrendRow[]
   rankings: Record<string, RankRow[]>
@@ -169,14 +169,19 @@ export default function AnalyticsPage() {
           <div className="space-y-6">
 
             {/* ① 總覽卡片 */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
               {[
-                { label: '總瀏覽', value: fmt(data.summary.totalPage), color: 'text-wiki-accent' },
-                { label: '搜索次數', value: fmt(data.summary.totalSearch), color: 'text-blue-400' },
-                { label: '最熱模塊', value: data.summary.topModule, color: 'text-purple-400' },
-                { label: '最熱內容', value: data.summary.topContent, color: 'text-green-400' },
+                { label: '總瀏覽', value: fmt(data.summary.totalPage), color: 'text-wiki-accent',
+                  hint: '每開一個頁面算一次' },
+                { label: '造訪次數', value: fmt(data.summary.totalVisit), color: 'text-amber-500',
+                  hint: '從進站到關閉分頁算一次，中間看幾頁都算同一次' },
+                { label: '搜索次數', value: fmt(data.summary.totalSearch), color: 'text-blue-400', hint: '' },
+                { label: '最熱模塊', value: data.summary.topModule, color: 'text-purple-400', hint: '' },
+                { label: '最熱內容', value: data.summary.topContent, color: 'text-green-400',
+                  hint: '不含陣容，陣容是曝光數、口徑不同' },
               ].map(c => (
-                <div key={c.label} className="bg-wiki-gray-light border border-wiki-border rounded-lg p-4">
+                <div key={c.label} className="bg-wiki-gray-light border border-wiki-border rounded-lg p-4"
+                     title={c.hint || undefined}>
                   <div className="text-wiki-text-muted text-xs mb-1">{c.label}</div>
                   <div className={`text-xl font-bold truncate ${c.color}`} title={c.value}>{c.value}</div>
                 </div>

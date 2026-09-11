@@ -11,10 +11,11 @@ import { sanitizeSearch } from '@/lib/sanitize'
 //
 // 允許的 metric：
 //   page    → 模塊 PV，key 為路徑前綴，如 /wiki/items
+//   visit   → 造訪次數，key 固定 '__total__'；一個分頁從開到關只記一次
 //   article / item / event / lineup → 單篇內容點擊，key 為該筆 id
 //   search  → key 為關鍵字，另帶 hasResult
 const ALLOWED_METRICS = new Set([
-  'page', 'article', 'item', 'event', 'lineup', 'search',
+  'page', 'visit', 'article', 'item', 'event', 'lineup', 'search',
 ])
 
 // key 不設限會被塞進垃圾撐爆表：長度截斷 + 只收合理字元

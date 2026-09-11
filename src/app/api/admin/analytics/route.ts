@@ -155,6 +155,7 @@ export async function GET(request: Request) {
       summary: {
         totalPage: Number(totalsRow?.totalPage) || 0,
         totalSearch: Number(totalsRow?.totalSearch) || 0,
+        totalVisit: Number(totalsRow?.totalVisit) || 0,
         topModule: topModule ? topModule.label : '—',
         topContent: allContent.length ? allContent[0].name : '—',
       },

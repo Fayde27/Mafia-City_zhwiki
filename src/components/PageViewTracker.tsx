@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
-import { trackPage } from '@/lib/track'
+import { trackPage, trackVisit } from '@/lib/track'
 
 /**
  * 全站模塊 PV 埋點。掛在 root layout 的 <body> 裡，
@@ -14,6 +14,12 @@ import { trackPage } from '@/lib/track'
  */
 export default function PageViewTracker() {
   const pathname = usePathname()
+
+  // 造訪次數：整個分頁的生命週期只記一次（後台路徑不算）
+  useEffect(() => {
+    if (pathname?.startsWith('/admin')) return
+    trackVisit()
+  }, [pathname])
 
   useEffect(() => {
     if (!pathname) return

@@ -37,6 +37,8 @@ export default function LineupWikiApp() {
 
   // 深連結命中的那張卡，短暫高亮讓人知道落在哪
   const [highlightId, setHighlightId] = useState('')
+  // 對位迴圈的目標，獨立於 highlightId（高亮 3 秒就消，對位要盯久一點）
+  const [settleId, setSettleId] = useState('')
   const scrolledRef = useRef(false)
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
@@ -84,22 +86,60 @@ export default function LineupWikiApp() {
     if (!el) return
     scrolledRef.current = true
     setHighlightId(targetId)
+    setSettleId(targetId)
+    el.scrollIntoView({ behavior: 'auto', block: 'start' })
+  }, [targetId, loading, data, genreFilter, heroFilter])
 
-    // 為什麼要重捲好幾次，而不是捲一次就算：
+  // ── 捲動後持續對位，直到版面不再動 ──
+  // 這段一定要獨立成自己的 effect：放在上面那個裡的話，
+  // 上面 effect 只要因 deps 變動重跑一次，cleanup 就會把對位迴圈整個拆掉
+  // （然後早退、不再重建），實際上只對位了一瞬間 —— 高亮那個坑一模一樣。
+  // 這裡的 deps 只有 settleId，設定一次就不再變。
+  useEffect(() => {
+    if (!settleId) return
+
+    // 為什麼不是捲一次就算：
     //   1. Next 在 hydration 完成後會把捲動位置重設回頂端，會蓋掉我們捲的結果
-    //   2. 卡片裡有立繪圖片，上方圖片陸續載入會把目標往下推，捲一次會停在錯的地方
-    // 所以用 instant 捲（smooth 會輸給上面兩件事），並在版面穩定前補捲幾次。
-    const timers = [0, 120, 400, 900, 1600].map(d => setTimeout(() => {
-      const node = cardRefs.current[targetId]
+    //   2. 卡片裡有立繪圖片，上方圖片陸續載入會把目標往下推
+    // 用 instant 捲（smooth 會輸給上面兩件事），並持續盯到版面不再動為止 ——
+    // 固定幾個計時器不夠：圖片載完的時間不固定，計時器結束後才發生的位移
+    // 就沒人修了，卡片頂部的流派／更新日期那一列會被推到視窗外。
+    let done = false
+    const OFFSET = 96   // 對齊 scroll-mt-24，讓卡片頂欄剛好在 sticky 導覽列下方
+
+    const settle = () => {
+      if (done) return
+      const node = cardRefs.current[settleId]
       if (!node) return
       const top = node.getBoundingClientRect().top
-      // 已經到位就別再動，免得使用者自己捲開後被拉回來
-      if (Math.abs(top - 96) < 8) return
-      node.scrollIntoView({ behavior: 'auto', block: 'start' })
-    }, d))
+      if (Math.abs(top - OFFSET) < 4) return
+      window.scrollBy({ top: top - OFFSET, behavior: 'auto' })
+    }
 
-    return () => { timers.forEach(clearTimeout) }
-  }, [targetId, loading, data, genreFilter, heroFilter])
+    // 使用者一旦自己操作就收手，不要跟他搶捲動
+    const stop = () => { done = true }
+    window.addEventListener('wheel', stop, { passive: true })
+    window.addEventListener('touchstart', stop, { passive: true })
+    window.addEventListener('keydown', stop)
+
+    settle()
+    // 版面只要有變動就重新對位（圖片載入、字體切換都會觸發）
+    const ro = new ResizeObserver(settle)
+    ro.observe(document.body)
+    const poll = setInterval(settle, 200)
+    // 圖片大致載完就停手，之後的位移多半是使用者自己造成的
+    const give = setTimeout(() => { done = true }, 6000)
+
+    return () => {
+      done = true
+      ro.disconnect()
+      clearInterval(poll)
+      clearTimeout(give)
+      window.removeEventListener('wheel', stop)
+      window.removeEventListener('touchstart', stop)
+      window.removeEventListener('keydown', stop)
+    }
+  }, [settleId])
 
   // 高亮的清除獨立一個 effect：放在上面那個裡的話，
   // 上面 effect 每次因 deps 變動重跑都會先清掉計時器、然後早退不再重設，

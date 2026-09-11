@@ -53,3 +53,25 @@ export function trackPage(pathname: string) {
   if (!key) return
   post({ metric: 'page', key })
 }
+
+const VISIT_FLAG = 'wiki_visit_counted'
+
+/**
+ * 造訪次數：一個人從進站到關掉分頁算一次，中間看幾頁都只算一次。
+ * 與「總瀏覽」不同 —— 後者是每開一頁就加一次。
+ *
+ * 用 sessionStorage 而不是 localStorage：sessionStorage 的生命週期
+ * 正好是「這個分頁開著的期間」，關掉就沒了，語義剛好對上。
+ * 隱私模式或封鎖儲存時 get/set 會直接丟例外，所以整段包 try —
+ * 讀不到就當作新的一次造訪，寧可多算也不要讓埋點整個掛掉。
+ */
+export function trackVisit() {
+  if (typeof window === 'undefined') return
+  try {
+    if (sessionStorage.getItem(VISIT_FLAG)) return
+    sessionStorage.setItem(VISIT_FLAG, '1')
+  } catch {
+    // 存不了就照記，下一頁會再記一次，屬於可接受的高估
+  }
+  post({ metric: 'visit', key: '__total__' })
+}
