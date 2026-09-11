@@ -28,10 +28,12 @@ const MODULE_LABELS: Record<string, string> = {
 }
 
 // 內容排行要把 id 翻成看得懂的名字
+// linkBy：詳情頁用 slug 組 URL；陣容沒有詳情頁，用 ?lineup=<id> 深連結回列表
 const CONTENT_SOURCES = [
-  { metric: 'article', table: 'Article', nameCol: 'title', urlPrefix: '/wiki/article/' },
-  { metric: 'item',    table: 'Item',    nameCol: 'name',  urlPrefix: '/wiki/items/' },
-  { metric: 'event',   table: 'Event',   nameCol: 'name',  urlPrefix: '/wiki/events/' },
+  { metric: 'article', table: 'Article', nameCol: 'title', urlPrefix: '/wiki/article/',       linkBy: 'slug' },
+  { metric: 'item',    table: 'Item',    nameCol: 'name',  urlPrefix: '/wiki/items/',         linkBy: 'slug' },
+  { metric: 'event',   table: 'Event',   nameCol: 'name',  urlPrefix: '/wiki/events/',        linkBy: 'slug' },
+  { metric: 'lineup',  table: 'Lineup',  nameCol: 'title', urlPrefix: '/wiki/lineups?lineup=', linkBy: 'id' },
 ] as const
 
 function toDateStr(d: Date): string {
@@ -123,11 +125,17 @@ export async function GET(request: Request) {
 
         rankings[src.metric] = rows.map(r => {
           const hit = nameMap.get(r.key)
+          let url = ''
+          if (hit) {
+            url = src.linkBy === 'id'
+              ? src.urlPrefix + encodeURIComponent(r.key)
+              : (hit.slug ? src.urlPrefix + hit.slug : '')
+          }
           return {
             id: r.key,
             // 查不到 = 內容已被刪除，但歷史點擊數還在，照樣列出來
             name: hit?.name || '(已刪除)',
-            url: hit?.slug ? src.urlPrefix + hit.slug : '',
+            url,
             count: Number(r.count) || 0,
           }
         })
@@ -135,7 +143,12 @@ export async function GET(request: Request) {
     )
 
     const topModule = modules.length ? modules[0] : null
-    const allContent = Object.values(rankings).flat().sort((a, b) => b.count - a.count)
+    // 「最熱內容」只比同口徑的三類。陣容是曝光數、量級天生高一截，
+    // 混進來的話這張卡永遠是陣容，等於沒資訊
+    const allContent = CONTENT_SOURCES
+      .filter(s => s.metric !== 'lineup')
+      .flatMap(s => rankings[s.metric] || [])
+      .sort((a, b) => b.count - a.count)
 
     return NextResponse.json({
       range: { from, to },

@@ -99,7 +99,10 @@ export async function GET(request: Request) {
       )
     }
 
-    // 陣容 /wiki/lineups（標題或解說模糊匹配；無獨立詳情頁，導向列表）
+    // 陣容 /wiki/lineups（標題或解說模糊匹配）
+    // 無獨立詳情頁，導向列表並用 ?lineup= 深連結到該張卡片；
+    // 帶上 kind 是因為列表按 characterKind 分開取數，不帶的話
+    // 點英雄陣容會落在豪傑分頁、那張卡根本不在資料裡
     if (want('lineup')) {
       tasks.push(
         supabaseAdmin
@@ -114,7 +117,7 @@ export async function GET(request: Request) {
               type: 'lineup' as const,
               id: l.id,
               name: l.title,
-              url: '/wiki/lineups',
+              url: `/wiki/lineups?lineup=${encodeURIComponent(l.id)}&kind=${l.characterKind === 'hero' ? 'hero' : 'haojie'}`,
               category: (l.characterKind === 'hero' ? '英雄' : '豪傑') + TYPE_LABELS.lineup,
               icon: '',
             }))

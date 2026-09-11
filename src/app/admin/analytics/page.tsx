@@ -37,7 +37,12 @@ const RANK_TABS = [
   { key: 'article', label: '文章' },
   { key: 'item',    label: '道具' },
   { key: 'event',   label: '活動' },
+  { key: 'lineup',  label: '陣容' },
 ]
+
+// 陣容沒有詳情頁（全部平鋪在一頁），計數口徑是「卡片曝光」而非「進入詳情頁」，
+// 與其他三類不同 —— 不標出來會被拿去跨類比較
+const LINEUP_NOTE = '陣容無詳情頁，此處為卡片曝光數（捲到視野內停留 2 秒以上），與其他三類口徑不同，不可直接比較。'
 
 const cardCls = 'bg-wiki-gray-light border border-wiki-border rounded-lg p-6'
 
@@ -152,13 +157,6 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        {/* 口徑說明：不寫清楚的話，數字會被誤讀 */}
-        <div className="mb-6 text-xs text-wiki-text-muted bg-wiki-gray border border-wiki-border rounded px-4 py-3 leading-relaxed">
-          本頁全部為<strong className="text-wiki-text">真實計數</strong>，與文章列表對外展示的「瀏覽數」不同口徑（後者含注水）。
-          未做防刷，重複刷新會重複計數 —— <strong className="text-wiki-text">看趨勢與相對比較，絕對值請打折</strong>。
-          資料保留近 365 天。
-        </div>
-
         {err && (
           <div className="mb-6 border-2 border-wiki-danger bg-wiki-danger/10 text-wiki-danger rounded px-4 py-3 text-sm">
             {err}
@@ -233,6 +231,9 @@ export default function AnalyticsPage() {
                     ))}
                   </div>
                 </div>
+                {rankTab === 'lineup' && (
+                  <p className="text-xs text-wiki-text-muted mb-3 leading-relaxed">{LINEUP_NOTE}</p>
+                )}
                 {ranks.length === 0 ? (
                   <div className="text-wiki-text-muted text-sm py-6 text-center">這段區間還沒有資料</div>
                 ) : (

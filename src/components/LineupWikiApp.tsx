@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { trackView } from '@/lib/track'
 import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import {
@@ -20,13 +22,23 @@ interface DataT {
 }
 
 export default function LineupWikiApp() {
+  const searchParams = useSearchParams()
+  // 從搜索結果深連結進來：?lineup=<id>&kind=<haojie|hero>
+  const targetId = searchParams.get('lineup') || ''
+  const targetKind = searchParams.get('kind') === 'hero' ? 'hero' : 'haojie'
+
   const [data, setData] = useState<DataT | null>(null)
   const [loading, setLoading] = useState(true)
   const [genreFilter, setGenreFilter] = useState('')
   const [heroFilter, setHeroFilter] = useState('')
   // 豪傑 / 英雄 在頁內切換（單一入口）
-  const [kind, setKind] = useState<'haojie' | 'hero'>('haojie')
+  const [kind, setKind] = useState<'haojie' | 'hero'>(targetKind)
   const isHero = kind === 'hero'
+
+  // 深連結命中的那張卡，短暫高亮讓人知道落在哪
+  const [highlightId, setHighlightId] = useState('')
+  const scrolledRef = useRef(false)
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   useEffect(() => {
     setLoading(true)
@@ -57,6 +69,97 @@ export default function LineupWikiApp() {
     if (heroFilter) list = list.filter(l => parseArr<LineupSlotT>(l.slots).some(s => s.heroId === heroFilter))
     return list
   }, [data, genreFilter, heroFilter])
+
+  // ── 深連結：捲動到目標卡片 ──
+  // 目標可能被流派/角色篩選擋住（從搜索進來時篩選是空的，但使用者可能先點過），
+  // 所以捲動前先把篩選清掉，否則會停在頁面頂端 —— 也就是原本的問題。
+  useEffect(() => {
+    if (!targetId || loading || scrolledRef.current) return
+    const exists = (data?.lineups || []).some(l => l.id === targetId)
+    if (!exists) return
+
+    if (genreFilter || heroFilter) { setGenreFilter(''); setHeroFilter(''); return }
+
+    const el = cardRefs.current[targetId]
+    if (!el) return
+    scrolledRef.current = true
+    setHighlightId(targetId)
+
+    // 為什麼要重捲好幾次，而不是捲一次就算：
+    //   1. Next 在 hydration 完成後會把捲動位置重設回頂端，會蓋掉我們捲的結果
+    //   2. 卡片裡有立繪圖片，上方圖片陸續載入會把目標往下推，捲一次會停在錯的地方
+    // 所以用 instant 捲（smooth 會輸給上面兩件事），並在版面穩定前補捲幾次。
+    const timers = [0, 120, 400, 900, 1600].map(d => setTimeout(() => {
+      const node = cardRefs.current[targetId]
+      if (!node) return
+      const top = node.getBoundingClientRect().top
+      // 已經到位就別再動，免得使用者自己捲開後被拉回來
+      if (Math.abs(top - 96) < 8) return
+      node.scrollIntoView({ behavior: 'auto', block: 'start' })
+    }, d))
+
+    return () => { timers.forEach(clearTimeout) }
+  }, [targetId, loading, data, genreFilter, heroFilter])
+
+  // 高亮的清除獨立一個 effect：放在上面那個裡的話，
+  // 上面 effect 每次因 deps 變動重跑都會先清掉計時器、然後早退不再重設，
+  // 高亮就永遠不會消失
+  useEffect(() => {
+    if (!highlightId) return
+    const t = setTimeout(() => setHighlightId(''), 3000)
+    return () => clearTimeout(t)
+  }, [highlightId])
+
+  // ── 單個陣容的瀏覽計數 ──
+  // 陣容全部平鋪在同一頁、沒有詳情頁可點，所以口徑是「卡片曝光」：
+  // 真的捲到視野內、且停留滿 2 秒才算一次。
+  //   · 只在搜索點進來時計數 → 量到的是「多少人從搜索找到它」，不是受歡迎程度
+  //   · 一出現就計數 → 快速捲過整頁會把每張卡都記一遍，等於沒篩選
+  // 同一次頁面載入內每張卡只記一次（這是讓數字有意義，不是防刷）。
+  const countedRef = useRef<Set<string>>(new Set())
+  const registerCard = useCallback((id: string) => (el: HTMLDivElement | null) => {
+    cardRefs.current[id] = el
+  }, [])
+
+  // 用定時掃描而不是 IntersectionObserver 的 threshold：
+  // threshold 算的是「元素自身面積的百分比」，但陣容卡很高（單張可達 3000px 以上、
+  // 比視窗還高），threshold 0.4 這種條件永遠不可能成立 —— 只有最後一張矮卡會被記到。
+  // 改成看「這張卡佔了多少視窗高度」，卡片多高都適用。
+  const TICK = 500       // 掃描間隔
+  const DWELL = 2000     // 要停留多久才算看過
+  useEffect(() => {
+    if (loading || !filtered.length) return
+
+    const dwell = new Map<string, number>()
+
+    const timer = setInterval(() => {
+      // 切到別的分頁時不累積，否則掛著不看也會計數
+      // （瀏覽器本身也會節流背景分頁的計時器，等於雙重保險）
+      if (document.hidden) return
+      const vh = window.innerHeight
+
+      for (const l of filtered) {
+        if (countedRef.current.has(l.id)) continue
+        const el = cardRefs.current[l.id]
+        if (!el) continue
+
+        const rect = el.getBoundingClientRect()
+        const visible = Math.min(rect.bottom, vh) - Math.max(rect.top, 0)
+        // 高卡：要佔滿半個視窗；矮卡：要整張看得到
+        const need = Math.min(rect.height, vh * 0.5)
+        if (visible < need) { dwell.set(l.id, 0); continue }
+
+        const next = (dwell.get(l.id) || 0) + TICK
+        dwell.set(l.id, next)
+        if (next >= DWELL) {
+          countedRef.current.add(l.id)
+          trackView('lineup', l.id)
+        }
+      }
+    }, TICK)
+
+    return () => clearInterval(timer)
+  }, [loading, filtered])
 
   const pageCfg = data?.config?.pageConfig
 
@@ -120,7 +223,17 @@ export default function LineupWikiApp() {
               const genre = genreMap[l.genreId || '']
               const badges: string[] = parseArr(l.badgeIds)
               return (
-                <div key={l.id} className="bg-wiki-card border border-wiki-border rounded-xl overflow-hidden relative">
+                <div
+                  key={l.id}
+                  id={`lineup-${l.id}`}
+                  ref={registerCard(l.id)}
+                  data-lineup-id={l.id}
+                  className={`bg-wiki-card border rounded-xl overflow-hidden relative scroll-mt-24 transition-colors duration-500 ${
+                    highlightId === l.id
+                      ? 'border-wiki-accent ring-2 ring-wiki-accent/50'
+                      : 'border-wiki-border'
+                  }`}
+                >
                   {/* 頂部欄 */}
                   <div className="relative flex items-center justify-between gap-2 px-3 sm:px-4 py-2 sm:py-2.5 border-b border-wiki-border">
                     <div className="flex items-center gap-2 flex-wrap">
