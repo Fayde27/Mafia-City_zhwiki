@@ -2,6 +2,7 @@ export const runtime = 'edge'
 
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { isAdminRequest } from '@/lib/auth'
 
 // 現存模塊（角色/建築/裝備/兵種圖鑑已於 2026-07 移除）
 const TABLE_MAP: Record<string, string> = {
@@ -13,6 +14,11 @@ const TABLE_MAP: Record<string, string> = {
 
 export async function POST(request: Request) {
   try {
+    // 後台人員自己看文章不該灌到瀏覽數裡（與 /api/track 同一條規矩）
+    if (await isAdminRequest(request)) {
+      return NextResponse.json({ success: true })
+    }
+
     const { entityType, entityId } = await request.json()
     const table = TABLE_MAP[entityType]
     if (!table || !entityId) {

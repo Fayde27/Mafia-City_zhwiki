@@ -78,3 +78,19 @@ export async function verifyToken(token: string): Promise<TokenPayload | null> {
     return null
   }
 }
+
+/**
+ * 這個請求是不是「已登入管理端的人」發出的。
+ * 用於埋點：後台人員自己瀏覽玩家端不該計入數據，看板要的是外網玩家的真實數據。
+ *
+ * 為什麼看 cookie 而不是前端的 localStorage：
+ * admin-token 是 httpOnly，前端讀不到但同源 fetch 會自動帶上，
+ * 在伺服器端驗簽才算數 —— localStorage 那個旗標是前端自己寫的，改一下就能偽造。
+ */
+export async function isAdminRequest(request: Request): Promise<boolean> {
+  const cookie = request.headers.get('cookie') || ''
+  const m = cookie.match(/(?:^|;\s*)admin-token=([^;]+)/)
+  if (!m) return false
+  const payload = await verifyToken(decodeURIComponent(m[1]))
+  return payload?.role === 'admin'
+}

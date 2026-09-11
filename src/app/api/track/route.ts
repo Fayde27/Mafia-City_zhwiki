@@ -3,6 +3,7 @@ export const runtime = 'edge'
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { sanitizeSearch } from '@/lib/sanitize'
+import { isAdminRequest } from '@/lib/auth'
 
 // 統一埋點入口：全部寫進 DailyStat / SearchLog（看板唯一數據源）
 //
@@ -23,6 +24,12 @@ const MAX_KEY_LEN = 120
 
 export async function POST(request: Request) {
   try {
+    // 看板只保留外網玩家的數據：已登入管理端的人瀏覽玩家端一律不計。
+    // 回 success 是故意的 —— 前端不需要知道自己沒被計入，也不該靠回應去探測登入狀態。
+    if (await isAdminRequest(request)) {
+      return NextResponse.json({ success: true })
+    }
+
     const { metric, key, hasResult } = await request.json()
 
     if (typeof metric !== 'string' || !ALLOWED_METRICS.has(metric)) {
