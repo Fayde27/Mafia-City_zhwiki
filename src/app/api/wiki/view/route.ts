@@ -2,7 +2,7 @@ export const runtime = 'edge'
 
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { isAdminRequest } from '@/lib/auth'
+import { isAdminRequest } from '@/lib/track-guard'
 
 // 現存模塊（角色/建築/裝備/兵種圖鑑已於 2026-07 移除）
 const TABLE_MAP: Record<string, string> = {

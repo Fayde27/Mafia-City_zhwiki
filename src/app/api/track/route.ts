@@ -3,7 +3,7 @@ export const runtime = 'edge'
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { sanitizeSearch } from '@/lib/sanitize'
-import { isAdminRequest } from '@/lib/auth'
+import { isAdminRequest } from '@/lib/track-guard'
 
 // 統一埋點入口：全部寫進 DailyStat / SearchLog（看板唯一數據源）
 //
