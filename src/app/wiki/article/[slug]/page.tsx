@@ -12,6 +12,7 @@ import MarkdownRenderer from '@/components/MarkdownRenderer'
 import ArticleActionBar from '@/components/ArticleActionBar'
 import ImageLightbox from '@/components/ImageLightbox'
 import ArticleBackground from '@/components/ArticleBackground'
+import { trackView } from '@/lib/track'
 
 interface Article {
   id: string
@@ -50,12 +51,14 @@ export default function ArticleDetailPage() {
         if (data.articles && data.articles.length > 0) {
           const a = data.articles[0]
           setArticle(a)
-          // 累加瀏覽次數
+          // 前台展示用的注水瀏覽數（views，隨機 +1~5）
           fetch('/api/wiki/view', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ entityType: 'article', entityId: a.id }),
           })
+          // 看板用的真實計數
+          trackView('article', a.id)
         }
         setLoading(false)
       })

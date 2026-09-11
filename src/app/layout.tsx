@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
+import PageViewTracker from '@/components/PageViewTracker'
 
 export const runtime = 'edge'
 
@@ -20,7 +21,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="zh-TW">
-      <body>{children}</body>
+      <body>
+        <PageViewTracker />
+        {children}
+      </body>
     </html>
   )
 }

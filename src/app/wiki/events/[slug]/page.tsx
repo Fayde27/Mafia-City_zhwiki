@@ -10,6 +10,7 @@ import { useParams } from 'next/navigation'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 import LikeButton from '@/components/LikeButton'
 import SectionCard from '@/components/SectionCard'
+import { trackView } from '@/lib/track'
 
 interface RelatedItem { id: string; name: string; slug: string; icon?: string; iconPosition?: string; categorySlug?: string }
 interface EventItem {
@@ -40,7 +41,10 @@ export default function EventDetailPage() {
     fetch(`/api/wiki/events?slug=${eventSlug}`)
       .then(r => r.json())
       .then(data => {
-        if (data.events?.length > 0) setEvent(data.events[0])
+        if (data.events?.length > 0) {
+          setEvent(data.events[0])
+          trackView('event', data.events[0].id)
+        }
         setLoading(false)
       })
       .catch(() => setLoading(false))

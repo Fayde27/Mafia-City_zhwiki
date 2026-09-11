@@ -7,6 +7,7 @@ import WikiHeader from '@/components/WikiHeader'
 import WikiFooter from '@/components/WikiFooter'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { trackSearch } from '@/lib/track'
 
 interface SearchResult {
   type: 'article' | 'item' | 'event' | 'lineup'
@@ -32,7 +33,10 @@ function SearchContent() {
       fetch(`/api/wiki/search?q=${encodeURIComponent(query)}&limit=50`)
         .then(res => res.json())
         .then(data => {
-          setResults(Array.isArray(data.results) ? data.results : [])
+          const list = Array.isArray(data.results) ? data.results : []
+          setResults(list)
+          // 記搜索詞；hasResult=false 的會進看板「搜了沒結果」清單
+          trackSearch(query, list.length > 0)
           setLoading(false)
         })
         .catch(() => setLoading(false))

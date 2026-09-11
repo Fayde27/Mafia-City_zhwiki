@@ -11,6 +11,7 @@ import MarkdownRenderer from '@/components/MarkdownRenderer'
 import LikeButton from '@/components/LikeButton'
 import ItemExchangeContent, { parseExchangeContent } from '@/components/ItemExchangeContent'
 import SectionCard from '@/components/SectionCard'
+import { trackView } from '@/lib/track'
 
 interface Item {
   id: string
@@ -42,7 +43,10 @@ export default function ItemDetailPage() {
     fetch(`/api/wiki/items?slug=${itemSlug}`)
       .then(r => r.json())
       .then(data => {
-        if (data.items?.length > 0) setItem(data.items[0])
+        if (data.items?.length > 0) {
+          setItem(data.items[0])
+          trackView('item', data.items[0].id)
+        }
         setLoading(false)
       })
       .catch(() => setLoading(false))
